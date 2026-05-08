@@ -70,7 +70,7 @@ export default function Settings() {
                         </CardContent >
                     </Card >
 
-                    <Card>
+                    {/* <Card>
                         <CardHeader><CardTitle>Integrations</CardTitle><CardDescription>Connected services (demo).</CardDescription></CardHeader>
                         <CardContent className="grid sm:grid-cols-2 gap-3">
                             {[
@@ -86,7 +86,7 @@ export default function Settings() {
                             ))
                             }
                         </CardContent >
-                    </Card >
+                    </Card > */}
                 </div >
             </div >
         </div >
