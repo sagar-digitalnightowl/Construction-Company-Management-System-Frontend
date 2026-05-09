@@ -7,7 +7,7 @@ import {
 export function ConfirmDialog({ open, onOpenChange, title = "Are you sure?", description, onConfirm, confirmLabel = "Delete" }) {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent data-testid="confirm-dialog">
+            <AlertDialogContent data-testid="confirm-dialog" >
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
                     {description && <AlertDialogDescription>{description}</AlertDialogDescription>}

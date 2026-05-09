@@ -63,7 +63,7 @@ export default function Sites() {
                                             <CardTitle className="text-base">{p?.name ?? "—"}</CardTitle>
                                             < CardDescription className="flex items-center gap-1.5"><MapPin className="h-3 w-3" />{p?.location}</CardDescription>
                                         </div >
-                                        <Badge variant="outline">{formatDate(r.date)}</Badge>
+                                        <Badge variant="outline" className={'text-nowrap'}>{formatDate(r.date)}</Badge>
                                     </div >
                                 </CardHeader >
                                 <CardContent className="space-y-3">

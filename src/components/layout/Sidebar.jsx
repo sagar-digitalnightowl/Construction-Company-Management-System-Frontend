@@ -69,7 +69,7 @@ export function Sidebar({ role }) {
     return (
         <aside
             data-testid="app-sidebar"
-            className="hidden md:flex w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border"
+            className={`h-screen flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border`}
         >
             <div className="px-5 py-5 flex items-center gap-2.5 border-b border-sidebar-border">
                 < div className="h-9 w-9 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground grid place-items-center shadow-sm">
@@ -125,7 +125,7 @@ export function Sidebar({ role }) {
                     })}
             </nav >
 
-           
+
         </aside >
     );
 }

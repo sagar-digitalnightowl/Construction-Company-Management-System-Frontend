@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, LogOut, Moon, Search, Sun, UserCog } from "lucide-react";
+import { Bell, LogOut, Moon, Search, Sun, UserCog, Menu } from "lucide-react";
 import {
     DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
     DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
@@ -13,13 +13,22 @@ import { useAuthStore, useThemeStore } from "@/store/authStore";
 import { ROLES } from "@/data/permissions";
 import { initials } from "@/lib/helpers";
 
-export function Topbar() {
+export function Topbar({ onMenuClick }) {
     const navigate = useNavigate();
     const { current, logout } = useAuthStore();
     const { dark, toggle } = useThemeStore();
 
     return (
-        <header className="h-16 border-b border-border bg-card/70 backdrop-blur-md flex items-center justify-between px-5 gap-4 sticky top-0 z-30">
+        <header className="h-16 border-b border-border bg-card/70 backdrop-blur-md flex items-center justify-between px-2 md:px-5 gap-3 sticky top-0 z-30">
+            <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden border border-gray-50 rounded-lg"
+                onClick={onMenuClick}
+            >
+                <Menu className="h-5 w-5" />
+            </Button>
+
             <div className="flex-1 max-w-xl relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input

@@ -59,7 +59,7 @@ export default function CRM() {
                 actions={canEdit && <Button onClick={startCreate}><Plus className="h-4 w-4" /> New lead</Button>
                 } />
 
-            < div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            < div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
                 {
                     STAGES.map((s) => {
                         const stageLeads = leads.filter(l => l.stage === s.id);

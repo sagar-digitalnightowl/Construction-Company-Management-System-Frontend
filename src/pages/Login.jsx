@@ -66,7 +66,7 @@ export default function Login() {
     const quickFill = (acc) => { setEmail(acc.email); setPassword(acc.pass); };
 
     return (
-        <div className="min-h-screen grid lg:grid-cols-[1.05fr_1fr]">
+        <div className="min-h-screen grid lg:grid-cols-[1.05fr_1fr] p-2">
             {/* Left — brand panel */}
             <div className="h-lvh relative hidden lg:flex flex-col justify-between p-10 bg-sidebar text-sidebar-foreground overflow-hidden">
                 <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
@@ -108,7 +108,7 @@ export default function Login() {
                         <div className="h-9 w-9 rounded-lg bg-foreground text-background grid place-items-center">
                             <ConstructionIcon className="h-5 w-5" />
                         </div>
-                        <div className="font-display text-base sm:text-xl font-semibold">Construction Company Management System</div>
+                        <div className="font-display text-base sm:text-xl font-semibold">CCMS</div>
                     </div>
 
                     <div className="space-y-1.5 mb-7">

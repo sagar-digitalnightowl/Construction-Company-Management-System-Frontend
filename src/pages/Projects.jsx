@@ -68,12 +68,12 @@ export default function Projects() {
     };
 
     return (
-        <div className="space-y-6">
-            < PageHeader eyebrow="Operations" title="Projects" description="Track every construction project from BOQ to handover."
+        <div className="space-y-5 sm:space-y-6">
+            <PageHeader eyebrow="Operations" title="Projects" description="Track every construction project from BOQ to handover."
                 actions={canEdit && <Button data-testid="proj-create-btn" onClick={startCreate}><Plus className="h-4 w-4" /> New project</Button>} />
 
-            < div className="flex flex-wrap gap-3 items-center justify-between">
-                < Tabs value={tab} onValueChange={setTab} >
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <Tabs value={tab} onValueChange={setTab} className="overflow-auto">
                     <TabsList>
                         <TabsTrigger value="all">All</TabsTrigger>
                         <TabsTrigger value="planning">Planning</TabsTrigger>
@@ -82,7 +82,7 @@ export default function Projects() {
                         <TabsTrigger value="completed">Completed</TabsTrigger>
                     </TabsList>
                 </Tabs>
-                <div className="relative flex-1 min-w-[240px] max-w-sm">
+                <div className="relative w-full sm:flex-1 sm:min-w-[240px] sm:max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input data-testid="proj-search" className="pl-9" placeholder="Search projects…" value={search} onChange={(e) => setSearch(e.target.value)} />
                 </div>
@@ -92,7 +92,7 @@ export default function Projects() {
                 filtered.length === 0 ? (
                     <EmptyState icon={FolderKanban} title="No projects match your filters" description="Try adjusting filters or create a new project." />
                 ) : (
-                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                         {
                             filtered.map((p) => {
                                 const pm = users.find(u => u.id === p.manager);
@@ -100,27 +100,27 @@ export default function Projects() {
                                 const burn = Math.round((p.spent / p.budget) * 100);
                                 return (
                                     <Card key={p.id} data-testid={`proj-card-${p.code}`} className="group transition-all hover:-translate-y-0.5 hover:shadow-md">
-                                        < CardContent className="p-5 space-y-4">
-                                            < div className="flex items-start justify-between gap-3">
-                                                < div className="min-w-0">
-                                                    < div className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">{p.code}</div>
-                                                    < div className="font-display text-lg font-semibold leading-tight mt-0.5 truncate">{p.name}</div>
-                                                    < div className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><MapPin className="h-3 w-3" /> {p.location}</div>
-                                                </div >
-                                                <Badge variant={STATUS[p.status].variant}>{STATUS[p.status].label}</Badge>
+                                        <CardContent className="p-3 sm:p-5 space-y-4">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">{p.code}</div>
+                                                    <div className="font-display text-lg font-semibold leading-tight mt-0.5 truncate">{p.name}</div>
+                                                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><MapPin className="h-3 w-3" /> {p.location}</div>
+                                                </div>
+                                                <Badge variant={STATUS[p.status].variant} className={'text-nowrap'}>{STATUS[p.status].label}</Badge>
                                             </div >
 
                                             <div>
                                                 <div className="flex items-center justify-between text-xs mb-1.5"><span className="text-muted-foreground">Progress</span><span className="font-medium tabular-nums">{p.progress}%</span></div>
-                                                < Progress value={p.progress} indicatorClassName={
+                                                <Progress value={p.progress} indicatorClassName={
                                                     p.status === "delayed" ? "bg-destructive" : p.progress > 70 ? "bg-[color:var(--color-success)]" : "bg-primary"} />
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-3 text-xs">
-                                                < div > <div className="text-muted-foreground flex items-center gap-1"><IndianRupee className="h-3 w-3" />Budget</div><div className="font-medium mt-0.5">{formatINR(p.budget)}</div></div>
-                                                < div > <div className="text-muted-foreground">Spent ({burn}%)</div><div className="font-medium mt-0.5">{formatINR(p.spent)}</div></div>
-                                                < div > <div className="text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" />Start</div><div className="font-medium mt-0.5">{formatDate(p.startDate)}</div></div>
-                                                < div > <div className="text-muted-foreground">End</div><div className="font-medium mt-0.5">{formatDate(p.endDate)}</div></div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                                <div> <div className="text-muted-foreground flex items-center gap-1"><IndianRupee className="h-3 w-3" />Budget</div><div className="font-medium mt-0.5">{formatINR(p.budget)}</div></div>
+                                                <div> <div className="text-muted-foreground">Spent ({burn}%)</div><div className="font-medium mt-0.5">{formatINR(p.spent)}</div></div>
+                                                <div> <div className="text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" />Start</div><div className="font-medium mt-0.5">{formatDate(p.startDate)}</div></div>
+                                                <div> <div className="text-muted-foreground">End</div><div className="font-medium mt-0.5">{formatDate(p.endDate)}</div></div>
                                             </div >
 
                                             <div className="flex items-center justify-between border-t border-border pt-3 -mb-1">
@@ -143,51 +143,55 @@ export default function Projects() {
                     </div >
                 )}
 
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="max-w-2xl">
-                    <DialogHeader><DialogTitle>{editing ? "Edit project" : "Create new project"}</DialogTitle></DialogHeader>
-                    <div className="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-2">
-                        <div className="space-y-1.5"><Label>Project code</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="BH-XXX-25" /></div>
-                        <div className="space-y-1.5"><Label>Status</Label>
-                            < Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>{Object.entries(STATUS).map(([k, v]) => (<SelectItem key={k} value={k}>{v.label}</SelectItem>))}</SelectContent>
-                            </Select >
-                        </div >
-                        <div className="col-span-2 space-y-1.5"><Label>Project name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-                        < div className="space-y-1.5"><Label>Client</Label><Input value={form.client} onChange={(e) => setForm({ ...form, client: e.target.value })} /></div>
-                        < div className="space-y-1.5"><Label>Location</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
-                        < div className="space-y-1.5"><Label>Start date</Label><Input type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} /></div>
-                        < div className="space-y-1.5"><Label>End date</Label><Input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} /></div>
-                        < div className="space-y-1.5"><Label>Budget (₹)</Label><Input type="number" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })} /></div>
-                        < div className="space-y-1.5"><Label>Spent (₹)</Label><Input type="number" value={form.spent} onChange={(e) => setForm({ ...form, spent: e.target.value })} /></div>
-                        < div className="space-y-1.5"><Label>Progress (%)</Label><Input type="number" min={0} max={100} value={form.progress} onChange={(e) => setForm({ ...form, progress: e.target.value })} /></div>
-                        < div className="space-y-1.5"><Label>Priority</Label>
-                            < Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem></SelectContent>
-                            </Select >
-                        </div >
-                        <div className="space-y-1.5"><Label>Project Manager</Label>
-                            < Select value={form.manager} onValueChange={(v) => setForm({ ...form, manager: v })}>
-                                <SelectTrigger><SelectValue placeholder="Select PM" /></SelectTrigger>
-                                <SelectContent>{pms.map(u => (<SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>))}</SelectContent>
-                            </Select >
-                        </div >
-                        <div className="space-y-1.5"><Label>Site Engineer</Label>
-                            < Select value={form.siteEngineer} onValueChange={(v) => setForm({ ...form, siteEngineer: v })}>
-                                <SelectTrigger><SelectValue placeholder="Select engineer" /></SelectTrigger>
-                                <SelectContent>{ses.map(u => (<SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>))}</SelectContent>
-                            </Select >
-                        </div >
-                        <div className="col-span-2 space-y-1.5"><Label>Description</Label><Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-                    </div >
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                        <Button onClick={save} data-testid="proj-form-save">{editing ? "Save" : "Create"}</Button>
-                    </DialogFooter >
-                </DialogContent >
-            </Dialog >
+            {/* <DialogContent className="w-[95%] sm:max-w-2xl max-h-[90vh] flex flex-col p-4 sm:p-6"> */}
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogContent className="w-[95%] sm:max-w-2xl max-h-[90vh] flex flex-col">
+                        <DialogHeader><DialogTitle>{editing ? "Edit project" : "Create new project"}</DialogTitle></DialogHeader>
+                        <div className="flex-1 overflow-y-auto pr-1 sm:pr-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="space-y-1.5"><Label>Project code</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="BH-XXX-25" /></div>
+                                <div className="space-y-1.5"><Label>Status</Label>
+                                    < Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>{Object.entries(STATUS).map(([k, v]) => (<SelectItem key={k} value={k}>{v.label}</SelectItem>))}</SelectContent>
+                                    </Select >
+                                </div >
+                                <div className="col-span-2 space-y-1.5"><Label>Project name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+                                < div className="space-y-1.5"><Label>Client</Label><Input value={form.client} onChange={(e) => setForm({ ...form, client: e.target.value })} /></div>
+                                < div className="space-y-1.5"><Label>Location</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
+                                < div className="space-y-1.5"><Label>Start date</Label><Input type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} /></div>
+                                < div className="space-y-1.5"><Label>End date</Label><Input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} /></div>
+                                < div className="space-y-1.5"><Label>Budget (₹)</Label><Input type="number" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })} /></div>
+                                < div className="space-y-1.5"><Label>Spent (₹)</Label><Input type="number" value={form.spent} onChange={(e) => setForm({ ...form, spent: e.target.value })} /></div>
+                                < div className="space-y-1.5"><Label>Progress (%)</Label><Input type="number" min={0} max={100} value={form.progress} onChange={(e) => setForm({ ...form, progress: e.target.value })} /></div>
+                                < div className="space-y-1.5"><Label>Priority</Label>
+                                    < Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem></SelectContent>
+                                    </Select >
+                                </div >
+                                <div className="space-y-1.5"><Label>Project Manager</Label>
+                                    < Select value={form.manager} onValueChange={(v) => setForm({ ...form, manager: v })}>
+                                        <SelectTrigger><SelectValue placeholder="Select PM" /></SelectTrigger>
+                                        <SelectContent>{pms.map(u => (<SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>))}</SelectContent>
+                                    </Select >
+                                </div >
+                                <div className="space-y-1.5"><Label>Site Engineer</Label>
+                                    < Select value={form.siteEngineer} onValueChange={(v) => setForm({ ...form, siteEngineer: v })}>
+                                        <SelectTrigger><SelectValue placeholder="Select engineer" /></SelectTrigger>
+                                        <SelectContent>{ses.map(u => (<SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>))}</SelectContent>
+                                    </Select >
+                                </div >
+                                <div className="col-span-2 space-y-1.5"><Label>Description</Label><Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+                            </div >
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                            <Button onClick={save} data-testid="proj-form-save">{editing ? "Save" : "Create"}</Button>
+                        </DialogFooter >
+                    </DialogContent >
+                </Dialog >
+            {/* </DialogContent> */}
             <ConfirmDialog open={!!confirmId} onOpenChange={(v) => !v && setConfirmId(null)} title="Delete project?" description="All linked dummy data references will remain but project disappears from this list." onConfirm={() => { removeProject(confirmId); toast.success("Project deleted"); setConfirmId(null); }} />
         </div >
     );
