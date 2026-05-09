@@ -64,7 +64,7 @@ const navGroups = [
     },
 ];
 
-export function Sidebar({ role }) {
+export function Sidebar({ role, onClickLink }) {
     const location = useLocation();
     return (
         <aside
@@ -102,6 +102,7 @@ export function Sidebar({ role }) {
                                                 <li key={it.to}>
                                                     <NavLink
                                                         to={it.to}
+                                                        onClick={onClickLink}
                                                         data-testid={`nav-${it.key}`}
                                                         className={cn(
                                                             "flex items-center gap-3 rounded-md px-2.5 py-2 text-sm transition-all duration-150",
