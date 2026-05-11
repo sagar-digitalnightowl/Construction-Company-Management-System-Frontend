@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { seedUsers } from "./seed";
 import { uid } from "../lib/helpers";
+import { authApi } from "@/api";
 
 export const useUsersStore = create((set, get) => ({
     users: seedUsers,
@@ -17,9 +18,24 @@ export const useUsersStore = create((set, get) => ({
 }));
 
 export const useAuthStore = create((set) => ({
-    current: null, // { id, name, email, role }
+    current: null,
+    loading: true,
+
     login: (user) => set({ current: user }),
+
     logout: () => set({ current: null }),
+
+    initAuth: async () => {
+        try {
+            const res = await authApi.getProfile();
+            set({ current: res.data.data });
+        } catch (error) {
+            set({ current: null });
+        } finally {
+            set({ loading: false });
+        }
+    },
+
     updateProfile: (patch) => set((s) => ({ current: s.current ? { ...s.current, ...patch } : null })),
 }));
 

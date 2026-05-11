@@ -8,65 +8,66 @@ import { Label } from "@/components/ui/label";
 import { useAuthStore, useUsersStore } from "@/store/authStore";
 import { ROLES } from "@/data/permissions";
 import { Toaster } from "@/components/ui/sonner";
+import { authApi } from "@/api";
 
-const demoAccounts = [
-    {
-        role: "admin", email: "admin@gmail.com", pass: "admin123"
-    },
-    {
-        role: "director", email: "director@gmail.com", pass: "demo123"
-    },
-    {
-        role: "project_manager", email: "pm.aria@gmail.com", pass: "demo123"
-    },
-    {
-        role: "site_engineer", email: "site.kabir@gmail.com", pass: "demo123"
-    },
-    {
-        role: "accountant", email: "finance.neha@gmail.com", pass: "demo123"
-    },
-    {
-        role: "hr_manager", email: "hr.varun@gmail.com", pass: "demo123"
-    },
-    {
-        role: "vendor", email: "vendor.steelmart@gmail.com", pass: "demo123"
-    },
-    { role: "client", email: "client.zenith@gmail.com", pass: "demo123" },
-];
+// const demoAccounts = [
+//     {
+//         role: "admin", email: "admin@gmail.com", pass: "admin123"
+//     },
+//     {
+//         role: "director", email: "director@gmail.com", pass: "demo123"
+//     },
+//     {
+//         role: "project_manager", email: "pm.aria@gmail.com", pass: "demo123"
+//     },
+//     {
+//         role: "site_engineer", email: "site.kabir@gmail.com", pass: "demo123"
+//     },
+//     {
+//         role: "accountant", email: "finance.neha@gmail.com", pass: "demo123"
+//     },
+//     {
+//         role: "hr_manager", email: "hr.varun@gmail.com", pass: "demo123"
+//     },
+//     {
+//         role: "vendor", email: "vendor.steelmart@gmail.com", pass: "demo123"
+//     },
+//     { role: "client", email: "client.zenith@gmail.com", pass: "demo123" },
+// ];
 
 export default function Login() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
+    const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
     const [loading, setLoading] = useState(false);
-    const findByEmail = useUsersStore((s) => s.findByEmail);
     const login = useAuthStore((s) => s.login);
 
-    const submit = (e) => {
+    const submit = async (e) => {
         e?.preventDefault();
         setLoading(true);
-        setTimeout(() => {
-            const user = findByEmail(email.trim());
-            if (!user || user.password !== password) {
-                toast.error("Invalid credentials. Try one of the demo accounts on the right.");
-                setLoading(false); return;
+        try {
+            const res = await authApi.login({ identifier, password });
+
+            if (res?.data?.success) {
+                login(res.data.data?.user);
+                localStorage.setItem("accessToken", res.data.data?.accessToken);
+                localStorage.setItem("refreshToken", res.data.data?.refreshToken);
+                toast.success(`Welcome back, ${res.data.data?.user.name.split(" ")[0]}`);
+                navigate("/dashboard");
             }
-            if (user.status !== "active") {
-                toast.error("This account has been disabled by the administrator.");
-                setLoading(false); return;
-            }
-            const { password: _pw, ...safe } = user;
-            login(safe);
-            toast.success(`Welcome back, ${user.name.split(" ")[0]}`);
-            navigate("/dashboard");
-        }, 350);
+
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Something went wrong");
+            console.log("Error in login : ", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const quickFill = (acc) => { setEmail(acc.email); setPassword(acc.pass); };
 
     return (
-        <div className="min-h-screen grid lg:grid-cols-[1.05fr_1fr] p-2">
+        <div className="min-h-screen grid lg:grid-cols-[1.05fr_1fr]">
             {/* Left — brand panel */}
             <div className="h-lvh relative hidden lg:flex flex-col justify-between p-10 bg-sidebar text-sidebar-foreground overflow-hidden">
                 <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
@@ -101,7 +102,6 @@ export default function Login() {
 
             </div>
 
-            {/* Right — form */}
             <div className="flex items-center justify-center p-6 sm:p-10">
                 <div className="w-full max-w-[420px]">
                     <div className="lg:hidden flex items-center gap-2 mb-8">
@@ -119,14 +119,20 @@ export default function Login() {
 
                     <form onSubmit={submit} className="space-y-4" data-testid="login-form">
                         <div className="space-y-1.5">
-                            <Label htmlFor="email">Work email</Label>
-                            <Input id="email" type="email" placeholder="you@gmail.com" value={email}
-                                onChange={(e) => setEmail(e.target.value)} required data-testid="login-email" />
+                            <Label htmlFor="email">Work email or mobile</Label>
+                            <Input id="identifier" type="text" placeholder="you@gmail.com" value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)} required data-testid="login-identifier" />
                         </div>
                         <div className="space-y-1.5">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
-                                <button type="button" className="text-xs text-muted-foreground hover:text-foreground">Forgot?</button>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/forgot-password")}
+                                    className="text-xs text-muted-foreground hover:text-foreground"
+                                >
+                                    Forgot?
+                                </button>
                             </div>
                             <div className="relative">
                                 <Input id="password" type={showPwd ? "text" : "password"} placeholder="••••••••" value={password}
@@ -142,7 +148,7 @@ export default function Login() {
                         </Button>
                     </form>
 
-                    <div className="mt-7">
+                    {/* <div className="mt-7">
                         <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-medium mb-2.5">
                             Quick demo · click to fill
                         </div>
@@ -156,7 +162,7 @@ export default function Login() {
                                 </button>
                             ))}
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 

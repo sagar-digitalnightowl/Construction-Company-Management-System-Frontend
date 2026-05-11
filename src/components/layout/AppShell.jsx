@@ -30,7 +30,7 @@ export function AppShell() {
                     md:relative md:translate-x-0 md:h-lvh`}
             >
                 <div className="h-full overflow-auto w-full">
-                    <Sidebar role={current.role} onClickLink={() => setSidebarOpen(false)}/>
+                    <Sidebar role={current.role} onClickLink={() => setSidebarOpen(false)} />
                 </div>
             </div>
 

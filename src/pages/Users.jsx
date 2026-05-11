@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -15,13 +15,13 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { useUsersStore, useAuthStore } from "@/store/authStore";
 import { ROLES, canMutate } from "@/data/permissions";
 import { initials } from "@/lib/helpers";
+import { authApi } from "@/api";
 
 const empty = {
     name: "", email: "", phone: "", role: "site_engineer", department: "", password: "demo123", status: "active"
 };
 
 export default function Users() {
-    const { users, addUser, updateUser, removeUser } = useUsersStore();
     const { current } = useAuthStore();
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
@@ -30,6 +30,109 @@ export default function Users() {
     const [form, setForm] = useState(empty);
     const [confirmId, setConfirmId] = useState(null);
 
+    const [users, setUsers] = useState([]);
+    const [otpStep, setOtpStep] = useState(null);
+    const [otpData, setOtpData] = useState({
+        identifier: "",
+        otp: "",
+        type: "email",
+    });
+
+    const [formError, setFormError] = useState("");
+    const [otpError, setOtpError] = useState("");
+    const [loadingBtn, setLoadingBtn] = useState(false);
+
+
+
+    const fetchUsers = async () => {
+        try {
+            const res = await authApi.getUsers();
+            console.log("response : ", res);
+            if (res?.data?.success) {
+                // setUsers(res.data.data);
+            }
+        } catch {
+            toast.error("Failed to load users");
+        }
+    };
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+
+
+    const save = async () => {
+        if (!form.name || !form.email || !form.password) {
+            setFormError("Name, email and password are required");
+            return;
+        }
+
+
+        try {
+            setLoadingBtn(true);
+            setFormError("");
+
+            const res = await authApi.registerUser({
+                name: form.name,
+                email: form.email,
+                phone: form.phone,
+                password: form.password,
+                role: form.role,
+            });
+            console.log("run the func")
+
+            if (res?.data?.success) {
+                setOtpData({
+                    identifier: form.email,
+                    otp: "",
+                    type: "email",
+                });
+
+                setOtpStep("email");
+                setOpen(false);
+            }
+
+        } catch (err) {
+            setFormError(err?.response?.data?.message || err?.message || "Failed to create user");
+        } finally {
+            setLoadingBtn(false);
+        }
+    };
+                                                                    
+
+    const verifyOtp = async () => {
+        try {
+            setLoadingBtn(true);
+            setOtpError("");
+
+            const res = await authApi.verifyOtp(otpData);
+
+            if (res?.data?.success) {
+
+                if (otpStep === "email") {
+                    setOtpData({
+                        identifier: form.phone,
+                        otp: "",
+                        type: "phone",
+                    });
+
+                    setOtpStep("phone");
+
+                } else {
+                    setOtpStep(null);
+                    fetchUsers();
+                    toast.success("User created successfully");
+                }
+            }
+
+        } catch (err) {
+            setOtpError(err?.response?.data?.message || "Invalid OTP");
+        } finally {
+            setLoadingBtn(false);
+        }
+    };
+
+
     const canEdit = canMutate(current.role, "users");
     const filtered = users.filter((u) => {
         const m = !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
@@ -37,19 +140,8 @@ export default function Users() {
         return m && r;
     });
 
-    const startCreate = () => { setEditing(null); setForm(empty); setOpen(true); };
-    const startEdit = (u) => { setEditing(u); setForm({ ...u }); setOpen(true); };
-    const save = () => {
-        if (!form.name || !form.email || !form.password) {
-            toast.error("Name, email and password are required"); return;
-        }
-        if (editing) { updateUser(editing.id, form); toast.success("User updated"); }
-        else { addUser(form); toast.success(`User created — ${form.email} can now sign in`); }
-        setOpen(false);
-    };
-    const del = () => {
-        removeUser(confirmId); toast.success("User removed"); setConfirmId(null);
-    };
+    const startCreate = () => { setForm(empty); setFormError(''); setOpen(true); };
+
 
     return (
         <div className="space-y-6">
@@ -123,7 +215,7 @@ export default function Users() {
                 </CardContent >
             </Card >
 
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open={open} onOpenChange={setOpen} >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>{editing ? "Edit user" : "Create new user"}</DialogTitle>
@@ -131,18 +223,25 @@ export default function Users() {
                             {editing ? "Update profile details and role permissions." : "Set credentials — the user will be able to sign in immediately."}
                         </DialogDescription>
                     </DialogHeader>
+
+                    {formError && (
+                        <div className="text-sm text-red-500 bg-red-50 border border-red-200 px-3 py-2 rounded-md">
+                            {formError}
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3">
                         <div className="col-span-2 space-y-1.5"><Label>Full name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} data-testid="user-form-name" /></div>
                         <div className="space-y-1.5"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="user-form-email" /></div>
                         <div className="space-y-1.5"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-                        < div className="space-y-1.5">
-                            < Label > Role</Label >
+                        <div className="col-span-2 space-y-1.5">
+                            <Label> Role</Label >
                             <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v })}>
                                 <SelectTrigger data-testid="user-form-role"><SelectValue /></SelectTrigger>
                                 <SelectContent>{Object.entries(ROLES).map(([k, v]) => (<SelectItem key={k} value={k}>{v}</SelectItem>))}</SelectContent>
                             </Select >
                         </div >
-                        <div className="space-y-1.5"><Label>Department</Label><Input value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} /></div>
+                        {/* <div className="space-y-1.5"><Label>Department</Label><Input value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} /></div> */}
                         < div className="col-span-2 space-y-1.5">
                             < Label > Password</Label >
                             <Input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} data-testid="user-form-password" />
@@ -151,12 +250,57 @@ export default function Users() {
                     </div >
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                        <Button onClick={save} data-testid="user-form-save">{editing ? "Save changes" : "Create user"}</Button>
+                        <Button onClick={save} disabled={loadingBtn}>
+                            {loadingBtn ? "Creating..." : "Create user"}
+                        </Button>
                     </DialogFooter >
                 </DialogContent >
             </Dialog >
 
-            <ConfirmDialog open={!!confirmId} onOpenChange={(v) => !v && setConfirmId(null)} title="Delete user?" description="This will revoke access immediately. This action cannot be undone in the demo." onConfirm={del} />
+
+            <Dialog open={!!otpStep}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {otpStep === "email" ? "Verify Email OTP" : "Verify Phone OTP"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Enter OTP sent to {otpData.identifier}
+                        </DialogDescription>
+                    </DialogHeader>
+
+
+
+                    <div className="space-y-3">
+                        {otpError && (
+                            <div className="text-sm text-red-500 bg-red-50 border border-red-200 px-3 py-2 rounded-md">
+                                {otpError}
+                            </div>
+                        )}
+
+                        <Input
+                            placeholder="Enter 6-digit OTP"
+                            value={otpData.otp}
+                            onChange={(e) =>
+                                setOtpData({ ...otpData, otp: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <DialogFooter>
+                        <Button onClick={verifyOtp} disabled={loadingBtn}>
+                            {loadingBtn ? "Verifying..." : "Verify OTP"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <ConfirmDialog
+                open={!!confirmId}
+                onOpenChange={(v) => !v && setConfirmId(null)}
+                title="Delete user?" description="This will revoke access immediately. This action cannot be undone in the demo."
+            // onConfirm={del}
+            />
         </div >
     );
 }

@@ -53,25 +53,25 @@ export default function Vendors() {
                 {
                     vendors.map((v) => (
                         <Card key={v.id} className="hover:shadow-md transition-shadow">
-                            < CardContent className="p-5 space-y-4">
-                                < div className="flex items-start gap-3">
-                                    < Avatar className="h-11 w-11"><AvatarFallback className="bg-primary/10 text-primary">{initials(v.name)}</AvatarFallback></Avatar>
-                                    < div className="min-w-0 flex-1">
-                                        < div className="font-display text-base font-semibold leading-tight truncate">{v.name}</div>
-                                        < div className="text-xs text-muted-foreground mt-0.5">{v.category}</div>
-                                        < div className="flex items-center gap-1 mt-1.5">
-                                            < Star className="h-3.5 w-3.5 fill-[color:var(--color-warning)] text-[color:var(--color-warning)]" />
-                                            < span className="text-xs font-medium tabular-nums">{v.rating.toFixed(1)}</span>
-                                        </div >
-                                    </div >
+                            <CardContent className="p-5 space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <Avatar className="h-11 w-11"><AvatarFallback className="bg-primary/10 text-primary">{initials(v.name)}</AvatarFallback></Avatar>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="font-display text-base font-semibold leading-tight truncate">{v.name}</div>
+                                        <div className="text-xs text-muted-foreground mt-0.5">{v.category}</div>
+                                        <div className="flex items-center gap-1 mt-1.5">
+                                            <Star className="h-3.5 w-3.5 fill-[color:var(--color-warning)] text-[color:var(--color-warning)]" />
+                                            <span className="text-xs font-medium tabular-nums">{v.rating.toFixed(1)}</span>
+                                        </div>
+                                    </div>
                                     <Badge variant={v.status === "active" ? "success" : "warning"}>{v.status.replace("_", " ")}</Badge>
-                                </div >
+                                </div>
 
                                 <div className="space-y-1.5 text-xs">
-                                    < div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3 w-3" />{v.phone}</div>
-                                    < div className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3 w-3" />{v.email}</div>
-                                    < div className="text-muted-foreground">GST: <span className="font-mono text-foreground">{v.gst}</span></div>
-                                </div >
+                                    <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3 w-3" />{v.phone}</div>
+                                    <div className="flex items-center gap-2 text-muted-foreground"><Mail className="h-3 w-3" />{v.email}</div>
+                                    <div className="text-muted-foreground">GST: <span className="font-mono text-foreground">{v.gst}</span></div>
+                                </div>
 
                                 <div className="flex items-center justify-between border-t border-border pt-3 -mb-1">
                                     < div >
@@ -103,7 +103,7 @@ export default function Vendors() {
                         <div className="space-y-1.5"><Label>Rating</Label><Input type="number" step="0.1" min={0} max={5} value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })} /></div>
                         <div className="space-y-1.5"><Label>Outstanding (₹)</Label><Input type="number" value={form.outstanding} onChange={(e) => setForm({ ...form, outstanding: e.target.value })} /></div>
                         <div className="space-y-1.5"><Label>Status</Label>
-                            < Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="on_hold">On hold</SelectItem><SelectItem value="blacklisted">Blacklisted</SelectItem></SelectContent>
                             </Select >
