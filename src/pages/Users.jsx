@@ -49,7 +49,7 @@ export default function Users() {
             const res = await authApi.getUsers();
             console.log("response : ", res);
             if (res?.data?.success) {
-                // setUsers(res.data.data);
+                setUsers(res.data.data.users);
             }
         } catch {
             toast.error("Failed to load users");
@@ -174,7 +174,7 @@ export default function Users() {
                             <TableRow>
                                 <TableHead>User</TableHead>
                                 <TableHead>Role</TableHead>
-                                <TableHead>Department</TableHead>
+                                {/* <TableHead>Department</TableHead> */}
                                 <TableHead>Phone</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="w-[100px] text-right">Actions</TableHead>
@@ -193,10 +193,10 @@ export default function Users() {
                                         </div >
                                     </TableCell >
                                     <TableCell><Badge variant={u.role === "admin" ? "default" : "outline"}>{ROLES[u.role]}</Badge></TableCell >
-                                    <TableCell className="text-sm text-muted-foreground">{u.department}</TableCell>
+                                    {/* <TableCell className="text-sm text-muted-foreground">{u.department}</TableCell> */}
                                     < TableCell className="text-sm tabular-nums">{u.phone}</TableCell>
                                     < TableCell >
-                                        <Badge variant={u.status === "active" ? "success" : "muted"}>{u.status}</Badge>
+                                        <Badge variant={u.isActive ? "success" : "muted"}>{u.isActive? "Active" : "In Active"}</Badge>
                                     </TableCell >
                                     <TableCell className="text-right">
                                         {
