@@ -47,7 +47,7 @@ export default function Users() {
     const fetchUsers = async () => {
         try {
             const res = await authApi.getUsers();
-            console.log("response : ", res);
+            // console.log("response : ", res);
             if (res?.data?.success) {
                 setUsers(res.data.data.users);
             }
@@ -182,7 +182,7 @@ export default function Users() {
                         </TableHeader>
                         <TableBody>
                             {filtered.map((u) => (
-                                <TableRow key={u.id} data-testid={`user-row-${u.id}`}>
+                                <TableRow key={u._id} data-testid={`user-row-${u._id}`}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-9 w-9"><AvatarFallback className="bg-foreground text-background">{initials(u.name)}</AvatarFallback></Avatar>
