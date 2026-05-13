@@ -22,7 +22,7 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { projectApi } from "@/api";
+import { authApi, projectApi, taskApi } from "@/api";
 import { useAuthStore } from "@/store/authStore";
 import { canMutate } from "@/data/permissions";
 import { formatINR, formatDate } from "@/lib/helpers";
@@ -47,9 +47,94 @@ function StatCard({ icon: Icon, label, value, sub, iconClass = "text-primary" })
 }
 
 // ─── Overview Tab ──────────────────────────────────────────────────────────────
-function OverviewTab({ project, onProgressUpdate, canEdit }) {
+function OverviewTab({ project, comments, onProgressUpdate, canEdit }) {
     const [progress, setProgress] = useState(project.progress ?? 0);
     const [saving, setSaving] = useState(false);
+    const [newComment, setNewComment] = useState("");
+    const [adding, setAdding] = useState(false);
+
+
+
+    const [teamModal, setTeamModal] = useState(false);
+    const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [search, setSearch] = useState("");
+    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [assigning, setAssigning] = useState(false);
+    const [teamError, setTeamError] = useState("");
+
+
+    useEffect(() => {
+        if (!teamModal) return;
+
+        const fetchUsers = async () => {
+            setLoadingUsers(true);
+            try {
+                const res = await authApi.getUsers();
+                if (res?.data?.success) {
+                    const list = res.data.data.users || [];
+                    setUsers(list);
+                    setFilteredUsers(list);
+                }
+            } catch (err) {
+                setTeamError("Failed to load users");
+            } finally {
+                setLoadingUsers(false);
+            }
+        };
+
+        fetchUsers();
+    }, [teamModal]);
+
+    useEffect(() => {
+        const q = search.toLowerCase();
+        setFilteredUsers(
+            users.filter(
+                (u) =>
+                    u.name?.toLowerCase().includes(q) ||
+                    u.email?.toLowerCase().includes(q)
+            )
+        );
+    }, [search, users]);
+
+    const toggleUser = (id) => {
+        setSelectedUsers((prev) =>
+            prev.includes(id)
+                ? prev.filter((u) => u !== id)
+                : [...prev, id]
+        );
+    };
+
+
+    const handleAssignTeam = async () => {
+        if (selectedUsers.length === 0) {
+            setTeamError("Select at least one user");
+            return;
+        }
+
+        setAssigning(true);
+        setTeamError("");
+
+        try {
+            await projectApi.assignTeam(project._id, {
+                teamMembers: selectedUsers,
+            });
+
+            project.teamMembers = [
+                ...(project.teamMembers || []),
+                ...selectedUsers,
+            ];
+
+            setTeamModal(false);
+            setSelectedUsers([]);
+        } catch (err) {
+            setTeamError("Failed to assign team");
+        } finally {
+            setAssigning(false);
+        }
+    };
+
 
     const handleUpdateProgress = async () => {
         setSaving(true);
@@ -59,6 +144,21 @@ function OverviewTab({ project, onProgressUpdate, canEdit }) {
             toast.success("Progress updated");
         } catch (err) {
             toast.error(err?.response?.data?.message || "Failed to update progress");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+
+    const handleAddComment = async () => {
+        if (!newComment) return;
+        setSaving(true);
+        try {
+            await projectApi.addComment(project._id, { comment: newComment });
+            setNewComment("");
+            toast.success("Comment added");
+        } catch (err) {
+            toast.error(err?.response?.data?.message || "Failed to add comment");
         } finally {
             setSaving(false);
         }
@@ -97,9 +197,9 @@ function OverviewTab({ project, onProgressUpdate, canEdit }) {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 ">
                 {/* Left: Progress + Description */}
-                <div className="lg:col-span-2 space-y-5">
+                <div className="lg:col-span-2 space-y-2">
                     {/* Progress Card */}
                     <Card>
                         <CardHeader className="pb-2">
@@ -186,10 +286,107 @@ function OverviewTab({ project, onProgressUpdate, canEdit }) {
                             </CardContent>
                         </Card>
                     )}
+
+
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm">Phase History</CardTitle>
+                        </CardHeader>
+
+                        <CardContent className="space-y-3">
+                            {project.phaseHistory?.length > 0 ? (
+                                project.phaseHistory.map((phase, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-start justify-between border rounded-md px-3 py-2"
+                                    >
+                                        <div>
+                                            <p className="font-medium capitalize">
+                                                <span>{phase.phase}</span>
+                                                <span>{phase.phase === project.currentPhase ? " (Current)" : ""}</span>
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {formatDate(phase.startDate)}
+                                            </p>
+                                        </div>
+
+                                        <span
+                                            className={`text-xs px-2 py-1 rounded-full ${phase.isCompleted
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-yellow-100 text-yellow-700"
+                                                }`}
+                                        >
+                                            {phase.isCompleted ? "Completed" : "Active"}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    No phase history available
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
+
+
+
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm">Comments</CardTitle>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                            {/* Add Comment */}
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Write a comment..."
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                />
+                                <Button
+                                    size="lg"
+                                    onClick={handleAddComment}
+                                    disabled={!newComment.trim() || adding}
+                                >
+                                    {adding ? "Posting..." : "Post"}
+                                </Button>
+                            </div>
+
+                            {/* Comment List */}
+                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                                {comments?.length > 0 ? (
+                                    comments.map((comment, index) => (
+                                        <div
+                                            key={index}
+                                            className="border rounded-md p-3 space-y-1"
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <p className="text-sm font-medium">
+                                                    {comment?.userId?.name || "Unknown"}
+                                                </p>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatDate(comment.createdAt)}
+                                                </span>
+                                            </div>
+
+                                            <p className="text-sm text-muted-foreground">
+                                                {comment.text}
+                                            </p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground text-center py-6">
+                                        No comments yet
+                                    </p>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
+
                 {/* Right: Client + Address info */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                     <Card>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm">Client Information</CardTitle>
@@ -240,45 +437,223 @@ function OverviewTab({ project, onProgressUpdate, canEdit }) {
                             <CardTitle className="text-sm">Team</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2 text-sm">
-                            <div>
-                                <p className="text-muted-foreground text-xs">Project Manager</p>
-                                <p className="font-medium">{project.manager?.name ?? "—"}</p>
+                            <div className="space-y-2">
+                                <div className="flex items-start gap-2">
+                                    <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                                    <div>
+                                        <p className="text-muted-foreground text-xs">Project Manager</p>
+                                        <p className="font-medium">{project.projectManager?.name ?? "—"}</p>
+                                    </div>
+                                </div>
+                                {project.clientPhone && (
+                                    <div className="flex items-start gap-2">
+                                        <Phone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                                        <div>
+                                            <p className="text-muted-foreground text-xs">Phone</p>
+                                            <p className="font-medium">{project.projectManager?.phone}</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {project.clientEmail && (
+                                    <div className="flex items-start gap-2">
+                                        <Mail className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                                        <div>
+                                            <p className="text-muted-foreground text-xs">Email</p>
+                                            <p className="font-medium">{project.projectManager?.email}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <Separator />
                             <div>
-                                <p className="text-muted-foreground text-xs">Team Members</p>
-                                <p className="font-medium">{project.teamMembers?.length ?? 0} assigned</p>
+                                <div className="flex justify-between items-center mb-2">
+                                    <p className="text-muted-foreground text-xs">Team Members</p>
+
+                                    {canEdit && (
+                                        <Button size="xs" onClick={() => setTeamModal(true)}>
+                                            <Plus className="h-3 w-3 mr-1" />
+                                            Add
+                                        </Button>
+                                    )}
+                                </div>
+
+
+                                {project.teamMembers?.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {project.teamMembers.map((member) => (
+                                            <div
+                                                key={member._id}
+                                                className="flex items-center justify-between border rounded-md px-3 py-2"
+                                            >
+                                                <span className="font-medium text-sm">
+                                                    {member?.name}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground capitalize">
+                                                    {/* {project.metadata?.teamRoles?.[member._id] || "member"} */}
+                                                    {member?.role.split("_").join(" ")}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">No team assigned</p>
+                                )}
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             </div>
+
+
+
+
+
+            <Dialog open={teamModal} onOpenChange={setTeamModal}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Add Team Members</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-3">
+                        {/* Error */}
+                        {teamError && (
+                            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
+                                {teamError}
+                            </div>
+                        )}
+
+                        {/* Search */}
+                        <Input
+                            placeholder="Search users..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+
+                        {/* User List */}
+                        <div className="max-h-[250px] overflow-y-auto space-y-2">
+                            {loadingUsers ? (
+                                <p className="text-sm text-muted-foreground text-center">
+                                    Loading...
+                                </p>
+                            ) : filteredUsers.length > 0 ? (
+                                filteredUsers.map((user) => (
+                                    <div
+                                        key={user._id}
+                                        onClick={() => toggleUser(user._id)}
+                                        className={`flex justify-between items-center border rounded-md px-3 py-2 cursor-pointer ${selectedUsers.includes(user._id)
+                                            ? "bg-primary/10 border-primary"
+                                            : ""
+                                            }`}
+                                    >
+                                        <div>
+                                            <p className="text-sm font-medium">
+                                                {user.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {user.email}
+                                            </p>
+                                        </div>
+
+                                        {selectedUsers.includes(user._id) && (
+                                            <Check className="h-4 w-4 text-primary" />
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground text-center">
+                                    No users found
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setTeamModal(false)}>
+                            Cancel
+                        </Button>
+
+                        <Button onClick={handleAssignTeam} disabled={assigning}>
+                            {assigning ? "Assigning..." : "Assign"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
 
 // ─── Milestones Tab ────────────────────────────────────────────────────────────
-function MilestonesTab({ project, canEdit }) {
-    const milestones = project.milestones ?? [];
+function MilestonesTab({ project, milestones, canEdit, fetchProject }) {
     const [open, setOpen] = useState(false);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState({ name: "", description: "", dueDate: "" });
-    const [list, setList] = useState(milestones);
+    const [list, setList] = useState(milestones ?? []);
+    const [error, setError] = useState("");
+
+    const [taskModal, setTaskModal] = useState({ open: false, milestoneId: null });
+    const [taskForm, setTaskForm] = useState({
+        title: "",
+        description: "",
+        dueDate: "",
+        priority: "medium",
+        assignedTo: "",
+    });
+    const [taskError, setTaskError] = useState("");
+
+
+    useEffect(() => {
+        setList(milestones ?? []);
+    }, [milestones]);
+
+    useEffect(() => {
+        if (open) setError("");
+    }, [open]);
 
     const handleAdd = async () => {
-        if (!form.name) return;
+        if (!form.name) {
+            setError("Milestone name is required");
+            return;
+        }
         setSaving(true);
+        setError("");
         try {
             const res = await projectApi.addMilestone(project._id, form);
-            const updated = res?.data?.data?.milestones ?? [...list, { ...form, _id: Date.now() }];
-            setList(Array.isArray(updated) ? updated : list);
-            toast.success("Milestone added");
-            setOpen(false);
-            setForm({ name: "", description: "", dueDate: "" });
+            if (res.data?.success) {
+                await fetchProject(false);
+                toast.success("Milestone added");
+                setOpen(false);
+                setForm({ name: "", description: "", dueDate: "" });
+            }
         } catch (err) {
-            toast.error(err?.response?.data?.message || "Failed to add milestone");
+            setError(err?.response?.data?.message || "Failed to add milestone");
         } finally {
             setSaving(false);
+        }
+    };
+
+
+
+    const handleAddTask = async () => {
+        if (!taskForm.title) {
+            setTaskError("Task title is required");
+            return;
+        }
+
+        try {
+            const res = await taskApi.createTask(project._id, {
+                ...taskForm,
+                milestoneId: taskModal.milestoneId,
+            });
+
+            if (res.data?.success) {
+                await fetchProject(false);
+                toast.success("Task added");
+                setTaskModal({ open: false, milestoneId: null });
+                setTaskForm({ title: "", description: "", dueDate: "", priority: "medium" });
+            }
+        } catch (err) {
+            console.log("Error in task creation : ", err)
+            setTaskError("Failed to create task");
         }
     };
 
@@ -300,7 +675,7 @@ function MilestonesTab({ project, canEdit }) {
                     {list.map((m, i) => (
                         <Card key={m._id ?? i}>
                             <CardContent className="p-4 flex items-start gap-3">
-                                <div className={`mt-0.5 rounded-full p-1 ${m.completed ? "bg-green-100 text-green-600" : "bg-muted text-muted-foreground"}`}>
+                                <div className={`mt-0.5 rounded-full p-1 ${m.isCompleted ? "bg-green-100 text-green-600" : "bg-muted text-muted-foreground"}`}>
                                     <Check className="h-3 w-3" />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -309,19 +684,88 @@ function MilestonesTab({ project, canEdit }) {
                                         <p className="text-xs text-muted-foreground mt-0.5">{m.description}</p>
                                     )}
                                 </div>
-                                <div className="text-xs text-muted-foreground shrink-0">
-                                    {m.dueDate ? formatDate(m.dueDate) : "No date"}
+                                <div className="text-xs text-muted-foreground shrink-0 flex flex-col items-end">
+                                    <p className="mb-1">Due Date : {m.dueDate ? formatDate(m.dueDate) : "No date"}</p>
+                                    <p>Complete At : {m.completedAt ? formatDate(m.completedAt) : "No date"}</p>
                                 </div>
+                            </CardContent>
+
+                            <Separator />
+
+                            <CardContent className="space-y-3 mt-3">
+                                {/* Header */}
+                                <div className="flex justify-between items-center">
+                                    <p className="text-xs text-muted-foreground">
+                                        {m.tasks?.length || 0} task{m.tasks?.length !== 1 ? "s" : ""}
+                                    </p>
+
+                                    {canEdit && (
+                                        <Button
+                                            size="xs"
+                                            onClick={() =>
+                                                setTaskModal({ open: true, milestoneId: m._id })
+                                            }
+                                        >
+                                            <Plus className="h-3 w-3 mr-1" />
+                                            Add Task
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Task List */}
+                                {m.tasks?.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {m.tasks.map((task) => (
+                                            <div
+                                                key={task._id}
+                                                className="flex items-center justify-between border rounded-md px-3 py-2"
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-medium">
+                                                        {task.title}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {task.priority} • {task.status || "pending"}
+                                                    </p>
+                                                    {task.assignedTo && (
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Assigned to: {
+                                                                project.teamMembers?.find(u => u._id === task.assignedTo)?.name
+                                                                || "User"
+                                                            }
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                <div className="text-xs text-muted-foreground text-right">
+                                                    <p>{task.dueDate ? formatDate(task.dueDate) : "No due date"}</p>
+                                                    <p>{task.estimatedHours || 0}h</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground text-center py-2">
+                                        No tasks yet
+                                    </p>
+                                )}
                             </CardContent>
                         </Card>
                     ))}
                 </div>
             )}
 
-            {/* Add Dialog */}
+
+
+            {/* Add Milestone Dialog */}
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader><DialogTitle>Add Milestone</DialogTitle></DialogHeader>
+                    {error && (
+                        <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
+                            {error}
+                        </div>
+                    )}
                     <div className="space-y-3">
                         <div className="space-y-1.5">
                             <Label>Name <span className="text-destructive">*</span></Label>
@@ -344,21 +788,132 @@ function MilestonesTab({ project, canEdit }) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+
+            {/* Add Task Modal */}
+            <Dialog open={taskModal.open} onOpenChange={(val) => setTaskModal({ open: val, milestoneId: null })}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Add Task</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-3">
+                        {/* Error */}
+                        {taskError && (
+                            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
+                                {taskError}
+                            </div>
+                        )}
+
+                        {/* Title */}
+                        <div className="space-y-1.5">
+                            <Label>Title <span className="text-destructive">*</span></Label>
+                            <Input
+                                value={taskForm.title}
+                                onChange={(e) =>
+                                    setTaskForm({ ...taskForm, title: e.target.value })
+                                }
+                                placeholder="Complete foundation work"
+                            />
+                        </div>
+
+                        {/* Description */}
+                        <div className="space-y-1.5">
+                            <Label>Description</Label>
+                            <Textarea
+                                rows={2}
+                                value={taskForm.description}
+                                onChange={(e) =>
+                                    setTaskForm({ ...taskForm, description: e.target.value })
+                                }
+                            />
+                        </div>
+
+                        {/* Due Date */}
+                        <div className="space-y-1.5">
+                            <Label>Due Date</Label>
+                            <Input
+                                type="date"
+                                value={taskForm.dueDate}
+                                onChange={(e) =>
+                                    setTaskForm({ ...taskForm, dueDate: e.target.value })
+                                }
+                            />
+                        </div>
+
+                        {/* Priority */}
+                        <div className="space-y-1.5">
+                            <Label>Priority</Label>
+                            <select
+                                className="w-full border rounded-md px-2 py-2 text-sm"
+                                value={taskForm.priority}
+                                onChange={(e) =>
+                                    setTaskForm({ ...taskForm, priority: e.target.value })
+                                }
+                            >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label>Assign To</Label>
+
+                            <select
+                                className="w-full border rounded-md px-2 py-2 text-sm"
+                                value={taskForm.assignedTo}
+                                onChange={(e) =>
+                                    setTaskForm({ ...taskForm, assignedTo: e.target.value })
+                                }
+                            >
+                                <option value="">Select team member</option>
+
+                                {project.teamMembers?.map((member) => (
+                                    <option key={member._id} value={member._id}>
+                                        {member.name || member.email || member._id} (
+                                        {member.projectRole})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                setTaskModal({ open: false, milestoneId: null })
+                            }
+                        >
+                            Cancel
+                        </Button>
+
+                        <Button onClick={handleAddTask}>
+                            Add Task
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
 
 // ─── BOQ Tab ───────────────────────────────────────────────────────────────────
-function BOQTab({ project, canEdit }) {
+function BOQTab({ project, boq, canEdit, fetchProject }) {
     const [open, setOpen] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [list, setList] = useState(project.boq ?? []);
     const [form, setForm] = useState({
         itemName: "", description: "", quantity: "", unit: "", unitPrice: "", category: "",
     });
+    const [boqError, setBoqError] = useState("");
+
+
 
     const handleAdd = async () => {
-        if (!form.itemName) return;
+        if (!form.itemName || !form.description || !form.quantity || !form.unitPrice || !form.category || !form.unit) {
+            setBoqError("All fields are required");
+        }
         setSaving(true);
         try {
             const res = await projectApi.addBOQ(project._id, {
@@ -366,25 +921,40 @@ function BOQTab({ project, canEdit }) {
                 quantity: Number(form.quantity),
                 unitPrice: Number(form.unitPrice),
             });
-            const updated = res?.data?.data?.boq ?? [...list, { ...form, _id: Date.now() }];
-            setList(Array.isArray(updated) ? updated : list);
-            toast.success("BOQ item added");
-            setOpen(false);
-            setForm({ itemName: "", description: "", quantity: "", unit: "", unitPrice: "", category: "" });
+            if (res.data?.success) {
+                await fetchProject(false);
+                toast.success("BOQ item added");
+                setOpen(false);
+                setForm({ itemName: "", description: "", quantity: "", unit: "", unitPrice: "", category: "" });
+            }
         } catch (err) {
-            toast.error(err?.response?.data?.message || "Failed to add BOQ item");
+            setBoqError(err?.response?.data?.message || "Failed to add BOQ item");
         } finally {
             setSaving(false);
         }
     };
 
-    const total = list.reduce((sum, i) => sum + ((i.quantity ?? 0) * (i.unitPrice ?? 0)), 0);
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                    {list.length} item{list.length !== 1 ? "s" : ""} · Total: <strong>{formatINR(total)}</strong>
+                <p className="text-sm text-muted-foreground flex items-center">
+                    <span>{boq.items.length} item{boq.items.length !== 1 ? "s" : ""} · Total: <strong>{formatINR(boq?.totalAmount)}</strong></span>
+                    <span className="ml-2">
+                        {boq.isApproved ?
+                            <Badge
+                                variant="success"
+                            >
+                                Approved
+                            </Badge>
+                            : <Badge
+                                variant="destructive"
+                            >
+                                Not Approved
+                            </Badge>
+                        }
+                    </span>
+
                 </p>
                 {canEdit && (
                     <Button size="sm" onClick={() => setOpen(true)}>
@@ -393,7 +963,7 @@ function BOQTab({ project, canEdit }) {
                 )}
             </div>
 
-            {list.length === 0 ? (
+            {boq.items.length === 0 ? (
                 <EmptyCard title="No BOQ items" description="Add bill of quantity items to track materials and costs." />
             ) : (
                 <div className="rounded-lg border overflow-auto">
@@ -405,11 +975,13 @@ function BOQTab({ project, canEdit }) {
                                 <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Qty</th>
                                 <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Unit</th>
                                 <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Unit Price</th>
+                                <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Received Qty</th>
+                                <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Remaining Qty</th>
                                 <th className="text-right px-4 py-2.5 font-medium text-muted-foreground">Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {list.map((item, i) => (
+                            {boq.items.map((item, i) => (
                                 <tr key={item._id ?? i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                                     <td className="px-4 py-2.5">
                                         <p className="font-medium">{item.itemName}</p>
@@ -421,6 +993,8 @@ function BOQTab({ project, canEdit }) {
                                     <td className="px-4 py-2.5 text-right tabular-nums">{item.quantity}</td>
                                     <td className="px-4 py-2.5 text-muted-foreground">{item.unit}</td>
                                     <td className="px-4 py-2.5 text-right tabular-nums">{formatINR(item.unitPrice)}</td>
+                                    <td className="px-4 py-2.5 text-right text-muted-foreground">{item.receivedQuantity}</td>
+                                    <td className="px-4 py-2.5 text-right text-muted-foreground">{item.remainingQuantity}</td>
                                     <td className="px-4 py-2.5 text-right font-medium tabular-nums">
                                         {formatINR((item.quantity ?? 0) * (item.unitPrice ?? 0))}
                                     </td>
@@ -429,8 +1003,8 @@ function BOQTab({ project, canEdit }) {
                         </tbody>
                         <tfoot className="bg-muted/50 border-t">
                             <tr>
-                                <td colSpan={5} className="px-4 py-2.5 text-right font-medium">Grand Total</td>
-                                <td className="px-4 py-2.5 text-right font-semibold">{formatINR(total)}</td>
+                                <td colSpan={7} className="px-4 py-2.5 text-right font-medium">Grand Total</td>
+                                <td className="px-4 py-2.5 text-right font-semibold">{formatINR(boq?.totalAmount)}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -441,30 +1015,35 @@ function BOQTab({ project, canEdit }) {
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader><DialogTitle>Add BOQ Item</DialogTitle></DialogHeader>
+                    {boqError && (
+                        <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
+                            {boqError}
+                        </div>
+                    )}
                     <div className="grid grid-cols-2 gap-3">
                         <div className="col-span-2 space-y-1.5">
                             <Label>Item Name <span className="text-destructive">*</span></Label>
-                            <Input value={form.itemName} onChange={(e) => setForm({ ...form, itemName: e.target.value })} placeholder="Cement" />
+                            <Input value={form.itemName} required onChange={(e) => setForm({ ...form, itemName: e.target.value })} placeholder="Cement" />
                         </div>
                         <div className="space-y-1.5">
                             <Label>Category</Label>
-                            <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="cement" />
+                            <Input value={form.category} required onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="cement" />
                         </div>
                         <div className="space-y-1.5">
                             <Label>Unit</Label>
-                            <Input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} placeholder="bags" />
+                            <Input value={form.unit} required onChange={(e) => setForm({ ...form, unit: e.target.value })} placeholder="bags" />
                         </div>
                         <div className="space-y-1.5">
                             <Label>Quantity</Label>
-                            <Input type="number" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
+                            <Input type="number" required value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
                         </div>
                         <div className="space-y-1.5">
                             <Label>Unit Price (₹)</Label>
-                            <Input type="number" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} />
+                            <Input type="number" required value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} />
                         </div>
                         <div className="col-span-2 space-y-1.5">
                             <Label>Description</Label>
-                            <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="OPC 53 Grade Cement" />
+                            <Input value={form.description} required onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="OPC 53 Grade Cement" />
                         </div>
                     </div>
                     <DialogFooter>
@@ -638,51 +1217,23 @@ function ActivityTab({ project }) {
 }
 
 // ─── Issues Tab ────────────────────────────────────────────────────────────────
-function IssuesTab({ project, canEdit }) {
-    const [issues, setIssues] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [open, setOpen] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [form, setForm] = useState({ title: "", description: "", severity: "medium" });
+function IssuesTab({ project, canEdit, fetchProject }) {
+    const [loading, setLoading] = useState(false);
 
-    const fetchIssues = useCallback(async () => {
-        setLoading(true);
-        try {
-            const res = await projectApi.getIssues(project._id);
-            const list = res?.data?.data?.issues ?? res?.data?.data ?? [];
-            setIssues(Array.isArray(list) ? list : []);
-        } catch {
-            setIssues([]);
-        } finally {
-            setLoading(false);
-        }
-    }, [project._id]);
-
-    useEffect(() => { fetchIssues(); }, [fetchIssues]);
-
-    const handleReport = async () => {
-        if (!form.title) return;
-        setSaving(true);
-        try {
-            await projectApi.reportIssue(project._id, form);
-            toast.success("Issue reported");
-            setOpen(false);
-            setForm({ title: "", description: "", severity: "medium" });
-            fetchIssues();
-        } catch (err) {
-            toast.error(err?.response?.data?.message || "Failed to report issue");
-        } finally {
-            setSaving(false);
-        }
-    };
+    const issues = project?.issues || [];
 
     const handleResolve = async (issueId) => {
+        setLoading(true);
         try {
-            await projectApi.resolveIssue(project._id, issueId, { resolved: true });
-            toast.success("Issue resolved");
-            fetchIssues();
+            const res = await projectApi.resolveIssue(project._id, issueId, { resolved: true });
+            if (res.data.status) {
+                await fetchProject(false);
+                toast.success("Issue resolved");
+            }
         } catch (err) {
             toast.error(err?.response?.data?.message || "Failed to resolve issue");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -692,11 +1243,11 @@ function IssuesTab({ project, canEdit }) {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">{issues.length} issue{issues.length !== 1 ? "s" : ""}</p>
-                {canEdit && (
+                {/* {canEdit && (
                     <Button size="sm" variant="destructive" onClick={() => setOpen(true)}>
                         <AlertCircle className="h-3 w-3 mr-1" /> Report Issue
                     </Button>
-                )}
+                )} */}
             </div>
 
             {loading ? (
@@ -707,34 +1258,78 @@ function IssuesTab({ project, canEdit }) {
                 <EmptyCard title="No issues reported" description="Site issues will appear here once reported." />
             ) : (
                 <div className="space-y-2">
-                    {issues.map((issue, i) => (
-                        <Card key={issue._id ?? i} className={issue.resolved ? "opacity-60" : ""}>
-                            <CardContent className="p-4 flex items-start gap-3">
-                                <AlertCircle className={`h-4 w-4 mt-0.5 shrink-0 ${issue.resolved ? "text-muted-foreground" : "text-destructive"}`} />
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-medium text-sm">{issue.title}</p>
-                                        <Badge variant={severityVariant[issue.severity] ?? "muted"} className="text-xs">
-                                            {issue.severity}
-                                        </Badge>
-                                        {issue.resolved && <Badge variant="success" className="text-xs">Resolved</Badge>}
+                    {project?.issues.map((issue, i) => {
+                        const isResolved = issue.status === "resolved";
+
+                        return (
+                            <Card key={issue._id ?? i} className={isResolved ? "opacity-60" : ""}>
+                                <CardContent className="p-4 flex items-start gap-3">
+
+                                    <AlertCircle
+                                        className={`h-4 w-4 mt-0.5 shrink-0 ${isResolved ? "text-muted-foreground" : "text-destructive"
+                                            }`}
+                                    />
+
+                                    <div className="flex-1 min-w-0">
+
+                                        {/* HEADER */}
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <p className="font-medium">
+                                                {issue.title || "Untitled Issue"}
+                                            </p>
+
+                                            <Badge
+                                                variant={severityVariant[issue.severity] ?? "muted"}
+                                                className="text-xs"
+                                            >
+                                                {issue.severity || "low"}
+                                            </Badge>
+
+                                            {isResolved && (
+                                                <Badge variant="success" className="text-xs">
+                                                    Resolved
+                                                </Badge>
+                                            )}
+                                        </div>
+
+                                        {/* DESCRIPTION */}
+                                        {issue.description && (
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                {issue.description}
+                                            </p>
+                                        )}
+
+                                        {/* RESOLUTION INFO */}
+                                        {isResolved && (
+                                            <div className="mt-2 text-xs text-green-600">
+                                                <p><strong>Resolution:</strong> {issue.resolution}</p>
+                                                {issue.resolvedAt && (
+                                                    <p className="text-muted-foreground">
+                                                        Resolved on: {new Date(issue.resolvedAt).toLocaleString()}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                    {issue.description && (
-                                        <p className="text-xs text-muted-foreground mt-0.5">{issue.description}</p>
+
+                                    {/* ACTION BUTTON */}
+                                    {canEdit && !isResolved && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleResolve(issue._id)}
+                                            disabled={loading}>
+                                            {loading && <Loader2 className="h-3 w-3 animate-spin mr-1" />} Resolve
+                                        </Button>
                                     )}
-                                </div>
-                                {canEdit && !issue.resolved && (
-                                    <Button size="sm" variant="outline" onClick={() => handleResolve(issue._id)}>
-                                        Resolve
-                                    </Button>
-                                )}
-                            </CardContent>
-                        </Card>
-                    ))}
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
             )}
 
-            <Dialog open={open} onOpenChange={setOpen}>
+            {/* <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader><DialogTitle>Report Issue</DialogTitle></DialogHeader>
                     <div className="space-y-3">
@@ -765,11 +1360,260 @@ function IssuesTab({ project, canEdit }) {
                         </Button>
                     </DialogFooter>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
         </div>
     );
 }
 
+// ─── Risk Tab ────────────────────────────────────────────────────────────────
+function RisksTab({ project, canEdit, fetchProject }) {
+    const risks = project?.risks || [];
+
+    const [open, setOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+
+    const [form, setForm] = useState({
+        title: "",
+        description: "",
+        impact: "medium",
+        probability: "medium",
+        mitigationPlan: "",
+        owner: "",
+    });
+
+    const impactVariant = {
+        low: "muted",
+        medium: "warning",
+        high: "destructive",
+    };
+
+    const probabilityVariant = {
+        low: "muted",
+        medium: "secondary",
+        high: "destructive",
+    };
+
+
+    const handleAddRisk = async () => {
+        if (!form.title) {
+            setError("Risk title is required");
+            return;
+        }
+
+        setSaving(true);
+        setError("");
+
+        try {
+            const res = await projectApi.addRisk(project._id, form);
+
+            if (res?.data?.success) {
+                await fetchProject(false);
+                toast.success("Risk added");
+
+                setOpen(false);
+                setForm({
+                    title: "",
+                    description: "",
+                    impact: "medium",
+                    probability: "medium",
+                    mitigationPlan: "",
+                    owner: "",
+                });
+            }
+        } catch (err) {
+            setError(err?.response?.data?.message || "Failed to add risk");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                    {risks.length} risk{risks.length !== 1 ? "s" : ""}
+                </p>
+
+                {canEdit && (
+                    <Button size="sm" onClick={() => setOpen(true)}>
+                        <Plus className="h-3 w-3 mr-1" /> Add Risk
+                    </Button>
+                )}
+            </div>
+
+            {risks.length === 0 ? (
+                <EmptyCard
+                    title="No risks added"
+                    description="Project risks will appear here once added."
+                />
+            ) : (
+                <div className="space-y-2">
+                    {risks.map((risk, i) => (
+                        <Card key={i}>
+                            <CardContent className="p-4 flex items-start gap-3">
+
+                                <Shield className="h-4 w-4 mt-1 text-yellow-500" />
+
+                                <div className="flex-1 min-w-0">
+
+                                    {/* HEADER */}
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <p className="font-medium">
+                                            {risk.title || "Untitled Risk"}
+                                        </p>
+
+                                        <Badge
+                                            variant={impactVariant[risk.impact] || "muted"}
+                                            className="text-xs"
+                                        >
+                                            Impact: {risk.impact}
+                                        </Badge>
+
+                                        <Badge
+                                            variant={probabilityVariant[risk.probability] || "muted"}
+                                            className="text-xs"
+                                        >
+                                            Probability: {risk.probability}
+                                        </Badge>
+                                    </div>
+
+                                    {/* DESCRIPTION */}
+                                    {risk.description && (
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            {risk.description}
+                                        </p>
+                                    )}
+
+                                    {/* MITIGATION */}
+                                    {risk.mitigationPlan && (
+                                        <div className="mt-2 text-xs text-blue-600">
+                                            <strong>Mitigation:</strong> {risk.mitigationPlan}
+                                        </div>
+                                    )}
+
+                                    {/* STATUS */}
+                                    <div className="mt-2">
+                                        <Badge variant="outline" className="text-xs capitalize">
+                                            {risk.status || "identified"}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
+
+
+
+
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Add Risk</DialogTitle>
+                    </DialogHeader>
+
+                    {error && (
+                        <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="space-y-3">
+
+                        {/* TITLE */}
+                        <div className="space-y-1.5">
+                            <Label>Title *</Label>
+                            <Input
+                                value={form.title}
+                                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                                placeholder="Material delay risk"
+                            />
+                        </div>
+
+                        {/* DESCRIPTION */}
+                        <div className="space-y-1.5">
+                            <Label>Description</Label>
+                            <Textarea
+                                rows={2}
+                                value={form.description}
+                                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            />
+                        </div>
+
+                        {/* IMPACT */}
+                        <div className="space-y-1.5">
+                            <Label>Impact</Label>
+                            <select
+                                className="w-full border rounded-md px-2 py-2 text-sm"
+                                value={form.impact}
+                                onChange={(e) => setForm({ ...form, impact: e.target.value })}
+                            >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        {/* PROBABILITY */}
+                        <div className="space-y-1.5">
+                            <Label>Probability</Label>
+                            <select
+                                className="w-full border rounded-md px-2 py-2 text-sm"
+                                value={form.probability}
+                                onChange={(e) => setForm({ ...form, probability: e.target.value })}
+                            >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        {/* MITIGATION */}
+                        <div className="space-y-1.5">
+                            <Label>Mitigation Plan</Label>
+                            <Textarea
+                                rows={2}
+                                value={form.mitigationPlan}
+                                onChange={(e) => setForm({ ...form, mitigationPlan: e.target.value })}
+                            />
+                        </div>
+
+                        {/* OWNER */}
+                        <div className="space-y-1.5">
+                            <Label>Owner</Label>
+                            <select
+                                className="w-full border rounded-md px-2 py-2 text-sm"
+                                value={form.owner}
+                                onChange={(e) => setForm({ ...form, owner: e.target.value })}
+                            >
+                                <option value="">Select team member</option>
+
+                                {project.teamMembers?.map((member) => (
+                                    <option key={member._id} value={member._id}>
+                                        {member.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setOpen(false)}>
+                            Cancel
+                        </Button>
+
+                        <Button onClick={handleAddRisk} disabled={saving}>
+                            {saving ? "Adding..." : "Add Risk"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+}
 // ─── Shared empty state ────────────────────────────────────────────────────────
 function EmptyCard({ title, description }) {
     return (
@@ -789,15 +1633,15 @@ export default function ProjectDetail() {
     const { current } = useAuthStore();
     const canEdit = canMutate(current?.role, "projects");
 
-    const [project, setProject] = useState(null);
+    const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchProject = useCallback(async () => {
-        setLoading(true);
+    const fetchProject = useCallback(async (loadingTrue = true) => {
+        if (loadingTrue) setLoading(true);
         try {
             const res = await projectApi.getById(id);
-            const data = res?.data?.data?.project ?? res?.data?.data ?? res?.data;
-            setProject(data);
+            const data = res?.data?.data
+            setData(data);
         } catch (err) {
             toast.error(err?.response?.data?.message || "Failed to load project");
             navigate("/projects");
@@ -820,7 +1664,7 @@ export default function ProjectDetail() {
         );
     }
 
-    if (!project) return null;
+    if (!data) return null;
 
     return (
         <div className="space-y-5 sm:space-y-6">
@@ -831,15 +1675,15 @@ export default function ProjectDetail() {
                 </Button>
                 <div className="flex flex-wrap items-start gap-3 justify-between">
                     <div>
-                        <h1 className="font-display text-2xl font-bold">{project.name}</h1>
+                        <h1 className="font-display text-2xl font-bold">{data?.project.name}</h1>
                         <div className="flex flex-wrap items-center gap-3 mt-1.5">
                             <span className="text-sm text-muted-foreground flex items-center gap-1">
-                                <MapPin className="h-3.5 w-3.5" />{project.location}
+                                <MapPin className="h-3.5 w-3.5" />{data?.project.location}
                             </span>
-                            <Badge variant={STATUS[project.status]?.variant}>
-                                {STATUS[project.status]?.label ?? project.status}
+                            <Badge variant={STATUS[data?.project.status]?.variant}>
+                                {STATUS[data?.project.status]?.label ?? data?.project.status}
                             </Badge>
-                            <Badge variant="outline" className="capitalize">{project.priority} priority</Badge>
+                            <Badge variant="outline" className="capitalize">{data?.project.priority} priority</Badge>
                         </div>
                     </div>
                 </div>
@@ -853,31 +1697,45 @@ export default function ProjectDetail() {
                     <TabsTrigger value="boq" className="flex items-center gap-1.5"><ClipboardList className="h-3.5 w-3.5" />BOQ</TabsTrigger>
                     <TabsTrigger value="dpr" className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />DPR</TabsTrigger>
                     <TabsTrigger value="issues" className="flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" />Issues</TabsTrigger>
+                    <TabsTrigger value="risks" className="flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" /> Risks</TabsTrigger>
                     <TabsTrigger value="activity" className="flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" />Activity</TabsTrigger>
                 </TabsList>
 
                 <div className="mt-5">
                     <TabsContent value="overview">
                         <OverviewTab
-                            project={project}
+                            project={data?.project}
+                            comments={data?.comments}
                             canEdit={canEdit}
-                            onProgressUpdate={(val) => setProject((p) => ({ ...p, progress: val }))}
+                            onProgressUpdate={(val) => setData((prev) => ({ ...prev, project: { ...prev.project, progress: val } }))}
                         />
                     </TabsContent>
                     <TabsContent value="milestones">
-                        <MilestonesTab project={project} canEdit={canEdit} />
+                        <MilestonesTab
+                            project={data?.project}
+                            milestones={data?.milestones}
+                            canEdit={canEdit}
+                            fetchProject={fetchProject}
+                        />
                     </TabsContent>
                     <TabsContent value="boq">
-                        <BOQTab project={project} canEdit={canEdit} />
+                        <BOQTab project={data?.project} boq={data?.boq} canEdit={canEdit} fetchProject={fetchProject} />
                     </TabsContent>
                     <TabsContent value="dpr">
-                        <DPRTab project={project} canEdit={canEdit} />
+                        <DPRTab project={data?.project?.dependencies} canEdit={canEdit} />
                     </TabsContent>
                     <TabsContent value="issues">
-                        <IssuesTab project={project} canEdit={canEdit} />
+                        <IssuesTab project={data?.project} canEdit={canEdit} fetchProject={fetchProject} />
+                    </TabsContent>
+                    <TabsContent value="risks">
+                        <RisksTab
+                            project={data?.project}
+                            canEdit={canEdit}
+                            fetchProject={fetchProject}
+                        />
                     </TabsContent>
                     <TabsContent value="activity">
-                        <ActivityTab project={project} />
+                        <ActivityTab project={data?.project} />
                     </TabsContent>
                 </div>
             </Tabs>

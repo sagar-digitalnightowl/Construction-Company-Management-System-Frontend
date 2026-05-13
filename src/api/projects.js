@@ -20,6 +20,12 @@ export const projectApi = {
     assignTeam: (id, data) =>
         api.post(`/project/${id}/assign-team`, data),
 
+    removeTeam: (projectId, userId) =>
+        api.delete(`/project/${projectId}/team/${userId}`),
+
+    updateTeamRole: (projectId, userId, data) =>
+        api.patch(`/project/${projectId}/team/${userId}/role`, data),
+
     // ================= MILESTONES =================
     addMilestone: (id, data) =>
         api.post(`/project/${id}/milestones`, data),
@@ -40,12 +46,16 @@ export const projectApi = {
     updatePhase: (id, data) =>
         api.patch(`/project/${id}/phase`, data),
 
-    // ================= DPR =================
-    createDPR: (id, data) =>
-        api.post(`/project/${id}/dpr`, data),
 
-    getDPR: (id) =>
-        api.get(`/project/${id}/dpr`),
+        // ================= RISKS =================
+    addRisk: (id, data) =>
+        api.post(`/project/${id}/risks`, data),
+
+    getRisks: (id) =>
+        api.get(`/project/${id}/risks`),
+
+
+
 
     // ================= ACTIVITY =================
     getActivity: (id) =>
@@ -58,12 +68,7 @@ export const projectApi = {
     getResources: (id) =>
         api.get(`/project/${id}/resources`),
 
-    // ================= RISKS =================
-    addRisk: (id, data) =>
-        api.post(`/project/${id}/risks`, data),
 
-    getRisks: (id) =>
-        api.get(`/project/${id}/risks`),
 
     // ================= ISSUES =================
     reportIssue: (id, data) =>
@@ -84,11 +89,6 @@ export const projectApi = {
         api.get(`/project/${id}/dependencies`),
 
     // ================= DOCUMENTS =================
-    uploadDocument: (id, data) =>
-        api.post(`/project/${id}/documents`, data),
-
-    getDocuments: (id) =>
-        api.get(`/project/${id}/documents`),
 
     getPresignedUrl: (id, data) =>
         api.post(`/project/${id}/documents/presigned-url`, data),
@@ -108,4 +108,10 @@ export const projectApi = {
 
     getTimeline: (id) =>
         api.get(`/project/${id}/timeline`),
+
+
+    // ================= DPR =================
+
+    getDPR: (id) =>
+        api.get(`/project/${id}/dpr`),
 };

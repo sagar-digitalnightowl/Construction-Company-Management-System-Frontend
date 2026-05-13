@@ -287,7 +287,7 @@ function ProjectCard({ project, canEdit, onEdit, onDelete }) {
                         <div className="font-medium mt-0.5">{formatINR(project.budget)}</div>
                     </div>
                     <div>
-                        <div className="text-muted-foreground">Spent ({burn}%)</div>
+                        <div className="text-muted-foreground">Spent ({burn || 0}%)</div>
                         <div className="font-medium mt-0.5">{formatINR(project.spent ?? 0)}</div>
                     </div>
                     <div>
@@ -305,7 +305,7 @@ function ProjectCard({ project, canEdit, onEdit, onDelete }) {
                 {/* Footer */}
                 <div className="flex items-center justify-between border-t border-border pt-3 -mb-1">
                     <div className="text-xs text-muted-foreground">
-                        <div>PM: <span className="text-foreground">{project.manager?.name ?? "—"}</span></div>
+                        <div>PM: <span className="text-foreground">{project.projectManager?.name ?? "—"}</span></div>
                         <div>Priority: <span className="text-foreground capitalize">{project.priority ?? "—"}</span></div>
                     </div>
                     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>

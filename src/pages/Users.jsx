@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -47,7 +47,6 @@ export default function Users() {
     const fetchUsers = async () => {
         try {
             const res = await authApi.getUsers();
-            // console.log("response : ", res);
             if (res?.data?.success) {
                 setUsers(res.data.data.users);
             }
@@ -79,7 +78,6 @@ export default function Users() {
                 password: form.password,
                 role: form.role,
             });
-            console.log("run the func")
 
             if (res?.data?.success) {
                 setOtpData({
@@ -98,7 +96,7 @@ export default function Users() {
             setLoadingBtn(false);
         }
     };
-                                                                    
+
 
     const verifyOtp = async () => {
         try {
@@ -145,7 +143,7 @@ export default function Users() {
 
     return (
         <div className="space-y-6">
-            < PageHeader
+            <PageHeader
                 eyebrow="Administration" title="User & Role Management"
                 description="Create accounts for any role; users can sign in with the credentials you set here."
                 actions={canEdit && (
@@ -185,25 +183,32 @@ export default function Users() {
                                 <TableRow key={u._id} data-testid={`user-row-${u._id}`}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
-                                            <Avatar className="h-9 w-9"><AvatarFallback className="bg-foreground text-background">{initials(u.name)}</AvatarFallback></Avatar>
+                                            <Avatar className="h-9 w-9">
+                                                {u.profileImage && (
+                                                    <AvatarImage src={u.profileImage} />
+                                                )}
+                                                <AvatarFallback className="bg-foreground text-background">
+                                                    {initials(u.name)}
+                                                </AvatarFallback>
+                                            </Avatar>
                                             <div className="leading-tight">
                                                 <div className="font-medium">{u.name}</div>
                                                 <div className="text-xs text-muted-foreground">{u.email}</div>
-                                            </div >
-                                        </div >
-                                    </TableCell >
+                                            </div>
+                                        </div>
+                                    </TableCell>
                                     <TableCell><Badge variant={u.role === "admin" ? "default" : "outline"}>{ROLES[u.role]}</Badge></TableCell >
                                     {/* <TableCell className="text-sm text-muted-foreground">{u.department}</TableCell> */}
                                     < TableCell className="text-sm tabular-nums">{u.phone}</TableCell>
                                     < TableCell >
-                                        <Badge variant={u.isActive ? "success" : "muted"}>{u.isActive? "Active" : "In Active"}</Badge>
+                                        <Badge variant={u.isActive ? "success" : "muted"}>{u.isActive ? "Active" : "In Active"}</Badge>
                                     </TableCell >
                                     <TableCell className="text-right">
                                         {
                                             canEdit && (
                                                 <div className="flex justify-end gap-1">
-                                                    < Button size="icon" variant="ghost" onClick={() => startEdit(u)} data-testid={`user-edit-${u.id}`}><Pencil className="h-4 w-4" /></Button>
-                                                    < Button size="icon" variant="ghost" className="text-destructive" onClick={() => setConfirmId(u.id)} data-testid={`user-delete-${u.id}`} disabled={u.id === current.id}><Trash2 className="h-4 w-4" /></Button>
+                                                    <Button size="icon" variant="ghost" onClick={() => startEdit(u)} data-testid={`user-edit-${u.id}`}><Pencil className="h-4 w-4" /></Button>
+                                                    <Button size="icon" variant="ghost" className="text-destructive" onClick={() => setConfirmId(u.id)} data-testid={`user-delete-${u.id}`} disabled={u.id === current.id}><Trash2 className="h-4 w-4" /></Button>
                                                 </div >
                                             )
                                         }
