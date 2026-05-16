@@ -9,7 +9,6 @@ import Projects from "@/pages/projects/Projects";
 import Sites from "@/pages/Sites";
 import Procurement from "@/pages/Procurement";
 import Vendors from "@/pages/Vendors";
-import Inventory from "@/pages/Inventory";
 import Finance from "@/pages/Finance";
 import HR from "@/pages/HR";
 import CRM from "@/pages/CRM";
@@ -20,6 +19,16 @@ import { useAuthStore } from "./store/authStore";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ProjectDetail from "./pages/projects/ProjectDetailsPage";
+import ProjectTemplate from "./pages/projectTemplete/projectTemplete";
+import Inventory from "./pages/inventory/Inventory";
+import Materials from "./pages/inventory/Materials";
+import Warehouses from "./pages/inventory/Warehouses";
+import StockTransactions from "./pages/inventory/StockTransactions";
+import LowStockAlerts from "./pages/inventory/LowStockAlerts";
+import Valuation from "./pages/inventory/Valuation";
+import StockCounts from "./pages/inventory/StockCounts";
+
+import { createPortal } from "react-dom";
 
 export default function App() {
 
@@ -33,14 +42,20 @@ export default function App() {
 
   return (
     <>
-      <Toaster
-        position="top-right"
-        richColors
-        expand={true}
-        portalProps={{
-          container: document.body,
-        }}
-      />
+      {
+        createPortal(
+          <Toaster
+            position="top-right"
+            richColors
+            expand={true}
+            portalProps={{
+              container: document.body,
+            }}
+          />,
+          document.body
+        )
+      }
+
 
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -51,7 +66,17 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/project-templates" element={<ProjectTemplate />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
+
+          <Route path="/inventory/stock-management" element={<Inventory />} />
+          <Route path="/inventory/materials" element={<Materials />} />
+          <Route path="/inventory/warehouses" element={<Warehouses />} />
+          <Route path="/inventory/transactions" element={<StockTransactions />} />
+          <Route path="/inventory/alerts" element={<LowStockAlerts />} />
+          <Route path="/inventory/valuation" element={<Valuation />} />
+          <Route path="/inventory/counts" element={<StockCounts />} />
+
           <Route path="/sites" element={<Sites />} />
           <Route path="/procurement" element={<Procurement />} />
           <Route path="/vendors" element={<Vendors />} />

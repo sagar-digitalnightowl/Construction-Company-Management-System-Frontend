@@ -13,6 +13,10 @@ export const projectApi = {
 
     delete: (id) => api.delete(`/project/${id}`), // archive
 
+    clone: (id) => api.post(`/project/${id}/clone`),
+
+    export: (params) => api.get("/project/export", { params }),
+
     // ================= STATS =================
     getStats: () => api.get("/project/stats"),
 
@@ -47,7 +51,7 @@ export const projectApi = {
         api.patch(`/project/${id}/phase`, data),
 
 
-        // ================= RISKS =================
+    // ================= RISKS =================
     addRisk: (id, data) =>
         api.post(`/project/${id}/risks`, data),
 
@@ -114,4 +118,16 @@ export const projectApi = {
 
     getDPR: (id) =>
         api.get(`/project/${id}/dpr`),
+
+    // ================= PROJECT TEMPLATES =================
+    
+    createTemplate: (data) => api.post("/project/templates", data),
+    
+    getTemplates: () => api.get("/project/templates"),
+    
+    
+    // ================= Material =================
+
+    getMaterialRequests: (id) => api.get(`/project/${id}/material-requests`),
 };
+

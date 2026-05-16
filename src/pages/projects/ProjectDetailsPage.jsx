@@ -28,6 +28,22 @@ import { canMutate } from "@/data/permissions";
 import { formatINR, formatDate } from "@/lib/helpers";
 import { STATUS } from "./Projects";
 
+
+const PHASES = [
+    "tender",
+    "planning",
+    "excavation",
+    "foundation",
+    "structure",
+    "brickwork",
+    "electrical",
+    "plumbing",
+    "finishing",
+    "handover",
+    "maintenance",
+];
+
+
 // ─── Stat Card ─────────────────────────────────────────────────────────────────
 function StatCard({ icon: Icon, label, value, sub, iconClass = "text-primary" }) {
     return (
@@ -47,7 +63,7 @@ function StatCard({ icon: Icon, label, value, sub, iconClass = "text-primary" })
 }
 
 // ─── Overview Tab ──────────────────────────────────────────────────────────────
-function OverviewTab({ project, comments, onProgressUpdate, canEdit }) {
+function OverviewTab({ project, comments, onProgressUpdate, canEdit, fetchProject }) {
     const [progress, setProgress] = useState(project.progress ?? 0);
     const [saving, setSaving] = useState(false);
     const [newComment, setNewComment] = useState("");
@@ -63,6 +79,9 @@ function OverviewTab({ project, comments, onProgressUpdate, canEdit }) {
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [assigning, setAssigning] = useState(false);
     const [teamError, setTeamError] = useState("");
+
+    const [phase, setPhase] = useState(project.currentPhase || "");
+    const [updatingPhase, setUpdatingPhase] = useState(false);
 
 
     useEffect(() => {
@@ -164,6 +183,27 @@ function OverviewTab({ project, comments, onProgressUpdate, canEdit }) {
         }
     };
 
+
+
+    const handleUpdatePhase = async () => {
+        if (!phase) return;
+
+        setUpdatingPhase(true);
+        try {
+            const res = await projectApi.updatePhase(project._id, { phase });
+
+            if (res.data.success) {
+                await fetchProject(false);
+                toast.success("Phase updated successfully");
+            }
+        } catch (err) {
+            toast.error(err?.response?.data?.message || "Failed to update phase");
+        } finally {
+            setUpdatingPhase(false);
+        }
+    };
+
+
     const burn = project.budget ? Math.round(((project.spent ?? 0) / project.budget) * 100) : 0;
 
     return (
@@ -208,7 +248,7 @@ function OverviewTab({ project, comments, onProgressUpdate, canEdit }) {
                                 {canEdit && (
                                     <Button
                                         size="sm"
-                                        variant="outline"
+                                        // variant="outline"
                                         onClick={handleUpdateProgress}
                                         disabled={saving}
                                     >
@@ -287,6 +327,39 @@ function OverviewTab({ project, comments, onProgressUpdate, canEdit }) {
                         </Card>
                     )}
 
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex justify-between items-center">
+                                Update Project Phase
+
+                                {canEdit && (
+                                    <Button
+                                        size="sm"
+                                        onClick={handleUpdatePhase}
+                                        disabled={updatingPhase}
+                                    >
+                                        {updatingPhase && <Loader2 className="h-3 w-3 animate-spin mr-1" />} Update
+                                    </Button>
+                                )}
+                            </CardTitle>
+                        </CardHeader>
+
+                        <CardContent>
+                            <select
+                                value={phase}
+                                onChange={(e) => setPhase(e.target.value)}
+                                className="w-full border rounded-md px-3 py-2 text-sm"
+                                disabled={!canEdit}
+                            >
+                                <option value="">Select Phase</option>
+                                {PHASES.map((p) => (
+                                    <option key={p} value={p}>
+                                        {p.charAt(0).toUpperCase() + p.slice(1)}
+                                    </option>
+                                ))}
+                            </select>
+                        </CardContent>
+                    </Card>
 
                     <Card>
                         <CardHeader className="pb-2">
@@ -1216,7 +1289,8 @@ function ActivityTab({ project }) {
     );
 }
 
-// ─── Issues Tab ────────────────────────────────────────────────────────────────
+
+// ─── Issues Tab ─────────────────────────────────────────────────────────────────
 function IssuesTab({ project, canEdit, fetchProject }) {
     const [loading, setLoading] = useState(false);
 
@@ -1365,7 +1439,7 @@ function IssuesTab({ project, canEdit, fetchProject }) {
     );
 }
 
-// ─── Risk Tab ────────────────────────────────────────────────────────────────
+// ─── Risk Tab ───────────────────────────────────────────────────────────────────
 function RisksTab({ project, canEdit, fetchProject }) {
     const risks = project?.risks || [];
 
@@ -1606,7 +1680,7 @@ function RisksTab({ project, canEdit, fetchProject }) {
                         </Button>
 
                         <Button onClick={handleAddRisk} disabled={saving}>
-                            {saving ? "Adding..." : "Add Risk"}
+                            {saving && <Loader2 className="h-3 w-3 animate-spin mr-1" />} Add Risk
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -1614,7 +1688,254 @@ function RisksTab({ project, canEdit, fetchProject }) {
         </div>
     );
 }
-// ─── Shared empty state ────────────────────────────────────────────────────────
+
+
+function MaterialRequestTab({ project, canEdit }) {
+    const [list, setList] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const [open, setOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+
+    const [form, setForm] = useState({
+        title: "",
+        description: "",
+        quantity: "",
+        unit: "",
+        requiredByDate: "",
+        priority: "medium",
+        deliveryLocation: "",
+    });
+
+    // ─── Fetch Requests ─────────────────────────
+    const fetchRequests = async () => {
+        setLoading(true);
+        try {
+            const res = await projectApi.getMaterialRequests(project._id);
+            if (res?.data.success) {
+                setList(res?.data?.data || []);
+            }
+        } catch {
+            setList([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRequests();
+    }, []);
+
+    // ─── Create Request ─────────────────────────
+    const handleCreate = async () => {
+        if (!form.title || !form.quantity || !form.unit || !form.requiredByDate) {
+            setError("Required fields missing");
+            return;
+        }
+
+        setSaving(true);
+        setError("");
+
+        try {
+            const res = await projectApi.createMaterialRequest(project._id, {
+                ...form,
+                quantity: Number(form.quantity),
+            });
+
+            if (res.data?.success) {
+                await fetchRequests();
+                toast.success("Material request created");
+                setOpen(false);
+
+                setForm({
+                    title: "",
+                    description: "",
+                    quantity: "",
+                    unit: "",
+                    requiredByDate: "",
+                    priority: "medium",
+                    deliveryLocation: "",
+                });
+            }
+        } catch (err) {
+            setError(err?.response?.data?.message || "Failed to create");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const statusColor = {
+        pending: "secondary",
+        approved: "success",
+        rejected: "destructive",
+        delivered: "outline",
+    };
+
+    return (
+        <div className="space-y-4">
+
+            {/* HEADER */}
+            <div className="flex justify-between items-center">
+                <p className="text-sm text-muted-foreground">
+                    {list.length} request{list.length !== 1 ? "s" : ""}
+                </p>
+
+                {canEdit && (
+                    <Button size="sm" onClick={() => setOpen(true)}>
+                        <Plus className="h-3 w-3 mr-1" />
+                        New Request
+                    </Button>
+                )}
+            </div>
+
+            {/* LIST */}
+            {loading ? (
+                <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+                </div>
+            ) : list.length === 0 ? (
+                <EmptyCard
+                    title="No material requests"
+                    description="Create requests to manage materials."
+                />
+            ) : (
+                <div className="space-y-2">
+                    {list.map((item) => (
+                        <Card key={item._id}>
+                            <CardContent className="p-4 flex justify-between items-start">
+
+                                <div>
+                                    <p className="font-medium">{item.title}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {item.description}
+                                    </p>
+
+                                    <p className="text-xs mt-1">
+                                        {item.quantity} {item.unit}
+                                    </p>
+
+                                    <p className="text-xs text-muted-foreground">
+                                        Required by: {item.requiredByDate}
+                                    </p>
+                                </div>
+
+                                <div className="text-right space-y-2">
+                                    <Badge variant={statusColor[item.status]}>
+                                        {item.status}
+                                    </Badge>
+
+                                    <Badge variant="outline">
+                                        {item.priority}
+                                    </Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
+
+            {/* MODAL */}
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Create Material Request</DialogTitle>
+                    </DialogHeader>
+
+                    {error && (
+                        <div className="text-sm text-destructive bg-destructive/10 p-2 rounded">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3">
+
+                        <Input
+                            placeholder="Title *"
+                            value={form.title}
+                            onChange={(e) =>
+                                setForm({ ...form, title: e.target.value })
+                            }
+                        />
+
+                        <Input
+                            placeholder="Quantity *"
+                            type="number"
+                            value={form.quantity}
+                            onChange={(e) =>
+                                setForm({ ...form, quantity: e.target.value })
+                            }
+                        />
+
+                        <Input
+                            placeholder="Unit (bags, kg)"
+                            value={form.unit}
+                            onChange={(e) =>
+                                setForm({ ...form, unit: e.target.value })
+                            }
+                        />
+
+                        <Input
+                            type="date"
+                            value={form.requiredByDate}
+                            onChange={(e) =>
+                                setForm({ ...form, requiredByDate: e.target.value })
+                            }
+                        />
+
+                        <Select
+                            value={form.priority}
+                            onValueChange={(val) =>
+                                setForm({ ...form, priority: val })
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Priority" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="urgent">Urgent</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Input
+                            placeholder="Delivery Location"
+                            value={form.deliveryLocation}
+                            onChange={(e) =>
+                                setForm({ ...form, deliveryLocation: e.target.value })
+                            }
+                        />
+
+                        <div className="col-span-2">
+                            <Textarea
+                                placeholder="Description"
+                                value={form.description}
+                                onChange={(e) =>
+                                    setForm({ ...form, description: e.target.value })
+                                }
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setOpen(false)}>
+                            Cancel
+                        </Button>
+
+                        <Button onClick={handleCreate} disabled={saving}>
+                            {saving && <Loader2 className="h-3 w-3 animate-spin mr-1" />} Create
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+}
+
+
+// ─── Shared empty state ─────────────────────────────────────────────────────────
 function EmptyCard({ title, description }) {
     return (
         <Card>
@@ -1626,7 +1947,7 @@ function EmptyCard({ title, description }) {
     );
 }
 
-// ─── Main ProjectDetail Page ───────────────────────────────────────────────────
+// ─── Main ProjectDetail Page ────────────────────────────────────────────────────
 export default function ProjectDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -1651,6 +1972,9 @@ export default function ProjectDetail() {
     }, [id, navigate]);
 
     useEffect(() => { fetchProject(); }, [fetchProject]);
+
+
+
 
     if (loading) {
         return (
@@ -1695,9 +2019,10 @@ export default function ProjectDetail() {
                     <TabsTrigger value="overview" className="flex items-center gap-1.5"><BarChart3 className="h-3.5 w-3.5" />Overview</TabsTrigger>
                     <TabsTrigger value="milestones" className="flex items-center gap-1.5"><Flag className="h-3.5 w-3.5" />Milestones</TabsTrigger>
                     <TabsTrigger value="boq" className="flex items-center gap-1.5"><ClipboardList className="h-3.5 w-3.5" />BOQ</TabsTrigger>
-                    <TabsTrigger value="dpr" className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />DPR</TabsTrigger>
+                    {/* <TabsTrigger value="dpr" className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />DPR</TabsTrigger> */}
                     <TabsTrigger value="issues" className="flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" />Issues</TabsTrigger>
                     <TabsTrigger value="risks" className="flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" /> Risks</TabsTrigger>
+                    <TabsTrigger value="materials" className="flex items-center gap-1.5"><ClipboardList className="h-3.5 w-3.5" />Materials</TabsTrigger>
                     <TabsTrigger value="activity" className="flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" />Activity</TabsTrigger>
                 </TabsList>
 
@@ -1708,6 +2033,7 @@ export default function ProjectDetail() {
                             comments={data?.comments}
                             canEdit={canEdit}
                             onProgressUpdate={(val) => setData((prev) => ({ ...prev, project: { ...prev.project, progress: val } }))}
+                            fetchProject={fetchProject}
                         />
                     </TabsContent>
                     <TabsContent value="milestones">
@@ -1732,6 +2058,12 @@ export default function ProjectDetail() {
                             project={data?.project}
                             canEdit={canEdit}
                             fetchProject={fetchProject}
+                        />
+                    </TabsContent>
+                    <TabsContent value="materials">
+                        <MaterialRequestTab
+                            project={data?.project}
+                            canEdit={canEdit}
                         />
                     </TabsContent>
                     <TabsContent value="activity">
