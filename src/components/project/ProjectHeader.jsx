@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { STATUS } from '@/pages/Projects/Projects';
+import { STATUS } from '@/pages/projects/Projects';
 
 export function ProjectHeader({ project }) {
     const navigate = useNavigate();
