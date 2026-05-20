@@ -8,16 +8,22 @@ import { Button } from '@/components/ui/button';
 import { formatINR } from '@/lib/helpers';
 
 export function StockCard({ item, onIssue, onReturn, onTransfer }) {
-    const isLowStock = item.quantity <= (item.minStockLevel || 0);
-    const usagePercent = ((item.quantityIssued || 0) / (item.quantityIssued + item.quantity) * 100) || 0;
+    const totalQty = item.quantity || 0;
+    const availableQty = item.availableQuantity ?? totalQty;
+    const issuedQty = totalQty - availableQty;
+    const usagePercent = totalQty > 0 ? (issuedQty / totalQty) * 100 : 0;
+
+    const isLowStock = availableQty < (item.materialId?.minStockLevel || 0);
+    const material = item.materialId || {};
+    const unit = material.unit || 'units';
 
     return (
         <Card className="group transition-all hover:-translate-y-0.5 hover:shadow-md">
             <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
                     <div>
-                        <p className="font-display font-semibold">{item.material?.name || item.materialName}</p>
-                        <p className="text-xs text-muted-foreground">{item.material?.code}</p>
+                        <p className="font-display font-semibold">{material.name || item.materialName}</p>
+                        <p className="text-xs text-muted-foreground">{material.code}</p>
                     </div>
                     {isLowStock && (
                         <Badge variant="destructive" className="flex items-center gap-1">
@@ -26,18 +32,22 @@ export function StockCard({ item, onIssue, onReturn, onTransfer }) {
                     )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-3 gap-2 text-sm">
                     <div>
                         <span className="text-muted-foreground text-xs">In Stock</span>
-                        <p className="font-medium">{item.quantity} {item.unit}</p>
+                        <p className="font-medium">{availableQty} {unit}</p>
+                    </div>
+                    <div>
+                        <span className="text-muted-foreground text-xs">Min Stock</span>
+                        <p className="font-medium">{material.minStockLevel || '—'} {unit}</p>
                     </div>
                     <div>
                         <span className="text-muted-foreground text-xs">Unit Price</span>
-                        <p className="font-medium">{formatINR(item.unitPrice)}</p>
+                        <p className="font-medium">{formatINR(material.unitPrice)}</p>
                     </div>
                     <div className="col-span-2">
                         <span className="text-muted-foreground text-xs">Warehouse</span>
-                        <p className="flex items-center gap-1 text-sm"><Warehouse className="h-3 w-3" /> {item.warehouseName || item.warehouse?.name}</p>
+                        <p className="flex items-center gap-1 text-sm"><Warehouse className="h-3 w-3" /> {item.warehouse}</p>
                     </div>
                 </div>
 

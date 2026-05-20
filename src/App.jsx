@@ -7,8 +7,6 @@ import Dashboard from "@/pages/Dashboard";
 import Users from "@/pages/Users";
 import Projects from "@/pages/projects/Projects";
 import Sites from "@/pages/Sites";
-import Procurement from "@/pages/Procurement";
-import Vendors from "@/pages/Vendors";
 import Finance from "@/pages/Finance";
 import HR from "@/pages/HR";
 import CRM from "@/pages/CRM";
@@ -29,6 +27,15 @@ import Valuation from "./pages/inventory/Valuation";
 import StockCounts from "./pages/inventory/StockCounts";
 
 import { createPortal } from "react-dom";
+
+import Procurement from "./pages/procurement/Procurement";
+import RFQs from "./pages/procurement/RFQs";
+import Quotations from "./pages/procurement/Quotations";
+import PurchaseOrders from "./pages/procurement/PurchaseOrders";
+import Deliveries from "./pages/procurement/Deliveries";
+import TaskRequests from "./pages/projects/TaskRequests";
+import MyTasks from "./pages/projects/MyTasks";
+import VendorDashboard from "./pages/vendor/VendorDashboard";
 
 export default function App() {
 
@@ -65,9 +72,19 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
+
           <Route path="/projects" element={<Projects />} />
           <Route path="/project-templates" element={<ProjectTemplate />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
+
+          <Route path="/tasks/my-tasks" element={<MyTasks />} />
+          <Route path="/tasks/requests" element={<TaskRequests />} />
+
+          <Route path="/procurement/dashboard" element={<Procurement />} />
+          <Route path="/procurement/rfqs" element={<RFQs />} />
+          <Route path="/procurement/quotations" element={<Quotations />} />
+          <Route path="/procurement/purchase-orders" element={<PurchaseOrders />} />
+          <Route path="/procurement/deliveries" element={<Deliveries />} />
 
           <Route path="/inventory/stock-management" element={<Inventory />} />
           <Route path="/inventory/materials" element={<Materials />} />
@@ -78,8 +95,9 @@ export default function App() {
           <Route path="/inventory/counts" element={<StockCounts />} />
 
           <Route path="/sites" element={<Sites />} />
-          <Route path="/procurement" element={<Procurement />} />
-          <Route path="/vendors" element={<Vendors />} />
+
+          <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+          
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/hr" element={<HR />} />

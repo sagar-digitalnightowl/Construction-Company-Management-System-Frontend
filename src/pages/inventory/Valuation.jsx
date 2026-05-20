@@ -14,6 +14,8 @@ export default function Valuation() {
         fetchValuation();
     }, []);
 
+    console.log("items : ", valuation)
+
     if (loading) return <Skeleton className="h-96 w-full" />;
     if (!valuation) return <EmptyState title="No data" description="Unable to load inventory valuation." />;
 
@@ -27,7 +29,7 @@ export default function Valuation() {
                 </Card>
                 <Card>
                     <CardHeader><CardTitle>Number of Items</CardTitle></CardHeader>
-                    <CardContent><p className="text-3xl font-bold">{valuation.itemCount}</p></CardContent>
+                    <CardContent><p className="text-3xl font-bold">{valuation.items?.length || 0}</p></CardContent>
                 </Card>
             </div>
             <div className="rounded-lg border">
@@ -36,7 +38,7 @@ export default function Valuation() {
                         <TableRow>
                             <TableHead>Material</TableHead>
                             <TableHead>Quantity</TableHead>
-                            <TableHead>Unit Price</TableHead>
+                            <TableHead>Avg Cost</TableHead>
                             <TableHead>Total Value</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -45,7 +47,7 @@ export default function Valuation() {
                             <TableRow key={item.materialId}>
                                 <TableCell>{item.materialName}</TableCell>
                                 <TableCell>{item.quantity} {item.unit}</TableCell>
-                                <TableCell>{formatINR(item.unitPrice)}</TableCell>
+                                <TableCell>{formatINR(item.averageCost)}</TableCell>
                                 <TableCell>{formatINR(item.totalValue)}</TableCell>
                             </TableRow>
                         ))}

@@ -89,7 +89,7 @@ export function ProjectForm({ open, onOpenChange, initialData, onSave }) {
                     <DialogTitle>{isEditing ? "Edit Project" : "Create New Project"}</DialogTitle>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto pr-1 sm:pr-2">
+                <div className="flex-1 overflow-y-auto p-2">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                         {/* Row 1: Name (full width) */}

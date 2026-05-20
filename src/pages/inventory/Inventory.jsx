@@ -21,6 +21,7 @@ import { canMutate } from '@/data/permissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { projectApi } from '@/api';
 import { toast } from 'sonner';
+import { AddStockDialog } from '@/components/inventory/AddStockDialog';
 
 export default function Inventory() {
     const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function Inventory() {
     const [selectedStock, setSelectedStock] = useState(null);
     const [dialog, setDialog] = useState({ issue: false, return: false, transfer: false });
     const [projects, setProjects] = useState([]);
+    const [addStockOpen, setAddStockOpen] = useState(false);
 
     // Fetch projects for issue dialog
     useEffect(() => {
@@ -68,9 +70,7 @@ export default function Inventory() {
     });
 
     const handleAddStock = () => {
-        // Placeholder: can link to procurement or open a dialog
-        // For now, navigate to purchase orders or show toast
-        toast.info('Add stock via Purchase Orders or manual entry coming soon');
+        setAddStockOpen(true);
     };
 
     return (
@@ -194,6 +194,14 @@ export default function Inventory() {
                     />
                 </>
             )}
+
+            <AddStockDialog
+                open={addStockOpen}
+                onOpenChange={setAddStockOpen}
+                onSuccess={() => {
+                    fetchStock(); 
+                }}
+            />
         </div>
     );
 }
