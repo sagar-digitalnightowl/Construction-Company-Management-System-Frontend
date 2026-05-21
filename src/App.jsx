@@ -6,7 +6,6 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Users from "@/pages/Users";
 import Projects from "@/pages/projects/Projects";
-import Sites from "@/pages/Sites";
 import Finance from "@/pages/Finance";
 import HR from "@/pages/HR";
 import CRM from "@/pages/CRM";
@@ -36,33 +35,30 @@ import Deliveries from "./pages/procurement/Deliveries";
 import TaskRequests from "./pages/projects/TaskRequests";
 import MyTasks from "./pages/projects/MyTasks";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
+import SiteManagement from "./pages/site/SiteManagement";
 
 export default function App() {
-
-  const { initAuth, loading } = useAuthStore(s => s);
+  const { initAuth, loading } = useAuthStore((s) => s);
 
   useEffect(() => {
-    initAuth()
+    initAuth();
   }, [initAuth]);
 
   if (loading) return null;
 
   return (
     <>
-      {
-        createPortal(
-          <Toaster
-            position="top-right"
-            richColors
-            expand={true}
-            portalProps={{
-              container: document.body,
-            }}
-          />,
-          document.body
-        )
-      }
-
+      {createPortal(
+        <Toaster
+          position="top-right"
+          richColors
+          expand={true}
+          portalProps={{
+            container: document.body,
+          }}
+        />,
+        document.body,
+      )}
 
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -83,21 +79,27 @@ export default function App() {
           <Route path="/procurement/dashboard" element={<Procurement />} />
           <Route path="/procurement/rfqs" element={<RFQs />} />
           <Route path="/procurement/quotations" element={<Quotations />} />
-          <Route path="/procurement/purchase-orders" element={<PurchaseOrders />} />
+          <Route
+            path="/procurement/purchase-orders"
+            element={<PurchaseOrders />}
+          />
           <Route path="/procurement/deliveries" element={<Deliveries />} />
 
           <Route path="/inventory/stock-management" element={<Inventory />} />
           <Route path="/inventory/materials" element={<Materials />} />
           <Route path="/inventory/warehouses" element={<Warehouses />} />
-          <Route path="/inventory/transactions" element={<StockTransactions />} />
+          <Route
+            path="/inventory/transactions"
+            element={<StockTransactions />}
+          />
           <Route path="/inventory/alerts" element={<LowStockAlerts />} />
           <Route path="/inventory/valuation" element={<Valuation />} />
           <Route path="/inventory/counts" element={<StockCounts />} />
 
-          <Route path="/sites" element={<Sites />} />
+          <Route path="/site-management" element={<SiteManagement />} />
 
           <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-          
+
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/hr" element={<HR />} />
@@ -110,7 +112,6 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-
     </>
   );
 }

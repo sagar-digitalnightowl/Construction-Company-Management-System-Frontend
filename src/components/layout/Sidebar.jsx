@@ -31,10 +31,10 @@ const navGroups = [
                 key: "project-templates",
             },
             {
-                to: "/sites",
+                to: "/site-management",
                 label: "Site Management",
                 icon: HardHat,
-                key: "sites",
+                key: "site-management",
             },
             {
                 label: "Procurement",

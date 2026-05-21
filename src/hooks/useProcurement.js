@@ -131,8 +131,9 @@ export const useProcurement = () => {
                 await fetchQuotations();
                 return true;
             }
+            return false;
         } catch (err) {
-            toast.error('Failed to reject quotation');
+            toast.error(err.response?.data?.message ||'Failed to reject quotation');
             return false;
         }
     }, [fetchQuotations]);

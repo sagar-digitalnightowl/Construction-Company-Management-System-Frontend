@@ -19,7 +19,7 @@ export const VIEW = {
     users: ["admin"],
     projects: ["admin", "director", "project_manager", "site_engineer", "accountant", "client"],
     "project-templates": ["admin", "director", "project_manager", "site_engineer", "accountant", "client"],
-    sites: ["admin", "director", "project_manager", "site_engineer"],
+    "site-management": ["admin", "director", "project_manager", "site_engineer"],
     procurement: ["admin", "director", "project_manager", "site_engineer", "accountant"],
     'procurement-overview': ["admin", "director", "project_manager", "site_engineer", "accountant"],
     'procurement-rfqs': ["admin", "director", "project_manager", "site_engineer", "accountant"],
@@ -47,7 +47,7 @@ export const VIEW = {
 export const MUTATE = {
     users: ["admin"],
     projects: ["admin", "director", "project_manager"],
-    sites: ["admin", "project_manager", "site_engineer"],
+    "site-management": ["admin", "project_manager", "site_engineer"],
     procurement: ["admin", "director", "project_manager", "site_engineer", "accountant"],
     'procurement-overview': ["admin", "director", "project_manager", "site_engineer", "accountant"],
     'procurement-rfqs': ["admin", "director", "project_manager", "site_engineer", "accountant"],
