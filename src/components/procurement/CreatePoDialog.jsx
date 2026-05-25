@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { procurementApi } from "@/api/procurementApi";
+import { procurementApi } from "@/api";
 import { formatINR } from "@/lib/helpers";
 
 export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
@@ -60,16 +60,18 @@ export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
       setSelectedRfq(null);
       return;
     }
+    
     const quotation = acceptedQuotations.find(
-      (q) => q._id === selectedQuotationId,
+      (q) => q._id?.toString() === selectedQuotationId.toString(),
     );
+
     if (!quotation) return;
 
     // Try to find RFQ in the passed rfqs array
     let rfq = rfqs.find((r) => String(r._id) === String(quotation.rfqId));
 
     console.log("quotation.rfqId : ", quotation);
-    console.log("RFQ : ", rfq);
+    console.log("RFQ : ", rfq);                     
     console.log("RFQS : ", rfqs);
 
     // If not found, fetch it directly from API

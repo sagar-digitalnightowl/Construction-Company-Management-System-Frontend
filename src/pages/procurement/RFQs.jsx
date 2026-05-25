@@ -15,7 +15,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RFQs() {
   const { current } = useAuthStore();
-  const canEdit = canMutate(current?.role, "procurement");
+
+  const canEdit = canMutate(current.role, "procurement");
+  const canOperationsEdit = canMutate(current.role, "procurement-operations");
+
   const { rfqs, fetchRfqs, sendRfq, createRfq, loading } = useProcurement();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

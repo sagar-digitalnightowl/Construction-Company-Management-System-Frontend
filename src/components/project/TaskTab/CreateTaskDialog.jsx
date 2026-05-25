@@ -138,7 +138,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { taskApi } from '@/api/taskApi';
+import { taskApi } from '@/api';
 
 export function CreateTaskDialog({ open, onOpenChange, projectId, milestones = [], teamMembers = [], onTaskCreated }) {
     // Use sentinel values instead of empty strings

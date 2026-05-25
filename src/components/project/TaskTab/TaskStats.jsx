@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Clock, AlertCircle, PlayCircle } from 'lucide-react';
-import { taskApi } from '@/api/taskApi';
+import { taskApi } from '@/api';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function TaskStats({ projectId }) {

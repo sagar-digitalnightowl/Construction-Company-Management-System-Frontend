@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, LogIn, LogOut } from "lucide-react";
 import { useSite } from "@/hooks/useSite";
-import { projectApi } from "@/api/projectApi";
+import { projectApi } from "@/api";
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/helpers";
 
-export function CheckInOut({ canCheckIn }) {
+export function CheckInOut({ canEdit, canOperationsEdit }) {
   const {
     activeCheckin,
     checkinHistory,
@@ -101,13 +101,15 @@ export function CheckInOut({ canCheckIn }) {
                   placeholder="Describe what was done today"
                 />
               </div>
-              <Button
-                onClick={handleCheckOut}
-                disabled={checking}
-                variant="destructive"
-              >
-                <LogOut className="h-4 w-4 mr-2" /> Check Out
-              </Button>
+              {canOperationsEdit && (
+                <Button
+                  onClick={handleCheckOut}
+                  disabled={checking}
+                  variant="destructive"
+                >
+                  <LogOut className="h-4 w-4 mr-2" /> Check Out
+                </Button>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
@@ -127,12 +129,14 @@ export function CheckInOut({ canCheckIn }) {
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                onClick={handleCheckIn}
-                disabled={checking || !selectedProject}
-              >
-                <LogIn className="h-4 w-4 mr-2" /> Check In
-              </Button>
+              {canOperationsEdit && (
+                <Button
+                  onClick={handleCheckIn}
+                  disabled={checking || !selectedProject}
+                >
+                  <LogIn className="h-4 w-4 mr-2" /> Check In
+                </Button>
+              )}
             </div>
           )}
         </CardContent>

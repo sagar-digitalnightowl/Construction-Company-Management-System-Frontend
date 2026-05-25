@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatINR } from "@/lib/helpers";
-import { procurementApi } from "@/api/procurementApi";
+import { procurementApi } from "@/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const statusColors = {

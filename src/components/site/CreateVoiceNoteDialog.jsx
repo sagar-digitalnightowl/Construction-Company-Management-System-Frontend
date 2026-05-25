@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mic, Square, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { projectApi } from "@/api/projectApi";
+import { projectApi } from "@/api";
 
 export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
   const [projects, setProjects] = useState([]);

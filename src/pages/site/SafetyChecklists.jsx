@@ -9,7 +9,7 @@ import { CreateSafetyChecklistDialog } from "@/components/site/CreateSafetyCheck
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/helpers";
 
-export function SafetyChecklists({ canEdit, canApprove }) {
+export function SafetyChecklists({ canEdit, canOperationsEdit }) {
   const {
     safetyChecklists,
     fetchSafetyChecklists,
@@ -55,7 +55,7 @@ export function SafetyChecklists({ canEdit, canApprove }) {
         <p className="text-sm text-muted-foreground">
           {safetyChecklists.length} checklist(s)
         </p>
-        {canEdit && (
+        {canOperationsEdit && (
           <Button
             size="sm"
             onClick={() => {
@@ -98,14 +98,16 @@ export function SafetyChecklists({ canEdit, canApprove }) {
                   {c.items?.length || 0} items
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(c)}
-                  >
-                    View / Edit
-                  </Button>
-                  {canApprove && c.status !== "approved" && (
+                  {canOperationsEdit && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(c)}
+                    >
+                      View / Edit
+                    </Button>
+                  )}
+                  {canEdit && c.status !== "approved" && (
                     <Button
                       size="sm"
                       variant="default"

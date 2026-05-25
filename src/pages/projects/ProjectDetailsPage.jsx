@@ -1,6 +1,6 @@
 // src/pages/ProjectDetail.jsx
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -27,11 +27,16 @@ import { TasksTab } from "@/components/project/TaskTab/index";
 import { useProject } from "@/hooks/useProject";
 import { useAuthStore } from "@/store/authStore";
 import { canMutate } from "@/data/permissions";
+import { DprTab } from "@/components/project/DprTab";
+import { ChecklistTab } from "@/components/project/ChecklistTab";
+import { ResourceTab } from "@/components/project/ResourceTab";
+import { DocumentsTab } from "@/components/project/DocumentsTab";
 
 export default function ProjectDetail() {
   const { id } = useParams();
   const { current } = useAuthStore();
   const canEdit = canMutate(current?.role, "projects");
+  const canOperationsEdit = canMutate(current?.role, "project-operations");
   const {
     loading,
     project,
@@ -52,6 +57,8 @@ export default function ProjectDetail() {
     resolveIssue,
     createMaterialRequest,
     assignTeam,
+    updateTeamRole,
+    removeTeamMember,
   } = useProject();
 
   useEffect(() => {
@@ -83,6 +90,19 @@ export default function ProjectDetail() {
               <BarChart3 className="h-3.5 w-3.5 mr-1.5 ml-2" />
               Overview
             </TabsTrigger>
+            <TabsTrigger value="dpr">
+              <FileText className="h-3.5 w-3.5 mr-1.5" />
+              DPR
+            </TabsTrigger>
+            <TabsTrigger value="checklist">
+              <Shield className="h-3.5 w-3.5 mr-1.5" />
+              Checklist
+            </TabsTrigger>
+            <TabsTrigger value="resources">
+              <Package className="h-3.5 w-3.5 mr-1.5" />
+              Resources
+            </TabsTrigger>
+
             <TabsTrigger value="milestones">
               <Flag className="h-3.5 w-3.5 mr-1.5" />
               Milestones
@@ -123,11 +143,30 @@ export default function ProjectDetail() {
               project={project}
               comments={comments}
               canEdit={canEdit}
+              canOperationsEdit={canOperationsEdit}
               onUpdateProgress={updateProgress}
               onUpdatePhase={updatePhase}
               onAddComment={(text) => addComment(project._id, text)}
               onAssignTeam={assignTeam}
+              onUpdateTeamRole={updateTeamRole}
+              onRemoveTeamMember={removeTeamMember}
             />
+          </TabsContent>
+
+          <TabsContent value="dpr">
+            <DprTab
+              projectId={project._id}
+              canOperationsEdit={canOperationsEdit}
+            />
+          </TabsContent>
+          <TabsContent value="checklist">
+            <ChecklistTab
+              projectId={project._id}
+              canOperationsEdit={canOperationsEdit}
+            />
+          </TabsContent>
+          <TabsContent value="resources">
+            <ResourceTab projectId={project._id} canEdit={canEdit} />
           </TabsContent>
 
           <TabsContent value="milestones">
@@ -150,7 +189,7 @@ export default function ProjectDetail() {
           <TabsContent value="issues">
             <IssuesTab
               issues={issues}
-              canEdit={canEdit}
+              canOperationsEdit={canOperationsEdit}
               teamMembers={project.teamMembers || []}
               onAddIssue={(data) => addIssue(project._id, data)}
               onResolveIssue={(issueId) => resolveIssue(project._id, issueId)}
@@ -170,12 +209,17 @@ export default function ProjectDetail() {
           </TabsContent>
 
           <TabsContent value="tasks">
-            <TasksTab
-              projectId={project._id}
-              milestones={milestones}
-              teamMembers={project.teamMembers || []}
-              canEdit={canEdit}
-            />
+            {current?.role === "site_engineer" ? (
+              <Navigate to={"/tasks/my-tasks"} />
+            ) : (
+              <TasksTab
+                projectId={project._id}
+                milestones={milestones}
+                teamMembers={project.teamMembers || []}
+                canEdit={canEdit}
+                canOperationsEdit={canOperationsEdit}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="activity">
@@ -183,12 +227,12 @@ export default function ProjectDetail() {
           </TabsContent>
 
           <TabsContent value="documents">
-            {/* DocumentsTab component – can be added later */}
-            <div className="text-center p-8 text-muted-foreground">
-              Documents feature coming soon
-            </div>
+            <DocumentsTab
+              projectId={project._id}
+              canEdit={canEdit}
+              canOperationsEdit={canOperationsEdit}
+            />
           </TabsContent>
-
         </div>
       </Tabs>
     </div>

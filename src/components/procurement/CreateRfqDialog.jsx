@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
-import { projectApi } from "@/api";
-import { vendorApi } from "@/api/vendorApi";
+import { projectApi, vendorApi } from "@/api";
 
 export function CreateRfqDialog({ open, onOpenChange, onCreate }) {
   const [form, setForm] = useState({

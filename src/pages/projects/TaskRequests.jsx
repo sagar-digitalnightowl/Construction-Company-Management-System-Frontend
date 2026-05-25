@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Check, X, Clock } from 'lucide-react';
-import { taskApi } from '@/api/taskApi';
+import { taskApi } from '@/api';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate } from '@/lib/helpers';
@@ -22,6 +22,7 @@ export default function TaskRequests() {
             const res = await taskApi.getRequests(statusFilter);
             setRequests(res.data?.data || []);
         } catch (err) {
+            console.log("Error in fetch task request : ", err)
             toast.error('Failed to load requests');
         } finally {
             setLoading(false);

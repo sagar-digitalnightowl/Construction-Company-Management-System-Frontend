@@ -23,7 +23,7 @@ export default function Quotations() {
   } = useProcurement();
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const [selectedQuotationId, setSelectedQuotationId] = useState(null);
+  const [selectedQuotation, setSelectedQuotation] = useState(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [pendingRejectId, setPendingRejectId] = useState(null);
@@ -34,13 +34,15 @@ export default function Quotations() {
 
   const filtered = quotations.filter((q) => {
     const matchStatus = statusFilter === "all" || q.status === statusFilter;
-    const matchSearch =
-      !search ||
-      (q.vendor?.name || q.vendorId?.name || "")
-        .toLowerCase()
-        .includes(search.toLowerCase());
+    // Search by vendor name (if available) or RFQ title
+    const vendorName = q.vendorId?.name || q.vendor?.name || "";
+    const rfqTitle = q.rfqId?.title || "";
+    const searchLower = search.toLowerCase();
+    const matchSearch = !search ||   
+      vendorName.toLowerCase().includes(searchLower) ||
+      rfqTitle.toLowerCase().includes(searchLower);
     return matchStatus && matchSearch;
-  });
+  });   
 
   const handleAccept = async (id) => {
     await acceptQuotation(id);
@@ -61,8 +63,8 @@ export default function Quotations() {
     return false;
   };
 
-  const handleViewDetails = (id) => {
-    setSelectedQuotationId(id);
+  const handleViewDetails = (q) => {
+    setSelectedQuotation(q);
     setDetailDialogOpen(true);
   };
 
@@ -83,7 +85,7 @@ export default function Quotations() {
           </TabsList>
         </Tabs>
         <Input
-          placeholder="Search vendor..."
+          placeholder="Search vendor or RFQ..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:w-72"
@@ -117,7 +119,7 @@ export default function Quotations() {
       <QuotationDetailDialog
         open={detailDialogOpen}
         onOpenChange={setDetailDialogOpen}
-        quotationId={selectedQuotationId}
+        quotation={selectedQuotation}
         onAccept={handleAccept}
         onReject={handleRejectClick}
       />

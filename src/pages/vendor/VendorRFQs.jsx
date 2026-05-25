@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Package, FileText, Send } from "lucide-react";
 import { formatDate } from "@/lib/helpers";
-import { procurementApi } from "@/api/procurementApi";
+import { procurementApi } from "@/api";
 import { SubmitQuotationDialog } from "@/components/vendor/SubmitQuotationDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 

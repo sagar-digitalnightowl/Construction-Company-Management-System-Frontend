@@ -32,7 +32,7 @@ const severityVariant = {
 
 export function IssuesTab({
   issues = [],
-  canEdit,
+  canOperationsEdit,
   teamMembers = [],
   onAddIssue,
   onResolveIssue,
@@ -71,11 +71,10 @@ export function IssuesTab({
         <p className="text-sm text-muted-foreground">
           {issues.length} issue(s)
         </p>
-        {canEdit && (
-          <Button size="sm" onClick={() => setOpen(true)}>
-            <Plus className="h-3 w-3 mr-1" /> Report Issue
-          </Button>
-        )}
+
+        <Button size="sm" onClick={() => setOpen(true)}>
+          <Plus className="h-3 w-3 mr-1" /> Report Issue
+        </Button>
       </div>
 
       {issues.length === 0 ? (
@@ -118,7 +117,7 @@ export function IssuesTab({
                     </p>
                   )}
                 </div>
-                {canEdit && issue.status !== "resolved" && (
+                {canOperationsEdit && issue.status !== "resolved" && (
                   <Button
                     size="sm"
                     variant="outline"

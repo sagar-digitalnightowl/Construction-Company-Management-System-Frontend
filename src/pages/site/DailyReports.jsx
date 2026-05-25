@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProject } from "@/hooks/useProject";
 import { projectApi } from "@/api";
 
-export function DailyReports({ canEdit, canApprove }) {
+export function DailyReports({ canEdit, canOperationsEdit }) {
   const {
     dailyReports,
     fetchDailyReports,
@@ -70,7 +70,7 @@ export function DailyReports({ canEdit, canApprove }) {
         <p className="text-sm text-muted-foreground">
           {dailyReports.length} report(s)
         </p>
-        {canEdit && (
+        {canOperationsEdit && (
           <Button
             size="sm"
             onClick={() => {
@@ -139,7 +139,7 @@ export function DailyReports({ canEdit, canApprove }) {
                       </Button>
                     </>
                   )}
-                  {canApprove && !report.isApproved && (
+                  {canEdit && !report.isApproved && (
                     <Button
                       size="sm"
                       variant="default"

@@ -12,8 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { procurementApi } from "@/api/procurementApi";
-import { projectApi } from "@/api/projectApi";
+import { projectApi, procurementApi } from "@/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function SubmitQuotationDialog({

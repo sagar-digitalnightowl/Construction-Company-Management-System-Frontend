@@ -9,13 +9,13 @@ import { toast } from 'sonner';
 
 export function StockCountDialog({ open, onOpenChange, warehouses = [], onStartCount }) {
     const [form, setForm] = useState({
-        warehouseId: '',
+        warehouse: '',
         notes: '',
     });
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async () => {
-        if (!form.warehouseId) {
+        if (!form.warehouse) {
             toast.error('Please select a warehouse');
             return;
         }
@@ -24,7 +24,7 @@ export function StockCountDialog({ open, onOpenChange, warehouses = [], onStartC
         setLoading(false);
         if (result) {
             onOpenChange(false);
-            setForm({ warehouseId: '', notes: '' });
+            setForm({ warehouse: '', notes: '' });
         }
     };
 
@@ -37,7 +37,7 @@ export function StockCountDialog({ open, onOpenChange, warehouses = [], onStartC
                 <div className="space-y-3">
                     <div className="space-y-1">
                         <Label>Warehouse *</Label>
-                        <Select value={form.warehouseId} onValueChange={(v) => setForm({ ...form, warehouseId: v })}>
+                        <Select value={form.warehouse} onValueChange={(v) => setForm({ ...form, warehouse: v })}>
                             <SelectTrigger><SelectValue placeholder="Select warehouse" /></SelectTrigger>
                             <SelectContent>
                                 {warehouses.map(w => <SelectItem key={w._id} value={w._id}>{w.name}</SelectItem>)}

@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { projectApi } from "@/api/projectApi";
+import { projectApi } from "@/api";
 
 export function ReportIssueDialog({ open, onOpenChange, onSubmit }) {
   const [projects, setProjects] = useState([]);

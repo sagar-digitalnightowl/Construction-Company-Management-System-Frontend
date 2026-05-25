@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TaskCard } from './TaskCard';
-import { taskApi } from '@/api/taskApi';
+import { taskApi } from '@/api';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 

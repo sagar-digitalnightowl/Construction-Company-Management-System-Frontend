@@ -6,7 +6,7 @@ import { Search, Filter, ListTodo } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaskCard } from '@/components/project/TaskTab/TaskCard';
 import { TaskDetailDialog } from '@/components/project/TaskTab/TaskDetailDialog';
-import { taskApi } from '@/api/taskApi';
+import { taskApi } from '@/api';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,7 +22,7 @@ export default function MyTasks() {
         setLoading(true);
         try {
             const res = await taskApi.getMyTasks();
-            setTasks(res.data?.data || []);
+            setTasks(res.data?.data?.tasks || []);
         } catch (err) {
             toast.error('Failed to load tasks');
         } finally {

@@ -4,6 +4,7 @@ import {
     LayoutDashboard, Users2, FolderKanban, HardHat, ShoppingCart, Truck,
     Boxes, Receipt, BadgeIndianRupee, HeartHandshake, FileText, BarChart3, Settings, ConstructionIcon,
     LayoutTemplate, ChevronDown, ChevronRight,
+    BookCheck,
 } from "lucide-react";
 import { cn } from "@/lib/helpers";
 import { canView } from "@/data/permissions";
@@ -67,6 +68,17 @@ const navGroups = [
                     { to: "/inventory/alerts", label: "Low Stock Alerts", key: "inventory-alerts" },
                     { to: "/inventory/valuation", label: "Inventory Valuation", key: "inventory-valuation" },
                     { to: "/inventory/counts", label: "Physical Counts", key: "inventory-counts" },
+                ],
+            },
+            {
+                label: "Booking",
+                icon: BookCheck,
+                key: "booking",
+                children: [
+                    { to: "/bookings", label: "Bookings", key: "bookings" },
+                    { to: "/my-bookings", label: "My Bookings", key: "my_bookings" },
+                    { to: "/my-installments", label: "My Installments", key: "my_installments" },
+                    { to: "/pending-bookings", label: "Pending Bookings", key: "pending_bookings" },
                 ],
             },
         ],

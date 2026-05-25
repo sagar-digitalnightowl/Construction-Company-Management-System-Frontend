@@ -22,8 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { projectApi } from "@/api/projectApi";
-import { inventoryApi } from "@/api/inventoryApi";
+import { projectApi, inventoryApi } from "@/api";
 
 export function MaterialRequestsTab({ projectId, canEdit = true }) {
   const [requests, setRequests] = useState([]);

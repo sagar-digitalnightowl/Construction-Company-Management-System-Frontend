@@ -26,7 +26,7 @@ export function StockCard({ item, onIssue, onReturn, onTransfer }) {
                         <p className="text-xs text-muted-foreground">{material.code}</p>
                     </div>
                     {isLowStock && (
-                        <Badge variant="destructive" className="flex items-center gap-1">
+                        <Badge variant="destructive" className="flex items-center gap-1 text-nowrap">
                             <AlertTriangle className="h-3 w-3" /> Low Stock
                         </Badge>
                     )}

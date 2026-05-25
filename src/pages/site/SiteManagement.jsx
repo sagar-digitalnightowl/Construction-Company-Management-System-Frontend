@@ -9,16 +9,14 @@ import { CheckInOut } from "./CheckInOut";
 import { SafetyChecklists } from "./SafetyChecklists";
 import { VoiceNotes } from "./VoiceNotes";
 import { useAuthStore } from "@/store/authStore";
+import { canMutate } from "@/data/permissions";
 
 export default function SiteManagement() {
   const { current } = useAuthStore();
   const [activeTab, setActiveTab] = useState("reports");
 
-  // Roles that can access these features (adjust as needed)
-  const isSiteEngineer = current?.role === "site_engineer";
-  const isManager = ["admin", "director", "project_manager"].includes(
-    current?.role,
-  );
+  const canEdit = canMutate(current.role, "site-management");
+  const canOperationsEdit = canMutate(current.role, "site-operations");
 
   return (
     <div className="space-y-6">
@@ -38,27 +36,30 @@ export default function SiteManagement() {
         </TabsList>
         <TabsContent value="reports" className="mt-6">
           <DailyReports
-            canEdit={isSiteEngineer || isManager}
-            canApprove={isManager}
+            canEdit={canEdit}
+            canOperationsEdit={canOperationsEdit}
           />
         </TabsContent>
         <TabsContent value="attendance" className="mt-6">
-          <Attendance canEdit={isSiteEngineer || isManager} />
+          <Attendance canEdit={canEdit} canOperationsEdit={canOperationsEdit} />
         </TabsContent>
         <TabsContent value="issues" className="mt-6">
-          <SiteIssues canEdit={isSiteEngineer || isManager} />
+          <SiteIssues canEdit={canEdit} canOperationsEdit={canOperationsEdit} />
         </TabsContent>
         <TabsContent value="checkin" className="mt-6">
-          <CheckInOut canCheckIn={isSiteEngineer || isManager} />
+          <CheckInOut
+            canEdit={canEdit}
+            canOperationsEdit={canOperationsEdit}
+          />
         </TabsContent>
         <TabsContent value="safety" className="mt-6">
           <SafetyChecklists
-            canEdit={isSiteEngineer || isManager}
-            canApprove={isManager}
+            canEdit={canEdit}
+            canOperationsEdit={canOperationsEdit}
           />
         </TabsContent>
         <TabsContent value="voice" className="mt-6">
-          <VoiceNotes canEdit={isSiteEngineer || isManager} />
+          <VoiceNotes canEdit={canEdit} canOperationsEdit={canOperationsEdit} />
         </TabsContent>
       </Tabs>
     </div>

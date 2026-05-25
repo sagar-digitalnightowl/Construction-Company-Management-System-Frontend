@@ -32,7 +32,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { projectApi } from '@/api/projectApi';
+import { projectApi } from '@/api';
 import { formatDate } from '@/lib/helpers';
 import {
     Activity, Calendar, CheckCircle, Clock, FileText, Flag,

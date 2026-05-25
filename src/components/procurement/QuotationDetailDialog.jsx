@@ -10,62 +10,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatINR, formatDate } from "@/lib/helpers";
-import { procurementApi } from "@/api/procurementApi";
+import { procurementApi } from "@/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
+const statusColors = {
+  pending: "warning",
+  accepted: "success",
+  rejected: "destructive",
+};
 
 export function QuotationDetailDialog({
   open,
   onOpenChange,
-  quotationId,
+  quotation,
   onAccept,
   onReject,
 }) {
-  const [quotation, setQuotation] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-
-  useEffect(() => {
-    if (open && quotationId) {
-      const fetchQuotation = async () => {
-        setLoading(true);
-        try {
-          const res = await procurementApi.getQuotationById(quotationId?._id);
-          setQuotation(res.data?.data);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);   
-        }
-      };
-      fetchQuotation();
-    }
-  }, [open, quotationId]);
-
-  const statusColors = {
-    pending: "warning",
-    accepted: "success",
-    rejected: "destructive",
-  };
-
-  if (loading) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-lg">
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   if (!quotation) return null;
+
+  const vendorName =
+    quotation.vendorId?.name || quotation.vendor?.name || "Unknown Vendor";
+  const rfqInfo = quotation.rfqId
+    ? `${quotation.rfqId.rfqNumber} - ${quotation.rfqId.title}`
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,10 +45,11 @@ export function QuotationDetailDialog({
         <div className="space-y-4">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm text-muted-foreground">Vendor</p>
-              <p className="font-medium">
-                {quotation.vendorId?.name || quotation.vendor?.name || "N/A"}
-              </p>
+              <p className="text-sm text-muted-foreground">Vendor / RFQ</p>
+              <p className="font-medium">{vendorName}</p>
+              {rfqInfo && (
+                <p className="text-xs text-muted-foreground">{rfqInfo}</p>
+              )}
             </div>
             <Badge
               variant={statusColors[quotation.status]}
@@ -148,6 +118,17 @@ export function QuotationDetailDialog({
               </table>
             </div>
           </div>
+
+          {/* Reviewed by info for accepted quotations */}
+          {quotation.status === "accepted" && quotation.reviewedBy && (
+            <div className="border-t pt-2">
+              <p className="text-xs text-muted-foreground">Accepted by</p>
+              <p className="text-sm">{quotation.reviewedBy.name}</p>
+              <p className="text-xs text-muted-foreground">
+                on {formatDate(quotation.reviewedAt)}
+              </p>
+            </div>
+          )}
 
           {quotation.status === "rejected" && quotation.rejectionReason && (
             <div className="border-l-4 border-destructive pl-3">

@@ -16,7 +16,7 @@ const severityVariant = {
   critical: "destructive",
 };
 
-export function SiteIssues({ canEdit }) {
+export function SiteIssues({ canEdit, canOperationsEdit }) {
   const { issues, fetchIssues, createIssue, resolveIssue, loading } = useSite();
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -44,7 +44,7 @@ export function SiteIssues({ canEdit }) {
         <p className="text-sm text-muted-foreground">
           {issues.length} issue(s)
         </p>
-        {canEdit && (
+        {canOperationsEdit && (
           <Button size="sm" onClick={() => setDialogOpen(true)}>
             <Plus className="h-3 w-3 mr-1" /> Report Issue
           </Button>

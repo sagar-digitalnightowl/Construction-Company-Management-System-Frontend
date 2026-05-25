@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Package, Users, Send } from "lucide-react";
 import { formatDate } from "@/lib/helpers";
-import { procurementApi } from "@/api/procurementApi";
+import { procurementApi } from "@/api";
 import { toast } from "sonner";
 
 export function RFQDetailDialog({ open, onOpenChange, rfqId, onSend }) {

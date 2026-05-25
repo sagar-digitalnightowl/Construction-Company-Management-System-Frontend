@@ -36,6 +36,12 @@ import TaskRequests from "./pages/projects/TaskRequests";
 import MyTasks from "./pages/projects/MyTasks";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import SiteManagement from "./pages/site/SiteManagement";
+import MaterialDetail from "./pages/inventory/MaterialDetail";
+import Bookings from "./pages/booking/Bookings";
+import BookingDetail from "./pages/booking/BookingDetail";
+import MyBookings from "./pages/booking/MyBookings";
+import MyInstallments from "./pages/booking/MyInstallments";
+import PendingBookings from "./pages/booking/PendingBookings";
 
 export default function App() {
   const { initAuth, loading } = useAuthStore((s) => s);
@@ -87,6 +93,7 @@ export default function App() {
 
           <Route path="/inventory/stock-management" element={<Inventory />} />
           <Route path="/inventory/materials" element={<Materials />} />
+          <Route path="/inventory/material/:id" element={<MaterialDetail />} />
           <Route path="/inventory/warehouses" element={<Warehouses />} />
           <Route
             path="/inventory/transactions"
@@ -99,6 +106,13 @@ export default function App() {
           <Route path="/site-management" element={<SiteManagement />} />
 
           <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+
+          <Route path="/bookings" element={<Bookings />} />
+          <Route path="/bookings/:id" element={<BookingDetail />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/my-bookings/:id" element={<BookingDetail />} />
+          <Route path="/my-installments" element={<MyInstallments />} />
+          <Route path="/pending-bookings" element={<PendingBookings />} />
 
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/finance" element={<Finance />} />

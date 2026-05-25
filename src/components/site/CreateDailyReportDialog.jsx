@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trash2, Plus } from "lucide-react";
-import { taskApi } from "@/api/taskApi";
+import { taskApi } from "@/api";
 
 export function CreateDailyReportDialog({
   open,

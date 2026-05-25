@@ -5,10 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, ClipboardList, ShoppingCart, Package } from "lucide-react";
 import { useProcurement } from "@/hooks/useProcurement";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthStore } from "@/store/authStore";
+import { canMutate } from "@/data/permissions";
 
 export default function Procurement() {
   const navigate = useNavigate();
   const { rfqs, quotations, purchaseOrders, loading } = useProcurement();
+
+   const { current } = useAuthStore();
+  
+    const canEdit = canMutate(current.role, "procurement");
+    const canOperationsEdit = canMutate(current.role, "procurement-operations");
 
   const stats = {
     rfqs: rfqs.length,
