@@ -71,6 +71,8 @@ export default function StockCounts() {
         }
       />
 
+      console.log(first)
+
       {!loading && stockCounts.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
@@ -89,7 +91,7 @@ export default function StockCounts() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-semibold">
-                      {count.warehouse?.name || count.warehouseName || "Unknown Warehouse"}
+                      {count.warehouse || "Unknown Warehouse"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Count #{count.countNumber?.slice(-6) || count._id.slice(-6)}
