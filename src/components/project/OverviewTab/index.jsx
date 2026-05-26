@@ -89,6 +89,8 @@ export function OverviewTab({
   onUpdatePhase,
   onAddComment,
   onAssignTeam,
+  onUpdateTeamRole,
+  onRemoveTeamMember,
 }) {
   return (
     <div className="space-y-6">
@@ -128,14 +130,22 @@ export function OverviewTab({
 
         {/* Right column – side cards */}
         <div className="space-y-3">
-          <WeatherCard projectId={project._id} canOperationsEdit={canOperationsEdit}/>
+          <WeatherCard
+            projectId={project._id}
+            canOperationsEdit={canOperationsEdit}
+          />
           <ClientInfoCard project={project} />
           <TeamCard
             project={project}
             canEdit={canEdit}
             onAssignTeam={onAssignTeam}
+            onUpdateTeamRole={onUpdateTeamRole}
+            onRemoveTeamMember={onRemoveTeamMember}
           />
-          <VisitorsCard projectId={project._id} canOperationsEdit={canOperationsEdit}/>
+          <VisitorsCard
+            projectId={project._id}
+            canOperationsEdit={canOperationsEdit}
+          />
           <NotesCard projectId={project._id} canEdit={canEdit} />
         </div>
       </div>

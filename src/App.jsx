@@ -42,6 +42,7 @@ import BookingDetail from "./pages/booking/BookingDetail";
 import MyBookings from "./pages/booking/MyBookings";
 import MyInstallments from "./pages/booking/MyInstallments";
 import PendingBookings from "./pages/booking/PendingBookings";
+import CountDetail from "./pages/inventory/CountDetail";
 
 export default function App() {
   const { initAuth, loading } = useAuthStore((s) => s);
@@ -92,6 +93,7 @@ export default function App() {
           <Route path="/procurement/deliveries" element={<Deliveries />} />
 
           <Route path="/inventory/stock-management" element={<Inventory />} />
+          <Route path="/inventory/counts/:id" element={<CountDetail />} />
           <Route path="/inventory/materials" element={<Materials />} />
           <Route path="/inventory/material/:id" element={<MaterialDetail />} />
           <Route path="/inventory/warehouses" element={<Warehouses />} />

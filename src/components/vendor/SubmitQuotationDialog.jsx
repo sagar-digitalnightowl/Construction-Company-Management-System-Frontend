@@ -12,8 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { projectApi, procurementApi } from "@/api";
+import { procurementApi } from "@/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate } from "@/lib/helpers";
 
 export function SubmitQuotationDialog({
   open,
@@ -22,7 +23,6 @@ export function SubmitQuotationDialog({
   onSuccess,
 }) {
   const [rfq, setRfq] = useState(null);
-  const [materialRequest, setMaterialRequest] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -37,45 +37,40 @@ export function SubmitQuotationDialog({
       const fetchData = async () => {
         setLoading(true);
         try {
-          // Fetch RFQ details
           const rfqRes = await procurementApi.getRfqById(rfqId);
           const rfqData = rfqRes.data?.data;
           if (!rfqData) throw new Error("RFQ not found");
           setRfq(rfqData);
 
-          // Fetch material request to get items
-          if (rfqData.materialRequestId && rfqData.projectId) {
-            const mrRes = await projectApi.getMaterialRequestById(
-              rfqData.projectId,
-              rfqData.materialRequestId,
+          // Extract material request details from rfqData.materialRequestId
+          const mr = rfqData.materialRequestId;
+          if (mr) {
+            // Create a single item from the material request
+            setItems([
+              {
+                materialId: mr.materialId,
+                materialName: mr.materialName,
+                quantity: mr.quantity,
+                unit: mr.unit,
+                unitPrice: "",
+                totalPrice: 0,
+              },
+            ]);
+          } else if (
+            rfqData.materialRequestItems &&
+            rfqData.materialRequestItems.length
+          ) {
+            // If multiple items are present (future case)
+            setItems(
+              rfqData.materialRequestItems.map((item) => ({
+                materialId: item.materialId,
+                materialName: item.materialName,
+                quantity: item.quantity,
+                unit: item.unit,
+                unitPrice: "",
+                totalPrice: 0,
+              })),
             );
-            const mrData = mrRes.data?.data;
-            setMaterialRequest(mrData);
-            // Initialize items from material request items
-            if (mrData && mrData.items && mrData.items.length) {
-              setItems(
-                mrData.items.map((item) => ({
-                  materialId: item.materialId,
-                  materialName: item.materialName,
-                  quantity: item.quantity,
-                  unit: item.unit,
-                  unitPrice: "",
-                  totalPrice: 0,
-                })),
-              );
-            } else if (mrData && mrData.materialId) {
-              // Single material request
-              setItems([
-                {
-                  materialId: mrData.materialId,
-                  materialName: mrData.materialName,
-                  quantity: mrData.quantity,
-                  unit: mrData.unit,
-                  unitPrice: "",
-                  totalPrice: 0,
-                },
-              ]);
-            }
           }
         } catch (err) {
           console.error(err);
@@ -175,7 +170,12 @@ export function SubmitQuotationDialog({
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Submit Quotation</DialogTitle>
-          <p className="text-sm text-muted-foreground">For: {rfq.title}</p>
+          <p className="text-sm text-muted-foreground">
+            RFQ: {rfq.rfqNumber} - {rfq.title}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Submission Deadline: {formatDate(rfq.submissionDeadline)}
+          </p>
         </DialogHeader>
         <div className="space-y-4">
           {items.length === 0 ? (
@@ -184,15 +184,15 @@ export function SubmitQuotationDialog({
             </div>
           ) : (
             <div className="space-y-2">
-              <Label>Items</Label>
+              <Label>Items to Quote</Label>
               <div className="border rounded-md overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-muted">
                     <tr>
                       <th className="px-2 py-1 text-left">Material</th>
                       <th className="px-2 py-1 text-right">Qty</th>
-                      <th className="px-2 py-1 text-right">Unit Price</th>
-                      <th className="px-2 py-1 text-right">Total</th>
+                      <th className="px-2 py-1 text-right">Unit Price (₹)</th>
+                      <th className="px-2 py-1 text-right">Total (₹)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -202,7 +202,7 @@ export function SubmitQuotationDialog({
                         <td className="px-2 py-1 text-right">
                           {item.quantity} {item.unit}
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 py-1 ">
                           <Input
                             type="number"
                             step="any"
@@ -211,11 +211,11 @@ export function SubmitQuotationDialog({
                             onChange={(e) =>
                               updateItem(idx, "unitPrice", e.target.value)
                             }
-                            className="w-24 text-right"
+                            className="w-28 text-right"
                           />
                         </td>
                         <td className="px-2 py-1 text-right font-medium">
-                          {item.totalPrice?.toFixed(2) || 0}
+                          ₹{(item.totalPrice || 0).toFixed(2)}
                         </td>
                       </tr>
                     ))}
@@ -237,7 +237,7 @@ export function SubmitQuotationDialog({
               />
             </div>
             <div className="space-y-1">
-              <Label>Delivery Charges</Label>
+              <Label>Delivery Charges (₹)</Label>
               <Input
                 type="number"
                 step="any"
@@ -256,12 +256,25 @@ export function SubmitQuotationDialog({
               rows={2}
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              placeholder="Delivery terms, etc."
+              placeholder="Delivery terms, validity conditions, etc."
             />
           </div>
 
-          <div className="border-t pt-2 text-right font-semibold">
-            Total Amount: ₹{calculateTotal().toFixed(2)}
+          <div className="border-t pt-2 space-y-1 text-right">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal:</span>
+              <span>
+                ₹{items.reduce((s, i) => s + (i.totalPrice || 0), 0).toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Delivery Charges:</span>
+              <span>₹{Number(form.deliveryCharges).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-base font-semibold">
+              <span>Total Amount:</span>
+              <span>₹{calculateTotal().toFixed(2)}</span>
+            </div>
           </div>
         </div>
         <DialogFooter>

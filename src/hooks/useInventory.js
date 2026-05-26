@@ -5,7 +5,7 @@ import { inventoryApi } from '@/api/inventoryApi';
 
 export const useInventory = () => {
     const [materials, setMaterials] = useState([]);
-    const [currentMaterial, setCurrentMaterial] = useState(null); // for single material
+    const [currentMaterial, setCurrentMaterial] = useState(null);
     const [stockData, setStockData] = useState([]);
     const [warehouses, setWarehouses] = useState([]);
     const [transactions, setTransactions] = useState([]);
@@ -260,17 +260,53 @@ export const useInventory = () => {
         }
     }, []);
 
+    const getCountById = useCallback(async (countId) => {
+        setLoading(true);
+        try {
+            const res = await inventoryApi.getCountById(countId);
+            return res.data?.data;
+        } catch (err) {
+            toast.error('Failed to load count details');
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Start a physical count (creates draft) and immediately begin it (draft → in_progress)
     const startCount = async (data) => {
         try {
-            const res = await inventoryApi.startCount(data);
-            if (res.data.success) {
-                toast.success('Inventory count started');
+            const createRes = await inventoryApi.startCount(data);
+            if (createRes.data?.success) {
+                const newCount = createRes.data.data;
+                // Auto‑begin the count to set status to 'in_progress'
+                if (newCount?._id) {
+                    await inventoryApi.beginCount(newCount._id);
+                    toast.success('Inventory count started');
+                } else {
+                    toast.success('Count draft created');
+                }
                 await fetchStockCounts();
-                return res.data.data;
+                return newCount;
             }
+            return null;
         } catch (err) {
             toast.error('Failed to start count');
             return null;
+        }
+    };
+
+    const beginCount = async (countId) => {
+        try {
+            const res = await inventoryApi.beginCount(countId);
+            if (res.data.success) {
+                toast.success('Counting began');
+                await fetchStockCounts();
+                return true;
+            }
+        } catch (err) {
+            toast.error('Failed to begin count');
+            return false;
         }
     };
 
@@ -278,7 +314,7 @@ export const useInventory = () => {
         try {
             const res = await inventoryApi.updateCountItems(countId, items);
             if (res.data.success) {
-                toast.success('Count updated');
+                toast.success('Count items updated');
                 return true;
             }
         } catch (err) {
@@ -380,9 +416,11 @@ export const useInventory = () => {
         // Alert actions
         fetchLowStockAlerts,
         resolveAlert,
-        // Count actions
+        // Count actions (full set)
         fetchStockCounts,
+        getCountById,
         startCount,
+        beginCount,
         updateCountItems,
         completeCount,
         approveCount,

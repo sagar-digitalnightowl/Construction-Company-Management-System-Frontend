@@ -21,24 +21,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { procurementApi } from "@/api";
 import { formatINR } from "@/lib/helpers";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
+export function CreatePoDialog({ open, onOpenChange, onCreate, fetchPurchaseOrders }) {
   const [acceptedQuotations, setAcceptedQuotations] = useState([]);
   const [selectedQuotationId, setSelectedQuotationId] = useState("");
-  const [selectedRfq, setSelectedRfq] = useState(null);
+  const [quotation, setQuotation] = useState(null);
+  const [associatedRfq, setAssociatedRfq] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [loadingQuotation, setLoadingQuotation] = useState(false);
+  const [fetchingQuotations, setFetchingQuotations] = useState(true);
 
   // Form fields
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [termsAndConditions, setTermsAndConditions] = useState("");
 
-  // Fetch accepted quotations when dialog opens
+  // Load accepted quotations
   useEffect(() => {
     if (open) {
       const fetchQuotations = async () => {
-        setLoadingQuotation(true);
+        setFetchingQuotations(true);
         try {
           const res = await procurementApi.getQuotations({
             status: "accepted",
@@ -47,84 +49,50 @@ export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
         } catch (err) {
           toast.error("Failed to load accepted quotations");
         } finally {
-          setLoadingQuotation(false);
+          setFetchingQuotations(false);
         }
       };
       fetchQuotations();
     }
   }, [open]);
 
-  // When a quotation is selected, find its associated RFQ
+  // When a quotation is selected, fetch its RFQ to get materialRequestId and projectId
   useEffect(() => {
     if (!selectedQuotationId) {
-      setSelectedRfq(null);
+      setQuotation(null);
+      setAssociatedRfq(null);
       return;
     }
-    
-    const quotation = acceptedQuotations.find(
-      (q) => q._id?.toString() === selectedQuotationId.toString(),
-    );
-
-    if (!quotation) return;
-
-    // Try to find RFQ in the passed rfqs array
-    let rfq = rfqs.find((r) => String(r._id) === String(quotation.rfqId));
-
-    console.log("quotation.rfqId : ", quotation);
-    console.log("RFQ : ", rfq);                     
-    console.log("RFQS : ", rfqs);
-
-    // If not found, fetch it directly from API
-    const fetchRfq = async () => {
-      try {
-        const res = await procurementApi.getRfqById(quotation.rfqId);
-        rfq = res.data?.data;
-        setSelectedRfq(rfq || null);
-        if (!rfq) toast.error("Associated RFQ not found");
-      } catch (err) {
-        console.error("Failed to fetch RFQ:", err);
-        toast.error("Failed to fetch RFQ details");
-        setSelectedRfq(null);
-      }
-    };
-
-    if (rfq) {
-      setSelectedRfq(rfq);
-    } else {
+    const quot = acceptedQuotations.find((q) => q._id === selectedQuotationId);
+    if (quot) {
+      setQuotation(quot);
+      // Fetch associated RFQ
+      const fetchRfq = async () => {
+        try {
+          const res = await procurementApi.getRfqById(quot.rfqId?._id);
+          setAssociatedRfq(res.data?.data);
+        } catch (err) {
+          toast.error("Failed to load RFQ details for this quotation");
+        }
+      };
       fetchRfq();
     }
-
-    // Pre-fill expected delivery date (7 days from now) if not already set
-    if (!expectedDeliveryDate) {
-      const defaultDate = new Date();
-      defaultDate.setDate(defaultDate.getDate() + 7);
-      setExpectedDeliveryDate(defaultDate.toISOString().split("T")[0]);
-    }
-  }, [selectedQuotationId, acceptedQuotations, rfqs]);
+  }, [selectedQuotationId, acceptedQuotations]);
 
   const handleSubmit = async () => {
     if (!selectedQuotationId) {
-      toast.error("Please select an accepted quotation");
+      toast.error("Please select a quotation");
       return;
     }
     if (!expectedDeliveryDate) {
       toast.error("Expected delivery date is required");
       return;
     }
-    if (!selectedRfq) {
-      toast.error("Unable to find associated RFQ details. Please try again.");
+    if (!quotation || !associatedRfq) {
+      toast.error("Quotation or RFQ details missing");
       return;
     }
 
-    const quotation = acceptedQuotations.find(
-      (q) => q._id === selectedQuotationId,
-    );
-    if (!quotation) {
-      toast.error("Quotation not found");
-      return;
-    }
-
-    // Build items array with all required fields
     const items = quotation.items.map((item) => ({
       materialId: item.materialId,
       materialName: item.materialName,
@@ -135,11 +103,11 @@ export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
     }));
 
     const payload = {
-      materialRequestId: selectedRfq.materialRequestId,
-      projectId: selectedRfq.projectId,
+      materialRequestId: associatedRfq.materialRequestId?._id,
+      projectId: associatedRfq.projectId,
       vendorId: quotation.vendorId?._id || quotation.vendorId,
-      items: items,
-      expectedDeliveryDate: expectedDeliveryDate,
+      items,
+      expectedDeliveryDate,
       deliveryAddress: deliveryAddress || undefined,
       termsAndConditions: termsAndConditions || undefined,
     };
@@ -148,39 +116,42 @@ export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
     const success = await onCreate(payload);
     setLoading(false);
     if (success) {
+      await fetchPurchaseOrders();
       onOpenChange(false);
       // Reset form
       setSelectedQuotationId("");
-      setSelectedRfq(null);
       setExpectedDeliveryDate("");
       setDeliveryAddress("");
       setTermsAndConditions("");
     }
   };
-
+  
   const selectedQuotation = acceptedQuotations.find(
     (q) => q._id === selectedQuotationId,
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Purchase Order</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Select an accepted quotation to convert into a PO.
+          </p>
         </DialogHeader>
         <div className="space-y-4">
-          {/* Quotation Selection */}
+          {/* Quotation selection */}
           <div className="space-y-1">
-            <Label>Select Accepted Quotation *</Label>
+            <Label>Accepted Quotation *</Label>
             <Select
               value={selectedQuotationId}
               onValueChange={setSelectedQuotationId}
-              disabled={loadingQuotation}
+              disabled={fetchingQuotations}
             >
               <SelectTrigger>
                 <SelectValue
                   placeholder={
-                    loadingQuotation ? "Loading..." : "Choose quotation"
+                    fetchingQuotations ? "Loading..." : "Choose quotation"
                   }
                 />
               </SelectTrigger>
@@ -194,23 +165,27 @@ export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
             </Select>
           </div>
 
-          {/* Preview selected quotation details */}
-          {selectedQuotation && selectedRfq && (
-            <div className="space-y-3 p-3 bg-muted rounded-md">
-              <p className="text-sm font-medium">Quotation Details</p>
+          {/* Preview selected quotation */}
+          {selectedQuotation && (
+            <div className="border rounded-md p-3 space-y-2 bg-muted/50">
+              <p className="text-sm font-medium">Selected Quotation</p>
               <div className="text-sm space-y-1">
-                <p>
-                  <span className="text-muted-foreground">Vendor:</span>{" "}
-                  {selectedQuotation.vendorId?.name || "N/A"}
-                </p>
-                <p>
-                  <span className="text-muted-foreground">Total Amount:</span>{" "}
-                  {formatINR(selectedQuotation.totalAmount)}
-                </p>
-                <p>
-                  <span className="text-muted-foreground">Items:</span>{" "}
-                  {selectedQuotation.items.length} item(s)
-                </p>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Vendor:</span>
+                  <span>{selectedQuotation.vendorId?.name || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Amount:</span>
+                  <span>{formatINR(selectedQuotation.totalAmount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Valid Until:</span>
+                  <span>
+                    {new Date(
+                      selectedQuotation.validUntil,
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
                 <details className="text-xs">
                   <summary className="cursor-pointer text-muted-foreground">
                     View items
@@ -229,17 +204,16 @@ export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
             </div>
           )}
 
-          {/* Expected Delivery Date */}
+          {/* PO Form Fields */}
           <div className="space-y-1">
             <Label>Expected Delivery Date *</Label>
             <Input
               type="date"
               value={expectedDeliveryDate}
               onChange={(e) => setExpectedDeliveryDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
             />
           </div>
-
-          {/* Delivery Address (optional) */}
           <div className="space-y-1">
             <Label>Delivery Address</Label>
             <Input
@@ -248,8 +222,6 @@ export function CreatePoDialog({ open, onOpenChange, onCreate, rfqs = [] }) {
               onChange={(e) => setDeliveryAddress(e.target.value)}
             />
           </div>
-
-          {/* Terms & Conditions (optional) */}
           <div className="space-y-1">
             <Label>Terms & Conditions</Label>
             <Textarea

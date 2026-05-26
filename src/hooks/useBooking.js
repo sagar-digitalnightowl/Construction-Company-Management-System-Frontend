@@ -61,8 +61,11 @@ export const useBooking = () => {
         setLoading(true);
         try {
             const res = await bookingApi.getBookingById(id);
-            setCurrentBooking(res.data?.data);
-            return res.data?.data;
+            const data = res.data?.data;
+            setCurrentBooking(data?.booking || null);
+            setInstallments(data?.installments || []);
+            setInstallmentSummary(data?.summary || null);
+            return data;
         } catch (err) {
             toast.error('Failed to load booking details');
             return null;
@@ -122,6 +125,7 @@ export const useBooking = () => {
         try {
             const res = await bookingApi.approveBooking(id, data);
             toast.success('Booking approved');
+            await fetchBookingById(id);
             return res.data?.data;
         } catch (err) {
             toast.error('Failed to approve booking');
@@ -137,6 +141,7 @@ export const useBooking = () => {
         try {
             const res = await bookingApi.rejectBooking(id, data);
             toast.success('Booking rejected');
+            await fetchBookingById(id);
             return res.data?.data;
         } catch (err) {
             toast.error('Failed to reject booking');

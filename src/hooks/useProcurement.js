@@ -9,6 +9,9 @@ export const useProcurement = () => {
     const [purchaseOrders, setPurchaseOrders] = useState([]);
     const [deliveries, setDeliveries] = useState([]);
 
+    const [acceptedQuotations, setAcceptedQuotations] = useState([]);
+
+
 
     // ---------- Purchase Orders ----------
     const fetchPurchaseOrders = useCallback(async (loading = true, params = {}) => {
@@ -24,6 +27,7 @@ export const useProcurement = () => {
     }, []);
 
     const createPurchaseOrder = useCallback(async (data) => {
+        setLoading(true);
         try {
             const res = await procurementApi.createPurchaseOrder(data);
             if (res.data?.success) {
@@ -34,6 +38,8 @@ export const useProcurement = () => {
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to create PO');
             return false;
+        } finally {
+            setLoading(false);
         }
     }, [fetchPurchaseOrders]);
 
@@ -133,7 +139,7 @@ export const useProcurement = () => {
             }
             return false;
         } catch (err) {
-            toast.error(err.response?.data?.message ||'Failed to reject quotation');
+            toast.error(err.response?.data?.message || 'Failed to reject quotation');
             return false;
         }
     }, [fetchQuotations]);
@@ -187,6 +193,19 @@ export const useProcurement = () => {
         }
     }, [fetchDeliveries, fetchPurchaseOrders]);
 
+    const fetchAcceptedQuotations = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await procurementApi.getQuotations({ status: 'accepted' });
+            setAcceptedQuotations(res.data?.data || []);
+        } catch (err) {
+            toast.error('Failed to load accepted quotations');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+
     // Auto-fetch on mount
     useEffect(() => {
         fetchRfqs();
@@ -201,6 +220,7 @@ export const useProcurement = () => {
         quotations,
         purchaseOrders,
         deliveries,
+        acceptedQuotations,
         fetchRfqs,
         createRfq,
         sendRfq,
@@ -213,5 +233,6 @@ export const useProcurement = () => {
         fetchDeliveries,
         updateDeliveryStatus,
         receiveDelivery,
+        fetchAcceptedQuotations,
     };
 };

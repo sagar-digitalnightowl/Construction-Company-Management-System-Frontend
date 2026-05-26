@@ -267,4 +267,9 @@ export const projectApi = {
     getNotes: (id, params) => api.get(`/project/${id}/notes`, { params }),
     updateNote: (id, noteId, data) => api.patch(`/project/${id}/notes/${noteId}`, data),
     deleteNote: (id, noteId) => api.delete(`/project/${id}/notes/${noteId}`),
+
+    // =========================
+    // Units
+    // =========================
+    getUnits: (id) => api.get(`/project/${id}/units`),
 };

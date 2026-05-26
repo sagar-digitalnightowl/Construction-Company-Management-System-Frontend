@@ -22,7 +22,7 @@ export default function BookingDetail() {
   const { current } = useAuthStore();
   const canEdit = canMutate(current?.role, "booking");
   const canPay =
-    canMutate(current?.role, "booking_payment") || current?.role === "client";
+    canMutate(current?.role, "booking_payment");
   const {
     currentBooking: booking,
     installments,
@@ -34,17 +34,19 @@ export default function BookingDetail() {
     updateBookingStatus,
     cancelBooking,
     uploadAgreement,
+    approveBooking,
+    rejectBooking,
     loading,
   } = useBooking();
   const [selectedInstallment, setSelectedInstallment] = useState(null);
   const [payDialogOpen, setPayDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  console.log("Booking : ", booking);
+
   useEffect(() => {
     if (id) {
       fetchBookingById(id);
-      fetchInstallmentsByBooking(id);
-      fetchInstallmentSummary(id);
     }
   }, [id]);
 
@@ -56,8 +58,6 @@ export default function BookingDetail() {
   const handlePaySuccess = async (instId, data) => {
     const result = await payInstallment(instId, data);
     if (result) {
-      await fetchInstallmentsByBooking(id);
-      await fetchInstallmentSummary(id);
       await fetchBookingById(id);
     }
     return !!result;
@@ -119,68 +119,83 @@ export default function BookingDetail() {
         >
           <ArrowLeft className="h-4 w-4 mr-1" /> Back
         </Button>
-        <div className="flex gap-2">
-          {canEdit && booking.approvalStatus === "pending" && (
-            <>
-              <Button
-                variant="default"
-                onClick={() =>
-                  updateBookingStatus(id, { approvalStatus: "approved" })
-                }
-              >
-                Approve
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  const reason = prompt("Rejection reason:");
-                  if (reason)
-                    updateBookingStatus(id, {
-                      approvalStatus: "rejected",
-                      rejectionReason: reason,
-                    });
-                }}
-              >
-                Reject
-              </Button>
-            </>
-          )}
-          {canEdit && booking.status !== "cancelled" && (
-            <>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  handleStatusUpdate(
-                    booking.status === "booked" ? "sold" : "booked",
-                  )
-                }
-              >
-                Mark as {booking.status === "booked" ? "Sold" : "Booked"}
-              </Button>
-              <Button variant="destructive" onClick={handleCancel}>
-                Cancel Booking
-              </Button>
-            </>
-          )}
+    
+        <div className="flex gap-2 flex-wrap">
           {canEdit && (
-            <Button
-              variant="outline"
-              onClick={handleUploadAgreement}
-              disabled={uploading}
-            >
-              <FileText className="h-4 w-4 mr-1" /> Upload Agreement
-            </Button>
-          )}
-          {booking.agreementDocumentUrl && (
-            <Button variant="outline" asChild>
-              <a
-                href={booking.agreementDocumentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Download className="h-4 w-4 mr-1" /> View Agreement
-              </a>
-            </Button>
+            <>
+              {/* Approval actions – only when pending */}
+              {booking.approvalStatus === "pending" && (
+                <>
+                  <Button
+                    variant="default"
+                    onClick={() =>
+                      approveBooking(id, {
+                        notes: "Payment verified, booking confirmed",
+                      })
+                    }
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      const reason = prompt("Rejection reason:");
+                      if (reason) rejectBooking(id, { reason });
+                    }}
+                  >
+                    Reject
+                  </Button>
+                </>
+              )}
+
+              {/* Status actions – only when approved and not cancelled */}
+              {booking.approvalStatus === "approved" &&
+                booking.status !== "cancelled" && (
+                  <>
+                    {booking.status === "booked" ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleStatusUpdate("sold")}
+                        >
+                          Mark as Sold
+                        </Button>
+                        <Button variant="destructive" onClick={handleCancel}>
+                          Cancel Booking
+                        </Button>
+                      </>
+                    ) : booking.status === "sold" ? (
+                      <Button variant="outline" disabled>
+                        Sold
+                      </Button>
+                    ) : null}
+                  </>
+                )}
+
+              {/* Agreement upload – only when approved (even if sold or booked) */}
+              {booking.approvalStatus === "approved" && (
+                <Button
+                  variant="outline"
+                  onClick={handleUploadAgreement}
+                  disabled={uploading}
+                >
+                  <FileText className="h-4 w-4 mr-1" /> Upload Agreement
+                </Button>
+              )}
+
+              {/* View Agreement – always visible if document exists */}
+              {booking.agreementDocumentUrl && (
+                <Button variant="outline" asChild>
+                  <a
+                    href={booking.agreementDocumentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Download className="h-4 w-4 mr-1" /> View Agreement
+                  </a>
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -274,15 +289,6 @@ export default function BookingDetail() {
               )}
             </CardContent>
           </Card>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Installments</h3>
-            <InstallmentTable
-              installments={installments}
-              onPay={handlePay}
-              canPay={canPay}
-            />
-          </div>
         </div>
 
         <div className="space-y-6">
@@ -320,6 +326,16 @@ export default function BookingDetail() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold mb-3">Installments</h3>
+        <InstallmentTable
+          installments={installments}
+          onPay={handlePay}
+          canPay={canPay}
+
+        />
       </div>
 
       <PayInstallmentDialog

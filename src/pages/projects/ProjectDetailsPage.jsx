@@ -13,6 +13,7 @@ import {
   Activity,
   CheckSquare,
   FileText,
+  Building2,
 } from "lucide-react";
 import { ProjectHeader } from "@/components/project/ProjectHeader";
 import { ProjectStats } from "@/components/project/ProjectStats";
@@ -31,6 +32,7 @@ import { DprTab } from "@/components/project/DprTab";
 import { ChecklistTab } from "@/components/project/ChecklistTab";
 import { ResourceTab } from "@/components/project/ResourceTab";
 import { DocumentsTab } from "@/components/project/DocumentsTab";
+import { UnitsTab } from "@/components/project/UnitsTab";
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -103,6 +105,11 @@ export default function ProjectDetail() {
               Resources
             </TabsTrigger>
 
+            <TabsTrigger value="units">
+              <Building2 className="h-3.5 w-3.5 mr-1.5" />
+              Units
+            </TabsTrigger>
+
             <TabsTrigger value="milestones">
               <Flag className="h-3.5 w-3.5 mr-1.5" />
               Milestones
@@ -167,6 +174,10 @@ export default function ProjectDetail() {
           </TabsContent>
           <TabsContent value="resources">
             <ResourceTab projectId={project._id} canEdit={canEdit} />
+          </TabsContent>
+
+          <TabsContent value="units">
+            <UnitsTab projectId={project._id} />
           </TabsContent>
 
           <TabsContent value="milestones">

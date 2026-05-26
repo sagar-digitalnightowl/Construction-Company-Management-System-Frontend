@@ -11,6 +11,8 @@ import { useProcurement } from "@/hooks/useProcurement";
 import { useAuthStore } from "@/store/authStore";
 import { canMutate } from "@/data/permissions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PODetailDialog } from "@/components/procurement/PODetailDialog";
+import { ReceiveDeliveryDialog } from "@/components/procurement/ReceiveDeliveryDialog";
 
 export default function PurchaseOrders() {
   const { current } = useAuthStore();
@@ -20,6 +22,10 @@ export default function PurchaseOrders() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPoId, setSelectedPoId] = useState(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+
+  const [receiveDialogOpen, setreceiveDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchPurchaseOrders();
@@ -31,6 +37,16 @@ export default function PurchaseOrders() {
       !search || po.poNumber.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
+
+  const handleView = (poId) => {
+    setSelectedPoId(poId);
+    setDetailDialogOpen(true);
+  };
+
+  const markReceived = (id) => {
+    setSelectedPoId(id);
+    setreceiveDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -80,8 +96,9 @@ export default function PurchaseOrders() {
             <POCard
               key={po._id}
               po={po}
-              onView={() => {}}
+              onView={handleView}
               onUpdateStatus={updatePoStatus}
+              markReceived={markReceived}
             />
           ))}
         </div>
@@ -90,7 +107,21 @@ export default function PurchaseOrders() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onCreate={useProcurement().createPurchaseOrder}
-        rfqs={rfqs}
+        fetchPurchaseOrders={fetchPurchaseOrders}
+      />
+
+      <PODetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        poId={selectedPoId}
+        onUpdateStatus={updatePoStatus}
+      />
+
+      <ReceiveDeliveryDialog
+        open={receiveDialogOpen}
+        onOpenChange={setreceiveDialogOpen}
+        poId={selectedPoId}
+        onSuccess={fetchPurchaseOrders}
       />
     </div>
   );

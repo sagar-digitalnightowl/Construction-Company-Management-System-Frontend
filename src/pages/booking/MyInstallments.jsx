@@ -7,6 +7,7 @@ import { InstallmentTable } from "@/components/booking/InstallmentTable";
 import { PayInstallmentDialog } from "@/components/booking/PayInstallmentDialog";
 import { useBooking } from "@/hooks/useBooking";
 import { useAuthStore } from "@/store/authStore";
+import { canMutate } from "@/data/permissions";
 
 export default function MyInstallments() {
   const { current } = useAuthStore();
@@ -21,13 +22,15 @@ export default function MyInstallments() {
   const [selectedInstallment, setSelectedInstallment] = useState(null);
   const [payDialogOpen, setPayDialogOpen] = useState(false);
 
+  const canPay = canMutate(current?.role, "booking_payment");
+
   useEffect(() => {
     fetchMyInstallments({
       status: statusFilter === "all" ? undefined : statusFilter,
     });
   }, [statusFilter]);
 
-  const handlePay = (inst) => {
+  const handlePay = (inst) => {                  
     setSelectedInstallment(inst);
     setPayDialogOpen(true);
   };
@@ -68,7 +71,7 @@ export default function MyInstallments() {
         <InstallmentTable
           installments={myInstallments}
           onPay={handlePay}
-          canPay={current?.role === "client"}
+          canPay={canPay}
         />
       )}
       <PayInstallmentDialog

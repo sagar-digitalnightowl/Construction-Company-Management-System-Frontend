@@ -227,6 +227,8 @@ export const useProject = () => {
     const [budgetUtilization, setBudgetUtilization] = useState(null);
     const [activityPagination, setActivityPagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
 
+    const [unitsData, setUnitsData] = useState({ units: [], statistics: null });
+
     // Existing fetchProject
     const fetchProject = useCallback(async (id, showLoading = true) => {
         if (showLoading) setLoading(true);
@@ -721,6 +723,24 @@ export const useProject = () => {
         }
     }, [fetchProject]);
 
+    const fetchUnits = useCallback(async (id) => {
+        if (!id) return;
+        try {
+            const res = await projectApi.getUnits(id);
+            const data = res.data?.data;
+            setUnitsData({
+                units: data?.units || [],
+                statistics: data?.statistics || null,
+            });
+            return data;
+        } catch (err) {
+            toast.error('Failed to load units data');
+            return null;
+        }
+    }, []);
+    
+
+
     return {
         // State
         loading,
@@ -742,6 +762,7 @@ export const useProject = () => {
         timeline,
         budgetUtilization,
         activityPagination,
+        unitsData,
 
         // Core
         fetchProject,
@@ -755,6 +776,7 @@ export const useProject = () => {
         resolveIssue,
         createMaterialRequest,
         assignTeam,
+        fetchUnits,
 
         // Activity
         fetchActivity,

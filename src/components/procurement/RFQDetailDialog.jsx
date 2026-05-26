@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Package, Users, Send } from "lucide-react";
-import { formatDate } from "@/lib/helpers";
+import { Calendar, Package, Users, Send, FileText, Clock } from "lucide-react";
+import { formatDate, formatINR } from "@/lib/helpers";
 import { procurementApi } from "@/api";
 import { toast } from "sonner";
 
@@ -58,7 +58,9 @@ export function RFQDetailDialog({ open, onOpenChange, rfqId, onSend }) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
-          <div className="py-8 text-center">Loading...</div>
+          <div className="py-8 text-center text-muted-foreground">
+            Loading RFQ details...
+          </div>
         </DialogContent>
       </Dialog>
     );
@@ -68,52 +70,127 @@ export function RFQDetailDialog({ open, onOpenChange, rfqId, onSend }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>RFQ Details</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          {/* Header */}
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm text-muted-foreground">{rfq.rfqNumber}</p>
-              <p className="text-lg font-semibold">{rfq.title}</p>
+              <p className="text-xs text-muted-foreground">{rfq.rfqNumber}</p>
+              <p className="text-lg font-semibold mt-1">{rfq.title}</p>
             </div>
-            <Badge variant={statusColor[rfq.status]}>{rfq.status}</Badge>
+            <Badge
+              variant={statusColor[rfq.status] || "secondary"}
+              className="capitalize"
+            >
+              {rfq.status}
+            </Badge>
           </div>
 
+          {/* Basic Info */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>Deadline: {formatDate(rfq.submissionDeadline)}</span>
+              <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">Deadline:</span>
+              <span className="font-medium">
+                {formatDate(rfq.submissionDeadline)}
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-muted-foreground" />
-              <span>
-                Material Request:{" "}
-                {rfq.materialRequestId?.title || rfq.materialRequestId}
-              </span>
+              <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">Created:</span>
+              <span>{formatDate(rfq.createdAt)}</span>
             </div>
           </div>
 
-          {rfq.description && (
-            <div>
-              <p className="text-sm font-medium">Description</p>
-              <p className="text-sm text-muted-foreground">{rfq.description}</p>
+          {/* Material Request Details */}
+          {rfq.materialRequestId && (
+            <div className="border rounded-md p-3 space-y-2">
+              <p className="text-sm font-medium flex items-center gap-2">
+                <Package className="h-4 w-4" /> Material Request
+              </p>
+              <div className="text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Title:</span>
+                  <span className="font-medium">
+                    {rfq.materialRequestId.title}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Material:</span>
+                  <span>{rfq.materialRequestId.materialName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Quantity:</span>
+                  <span>
+                    {rfq.materialRequestId.quantity}{" "}
+                    {rfq.materialRequestId.unit}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Required By:</span>
+                  <span>
+                    {formatDate(rfq.materialRequestId.requiredByDate)}
+                  </span>
+                </div>
+                {rfq.materialRequestId.deliveryLocation && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Delivery Location:
+                    </span>
+                    <span>{rfq.materialRequestId.deliveryLocation}</span>
+                  </div>
+                )}
+                {rfq.materialRequestId.description && (
+                  <div>
+                    <p className="text-muted-foreground">Description:</p>
+                    <p className="text-sm">
+                      {rfq.materialRequestId.description}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
+          {/* Description */}
+          {rfq.description && (
+            <div>
+              <p className="text-sm font-medium">Additional Details</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {rfq.description}
+              </p>
+            </div>
+          )}
+
+          {/* Invited Vendors */}
           <div>
-            <p className="text-sm font-medium">Invited Vendors</p>
-            <div className="flex flex-wrap gap-2 mt-1">
+            <p className="text-sm font-medium flex items-center gap-2">
+              <Users className="h-4 w-4" /> Invited Vendors (
+              {rfq.invitedVendors?.length || 0})
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
               {rfq.invitedVendors?.map((vendor) => (
-                <Badge key={vendor._id || vendor} variant="outline">
+                <Badge
+                  key={vendor._id || vendor}
+                  variant="outline"
+                  className="text-xs"
+                >
                   {vendor.name || vendor}
                 </Badge>
               ))}
+              {(!rfq.invitedVendors || rfq.invitedVendors.length === 0) && (
+                <p className="text-sm text-muted-foreground">
+                  No vendors invited yet
+                </p>
+              )}
             </div>
           </div>
 
-          {rfq.receivedQuotations?.length > 0 && (
+          {/* Received Quotations */}
+          {rfq.receivedQuotations && rfq.receivedQuotations.length > 0 && (
             <div>
               <p className="text-sm font-medium">Received Quotations</p>
               <p className="text-sm text-muted-foreground">
@@ -122,6 +199,7 @@ export function RFQDetailDialog({ open, onOpenChange, rfqId, onSend }) {
             </div>
           )}
         </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close

@@ -10,7 +10,7 @@ export const bookingApi = {
     // Get my bookings (client only)
     getMyBookings: () => api.get('/booking/my-bookings'),
     // Get booking by ID
-    getBookingById: (id) => api.get(`/booking/${id}`),
+    getBookingById: (id) => api.get(`/booking/details/${id}`),
     // Update booking status (admin/director/PM)
     updateBookingStatus: (id, data) => api.patch(`/booking/${id}`, data),
     // Cancel booking (admin/director/PM)

@@ -76,9 +76,9 @@ const navGroups = [
                 key: "booking",
                 children: [
                     { to: "/bookings", label: "Bookings", key: "bookings" },
-                    { to: "/my-bookings", label: "My Bookings", key: "my_bookings" },
-                    { to: "/my-installments", label: "My Installments", key: "my_installments" },
-                    { to: "/pending-bookings", label: "Pending Bookings", key: "pending_bookings" },
+                    { to: "/my-bookings", label: "My Bookings", key: "my-bookings" },
+                    { to: "/my-installments", label: "My Installments", key: "my-installments" },
+                    { to: "/pending-bookings", label: "Pending Bookings", key: "pending-bookings" },
                 ],
             },
         ],

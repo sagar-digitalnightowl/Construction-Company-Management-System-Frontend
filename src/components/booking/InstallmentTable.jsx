@@ -43,7 +43,12 @@ export function InstallmentTable({ installments, onPay, canPay }) {
             <TableRow key={inst._id}>
               <TableCell>{inst.installmentNumber}</TableCell>
               <TableCell className="max-w-xs">{inst.milestoneName}</TableCell>
-              <TableCell>{formatDate(inst.dueDate)}</TableCell>
+              <TableCell>
+                {" "}
+                {inst.dueDate
+                  ? formatDate(inst.dueDate)
+                  : "Not scheduled"}
+              </TableCell>
               <TableCell>{formatINR(inst.amount)}</TableCell>
               <TableCell>{formatINR(inst.paidAmount || 0)}</TableCell>
               <TableCell>

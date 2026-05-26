@@ -9,8 +9,10 @@ import { useBooking } from "@/hooks/useBooking";
 import { formatINR, formatDate } from "@/lib/helpers";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export default function PendingBookings() {
+  const navigate = useNavigate();
   const {
     pendingBookings,
     fetchPendingBookings,
@@ -61,7 +63,7 @@ export default function PendingBookings() {
       ) : (
         <div className="space-y-3">
           {pendingBookings.map((b) => (
-            <Card key={b._id}>
+            <Card key={b._id} className="cursor-pointer" onClick={() =>  navigate(`/bookings/${b._id}`)}>
               <CardContent className="p-4 flex flex-wrap justify-between items-center gap-3">
                 <div>
                   <p className="font-medium">
@@ -80,14 +82,21 @@ export default function PendingBookings() {
                   <Button
                     size="sm"
                     variant="default"
-                    onClick={() => handleApprove(b._id)}
+                    onClick={(e) =>{
+                      e.stopPropagation()
+                      handleApprove(b._id)
+                    } 
+                    }
                   >
                     <Check className="h-3 w-3 mr-1" /> Approve
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => handleReject(b._id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleReject(b._id)
+                    }}
                   >
                     <X className="h-3 w-3 mr-1" /> Reject
                   </Button>
