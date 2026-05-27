@@ -11,6 +11,7 @@ import { TaskDetailDialog } from "@/components/project/TaskTab/TaskDetailDialog"
 import { CreateTaskDialog } from "@/components/project/TaskTab/CreateTaskDialog";
 import { taskApi } from "@/api";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const priorityColors = { low: "muted", medium: "warning", high: "destructive" };
 const statusColors = {
@@ -22,10 +23,12 @@ const statusColors = {
 };
 
 function TaskCard({ task, onStatusChange, onClick, canOperationsEdit }) {
+  const navigate = useNavigate();
+
   return (
     <Card
+      onClick={() => navigate(`/tasks/${task._id}`)}
       className="cursor-pointer hover:shadow-md transition"
-      onClick={() => onClick(task)}
     >
       <CardContent className="p-3 space-y-2">
         <div className="flex justify-between items-start">
@@ -54,12 +57,13 @@ function TaskCard({ task, onStatusChange, onClick, canOperationsEdit }) {
           <select
             className="text-xs border rounded px-1 py-0.5"
             value={task.status}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             onChange={(e) => {
               e.stopPropagation();
               onStatusChange(task._id, e.target.value);
             }}
-            onClick={(e) => e.stopPropagation()}
-            disabled={canOperationsEdit}
+            disabled={!canOperationsEdit}
           >
             {" "}
             <option value="todo">To Do</option>
@@ -145,7 +149,7 @@ export function TasksTab({
             />
           </div>
         </div>
-        {canOperationsEdit && (
+        {canEdit && (
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <Plus className="h-3 w-3 mr-1" /> New Task
           </Button>

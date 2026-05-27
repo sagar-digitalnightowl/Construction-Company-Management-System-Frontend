@@ -70,6 +70,7 @@ export function TaskDetailDialog({ open, onOpenChange, taskId, onUpdate }) {
   const [comments, setComments] = useState([]);
   const [history, setHistory] = useState([]);
   const [watchers, setWatchers] = useState([]);
+  const [reminders, setReminders] = useState([]); // NEW: store existing reminders
   const [timeLogs, setTimeLogs] = useState([]);
   const [activeTimer, setActiveTimer] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -110,6 +111,7 @@ export function TaskDetailDialog({ open, onOpenChange, taskId, onUpdate }) {
       setComments(data.comments || []);
       setHistory(data.history || []);
       setWatchers(data.watchers || []);
+      setReminders(data.reminders || []); // NEW: populate reminders
       setProgress(data.task?.progress || 0);
       // Fetch time tracking separately
       const timeRes = await taskApi.getTimeTracking(taskId);
@@ -121,7 +123,9 @@ export function TaskDetailDialog({ open, onOpenChange, taskId, onUpdate }) {
 
       if (data.task?.projectId?._id) {
         try {
-          const tasksRes = await taskApi.getTasksByProject(task.projectId._id);
+          const tasksRes = await taskApi.getTasksByProject(
+            data.task.projectId._id,
+          );
           setProjectTasks(tasksRes.data?.data?.tasks || []);
         } catch (err) {
           console.error("Failed to load project tasks for dependency");
@@ -481,6 +485,11 @@ export function TaskDetailDialog({ open, onOpenChange, taskId, onUpdate }) {
     );
   }
 
+  // Helper to show overdue badge with days
+  const overdueText = task.isOverdue
+    ? `Overdue${task.daysOverdue ? ` by ${task.daysOverdue} day${task.daysOverdue !== 1 ? "s" : ""}` : ""}`
+    : "";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -497,7 +506,9 @@ export function TaskDetailDialog({ open, onOpenChange, taskId, onUpdate }) {
               </Badge>
               <Badge>{task.status?.replace("_", " ")}</Badge>
               {task.isArchived && <Badge variant="outline">Archived</Badge>}
-              {task.isOverdue && <Badge variant="destructive">Overdue</Badge>}
+              {task.isOverdue && (
+                <Badge variant="destructive">{overdueText}</Badge>
+              )}
             </div>
           </div>
           {task.milestoneId && (
@@ -712,6 +723,20 @@ export function TaskDetailDialog({ open, onOpenChange, taskId, onUpdate }) {
               </div>
             )}
 
+            {/* Labels – display if any (NEW) */}
+            {task.labels && task.labels.length > 0 && (
+              <div className="border rounded-md p-3 space-y-2">
+                <h4 className="font-medium">Labels</h4>
+                <div className="flex flex-wrap gap-2">
+                  {task.labels.map((label, idx) => (
+                    <Badge key={idx} variant="secondary">
+                      {label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Dependencies – full edit only */}
             {isFullEdit && (
               <div className="border rounded-md p-3 space-y-2">
@@ -830,10 +855,36 @@ export function TaskDetailDialog({ open, onOpenChange, taskId, onUpdate }) {
               </div>
             )}
 
-            {/* Reminders – operators */}
+            {/* Reminders – operators (display existing + set new) */}
             {isOperator && (
               <div className="border rounded-md p-3 space-y-3">
-                <h4 className="font-medium">Set Reminder</h4>
+                <h4 className="font-medium">Reminders</h4>
+                {/* Existing reminders list (NEW) */}
+                {reminders.length > 0 && (
+                  <div className="space-y-2 mb-3">
+                    <p className="text-xs text-muted-foreground">
+                      Upcoming / existing reminders:
+                    </p>
+                    {reminders.map((rem) => (
+                      <div
+                        key={rem._id}
+                        className="text-sm bg-muted/30 p-2 rounded-md"
+                      >
+                        <div className="flex justify-between items-start">
+                          <span className="font-medium">{rem.message}</span>
+                          <Badge variant={rem.isSent ? "secondary" : "outline"}>
+                            {rem.isSent ? "Sent" : "Pending"}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {formatDate(rem.remindAt)} • {rem.type}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <Separator />
+                <p className="text-sm">Set a new reminder:</p>
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     placeholder="Message"

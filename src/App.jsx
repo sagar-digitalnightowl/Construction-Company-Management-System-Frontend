@@ -43,6 +43,7 @@ import MyBookings from "./pages/booking/MyBookings";
 import MyInstallments from "./pages/booking/MyInstallments";
 import PendingBookings from "./pages/booking/PendingBookings";
 import CountDetail from "./pages/inventory/CountDetail";
+import TaskDetailPage from "./pages/projects/TaskDetailPage";
 
 export default function App() {
   const { initAuth, loading } = useAuthStore((s) => s);
@@ -82,12 +83,13 @@ export default function App() {
 
           <Route path="/tasks/my-tasks" element={<MyTasks />} />
           <Route path="/tasks/requests" element={<TaskRequests />} />
+          <Route path="/tasks/:taskId" element={<TaskDetailPage />} />
 
           <Route path="/procurement/dashboard" element={<Procurement />} />
           <Route path="/procurement/rfqs" element={<RFQs />} />
           <Route path="/procurement/quotations" element={<Quotations />} />
           <Route
-            path="/procurement/purchase-orders"
+            path="/procurement/purchase-orders"              
             element={<PurchaseOrders />}
           />
           <Route path="/procurement/deliveries" element={<Deliveries />} />

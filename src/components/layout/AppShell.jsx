@@ -17,6 +17,8 @@ export function AppShell() {
 
     // route-level guard
     const seg = location.pathname.split("/")[1] || "dashboard";
+
+    console.log("Seg : ", seg)
     if (!canView(current.role, seg)) {
         return <Navigate to="/dashboard" replace />;
     }
