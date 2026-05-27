@@ -22,6 +22,30 @@ import { Mic, Square, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { projectApi } from "@/api";
 
+// ── Fixes broken WebM duration metadata (Chrome MediaRecorder bug) ──────────
+// Chrome writes duration=Infinity in the WebM header. Seeking to a huge time
+// forces the browser to scan the file and rewrite the real duration.
+function fixBlobDuration(url) {
+  return new Promise((resolve) => {
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.src = url;
+    audio.onloadedmetadata = () => {
+      if (audio.duration === Infinity || isNaN(audio.duration)) {
+        audio.currentTime = 1e101; // seek past end → triggers scan
+        audio.ontimeupdate = () => {
+          audio.ontimeupdate = null;
+          audio.currentTime = 0;
+          resolve({ url, duration: Math.round(audio.duration) });
+        };
+      } else {
+        resolve({ url, duration: Math.round(audio.duration) });
+      }
+    };
+    audio.onerror = () => resolve({ url, duration: 0 }); // fallback
+  });
+}
+
 export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
   const [projects, setProjects] = useState([]);
   const [form, setForm] = useState({
@@ -32,9 +56,14 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
     notes: "",
   });
   const [recording, setRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [audioChunks, setAudioChunks] = useState([]);
+  const [elapsed, setElapsed] = useState(0); // seconds shown while recording
   const [loading, setLoading] = useState(false);
+
+  // ── refs (never stale inside callbacks) ──────────────────────────────────
+  const mediaRecorderRef = useRef(null);
+  const streamRef = useRef(null); // ← FIX 1: store stream so we can stop it immediately
+  const audioChunksRef = useRef([]);
+  const timerRef = useRef(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -46,45 +75,74 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
     }
   }, [open]);
 
+  // Clear timer on unmount
+  useEffect(() => () => clearInterval(timerRef.current), []);
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      setAudioChunks([]);
-      recorder.ondataavailable = (event) => {
-        setAudioChunks((prev) => [...prev, event.data]);
+      streamRef.current = stream; // ← store for stopRecording
+
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/mp4";
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data?.size > 0) audioChunksRef.current.push(e.data);
       };
+
       recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
-        // In real app, upload to server and get URL
-        // For demo, we create a local URL
-        const url = URL.createObjectURL(audioBlob);
-        setForm((prev) => ({ ...prev, audioUrl: url, duration: 0 }));
+        const chunks = audioChunksRef.current;
+        if (!chunks.length) {
+          toast.error("No audio captured — try again");
+          return;
+        }
+
+        const blob = new Blob(chunks, { type: mimeType });
+        const rawUrl = URL.createObjectURL(blob);
+
+        // ── FIX 2: patch WebM duration header so player shows real length ──
+        const { url, duration } = await fixBlobDuration(rawUrl);
+        setForm((prev) => ({ ...prev, audioUrl: url, duration }));
         toast.success("Recording saved");
       };
-      recorder.start();
-      setMediaRecorder(recorder);
+
+      recorder.start(250); // flush chunks every 250 ms
+      mediaRecorderRef.current = recorder;
       setRecording(true);
-    } catch (err) {
+      setElapsed(0);
+
+      // elapsed timer
+      timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
+    } catch {
       toast.error("Microphone access denied");
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach((track) => track.stop());
-      setMediaRecorder(null);
-      setRecording(false);
+    clearInterval(timerRef.current);
+
+    // ── FIX 1: stop mic tracks HERE, immediately, not inside onstop ──────
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+
+    if (mediaRecorderRef.current?.state !== "inactive") {
+      mediaRecorderRef.current.stop(); // still fires onstop → builds blob
     }
+    mediaRecorderRef.current = null;
+    setRecording(false);
   };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setForm((prev) => ({ ...prev, audioUrl: url }));
-    }
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setForm((prev) => ({ ...prev, audioUrl: url }));
   };
 
   const handleSubmit = async () => {
@@ -92,19 +150,26 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
     if (!form.audioUrl)
       return toast.error("Please record or upload an audio file");
     setLoading(true);
-    // In real implementation, you would upload the file to S3 via presigned URL
-    // For now, we simulate success
-    toast.success("Voice note created (demo – upload to server required)");
-    setLoading(false);
-    onOpenChange(false);
-    setForm({
-      projectId: "",
-      audioUrl: "",
-      duration: 0,
-      transcript: "",
-      notes: "",
-    });
+    try {
+      await onSubmit?.(form);
+      toast.success("Voice note created");
+      onOpenChange(false);
+      setForm({
+        projectId: "",
+        audioUrl: "",
+        duration: 0,
+        transcript: "",
+        notes: "",
+      });
+    } catch {
+      toast.error("Failed to save voice note");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const fmt = (s) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -112,7 +177,9 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
         <DialogHeader>
           <DialogTitle>Record Voice Note</DialogTitle>
         </DialogHeader>
+
         <div className="space-y-3">
+          {/* Project */}
           <div className="space-y-1">
             <Label>Project *</Label>
             <Select
@@ -131,9 +198,11 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Audio */}
           <div className="space-y-1">
             <Label>Audio</Label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               {!recording ? (
                 <Button
                   type="button"
@@ -154,7 +223,7 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => fileInputRef.current.click()}
+                onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="h-4 w-4 mr-2" /> Upload
               </Button>
@@ -165,13 +234,22 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
                 className="hidden"
                 onChange={handleFileUpload}
               />
+
+              {/* live timer shown while recording */}
+              {recording && (
+                <span className="ml-1 text-sm font-mono text-red-500 flex items-center gap-1">
+                  <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  {fmt(elapsed)}
+                </span>
+              )}
             </div>
+
             {form.audioUrl && (
-              <audio controls className="mt-2 w-full">
-                <source src={form.audioUrl} type="audio/mpeg" />
-              </audio>
+              <audio controls className="mt-2 w-full" src={form.audioUrl} />
             )}
           </div>
+
+          {/* Transcript */}
           <div className="space-y-1">
             <Label>Transcript (auto-generated optional)</Label>
             <Textarea
@@ -181,6 +259,8 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
               placeholder="Auto-generated transcript will appear here"
             />
           </div>
+
+          {/* Notes */}
           <div className="space-y-1">
             <Label>Notes</Label>
             <Input
@@ -190,6 +270,7 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
             />
           </div>
         </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel

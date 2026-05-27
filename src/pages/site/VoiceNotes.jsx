@@ -15,8 +15,10 @@ export function VoiceNotes({ canEdit }) {
     fetchVoiceNotes,
     markVoiceNoteAsRead,
     deleteVoiceNote,
+    createVoiceNote,
     loading,
   } = useSite();
+
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -98,7 +100,7 @@ export function VoiceNotes({ canEdit }) {
       <CreateVoiceNoteDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onSubmit={useSite().createVoiceNote}
+        onSubmit={createVoiceNote}
       />
     </div>
   );
