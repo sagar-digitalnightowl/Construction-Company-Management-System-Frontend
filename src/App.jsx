@@ -7,7 +7,6 @@ import Dashboard from "@/pages/Dashboard";
 import Users from "@/pages/Users";
 import Projects from "@/pages/projects/Projects";
 import Finance from "@/pages/Finance";
-import HR from "@/pages/HR";
 import CRM from "@/pages/CRM";
 import Documents from "@/pages/Documents";
 import Reports from "@/pages/Reports";
@@ -44,6 +43,9 @@ import MyInstallments from "./pages/booking/MyInstallments";
 import PendingBookings from "./pages/booking/PendingBookings";
 import CountDetail from "./pages/inventory/CountDetail";
 import TaskDetailPage from "./pages/projects/TaskDetailPage";
+import HR from "./pages/hr/HR";
+import EmployeeDetail from "./pages/hr/EmployeeDetail";
+import LaborDetail from "./pages/hr/LaborDetail";
 
 export default function App() {
   const { initAuth, loading } = useAuthStore((s) => s);
@@ -89,7 +91,7 @@ export default function App() {
           <Route path="/procurement/rfqs" element={<RFQs />} />
           <Route path="/procurement/quotations" element={<Quotations />} />
           <Route
-            path="/procurement/purchase-orders"              
+            path="/procurement/purchase-orders"
             element={<PurchaseOrders />}
           />
           <Route path="/procurement/deliveries" element={<Deliveries />} />
@@ -118,9 +120,12 @@ export default function App() {
           <Route path="/my-installments" element={<MyInstallments />} />
           <Route path="/pending-bookings" element={<PendingBookings />} />
 
+          <Route path="/hr" element={<HR />} />
+          <Route path="/hr/employees/:id" element={<EmployeeDetail />} />
+          <Route path="/hr/labors/:id" element={<LaborDetail />} />
+
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/finance" element={<Finance />} />
-          <Route path="/hr" element={<HR />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/reports" element={<Reports />} />

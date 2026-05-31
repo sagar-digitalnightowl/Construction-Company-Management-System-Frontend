@@ -147,14 +147,14 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
 
   const handleSubmit = async () => {
     if (!form.projectId) return toast.error("Project is required");
-    if (!form.audioUrl)
+    if (!form.audioUrl)                                                                        
       return toast.error("Please record or upload an audio file");
     setLoading(true);
-    try {
-      await onSubmit?.(form);
+    try {                
+      await onSubmit?.(form);             
       toast.success("Voice note created");
       onOpenChange(false);
-      setForm({
+      setForm({                                    
         projectId: "",
         audioUrl: "",
         duration: 0,
@@ -183,19 +183,19 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
           <div className="space-y-1">
             <Label>Project *</Label>
             <Select
-              value={form.projectId}
+              value={form.projectId}         
               onValueChange={(v) => setForm({ ...form, projectId: v })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
-              <SelectContent>
-                {projects.map((p) => (
-                  <SelectItem key={p._id} value={p._id}>
+              <SelectContent>                 
+                {projects.map((p) => (     
+                  <SelectItem key={p._id} value={p._id}>     
                     {p.name}
                   </SelectItem>
                 ))}
-              </SelectContent>
+              </SelectContent>                                           x  
             </Select>
           </div>
 
@@ -262,10 +262,10 @@ export function CreateVoiceNoteDialog({ open, onOpenChange, onSubmit }) {
 
           {/* Notes */}
           <div className="space-y-1">
-            <Label>Notes</Label>
-            <Input
+            <Label>Notes</Label>                          
+            <Input              
               value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}  
               placeholder="Additional notes"
             />
           </div>
