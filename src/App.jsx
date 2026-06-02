@@ -48,93 +48,93 @@ import EmployeeDetail from "./pages/hr/EmployeeDetail";
 import LaborDetail from "./pages/hr/LaborDetail";
 
 export default function App() {
-  const { initAuth, loading } = useAuthStore((s) => s);
+	const { initAuth, loading } = useAuthStore((s) => s);
 
-  useEffect(() => {
-    initAuth();
-  }, [initAuth]);
+	useEffect(() => {
+		initAuth();
+	}, [initAuth]);
 
-  if (loading) return null;
+	if (loading) return null;
 
-  return (
-    <>
-      {createPortal(
-        <Toaster
-          position="top-right"
-          richColors
-          expand={true}
-          portalProps={{
-            container: document.body,
-          }}
-        />,
-        document.body,
-      )}
+	return (
+		<>
+			{createPortal(
+				<Toaster
+					position="top-right"
+					richColors
+					expand={true}
+					portalProps={{
+						container: document.body,
+					}}
+				/>,
+				document.body,
+			)}
 
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+			<Routes>
+				<Route path="/login" element={<Login />} />
+				<Route path="/forgot-password" element={<ForgotPassword />} />
+				<Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        <Route element={<AppShell />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
+				<Route element={<AppShell />}>
+					<Route path="/dashboard" element={<Dashboard />} />
+					<Route path="/users" element={<Users />} />
 
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/project-templates" element={<ProjectTemplate />} />
-          <Route path="/projects/:id" element={<ProjectDetail />} />
+					<Route path="/projects" element={<Projects />} />
+					<Route path="/project-templates" element={<ProjectTemplate />} />
+					<Route path="/projects/:id" element={<ProjectDetail />} />
 
-          <Route path="/tasks/my-tasks" element={<MyTasks />} />
-          <Route path="/tasks/requests" element={<TaskRequests />} />
-          <Route path="/tasks/:taskId" element={<TaskDetailPage />} />
+					<Route path="/tasks/my-tasks" element={<MyTasks />} />
+					<Route path="/tasks/requests" element={<TaskRequests />} />
+					<Route path="/tasks/:taskId" element={<TaskDetailPage />} />
 
-          <Route path="/procurement/dashboard" element={<Procurement />} />
-          <Route path="/procurement/rfqs" element={<RFQs />} />
-          <Route path="/procurement/quotations" element={<Quotations />} />
-          <Route
-            path="/procurement/purchase-orders"
-            element={<PurchaseOrders />}
-          />
-          <Route path="/procurement/deliveries" element={<Deliveries />} />
+					<Route path="/procurement/dashboard" element={<Procurement />} />
+					<Route path="/procurement/rfqs" element={<RFQs />} />
+					<Route path="/procurement/quotations" element={<Quotations />} />
+					<Route
+						path="/procurement/purchase-orders"
+						element={<PurchaseOrders />}
+					/>
+					<Route path="/procurement/deliveries" element={<Deliveries />} />
 
-          <Route path="/inventory/stock-management" element={<Inventory />} />
-          <Route path="/inventory/counts/:id" element={<CountDetail />} />
-          <Route path="/inventory/materials" element={<Materials />} />
-          <Route path="/inventory/material/:id" element={<MaterialDetail />} />
-          <Route path="/inventory/warehouses" element={<Warehouses />} />
-          <Route
-            path="/inventory/transactions"
-            element={<StockTransactions />}
-          />
-          <Route path="/inventory/alerts" element={<LowStockAlerts />} />
-          <Route path="/inventory/valuation" element={<Valuation />} />
-          <Route path="/inventory/counts" element={<StockCounts />} />
+					<Route path="/inventory/stock-management" element={<Inventory />} />
+					<Route path="/inventory/counts/:id" element={<CountDetail />} />
+					<Route path="/inventory/materials" element={<Materials />} />
+					<Route path="/inventory/material/:id" element={<MaterialDetail />} />
+					<Route path="/inventory/warehouses" element={<Warehouses />} />
+					<Route
+						path="/inventory/transactions"
+						element={<StockTransactions />}
+					/>
+					<Route path="/inventory/alerts" element={<LowStockAlerts />} />
+					<Route path="/inventory/valuation" element={<Valuation />} />
+					<Route path="/inventory/counts" element={<StockCounts />} />
 
-          <Route path="/site-management" element={<SiteManagement />} />
+					<Route path="/site-management" element={<SiteManagement />} />
 
-          <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+					<Route path="/vendor/dashboard" element={<VendorDashboard />} />
 
-          <Route path="/bookings" element={<Bookings />} />
-          <Route path="/bookings/:id" element={<BookingDetail />} />
-          <Route path="/my-bookings" element={<MyBookings />} />
-          <Route path="/my-bookings/:id" element={<BookingDetail />} />
-          <Route path="/my-installments" element={<MyInstallments />} />
-          <Route path="/pending-bookings" element={<PendingBookings />} />
+					<Route path="/bookings" element={<Bookings />} />
+					<Route path="/bookings/:id" element={<BookingDetail />} />
+					<Route path="/my-bookings" element={<MyBookings />} />
+					<Route path="/my-bookings/:id" element={<BookingDetail />} />
+					<Route path="/my-installments" element={<MyInstallments />} />
+					<Route path="/pending-bookings" element={<PendingBookings />} />
 
-          <Route path="/hr" element={<HR />} />
-          <Route path="/hr/employees/:id" element={<EmployeeDetail />} />
-          <Route path="/hr/labors/:id" element={<LaborDetail />} />
+					<Route path="/hr" element={<HR />} />
+					<Route path="/hr/employees/:id" element={<EmployeeDetail />} />
+					<Route path="/hr/labors/:id" element={<LaborDetail />} />
 
-          <Route path="/inventory" element={<Inventory />} />
-          <Route path="/finance" element={<Finance />} />
-          <Route path="/crm" element={<CRM />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
-        </Route>
+					<Route path="/inventory" element={<Inventory />} />
+					<Route path="/finance" element={<Finance />} />
+					<Route path="/crm" element={<CRM />} />
+					<Route path="/documents" element={<Documents />} />
+					<Route path="/reports" element={<Reports />} />
+					<Route path="/settings" element={<Settings />} />
+				</Route>
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </>
-  );
+				<Route path="/" element={<Navigate to="/dashboard" replace />} />
+				<Route path="*" element={<Navigate to="/dashboard" replace />} />
+			</Routes>
+		</>
+	);
 }
