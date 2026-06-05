@@ -33,13 +33,13 @@ export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
 
-  // Extract data from the unified object
+  // Extract data from the unified object   
   const employees = employeesData?.employees || [];
-  const pagination = employeesData?.pagination || {
+  const pagination = employeesData?.pagination || {                       
     page: 1,
     limit: 10,
-    total: 0,
-    pages: 0,
+    total: 0,              
+    pages: 0,                         
   };
 
   const handleViewEmployee = (employeeId) => {
@@ -50,8 +50,8 @@ export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.pages) {
       onRefresh({ page: newPage, limit: pagination.limit });
-    }
-  };
+    }                     
+  };                         
 
   return (
     <div className="space-y-4">
@@ -62,7 +62,7 @@ export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
         {onlyAdmin && (
           <Button size="sm" onClick={() => setDialogOpen(true)}>
             <Plus className="h-3 w-3 mr-1" /> Add Employee
-          </Button>
+          </Button>                        
         )}
       </div>
 
