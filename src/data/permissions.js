@@ -15,7 +15,7 @@ export const ROLES = {
 
 // per-resource: who can VIEW the page
 export const VIEW = {
-    dashboard: ["admin", "director", "project_manager", "site_engineer", "accountant", "hr_manager", "vendor", "client"],
+    dashboard: ["admin", "director", "project_manager", "site_engineer", "accountant", "hr_manager", "vendor", "client", "employee"],
     users: ["admin"],
     projects: ["admin", "director", "project_manager", "site_engineer", "accountant"],
     "project-templates": ["admin", "director", "project_manager", "site_engineer", "accountant"],
@@ -36,16 +36,17 @@ export const VIEW = {
     "inventory-alerts": ["admin", "director", "project_manager", "site_engineer"],
     "inventory-valuation": ["admin", "director", "project_manager", "site_engineer"],
     "inventory-counts": ["admin", "director", "project_manager", "site_engineer"],
-    bookings: ["admin", "director", "project_manager", "site_engineer"],
+    bookings: ["admin", "director", "project_manager", "site_engineer", "employee"],
     "my-bookings": ["client"],
     "my-installments": ["client"],
     "pending-bookings": ["admin", "director", "project_manager", "site_engineer"],
     finance: ["admin", "director", "accountant"],
     hr: ["admin", "director", "hr_manager"],
-    crm: ["admin", "director", "project_manager"],
+    leaves: ["admin", "director", "project_manager", "site_engineer", "accountant", "hr_manager", "employee"],
+    crm: ["admin", "director", "project_manager", "hr_manager", "employee"],
     documents: ["admin", "director", "project_manager", "site_engineer", "accountant", "vendor"],
     reports: ["admin", "director"],
-    settings: ["admin", "director", "project_manager", "site_engineer", "accountant", "hr_manager", "vendor", "client"],
+    settings: ["admin", "director", "project_manager", "site_engineer", "accountant", "hr_manager", "vendor", "client", "employee"],
 };
 
 // who can mutate (create / edit / delete) records on a resource
@@ -67,7 +68,7 @@ export const MUTATE = {
     booking_payment: ['admin', 'director', 'project_manager', 'accountant'],
     finance: ["admin", "accountant"],
     hr: ["admin", "hr_manager"],
-    crm: ["admin", "project_manager"],
+    crm: ["admin", "director", "hr_manager",],
     documents: ["admin", "project_manager", "site_engineer", "accountant"],
 };
 

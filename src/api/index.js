@@ -7,4 +7,5 @@ export * from "./siteApi";
 export * from "./users";
 export * from "./vendorApi";
 export * from "./bookingApi";
+export * from "./leadApi";
 

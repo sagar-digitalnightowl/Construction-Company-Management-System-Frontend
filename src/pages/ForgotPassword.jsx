@@ -37,7 +37,7 @@ export default function ForgotPassword() {
                         <ConstructionIcon className="h-6 w-6" />
                     </div>
                     <div className="font-display text-2xl font-semibold">
-                        CCMS
+                        Ashirwaad
                     </div>
                 </div>
 

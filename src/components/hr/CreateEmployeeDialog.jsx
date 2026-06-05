@@ -461,6 +461,8 @@ export function CreateEmployeeDialog({ open, onOpenChange, onSuccess }) {
 											<SelectItem value="site_engineer">Site Engineer</SelectItem>
 											<SelectItem value="accountant">Accountant</SelectItem>
 											<SelectItem value="hr_manager">HR Manager</SelectItem>
+											<SelectItem value="employee">Employee</SelectItem>
+											<SelectItem value="vendor">Vendor</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>

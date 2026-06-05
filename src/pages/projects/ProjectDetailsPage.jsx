@@ -32,7 +32,7 @@ import { DprTab } from "@/components/project/DprTab";
 import { ChecklistTab } from "@/components/project/ChecklistTab";
 import { ResourceTab } from "@/components/project/ResourceTab";
 import { DocumentsTab } from "@/components/project/DocumentsTab";
-import { UnitsTab } from "@/components/project/UnitsTab";
+import { TowersTab } from "@/components/project/TowersTab";
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -92,6 +92,10 @@ export default function ProjectDetail() {
               <BarChart3 className="h-3.5 w-3.5 mr-1.5 ml-2" />
               Overview
             </TabsTrigger>
+             <TabsTrigger value="towers">
+              <Building2 className="h-3.5 w-3.5 mr-1.5" />
+              Tower
+            </TabsTrigger>
             <TabsTrigger value="dpr">
               <FileText className="h-3.5 w-3.5 mr-1.5" />
               DPR
@@ -105,10 +109,7 @@ export default function ProjectDetail() {
               Resources
             </TabsTrigger>
 
-            <TabsTrigger value="units">
-              <Building2 className="h-3.5 w-3.5 mr-1.5" />
-              Units
-            </TabsTrigger>
+           
 
             <TabsTrigger value="milestones">
               <Flag className="h-3.5 w-3.5 mr-1.5" />
@@ -176,8 +177,8 @@ export default function ProjectDetail() {
             <ResourceTab projectId={project._id} canEdit={canEdit} />
           </TabsContent>
 
-          <TabsContent value="units">
-            <UnitsTab projectId={project._id} />
+          <TabsContent value="towers">
+            <TowersTab projectId={project._id} />
           </TabsContent>
 
           <TabsContent value="milestones">

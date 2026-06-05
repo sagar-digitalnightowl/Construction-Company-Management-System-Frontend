@@ -79,7 +79,7 @@ export default function Login() {
                             <ConstructionIcon className="h-6 w-6" />
                         </div>
                         <div>
-                            <div className="font-display text-2xl font-semibold">Construction Company Management System</div>
+                            <div className="font-display text-2xl font-semibold">Ashirwaad</div>
                             <div className="text-[11px] uppercase tracking-[0.22em] text-sidebar-foreground/55">Construction Operations Platform</div>
                         </div>
                     </div>

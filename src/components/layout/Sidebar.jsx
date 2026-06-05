@@ -99,6 +99,12 @@ const navGroups = [
                 key: "hr",
             },
             {
+                to: "/leaves",
+                label: "Leaves & Attendance",
+                icon: Users2,
+                key: "leaves",
+            },
+            {
                 to: "/crm",
                 label: "CRM & Clients",
                 icon: HeartHandshake,
@@ -159,7 +165,7 @@ export function Sidebar({ role, onClickLink }) {
                     <ConstructionIcon className="h-5 w-5" />
                 </div>
                 <div className="leading-tight">
-                    <div className="font-display text-[1.05rem] font-semibold tracking-tight">CCMS</div>
+                    <div className="font-display text-[1.05rem] font-semibold tracking-tight">Ashirwaad</div>
                     <div className="text-[10.5px] uppercase tracking-[0.18em] text-sidebar-foreground/55">
                         Construction OS
                     </div>

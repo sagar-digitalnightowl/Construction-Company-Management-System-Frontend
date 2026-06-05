@@ -3,28 +3,34 @@ import { toast } from "sonner";
 import { hrApi } from "@/api/hrApi";
 
 export const useHR = () => {
-	// ---- Employees ----
+	// ---- Employees (global list) ----
 	const [employees, setEmployees] = useState([]);
 	const [employee, setEmployee] = useState(null);
 	const [employeeStats, setEmployeeStats] = useState(null);
+
+	// ---- Current employee specific data (for detail view) ----
+	const [currentEmployeeAttendance, setCurrentEmployeeAttendance] = useState([]);
+	const [currentEmployeeLeaves, setCurrentEmployeeLeaves] = useState([]);
+	const [currentEmployeeSalarySlips, setCurrentEmployeeSalarySlips] = useState([]);
+	const [currentEmployeeLeaveBalance, setCurrentEmployeeLeaveBalance] = useState(null);
 
 	// ---- Departments ----
 	const [departments, setDepartments] = useState([]);
 	const [departmentEmployees, setDepartmentEmployees] = useState([]);
 
-	// ---- Attendance ----
+	// ---- Attendance (global) ----
 	const [attendanceRecords, setAttendanceRecords] = useState([]);
-	const [myAttendance, setMyAttendance] = useState([]);
+	const [myAttendance, setMyAttendance] = useState({});
 	const [attendanceStats, setAttendanceStats] = useState(null);
 	const [todayAnalytics, setTodayAnalytics] = useState(null);
 
-	// ---- Leaves ----
+	// ---- Leaves (global) ----
 	const [leaves, setLeaves] = useState([]);
 	const [myLeaves, setMyLeaves] = useState([]);
 	const [leaveBalance, setLeaveBalance] = useState(null);
 	const [employeeLeaveBalance, setEmployeeLeaveBalance] = useState(null);
 
-	// ---- Salary ----
+	// ---- Salary (global) ----
 	const [salarySlips, setSalarySlips] = useState([]);
 	const [employeeSalarySlips, setEmployeeSalarySlips] = useState([]);
 
@@ -58,14 +64,7 @@ export const useHR = () => {
 		try {
 			const res = await hrApi.getAllEmployees(params);
 			setEmployees(res.data?.data?.employees || []);
-			setPagination(
-				res.data?.data?.pagination || {
-					page: 1,
-					limit: 10,
-					total: 0,
-					pages: 0,
-				},
-			);
+			setPagination(res.data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 0 });
 		} catch (err) {
 			toast.error("Failed to load employees");
 		} finally {
@@ -81,6 +80,63 @@ export const useHR = () => {
 			return res.data?.data;
 		} catch (err) {
 			toast.error("Failed to load employee details");
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	// ---- Employee specific data fetchers (sets dedicated state) ----
+	const fetchCurrentEmployeeAttendance = useCallback(async (employeeId) => {
+		setLoading(true);
+		try {
+			const res = await hrApi.getEmployeeAttendanceById(employeeId);
+			setCurrentEmployeeAttendance(res.data?.data?.attendance || []);
+			return res.data?.data;
+		} catch (err) {
+			toast.error("Failed to load employee attendance");
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const fetchCurrentEmployeeLeaves = useCallback(async (employeeId) => {
+		setLoading(true);
+		try {
+			const res = await hrApi.getAllLeaves({ employeeId });
+			setCurrentEmployeeLeaves(res.data?.data?.leaves || []);
+			return res.data?.data;
+		} catch (err) {
+			toast.error("Failed to load employee leaves");
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const fetchCurrentEmployeeLeaveBalance = useCallback(async (employeeId) => {
+		setLoading(true);
+		try {
+			const res = await hrApi.getEmployeeLeaveBalance(employeeId);
+			setCurrentEmployeeLeaveBalance(res.data?.data);
+			return res.data?.data;
+		} catch (err) {
+			toast.error("Failed to load employee leave balance");
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const fetchCurrentEmployeeSalarySlips = useCallback(async (employeeId) => {
+		setLoading(true);
+		try {
+			const res = await hrApi.getEmployeeAllSalarySlips(employeeId);
+			setCurrentEmployeeSalarySlips(res.data?.data || []);
+			return res.data?.data;
+		} catch (err) {
+			toast.error("Failed to load employee salary slips");
 			return null;
 		} finally {
 			setLoading(false);
@@ -104,16 +160,13 @@ export const useHR = () => {
 			await fetchEmployees();
 			return true;
 		} catch (err) {
-			toast.error(
-				err.response?.data?.message || "Failed to create employee",
-			);
+			toast.error(err.response?.data?.message || "Failed to create employee");
 			return false;
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	// new function to register employee
 	const registerEmployee = async (data) => {
 		try {
 			const res = await hrApi.registerEmployee(data);
@@ -121,28 +174,19 @@ export const useHR = () => {
 			return res.data;
 		} catch (error) {
 			console.error(error);
-			toast.error(
-				error?.response?.data?.message || "Failed to create employee",
-			);
+			toast.error(error?.response?.data?.message || "Failed to create employee");
 			return null;
 		}
 	};
 
-	// after registration verify otp
 	const verifyOtp = async (payload) => {
 		setLoading(true);
-
 		try {
 			const res = await hrApi.verifyOtp(payload);
-
 			toast.success(res.data?.message || "OTP verified successfully");
-
 			return res.data;
 		} catch (err) {
-			toast.error(
-				err?.response?.data?.message || "OTP verification failed",
-			);
-
+			toast.error(err?.response?.data?.message || "OTP verification failed");
 			return null;
 		} finally {
 			setLoading(false);
@@ -177,21 +221,14 @@ export const useHR = () => {
 		}
 	};
 
-	// delete user
 	const deleteUser = useCallback(async (userId) => {
 		setLoading(true);
-
 		try {
 			const res = await hrApi.deleteUser(userId);
-
 			toast.success(res.data?.message || "Employee deleted successfully");
-
 			return true;
 		} catch (err) {
-			toast.error(
-				err?.response?.data?.message || "Failed to delete employee",
-			);
-
+			toast.error(err?.response?.data?.message || "Failed to delete employee");
 			return false;
 		} finally {
 			setLoading(false);
@@ -211,23 +248,17 @@ export const useHR = () => {
 		}
 	}, []);
 
-	const fetchDepartmentEmployees = useCallback(
-		async (departmentId, params = {}) => {
-			setLoading(true);
-			try {
-				const res = await hrApi.getEmployeesByDepartment(
-					departmentId,
-					params,
-				);
-				setDepartmentEmployees(res.data?.data?.employees || []);
-			} catch (err) {
-				toast.error("Failed to load department employees");
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
+	const fetchDepartmentEmployees = useCallback(async (departmentId, params = {}) => {
+		setLoading(true);
+		try {
+			const res = await hrApi.getEmployeesByDepartment(departmentId, params);
+			setDepartmentEmployees(res.data?.data?.employees || []);
+		} catch (err) {
+			toast.error("Failed to load department employees");
+		} finally {
+			setLoading(false);
+		}
+	}, []);
 
 	const createDepartment = async (data) => {
 		setLoading(true);
@@ -237,9 +268,7 @@ export const useHR = () => {
 			await fetchDepartments();
 			return true;
 		} catch (err) {
-			toast.error(
-				err.response?.data?.message || "Failed to create department",
-			);
+			toast.error(err.response?.data?.message || "Failed to create department");
 			return false;
 		} finally {
 			setLoading(false);
@@ -274,7 +303,7 @@ export const useHR = () => {
 		}
 	};
 
-	// ==================== Attendance ====================
+	// ==================== Attendance (global) ====================
 	const checkIn = async () => {
 		setLoading(true);
 		try {
@@ -307,7 +336,7 @@ export const useHR = () => {
 		setLoading(true);
 		try {
 			const res = await hrApi.getMyAttendance(params);
-			setMyAttendance(res.data?.data?.attendance || []);
+			setMyAttendance(res.data?.data || {});
 		} catch (err) {
 			toast.error("Failed to load your attendance");
 		} finally {
@@ -327,25 +356,6 @@ export const useHR = () => {
 		}
 	}, []);
 
-	const fetchEmployeeAttendanceById = useCallback(
-		async (employeeId, params = {}) => {
-			setLoading(true);
-			try {
-				const res = await hrApi.getEmployeeAttendanceById(
-					employeeId,
-					params,
-				);
-				return res.data;
-			} catch (err) {
-				toast.error("Failed to load employee attendance");
-				return null;
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
-
 	const fetchAttendanceStats = useCallback(async () => {
 		try {
 			const res = await hrApi.getAttendanceStats();
@@ -364,7 +374,7 @@ export const useHR = () => {
 		}
 	}, []);
 
-	// ==================== Leaves ====================
+	// ==================== Leaves (global) ====================
 	const fetchLeaves = useCallback(async (params = {}) => {
 		setLoading(true);
 		try {
@@ -406,8 +416,10 @@ export const useHR = () => {
 		try {
 			const res = await hrApi.getEmployeeLeaveBalance(employeeId);
 			setEmployeeLeaveBalance(res.data?.data);
+			return res.data?.data;
 		} catch (err) {
 			toast.error("Failed to load employee leave balance");
+			return null;
 		} finally {
 			setLoading(false);
 		}
@@ -444,7 +456,7 @@ export const useHR = () => {
 		}
 	};
 
-	// ==================== Salary ====================
+	// ==================== Salary (global) ====================
 	const fetchMySalarySlips = useCallback(async () => {
 		setLoading(true);
 		try {
@@ -462,8 +474,10 @@ export const useHR = () => {
 		try {
 			const res = await hrApi.getEmployeeAllSalarySlips(employeeId);
 			setEmployeeSalarySlips(res.data?.data || []);
+			return res.data?.data;
 		} catch (err) {
 			toast.error("Failed to load employee salary slips");
+			return null;
 		} finally {
 			setLoading(false);
 		}
@@ -572,8 +586,10 @@ export const useHR = () => {
 		try {
 			const res = await hrApi.getEmployeeCurrentShift(employeeId);
 			setEmployeeShift(res.data?.data);
+			return res.data?.data;
 		} catch (err) {
 			toast.error("Failed to load employee shift");
+			return null;
 		} finally {
 			setLoading(false);
 		}
@@ -623,9 +639,7 @@ export const useHR = () => {
 			await fetchLabors();
 			return true;
 		} catch (err) {
-			toast.error(
-				err.response?.data?.message || "Failed to create labor",
-			);
+			toast.error(err.response?.data?.message || "Failed to create labor");
 			return false;
 		} finally {
 			setLoading(false);
@@ -725,6 +739,7 @@ export const useHR = () => {
 			return res.data?.data;
 		} catch (err) {
 			toast.error("Failed to load labor attendance");
+			return null;
 		} finally {
 			setLoading(false);
 		}
@@ -760,24 +775,19 @@ export const useHR = () => {
 		}
 	};
 
-	const fetchLaborAttendanceSummary = useCallback(
-		async (laborId, params = {}) => {
-			setLoading(true);
-			try {
-				const res = await hrApi.getLaborAttendanceSummary(
-					laborId,
-					params,
-				);
-				setLaborAttendanceSummary(res.data?.data);
-				return res.data?.data;
-			} catch (err) {
-				toast.error("Failed to load attendance summary");
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
+	const fetchLaborAttendanceSummary = useCallback(async (laborId, params = {}) => {
+		setLoading(true);
+		try {
+			const res = await hrApi.getLaborAttendanceSummary(laborId, params);
+			setLaborAttendanceSummary(res.data?.data);
+			return res.data?.data;
+		} catch (err) {
+			toast.error("Failed to load attendance summary");
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
 
 	const fetchDailyLaborAttendance = useCallback(async (date, params = {}) => {
 		setLoading(true);
@@ -845,22 +855,29 @@ export const useHR = () => {
 		announcements,
 		loading,
 		pagination,
+
+		// Current employee specific data
+		currentEmployeeAttendance,
+		currentEmployeeLeaves,
+		currentEmployeeSalarySlips,
+		currentEmployeeLeaveBalance,
+
 		// Employee actions
 		fetchEmployees,
 		fetchEmployeeById,
 		fetchEmployeeStats,
 		createEmployee,
-
-		// new function to register employee
 		registerEmployee,
-		// new function to verify otp after registration
 		verifyOtp,
-
 		updateEmployee,
 		deleteEmployee,
-
-		// delete user
 		deleteUser,
+
+		// Current employee specific fetchers
+		fetchCurrentEmployeeAttendance,
+		fetchCurrentEmployeeLeaves,
+		fetchCurrentEmployeeLeaveBalance,
+		fetchCurrentEmployeeSalarySlips,
 
 		// Department actions
 		fetchDepartments,
@@ -868,14 +885,15 @@ export const useHR = () => {
 		createDepartment,
 		updateDepartment,
 		deleteDepartment,
+
 		// Attendance actions
 		checkIn,
 		checkOut,
 		fetchMyAttendance,
 		fetchAllAttendance,
-		fetchEmployeeAttendanceById,
 		fetchAttendanceStats,
 		fetchTodayAnalytics,
+
 		// Leave actions
 		fetchLeaves,
 		fetchMyLeaves,
@@ -883,11 +901,13 @@ export const useHR = () => {
 		fetchEmployeeLeaveBalance,
 		applyLeave,
 		processLeave,
+
 		// Salary actions
 		fetchMySalarySlips,
 		fetchEmployeeSalarySlips,
 		generateSalarySlip,
 		updateSalaryStatus,
+
 		// Shift actions
 		fetchShifts,
 		createShift,
@@ -895,6 +915,7 @@ export const useHR = () => {
 		deleteShift,
 		assignShiftToEmployee,
 		fetchEmployeeCurrentShift,
+
 		// Labor actions
 		fetchLabors,
 		fetchLaborById,
@@ -911,6 +932,7 @@ export const useHR = () => {
 		markBulkLaborAttendance,
 		fetchLaborAttendanceSummary,
 		fetchDailyLaborAttendance,
+
 		// Announcement actions
 		fetchAnnouncements,
 		createAnnouncement,

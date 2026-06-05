@@ -1,204 +1,3 @@
-// // src/hooks/useProject.js
-// import { useState, useCallback } from 'react';
-// import { toast } from 'sonner';
-// import { projectApi } from '@/api/projectApi';
-
-// export const useProject = () => {
-//     const [loading, setLoading] = useState(false);
-//     const [project, setProject] = useState(null);
-//     const [milestones, setMilestones] = useState([]);
-//     const [boq, setBoq] = useState({ items: [], totalAmount: 0, isApproved: false });
-//     const [comments, setComments] = useState([]);
-//     const [issues, setIssues] = useState([]);
-//     const [risks, setRisks] = useState([]);
-//     const [activity, setActivity] = useState([]);
-//     const [materialRequests, setMaterialRequests] = useState([]);
-//     const [documents, setDocuments] = useState([]);
-
-//     const fetchProject = useCallback(async (id, loading = true) => {
-//         if (loading) setLoading(true);
-//         try {
-//             const res = await projectApi.getById(id);
-//             const data = res.data?.data;
-//             setProject(data?.project);
-//             setMilestones(data?.milestones || []);
-//             setBoq(data?.boq || { items: [], totalAmount: 0, isApproved: false });
-//             setComments(data?.comments || []);
-//             setIssues(data?.project?.issues || []);
-//             setRisks(data?.project?.risks || []);
-//             setMaterialRequests(data?.materialRequests || []);
-//             return data;
-//         } catch (err) {
-//             toast.error(err.response?.data?.message || 'Failed to load project');
-//             throw err;
-//         } finally {
-//             setLoading(false);
-//         }
-//     }, []);
-
-//     const updateProgress = async (id, progress) => {
-//         try {
-//             await projectApi.updateProgress(id, { progress });
-//             setProject(prev => ({ ...prev, progress }));
-//             toast.success('Progress updated');
-//             return true;
-//         } catch (err) {
-//             toast.error('Failed to update progress');
-//             return false;
-//         }
-//     };
-
-//     const updatePhase = async (id, phase) => {
-//         try {
-//             await projectApi.updatePhase(id, { phase });
-//             setProject(prev => ({ ...prev, currentPhase: phase }));
-//             toast.success('Phase updated');
-//             return true;
-//         } catch (err) {
-//             toast.error('Failed to update phase');
-//             return false;
-//         }
-//     };
-
-//     const addMilestone = async (id, data) => {
-//         try {
-//             const res = await projectApi.addMilestone(id, data);
-//             if (res.data.success) {
-//                 await fetchProject(id, false);
-//                 toast.success('Milestone added');
-//                 return true;
-//             }
-//         } catch (err) {
-//             toast.error('Failed to add milestone');
-//             return false;
-//         }
-//     };
-
-//     const addBOQItem = async (id, data) => {
-//         try {
-//             const res = await projectApi.addBOQItem(id, data);
-//             if (res.data.success) {
-//                 await fetchProject(id, false);
-//                 toast.success('BOQ item added');
-//                 return true;
-//             }
-//         } catch (err) {
-//             toast.error('Failed to add BOQ item');
-//             return false;
-//         }
-//     };
-
-//     const addComment = async (id, text) => {
-//         try {
-//             const res = await projectApi.addComment(id, { comment: text });
-//             if (res.data.success) {
-//                 await fetchProject(id, false);
-//                 toast.success('Comment added');
-//                 return true;
-//             }
-//         } catch (err) {
-//             toast.error('Failed to add comment');
-//             return false;
-//         }
-//     };
-
-//     const addRisk = async (id, data) => {
-//         try {
-//             const res = await projectApi.addRisk(id, data);
-//             if (res.data.success) {
-//                 await fetchProject(id, false);
-//                 toast.success('Risk added');
-//                 return true;
-//             }
-//         } catch (err) {
-//             toast.error('Failed to add risk');
-//             return false;
-//         }
-//     };
-
-//     const addIssue = async (id, data) => {
-//         try {
-//             const res = await projectApi.reportIssue(id, data);
-//             if (res.data.success) {
-//                 await fetchProject(id, false);
-//                 toast.success('Issue reported');
-//                 return true;
-//             }
-//         } catch (err) {
-//             toast.error(err.response?.data?.message || 'Failed to report issue');
-//             return false;
-//         }
-//     };
-
-//     const resolveIssue = async (projectId, issueId) => {
-//         try {
-//             const res = await projectApi.resolveIssue(projectId, issueId, { resolved: true });
-//             if (res.data.success) {
-//                 await fetchProject(projectId, false);
-//                 toast.success('Issue resolved');
-//                 return true;
-//             }
-//         } catch (err) {
-//             toast.error('Failed to resolve issue');
-//             return false;
-//         }
-//     };
-
-//     const createMaterialRequest = async (id, data) => {
-//         try {
-//             const res = await projectApi.createMaterialRequest(id, data);
-//             if (res.data.success) {
-//                 await fetchProject(id, false);
-//                 toast.success('Material request created');
-//                 return true;
-//             }
-//         } catch (err) {
-//             toast.error('Failed to create request');
-//             return false;
-//         }
-//     };
-
-//     const assignTeam = async (id, userIds) => {
-//         try {
-//             await projectApi.assignTeam(id, { teamMembers: userIds });
-//             await fetchProject(id, false);
-//             toast.success('Team members added');
-//             return true;
-//         } catch (err) {
-//             toast.error('Failed to assign team');
-//             return false;
-//         }
-//     };
-
-//     return {
-//         loading,
-//         project,
-//         milestones,
-//         boq,
-//         comments,
-//         issues,
-//         risks,
-//         activity,
-//         materialRequests,
-//         documents,
-//         fetchProject,
-//         updateProgress,
-//         updatePhase,
-//         addMilestone,
-//         addBOQItem,
-//         addComment,
-//         addRisk,
-//         addIssue,
-//         resolveIssue,
-//         createMaterialRequest,
-//         assignTeam,
-//     };
-// };
-
-
-
-
-
 // src/hooks/useProject.js
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
@@ -228,6 +27,14 @@ export const useProject = () => {
     const [activityPagination, setActivityPagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
 
     const [unitsData, setUnitsData] = useState({ units: [], statistics: null });
+
+
+    const [towersData, setTowersData] = useState({
+        projectId: null,
+        projectName: "",
+        totalTowers: 0,
+        towers: [],
+    });
 
     // Existing fetchProject
     const fetchProject = useCallback(async (id, showLoading = true) => {
@@ -738,7 +545,185 @@ export const useProject = () => {
             return null;
         }
     }, []);
-    
+
+
+
+
+    const fetchTowers = useCallback(async (projectId, showLoading = false) => {
+        if (showLoading) setLoading(true);
+        try {
+            const res = await projectApi.towers.getAll(projectId);
+            if (res.data.success) {
+                setTowersData(res.data.data);
+            }
+        } catch (err) {
+            toast.error('Failed to load towers');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const addTower = useCallback(async (projectId, towerData) => {
+        try {
+            const res = await projectApi.towers.create(projectId, towerData);
+            if (res.data.success) {
+                toast.success('Tower added');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to add tower');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const updateTower = useCallback(async (projectId, towerIndex, towerData) => {
+        try {
+            const res = await projectApi.towers.update(projectId, towerIndex, towerData);
+            if (res.data.success) {
+                toast.success('Tower updated');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to update tower');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const deleteTower = useCallback(async (projectId, towerIndex) => {
+        try {
+            const res = await projectApi.towers.delete(projectId, towerIndex);
+            if (res.data.success) {
+                toast.success('Tower deleted');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to delete tower');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const addFloor = useCallback(async (projectId, towerIndex, floorData) => {
+        try {
+            const res = await projectApi.towers.addFloor(projectId, towerIndex, floorData);
+            if (res.data.success) {
+                toast.success('Floor added');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to add floor');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const updateFloor = useCallback(async (projectId, towerIndex, floorIndex, floorData) => {
+        try {
+            const res = await projectApi.towers.updateFloor(projectId, towerIndex, floorIndex, floorData);
+            if (res.data.success) {
+                toast.success('Floor updated');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to update floor');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const deleteFloor = useCallback(async (projectId, towerIndex, floorIndex) => {
+        try {
+            const res = await projectApi.towers.deleteFloor(projectId, towerIndex, floorIndex);
+            if (res.data.success) {
+                toast.success('Floor deleted');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to delete floor');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const addFlat = useCallback(async (projectId, towerIndex, floorIndex, flatData) => {
+        try {
+            const res = await projectApi.towers.addFlat(projectId, towerIndex, floorIndex, flatData);
+            if (res.data.success) {
+                toast.success('Flat added');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to add flat');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const updateFlat = useCallback(async (projectId, towerIndex, floorIndex, flatIndex, flatData) => {
+        try {
+            const res = await projectApi.towers.updateFlat(projectId, towerIndex, floorIndex, flatIndex, flatData);
+            if (res.data.success) {
+                toast.success('Flat updated');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to update flat');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const deleteFlat = useCallback(async (projectId, towerIndex, floorIndex, flatIndex) => {
+        try {
+            const res = await projectApi.towers.deleteFlat(projectId, towerIndex, floorIndex, flatIndex);
+            if (res.data.success) {
+                toast.success('Flat deleted');
+                await fetchTowers(projectId, false);
+                return true;
+            }
+            throw new Error(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to delete flat');
+            return false;
+        }
+    }, [fetchTowers]);
+
+    const fetchAvailableFlats = useCallback(async (projectId, towerName, params) => {
+        try {
+            const res = await projectApi.towers.getAvailableFlats(projectId, towerName);
+            if (res.data.success) {
+                return res.data.data;
+            }
+            return null;
+        } catch (err) {
+            toast.error('Failed to load available flats');
+            return null;
+        }
+    }, []);
+
+    const fetchAllFlats = useCallback(async (projectId, params) => {
+        try {
+            const res = await projectApi.towers.getAllFlats(projectId, params);
+            if (res.data.success) {
+                return res.data.data;
+            }
+            return [];
+        } catch (err) {
+            toast.error('Failed to load flats');
+            return [];
+        }
+    }, []);
+
 
 
     return {
@@ -818,5 +803,22 @@ export const useProject = () => {
         fetchDocuments,
         uploadDocument,
         deleteDocument,
+
+
+
+        // Towers
+        towersData,
+        fetchTowers,
+        addTower,
+        updateTower,
+        deleteTower,
+        addFloor,
+        updateFloor,
+        deleteFloor,
+        addFlat,
+        updateFlat,
+        deleteFlat,
+        fetchAvailableFlats,
+        fetchAllFlats,
     };
 };

@@ -46,6 +46,8 @@ import TaskDetailPage from "./pages/projects/TaskDetailPage";
 import HR from "./pages/hr/HR";
 import EmployeeDetail from "./pages/hr/EmployeeDetail";
 import LaborDetail from "./pages/hr/LaborDetail";
+import EmployeeDashboard from "./pages/hr/EmployeeDashboard";
+import LeadManagement from "./pages/lead/LeadManagement";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -123,6 +125,9 @@ export default function App() {
 					<Route path="/hr" element={<HR />} />
 					<Route path="/hr/employees/:id" element={<EmployeeDetail />} />
 					<Route path="/hr/labors/:id" element={<LaborDetail />} />
+					<Route path="/leaves" element={<EmployeeDashboard />} />
+
+					<Route path="/crm" element={<LeadManagement />} />
 
 					<Route path="/inventory" element={<Inventory />} />
 					<Route path="/finance" element={<Finance />} />
