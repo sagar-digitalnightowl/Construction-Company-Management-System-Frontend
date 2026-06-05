@@ -83,7 +83,7 @@ export const useLead = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, []);   
 
 	const fetchLeadById = useCallback(async (id) => {
 		setLoading(true);

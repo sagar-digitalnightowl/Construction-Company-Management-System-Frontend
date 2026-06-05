@@ -4,7 +4,10 @@ import { hrApi } from "@/api/hrApi";
 
 export const useHR = () => {
 	// ---- Employees (global list) ----
-	const [employees, setEmployees] = useState([]);
+	const [employees, setEmployees] = useState({
+		employees: [],
+		pagination: { page: 1, limit: 10, total: 0, pages: 0 },
+	});
 	const [employee, setEmployee] = useState(null);
 	const [employeeStats, setEmployeeStats] = useState(null);
 
@@ -63,8 +66,11 @@ export const useHR = () => {
 		setLoading(true);
 		try {
 			const res = await hrApi.getAllEmployees(params);
-			setEmployees(res.data?.data?.employees || []);
-			setPagination(res.data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 0 });
+			const data = res.data?.data || {};
+			setEmployees({
+				employees: data.employees || [],
+				pagination: data.pagination || { page: 1, limit: 10, total: 0, pages: 0 },
+			});
 		} catch (err) {
 			toast.error("Failed to load employees");
 		} finally {

@@ -63,7 +63,9 @@ export default function HR() {
     checkIn,
     checkOut,
     fetchLaborWages,
-  } = useHR();            
+  } = useHR();          
+  
+  
 
   useEffect(() => {
     fetchEmployeeStats();
@@ -178,7 +180,7 @@ export default function HR() {
         <div className="mt-5">
           <TabsContent value="employees">
             <EmployeesTab
-              employees={employees}
+              employeesData={employees}
               onlyAdmin={onlyAdmin}
               canEdit={canEdit}
               onRefresh={fetchEmployees}
