@@ -28,8 +28,10 @@ import {
   ChevronRight,
   Building2,
   Layers,
-  Home
+  Home,
 } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
+import { canMutate } from "@/data/permissions";
 
 const FACING_OPTIONS = [
   { value: "East", label: "East" },
@@ -581,6 +583,10 @@ function AddFloorDialog({ open, onOpenChange, tower, onSave }) {
 
 // ---------- Main TowersTab Component ----------
 export function TowersTab({ projectId }) {
+  const { current } = useAuthStore();
+
+  const canEdit = canMutate(current?.role, "tower-operations");
+
   const { towersData, loading, fetchTowers, addTower, addFloor, addFlat } =
     useProject();
 
@@ -701,13 +707,15 @@ export function TowersTab({ projectId }) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Towers Inventory</CardTitle>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setAddTowerOpen(true)}
-          >
-            <Plus className="h-3 w-3 mr-1" /> Add Tower
-          </Button>
+          {canEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAddTowerOpen(true)}
+            >
+              <Plus className="h-3 w-3 mr-1" /> Add Tower
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {towers.length === 0 ? (
@@ -729,16 +737,18 @@ export function TowersTab({ projectId }) {
                         <h3 className="font-semibold text-lg">
                           {tower.towerName}
                         </h3>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedTower(tower);
-                            setAddFloorOpen(true);
-                          }}
-                        >
-                          <Plus className="h-3 w-3 mr-1" /> Add Floor
-                        </Button>
+                        {canEdit && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedTower(tower);
+                              setAddFloorOpen(true);
+                            }}
+                          >
+                            <Plus className="h-3 w-3 mr-1" /> Add Floor
+                          </Button>
+                        )}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {floors.length} Floor{floors.length !== 1 && "s"} ·{" "}
@@ -819,19 +829,21 @@ export function TowersTab({ projectId }) {
                                           ? formatINR(avgPrice)
                                           : "-"}
                                       </td>
-                                      <td className="px-3 py-2 text-right">
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            openAddFlatDialog(tower, floor);
-                                          }}
-                                        >
-                                          <Plus className="h-3 w-3 mr-1" /> Add
-                                          Flat
-                                        </Button>
-                                      </td>
+                                      {canEdit && (
+                                        <td className="px-3 py-2 text-right">
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              openAddFlatDialog(tower, floor);
+                                            }}
+                                          >
+                                            <Plus className="h-3 w-3 mr-1" />{" "}
+                                            Add Flat
+                                          </Button>
+                                        </td>
+                                      )}
                                     </tr>
                                     {isExpanded && (
                                       <tr key={`expanded-${floor.floorNumber}`}>

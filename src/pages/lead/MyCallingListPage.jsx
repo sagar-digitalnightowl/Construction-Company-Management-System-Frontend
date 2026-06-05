@@ -591,6 +591,9 @@ const MyCallingListPage = () => {
       page: myCallingList.pagination?.page,
       limit: 20,
     });
+
+    setSelectedRecord(null);
+    setConvertOpen(false);
   };
 
   const openStatusDialog = (record) => {

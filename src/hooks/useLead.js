@@ -5,7 +5,12 @@ import { projectApi } from "@/api"; // assume exists
 
 export const useLead = () => {
 	// Lead data
-	const [leads, setLeads] = useState([]);
+	const [leads, setLeads] = useState({
+		leads: [],
+		pagination: { page: 1, limit: 10, total: 0, pages: 0 },
+		statistics: null,
+	});
+
 	const [lead, setLead] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
@@ -50,8 +55,12 @@ export const useLead = () => {
 		setLoading(true);
 		try {
 			const res = await leadApi.getAllLeads(params);
-			setLeads(res.data?.data?.leads || []);
-			setPagination(res.data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 0 });
+			const data = res.data?.data || {};
+			setLeads({
+				leads: data.leads || [],
+				pagination: data.pagination || { page: 1, limit: 10, total: 0, pages: 0 },
+				statistics: data.statistics || null,
+			});
 		} catch (err) {
 			toast.error("Failed to load leads");
 		} finally {
@@ -63,8 +72,12 @@ export const useLead = () => {
 		setLoading(true);
 		try {
 			const res = await leadApi.getAllMyLeads(params);
-			setLeads(res.data?.data?.leads || []);
-			setPagination(res.data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 0 });
+			const data = res.data?.data || {};
+			setLeads({
+				leads: data.leads || [],
+				pagination: data.pagination || { page: 1, limit: 10, total: data.totalLeads, pages: 0 } || { page: 1, limit: 10, total: 0, pages: 0 },
+				statistics: data.statistics || null,
+			});
 		} catch (err) {
 			toast.error("Failed to load leads");
 		} finally {

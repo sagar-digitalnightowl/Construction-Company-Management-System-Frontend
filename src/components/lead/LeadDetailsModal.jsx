@@ -86,14 +86,18 @@ const LeadCallStatusSection = ({ lead, updateLeadCallStatus, onUpdated }) => {
     switch (status) {
       case "connected":
       case "converted":
+      case "interested":
         return "success";
       case "pending":
       case "callback_requested":
+      case "follow_up":
         return "warning";
       case "not_interested":
       case "not_reachable":
       case "busy":
       case "no_answer":
+      case "wrong_number":
+      case "invalid_number":
         return "destructive";
       default:
         return "outline";
@@ -192,7 +196,11 @@ const LeadCallStatusSection = ({ lead, updateLeadCallStatus, onUpdated }) => {
                     Callback Requested
                   </SelectItem>
                   <SelectItem value="not_interested">Not Interested</SelectItem>
+                  <SelectItem value="interested">Interested</SelectItem>
+                  <SelectItem value="follow_up">Follow Up</SelectItem>
                   <SelectItem value="converted">Converted</SelectItem>
+                  <SelectItem value="wrong_number">Wrong Number</SelectItem>
+                  <SelectItem value="invalid_number">Invalid Number</SelectItem>
                 </SelectContent>
               </Select>
             </div>

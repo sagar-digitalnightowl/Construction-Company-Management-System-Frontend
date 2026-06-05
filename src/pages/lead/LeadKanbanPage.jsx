@@ -1,5 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import React, { useEffect } from "react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  PhoneCall,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,23 +24,44 @@ const STAGES = [
   { id: "contacted", label: "Contacted", tint: "var(--color-chart-2)" },
   { id: "interested", label: "Interested", tint: "var(--color-chart-5)" },
   { id: "negotiation", label: "Negotiation", tint: "var(--color-chart-1)" },
-  { id: "converted", label: "Converted / Won", tint: "var(--color-success)" },
+  { id: "converted", label: "Converted", tint: "var(--color-success)" },
+  { id: "lost", label: "Lost", tint: "var(--color-destructive)" },
+  { id: "cancelled", label: "Cancelled", tint: "var(--color-destructive)" },
 ];
 
 const LeadKanbanPage = () => {
-  const { leads, loading, fetchLeads, fetchMyLeads, deleteLead } = useLead();
+  const { leads, loading, fetchLeads, fetchMyLeads, deleteLead, pagination } =
+    useLead();
   const { current } = useAuthStore();
   const canEdit = canMutate(current.role, "crm");
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingLead, setEditingLead] = useState(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [formOpen, setFormOpen] = React.useState(false);
+  const [editingLead, setEditingLead] = React.useState(null);
+  const [detailsOpen, setDetailsOpen] = React.useState(false);
+  const [selectedLead, setSelectedLead] = React.useState(null);
+  const [confirmDelete, setConfirmDelete] = React.useState(null);
+
+  const stats = leads.statistics || { byStatus: {}, bySource: {} };
+  console.log("Leads : ", leads)
+  const totalLeads = leads.pagination?.total;
+
+  // Fetch leads with pagination
+  const fetchData = (page = 1, limit = 10) => {
+    if (canEdit) {
+      fetchLeads({ page, limit });
+    } else {
+      fetchMyLeads({ page, limit });
+    }
+  };
 
   useEffect(() => {
-    canEdit ? fetchLeads({}) : fetchMyLeads({});
+    fetchData(pagination.page, pagination.limit);
   }, []);
+
+  // After mutations (create, edit, delete) we refetch current page
+  const refresh = () => {
+    fetchData(pagination.page, pagination.limit);
+  };
 
   const handleViewLead = (lead) => {
     setSelectedLead(lead);
@@ -47,8 +77,17 @@ const LeadKanbanPage = () => {
     if (confirmDelete) {
       await deleteLead(confirmDelete, !canEdit);
       setConfirmDelete(null);
+      refresh();
     }
   };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.pages) {
+      fetchData(newPage, pagination.limit);
+    }
+  };
+
+  const allLeads = leads.leads || [];
 
   if (loading) {
     return (
@@ -60,7 +99,13 @@ const LeadKanbanPage = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">
+            Page {pagination.page} of {pagination.pages} · Total{" "}
+            {pagination.total} leads
+          </span>
+        </div>
         <Button
           onClick={() => {
             setEditingLead(null);
@@ -71,9 +116,52 @@ const LeadKanbanPage = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <Card className="p-3 flex items-center gap-3 border-l-4 border-l-blue-500">
+          <BarChart3 className="h-5 w-5 text-blue-500" />
+          <div>
+            <p className="text-xs text-muted-foreground">Total Leads</p>
+            <p className="text-lg font-bold">{totalLeads}</p>
+          </div>
+        </Card>
+
+        {Object.entries(stats.byStatus || {}).map(([status, count]) => (
+          <Card
+            key={status}
+            className="p-3 flex items-center gap-3 border-l-4 border-l-purple-500"
+          >
+            <Users className="h-5 w-5 text-purple-500" />
+            <div>
+              <p className="text-xs text-muted-foreground capitalize">
+                {status}
+              </p>
+              <p className="text-lg font-bold">{count}</p>
+            </div>
+          </Card>
+        ))}
+
+        {Object.entries(stats.bySource || {})
+          .slice(0, 4)
+          .map(([source, count]) => (
+            <Card
+              key={source}
+              className="p-3 flex items-center gap-3 border-l-4 border-l-emerald-500"
+            >
+              <PhoneCall className="h-5 w-5 text-emerald-500" />
+              <div>
+                <p className="text-xs text-muted-foreground capitalize">
+                  {source.replace("_", " ")}
+                </p>
+                <p className="text-lg font-bold">{count}</p>
+              </div>
+            </Card>
+          ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-7 gap-2">
         {STAGES.map((stage) => {
-          const stageLeads = leads.filter((l) => l.status === stage.id);
+          const stageLeads = allLeads.filter((l) => l.status === stage.id);
           return (
             <div
               key={stage.id}
@@ -157,15 +245,40 @@ const LeadKanbanPage = () => {
         })}
       </div>
 
+      {/* Pagination Controls */}
+      {pagination.pages > 1 && (
+        <div className="flex justify-center items-center gap-4 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(pagination.page - 1)}
+            disabled={pagination.page === 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+          </Button>
+          <span className="text-sm">
+            Page {pagination.page} of {pagination.pages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(pagination.page + 1)}
+            disabled={pagination.page === pagination.pages}
+          >
+            Next <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+      )}
+
       <LeadFormModal
-      canEdit={canEdit}
+        canEdit={canEdit}
         open={formOpen}
         onOpenChange={setFormOpen}
         editingLead={editingLead}
         onSuccess={() => {
           setFormOpen(false);
           setEditingLead(null);
-          fetchLeads();
+          refresh();
         }}
       />
 
