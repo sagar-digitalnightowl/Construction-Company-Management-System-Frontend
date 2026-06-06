@@ -5,6 +5,8 @@ export const hrApi = {
 	createEmployee: (data) => api.post("/hr/employees", data),
 
 	// new api to create employee
+	getPresignedUrl: (data) => api.post("/auth/upload/presigned-url", data),
+	confirmUpload: (data) => api.post("/auth/upload/confirm", data),
 	registerEmployee: (data) => api.post("/auth/register", data),
 	// after successful registration verify otp
 	verifyOtp: (data) => api.post("/auth/verify-otp", data),

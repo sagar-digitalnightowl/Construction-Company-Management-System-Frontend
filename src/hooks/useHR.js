@@ -173,6 +173,49 @@ export const useHR = () => {
 		}
 	};
 
+	const getPresignedUrl = async (file, fileType) => {
+		try {
+			const res = await hrApi.getPresignedUrl({
+				fileName: file.name,
+				fileType,
+				mimeType: file.type,
+			});
+			return res.data.data; // { uploadUrl, fileKey, publicUrl, expiresIn }
+		} catch (err) {
+			toast.error("Failed to get upload URL");
+			throw err;
+		}
+	};
+
+	const uploadFileToS3 = async (uploadUrl, file) => {
+		await fetch(uploadUrl, {
+			method: "PUT",
+			body: file,
+			headers: { "Content-Type": file.type },
+		});
+	};
+
+	const confirmUpload = async (fileKey, fileType) => {
+		const res = await hrApi.confirmUpload({ fileKey, fileType });
+		return res.data.data;
+	};
+
+	const uploadFile = async (file, fileType) => {
+		setLoading(true);
+		try {
+			const { uploadUrl, fileKey, publicUrl } = await getPresignedUrl(file, fileType);
+			await uploadFileToS3(uploadUrl, file);
+			const { fileUrl } = await confirmUpload(fileKey, fileType);
+			toast.success(`${fileType} uploaded`);
+			return publicUrl; 
+		} catch (err) {
+			toast.error("Upload failed");
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const registerEmployee = async (data) => {
 		try {
 			const res = await hrApi.registerEmployee(data);
@@ -873,6 +916,7 @@ export const useHR = () => {
 		fetchEmployeeById,
 		fetchEmployeeStats,
 		createEmployee,
+		uploadFile,
 		registerEmployee,
 		verifyOtp,
 		updateEmployee,
