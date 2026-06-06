@@ -316,10 +316,7 @@ export function CreateEmployeeDialog({ open, onOpenChange, onSuccess }) {
           pincode: form.pincode || undefined,
           country: "India",
         },
-        sameAsPermanent: form.sameAsPermanent,
-        currentAddress: form.sameAsPermanent
-          ? undefined
-          : {
+        currentAddress: {
               line1: form.currentAddressLine1 || undefined,
               city: form.currentCity || undefined,
               state: form.currentState || undefined,
