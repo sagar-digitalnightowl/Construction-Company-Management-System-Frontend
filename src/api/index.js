@@ -8,4 +8,5 @@ export * from "./users";
 export * from "./vendorApi";
 export * from "./bookingApi";
 export * from "./leadApi";
+export * from "./hrApi";
 

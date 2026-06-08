@@ -3,6 +3,7 @@ import api from "./axios";
 export const hrApi = {
 	// Employees
 	createEmployee: (data) => api.post("/hr/employees", data),
+	
 
 	// new api to create employee
 	getPresignedUrl: (data) => api.post("/auth/upload/presigned-url", data),
@@ -11,9 +12,11 @@ export const hrApi = {
 	// after successful registration verify otp
 	verifyOtp: (data) => api.post("/auth/verify-otp", data),
 
+	updateEmployee: (id, data) => api.patch(`/auth/users/${id}`, data),
+
 	getAllEmployees: (params) => api.get("/hr/employees", { params }),
 	getEmployeeById: (id) => api.get(`/hr/employees/${id}`),
-	updateEmployee: (id, data) => api.put(`/hr/employees/${id}`, data),
+	// updateEmployee: (id, data) => api.put(`/hr/employees/${id}`, data),
 	deleteEmployee: (id) => api.delete(`/hr/employees/${id}`),
 
 	// delete user

@@ -20,26 +20,29 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { CreateEmployeeDialog } from "@/components/hr/CreateEmployeeDialog";
+import { EmployeeFormDialog } from "@/components/hr/EmployeeFormDialog";
 import { ViewEmployeeDialog } from "@/components/hr/ViewEmployeeDialog";
 import { DeleteEmployeeDialog } from "@/components/hr/DeleteEmployeeDialog";
 
 export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
   const navigate = useNavigate();
-  const [dialogOpen, setDialogOpen] = useState(false);
+
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
+  const [formOpen, setFormOpen] = useState(false);
+  const [editEmployee, setEditEmployee] = useState(null);
 
-  // Extract data from the unified object   
+  // Extract data from the unified object
   const employees = employeesData?.employees || [];
-  const pagination = employeesData?.pagination || {                       
+  const pagination = employeesData?.pagination || {
     page: 1,
     limit: 10,
-    total: 0,              
-    pages: 0,                         
+    total: 0,
+    pages: 0,
   };
 
   const handleViewEmployee = (employeeId) => {
@@ -47,11 +50,32 @@ export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
     setViewDialogOpen(true);
   };
 
+  const handleOpenCreate = () => {
+    setEditEmployee(null);
+    setFormOpen(true);
+  };
+
+  const handleOpenEdit = (emp) => {
+    setEditEmployee(emp);
+    setFormOpen(true);
+  };
+
+  const handleFormClose = (open) => {
+    setFormOpen(open);
+    if (!open) setEditEmployee(null);
+  };
+
+  const handleFormSuccess = () => {
+    setFormOpen(false);
+    setEditEmployee(null);
+    onRefresh({ page: pagination.page, limit: pagination.limit });
+  };
+
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.pages) {
       onRefresh({ page: newPage, limit: pagination.limit });
-    }                     
-  };                         
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -60,9 +84,9 @@ export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
           {pagination.total} employee(s)
         </p>
         {onlyAdmin && (
-          <Button size="sm" onClick={() => setDialogOpen(true)}>
+          <Button size="sm" onClick={handleOpenCreate}>
             <Plus className="h-3 w-3 mr-1" /> Add Employee
-          </Button>                        
+          </Button>
         )}
       </div>
 
@@ -116,6 +140,16 @@ export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
                           <Button
                             size="icon"
                             variant="ghost"
+                            onClick={() => handleOpenEdit(emp)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
+
+                        {onlyAdmin && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
                             className="text-destructive"
                             onClick={() => {
                               setSelectedEmployee(emp);
@@ -162,10 +196,11 @@ export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
         </CardContent>
       </Card>
 
-      <CreateEmployeeDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onSuccess={() => onRefresh({ page: 1, limit: pagination.limit })}
+     <EmployeeFormDialog
+        open={formOpen}
+        onOpenChange={handleFormClose}
+        employee={editEmployee}
+        onSuccess={handleFormSuccess}
       />
 
       <ViewEmployeeDialog

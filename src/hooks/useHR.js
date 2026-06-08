@@ -253,6 +253,7 @@ export const useHR = () => {
 			await fetchEmployees();
 			return true;
 		} catch (err) {
+			console.log("Error : ", err);
 			toast.error("Failed to update employee");
 			return false;
 		} finally {
