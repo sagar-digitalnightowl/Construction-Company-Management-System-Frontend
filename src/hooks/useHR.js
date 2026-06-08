@@ -207,7 +207,7 @@ export const useHR = () => {
 			await uploadFileToS3(uploadUrl, file);
 			const { fileUrl } = await confirmUpload(fileKey, fileType);
 			toast.success(`${fileType} uploaded`);
-			return publicUrl; 
+			return publicUrl;
 		} catch (err) {
 			toast.error("Upload failed");
 			return null;
@@ -217,6 +217,7 @@ export const useHR = () => {
 	};
 
 	const registerEmployee = async (data) => {
+		setLoading(true)
 		try {
 			const res = await hrApi.registerEmployee(data);
 			toast.success("Employee created");
@@ -225,6 +226,8 @@ export const useHR = () => {
 			console.error(error);
 			toast.error(error?.response?.data?.message || "Failed to create employee");
 			return null;
+		} finally {
+			setLoading(false);
 		}
 	};
 
