@@ -42,7 +42,6 @@ const LeadKanbanPage = () => {
   const [confirmDelete, setConfirmDelete] = React.useState(null);
 
   const stats = leads.statistics || { byStatus: {}, bySource: {} };
-  console.log("Leads : ", leads)
   const totalLeads = leads.pagination?.total;
 
   // Fetch leads with pagination

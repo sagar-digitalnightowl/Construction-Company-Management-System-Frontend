@@ -173,6 +173,98 @@ export const seedExpenses = [
     { id: "ex_04", projectId: "p_003", category: "Consultancy", note: "Structural design revision", amount: 185000, date: "2025-01-09" },
 ];
 
+export const seedPayroll = [
+    {
+        id: "pay-1",
+        employeeId: "u1",
+        month: "2025-04",
+        basic: 30000,
+        allowances: 5000,
+        deductions: 2000,
+        netPay: 33000,
+        paidOn: "2025-04-30",
+    },
+    {
+        id: "pay-2",
+        employeeId: "u2",
+        month: "2025-04",
+        basic: 45000,
+        allowances: 7000,
+        deductions: 3000,
+        netPay: 49000,
+        paidOn: "2025-04-30",
+    },
+]
+
+export const seedSales = [
+    {
+        id: "sale-1",
+        projectId: "p_001",
+        unitNo: "A-101",
+        buyerName: "Rahul Mehta",
+        saleAmount: 8000000,
+        date: "2025-06-01",
+        paymentMode: "bank",
+    },
+    {
+        id: "sale-2",
+        projectId: "p_002",
+        unitNo: "B-202",
+        buyerName: "Neha Agarwal",
+        saleAmount: 9500000,
+        date: "2025-07-15",
+        paymentMode: "cheque",
+    },
+]
+
+export const seedProcurement = [
+    {
+        id: "proc-1",
+        projectId: "p_001",
+        item: "Steel TMT Bars",
+        quantity: 50,
+        unitPrice: 62000,
+        totalCost: 3100000,
+        orderDate: "2025-04-05",
+        received: true,
+    },
+    {
+        id: "proc-2",
+        projectId: "p_002",
+        item: "Cement",
+        quantity: 100,
+        unitPrice: 380,
+        totalCost: 38000,
+        orderDate: "2025-05-20",
+        received: false,
+    },
+]
+
+export const seedBookings = [
+    {
+        id: "book-1",
+        projectId: "p_001",
+        unitNo: "A-102",
+        customerName: "Vikram Singh",
+        totalAmount: 8500000,
+        paidAmount: 2000000,
+        dueAmount: 6500000,
+        status: "pending",
+        bookingDate: "2025-06-10",
+    },
+    {
+        id: "book-2",
+        projectId: "p_002",
+        unitNo: "B-301",
+        customerName: "Ananya Patel",
+        totalAmount: 12000000,
+        paidAmount: 6000000,
+        dueAmount: 6000000,
+        status: "partially_paid",
+        bookingDate: "2025-07-05",
+    },
+]
+
 export const seedAttendance = [
     {
         id: "at_01", employeeId: "u_se1", date: "2025-01-22", checkIn: "08:12", checkOut: "18:34", site: "Verita Residences", hours: 10.3

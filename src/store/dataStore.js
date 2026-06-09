@@ -10,6 +10,10 @@ import {
     seedAttendance,
     seedLeads,
     seedDocuments,
+    seedPayroll,
+    seedSales,
+    seedProcurement,
+    seedBookings,
 } from "./seed";
 import { uid } from "../lib/helpers";
 
@@ -81,23 +85,52 @@ export const useProcurementStore = create((set) => ({
     removeOrder: (id) => set((s) => ({ orders: s.orders.filter((p) => p.id !== id) })),
 }));
 
+
 export const useFinanceStore = create((set) => ({
     invoices: seedInvoices,
     expenses: seedExpenses,
-    addInvoice: (data) => set((s) => ({
-        invoices: [{
-            id: uid("inv"), status: "draft", ...data
-        }, ...s.invoices]
-    })),
-    updateInvoice: (id, patch) => set((s) => ({ invoices: s.invoices.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
-    removeInvoice: (id) => set((s) => ({ invoices: s.invoices.filter((p) => p.id !== id) })),
-    addExpense: (data) => set((s) => ({
-        expenses: [{
-            id: uid("ex"), ...data
-        }, ...s.expenses]
-    })),
-    updateExpense: (id, patch) => set((s) => ({ expenses: s.expenses.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
-    removeExpense: (id) => set((s) => ({ expenses: s.expenses.filter((p) => p.id !== id) })),
+    payroll: seedPayroll,
+    sales: seedSales,
+    procurement: seedProcurement,
+    bookings: seedBookings,
+
+    // Invoice methods (existing)
+    addInvoice: (data) =>
+        set((s) => ({ invoices: [{ id: uid("inv"), status: "draft", ...data }, ...s.invoices] })),
+    updateInvoice: (id, patch) =>
+        set((s) => ({ invoices: s.invoices.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),
+    removeInvoice: (id) =>
+        set((s) => ({ invoices: s.invoices.filter((i) => i.id !== id) })),
+
+    // Expense methods (existing)
+    addExpense: (data) =>
+        set((s) => ({ expenses: [{ id: uid("ex"), ...data }, ...s.expenses] })),
+    removeExpense: (id) =>
+        set((s) => ({ expenses: s.expenses.filter((e) => e.id !== id) })),
+
+    // New: Payroll
+    addPayrollEntry: (data) =>
+        set((s) => ({ payroll: [{ id: uid("pay"), ...data }, ...s.payroll] })),
+    removePayrollEntry: (id) =>
+        set((s) => ({ payroll: s.payroll.filter((p) => p.id !== id) })),
+
+    // New: Sales
+    addSale: (data) =>
+        set((s) => ({ sales: [{ id: uid("sale"), ...data }, ...s.sales] })),
+    removeSale: (id) =>
+        set((s) => ({ sales: s.sales.filter((s) => s.id !== id) })),
+
+    // New: Procurement
+    addProcurementOrder: (data) =>
+        set((s) => ({ procurement: [{ id: uid("proc"), ...data }, ...s.procurement] })),
+    removeProcurementOrder: (id) =>
+        set((s) => ({ procurement: s.procurement.filter((o) => o.id !== id) })),
+
+    // New: Bookings
+    addBooking: (data) =>
+        set((s) => ({ bookings: [{ id: uid("book"), status: "pending", ...data }, ...s.bookings] })),
+    removeBooking: (id) =>
+        set((s) => ({ bookings: s.bookings.filter((b) => b.id !== id) })),
 }));
 
 export const useHRStore = create((set) => ({

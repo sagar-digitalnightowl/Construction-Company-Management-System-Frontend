@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 
 // ----------------------------------------------------------------------
-// Statistics Card Component
+// Statistics Card Component (unchanged)
 // ----------------------------------------------------------------------
 const StatsCard = ({
   icon: Icon,
@@ -63,11 +63,13 @@ const StatsCard = ({
 );
 
 // ----------------------------------------------------------------------
-// Convert To Lead Dialog Component (same file – unchanged)
+// Updated Convert To Lead Dialog Component
 // ----------------------------------------------------------------------
 const INITIAL_CONVERT_FORM = {
   projectId: "",
-  interestedUnit: "",
+  interestedTower: "",
+  interestedFloor: "",
+  interestedFlat: "",
   budgetRange: "",
   notes: "",
   personalDetails: {
@@ -111,6 +113,18 @@ const ConvertToLeadDialog = ({
 }) => {
   const [form, setForm] = useState(INITIAL_CONVERT_FORM);
 
+  // Derived data for cascading selects
+  const selectedProject = projects.find((p) => p._id === form.projectId);
+  const towers = selectedProject?.towers || [];
+  const selectedTower = towers.find(
+    (t) => t.towerName === form.interestedTower,
+  );
+  const floors = selectedTower?.floors || [];
+  const selectedFloor = floors.find(
+    (f) => f.floorNumber.toString() === form.interestedFloor?.toString(),
+  );
+  const flats = selectedFloor?.flats || [];
+
   useEffect(() => {
     if (open && selectedRecord) {
       setForm({
@@ -120,6 +134,7 @@ const ConvertToLeadDialog = ({
     }
   }, [open, selectedRecord]);
 
+  // Generic field updater
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -144,12 +159,51 @@ const ConvertToLeadDialog = ({
     }));
   };
 
+  // Cascading handlers – clear downstream fields
+  const handleProjectChange = (projectId) => {
+    setForm((prev) => ({
+      ...prev,
+      projectId,
+      interestedTower: "",
+      interestedFloor: "",
+      interestedFlat: "",
+    }));
+  };
+
+  const handleTowerChange = (towerName) => {
+    setForm((prev) => ({
+      ...prev,
+      interestedTower: towerName,
+      interestedFloor: "",
+      interestedFlat: "",
+    }));
+  };
+
+  const handleFloorChange = (floorNumber) => {
+    setForm((prev) => ({
+      ...prev,
+      interestedFloor: floorNumber,
+      interestedFlat: "",
+    }));
+  };
+
+  const handleFlatChange = (flatNumber) => {
+    setForm((prev) => ({ ...prev, interestedFlat: flatNumber }));
+  };
+
   const handleSubmit = () => {
     if (!form.projectId) {
       toast.error("Please select a project");
       return;
     }
-    onConvert(selectedRecord._id, form);
+    // Build payload with new hierarchical fields
+    const payload = {
+      ...form,
+      interestedFloor: form.interestedFloor
+        ? Number(form.interestedFloor)
+        : undefined,
+    };
+    onConvert(selectedRecord._id, payload);
   };
 
   return (
@@ -168,7 +222,7 @@ const ConvertToLeadDialog = ({
                 <Label>Select Project *</Label>
                 <Select
                   value={form.projectId}
-                  onValueChange={(v) => updateField("projectId", v)}
+                  onValueChange={handleProjectChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Choose project" />
@@ -182,16 +236,79 @@ const ConvertToLeadDialog = ({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Interested Unit (optional)</Label>
-                <Input
-                  value={form.interestedUnit}
-                  onChange={(e) =>
-                    updateField("interestedUnit", e.target.value)
-                  }
-                  placeholder="e.g., A-101"
-                />
-              </div>
+
+              {/* Tower – appears only after project is selected */}
+              {form.projectId && (
+                <div className="space-y-2">
+                  <Label>Interested Tower</Label>
+                  <Select
+                    value={form.interestedTower}
+                    onValueChange={handleTowerChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select tower" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {towers.map((t) => (
+                        <SelectItem key={t.towerName} value={t.towerName}>
+                          {t.towerName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Floor – appears only after tower is selected */}
+              {form.interestedTower && (
+                <div className="space-y-2">
+                  <Label>Interested Floor</Label>
+                  <Select
+                    value={form.interestedFloor}
+                    onValueChange={handleFloorChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select floor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {floors.map((f) => (
+                        <SelectItem
+                          key={f.floorNumber}
+                          value={f.floorNumber.toString()}
+                        >
+                          Floor {f.floorNumber}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Flat – appears only after floor is selected */}
+              {form.interestedFloor && (
+                <div className="space-y-2">
+                  <Label>Interested Flat</Label>
+                  <Select
+                    value={form.interestedFlat}
+                    onValueChange={handleFlatChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select flat" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {flats.map((flat) => (
+                        <SelectItem
+                          key={flat.flatNumber}
+                          value={flat.flatNumber}
+                        >
+                          {flat.flatNumber} ({flat.area} sqft, ₹{flat.price})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label>Budget Range (optional)</Label>
                 <Input
@@ -211,7 +328,7 @@ const ConvertToLeadDialog = ({
             </div>
           </div>
 
-          {/* Personal Details */}
+          {/* Personal Details (unchanged) */}
           <div className="space-y-4">
             <h4 className="font-medium border-b pb-1">Personal Details</h4>
             <div className="grid grid-cols-2 gap-4">
@@ -426,7 +543,7 @@ const ConvertToLeadDialog = ({
             </div>
           </div>
 
-          {/* Bank Details */}
+          {/* Bank Details (unchanged) */}
           <div className="space-y-4">
             <h4 className="font-medium border-b pb-1">Bank Details</h4>
             <div className="grid grid-cols-2 gap-4">
@@ -523,7 +640,7 @@ const ConvertToLeadDialog = ({
 };
 
 // ----------------------------------------------------------------------
-// Main Page Component
+// Main Page Component (unchanged except ConvertToLeadDialog props)
 // ----------------------------------------------------------------------
 const MyCallingListPage = () => {
   const {
@@ -553,7 +670,6 @@ const MyCallingListPage = () => {
         await fetchMyCallingList({ page, limit });
       } catch (error) {
         toast.error("Failed to load calling list");
-      } finally {
       }
     },
     [fetchMyCallingList],
@@ -573,8 +689,6 @@ const MyCallingListPage = () => {
       return;
     loadData(page);
   };
-
-  // Refresh data after mutations
 
   const handleUpdateStatus = async () => {
     if (!selectedRecord) return;
@@ -864,7 +978,7 @@ const MyCallingListPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Convert to Lead Dialog */}
+      {/* Convert to Lead Dialog (updated) */}
       <ConvertToLeadDialog
         open={convertOpen}
         onOpenChange={setConvertOpen}

@@ -153,10 +153,9 @@ const CallingRecordsPage = () => {
   useEffect(() => {
     if (
       (assignOpen || bulkAssignOpen) &&
-      !fetchedEmployees &&
-      employees.length === 0
+      !fetchedEmployees
     ) {
-      fetchEmployees().then(() => setFetchedEmployees(true));
+        fetchEmployees().then(() => setFetchedEmployees(true));
     }
   }, [
     assignOpen,
