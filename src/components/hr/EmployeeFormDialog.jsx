@@ -1459,33 +1459,79 @@ import { useHR } from "@/hooks/useHR";
 import { hrApi } from "@/api";
 import { toast } from "sonner";
 
+// const ROLES = [
+//   { value: "admin", label: "👑 Admin" },
+//   { value: "ceo", label: "🏢 CEO" },
+//   { value: "cmd", label: "🏢 CMD" },
+//   { value: "md", label: "📊 MD" },
+//   { value: "director", label: "👔 Director" },
+//   { value: "general_manager", label: "⭐ General Manager" },
+//   { value: "business_manager", label: "💼 Business Manager" },
+//   { value: "team_manager", label: "👥 Team Manager" },
+//   { value: "project_manager", label: "📋 Project Manager" },
+//   { value: "finance_executive", label: "💰 Finance Executive" },
+//   { value: "accountant", label: "💰 Accountant" },
+//   { value: "hr_manager", label: "👤 HR Manager" },
+//   { value: "office_supervisor", label: "📌 Office Supervisor" },
+//   { value: "mis", label: "📊 MIS Executive" },
+//   { value: "coordinator", label: "🤝 Co-ordinator" },
+//   { value: "receptionist", label: "📞 Receptionist" },
+//   { value: "office_assistant", label: "📋 Office Assistant" },
+//   { value: "site_engineer", label: "🏗️ Site Engineer" },
+//   { value: "driver", label: "🚗 Driver" },
+//   { value: "guard", label: "🛡️ Guard" },
+//   { value: "swiper", label: "🎫 Swiper" },
+//   { value: "bouncer", label: "💪 Bouncer" },
+//   { value: "employee", label: "👷 Employee" },
+//   { value: "vendor", label: "🤝 Vendor" },
+//   { value: "client", label: "🏠 Client" },
+// ];
+
 const ROLES = [
-  { value: "admin", label: "👑 Admin" },
-  { value: "ceo", label: "🏢 CEO" },
-  { value: "cmd", label: "🏢 CMD" },
-  { value: "md", label: "📊 MD" },
-  { value: "director", label: "👔 Director" },
-  { value: "general_manager", label: "⭐ General Manager" },
-  { value: "business_manager", label: "💼 Business Manager" },
-  { value: "team_manager", label: "👥 Team Manager" },
-  { value: "project_manager", label: "📋 Project Manager" },
-  { value: "finance_executive", label: "💰 Finance Executive" },
-  { value: "accountant", label: "💰 Accountant" },
-  { value: "hr_manager", label: "👤 HR Manager" },
-  { value: "office_supervisor", label: "📌 Office Supervisor" },
-  { value: "mis", label: "📊 MIS Executive" },
-  { value: "coordinator", label: "🤝 Co-ordinator" },
-  { value: "receptionist", label: "📞 Receptionist" },
-  { value: "office_assistant", label: "📋 Office Assistant" },
-  { value: "site_engineer", label: "🏗️ Site Engineer" },
-  { value: "driver", label: "🚗 Driver" },
-  { value: "guard", label: "🛡️ Guard" },
-  { value: "swiper", label: "🎫 Swiper" },
-  { value: "bouncer", label: "💪 Bouncer" },
-  { value: "employee", label: "👷 Employee" },
-  { value: "vendor", label: "🤝 Vendor" },
-  { value: "client", label: "🏠 Client" },
+  // Top Management
+  { value: "admin", label: "👑 Admin (L20)" },
+  { value: "ceo", label: "🏢 CEO (L19)" },
+  { value: "cmd", label: "🏛️ CMD (L18)" },
+
+  // Senior Management
+  { value: "md", label: "📊 Managing Director (MD) (L17)" },
+  { value: "director", label: "👔 Director (L16)" },
+  { value: "general_manager", label: "⭐ General Manager (L15)" },
+  { value: "business_manager", label: "💼 Business Manager (L14)" },
+  { value: "team_manager", label: "👥 Team Manager (L13)" },
+
+  // Middle Management
+  { value: "project_manager", label: "📋 Project Manager (L12)" },
+  { value: "credit_manager", label: "💳 Credit Manager (L11)" },
+  { value: "finance_executive", label: "💰 Finance Executive (L11)" },
+  { value: "accountant", label: "🧾 Accountant (L10)" },
+  { value: "hr_manager", label: "👤 HR Manager (L9)" },
+
+  // Office Staff
+  { value: "office_supervisor", label: "📌 Office Supervisor (L8)" },
+  { value: "mis", label: "📊 MIS Executive (L7)" },
+  { value: "coordinator", label: "🤝 Coordinator (L6)" },
+  { value: "receptionist", label: "📞 Receptionist (L5)" },
+
+  // Technical / Field Staff
+  { value: "site_engineer", label: "🏗️ Site Engineer (L4)" },
+  { value: "office_assistant", label: "📋 Office Assistant (L3)" },
+
+  // Operational Staff
+  { value: "employee", label: "👷 Employee (L2)" },
+  { value: "driver", label: "🚗 Driver (L2)" },
+  { value: "guard", label: "🛡️ Security Guard (L2)" },
+  { value: "swiper", label: "🎫 Swiper (L2)" },
+  { value: "bouncer", label: "💪 Bouncer (L2)" },
+  { value: "office_boy", label: "🧹 Office Boy (L2)" },
+  { value: "body_guard", label: "🥷 Body Guard (L2)" },
+  { value: "boss_driver", label: "🚘 Boss Driver (L2)" },
+
+  // External
+  { value: "vendor", label: "🤝 Vendor (L1)" },
+  { value: "client", label: "🏠 Client (L1)" },
 ];
+
 
 const initialFormState = {
   name: "",
@@ -1923,7 +1969,7 @@ export function EmployeeFormDialog({
       onOpenChange(false);
     }
   };
-  
+
   const handleSubmit = async () => {
     if (!validateStep1()) {
       setStep(1);
