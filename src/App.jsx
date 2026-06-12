@@ -48,6 +48,7 @@ import EmployeeDetail from "./pages/hr/EmployeeDetail";
 import LaborDetail from "./pages/hr/LaborDetail";
 import EmployeeDashboard from "./pages/hr/EmployeeDashboard";
 import LeadManagement from "./pages/lead/LeadManagement";
+import PropertyInventory from "./pages/PropertyInventory";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -84,6 +85,7 @@ export default function App() {
 					<Route path="/projects" element={<Projects />} />
 					<Route path="/project-templates" element={<ProjectTemplate />} />
 					<Route path="/projects/:id" element={<ProjectDetail />} />
+					<Route path="/property-inventory" element={<PropertyInventory />} />
 
 					<Route path="/tasks/my-tasks" element={<MyTasks />} />
 					<Route path="/tasks/requests" element={<TaskRequests />} />

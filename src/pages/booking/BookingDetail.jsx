@@ -42,7 +42,6 @@ export default function BookingDetail() {
   const [payDialogOpen, setPayDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  console.log("Booking : ", booking);
 
   useEffect(() => {
     if (id) {

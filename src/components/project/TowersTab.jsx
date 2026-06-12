@@ -876,6 +876,9 @@ export function TowersTab({ projectId }) {
                                                   <th className="px-2 py-1 text-left font-medium">
                                                     Features
                                                   </th>
+                                                  <th className="px-2 py-1 text-left font-medium">
+                                                    Booked By
+                                                  </th>
                                                 </tr>
                                               </thead>
                                               <tbody>
@@ -940,6 +943,9 @@ export function TowersTab({ projectId }) {
                                                               </Badge>
                                                             )}
                                                         </div>
+                                                      </td>
+                                                       <td className="px-2 py-1">
+                                                        {flat?.bookedBy || "-"}
                                                       </td>
                                                     </tr>
                                                   ))

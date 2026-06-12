@@ -21,7 +21,7 @@ export const projectApi = {
     getStats: () => api.get('/project/stats'),
     getDelayed: () => api.get('/project/delayed'),
     compare: (ids) => api.get(`/project/compare?ids=${ids.join(',')}`),
-
+             
     // =========================
     // TEAM MANAGEMENT
     // =========================

@@ -19,6 +19,7 @@ export const VIEW = {
     users: ["admin"],
     projects: ["admin", "director", "project_manager", "site_engineer", "accountant"],
     "project-templates": ["admin", "director", "project_manager", "site_engineer", "accountant"],
+    "property-inventory": ["admin", "director", "project_manager", "accountant"],
     "site-management": ["admin", "director", "project_manager", "site_engineer"],
     "tasks": ["admin", "director", "project_manager", "site_engineer"],
     procurement: ["admin", "director", "project_manager", "accountant"],

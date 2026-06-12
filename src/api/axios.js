@@ -53,13 +53,13 @@ api.interceptors.response.use(
 
             originalRequest._retry = true;
             isRefreshing = true;
-
+                       
             try {
                 const refreshToken = localStorage.getItem("refreshToken");
 
                 const res = await axios.post(
                     `${VITE_API_URL}/auth/refresh-token`,
-                    { refreshToken }
+                    { refreshToken: refreshToken || "" }
                 );
 
                 const newAccessToken = res.data.accessToken;
