@@ -46,6 +46,21 @@ const FURNISHED_OPTIONS = [
   { value: "fully-furnished", label: "Fully Furnished" },
 ];
 
+const TYPE_OF_BOOKING_OPTIONS = [
+  { value: "CLP", label: "CLP" },
+  { value: "ONE_TIME", label: "ONE TIME" },
+  { value: "OTP", label: "OTP" },
+  { value: "RENTAL", label: "RENTAL" },
+];
+
+const AGREEMENT_STATUS_OPTIONS = [
+  { value: "REGISTERED", label: "REGISTERED" },
+  { value: "CANCELLED", label: "CANCELLED" },
+  { value: "PENDING", label: "PENDING" },
+  { value: "APPROVED", label: "APPROVED" },
+  { value: "REJECTED", label: "REJECTED" },
+];
+
 const EMPTY_FLAT = {
   flatNumber: "",
   area: "",
@@ -56,6 +71,19 @@ const EMPTY_FLAT = {
   parking: false,
   balcony: false,
   furnished: "unfurnished",
+
+  typeOfBooking: "",
+  agreementStatus: "",
+  agreementDate: "",
+  cancelled: false,
+};
+
+const getNextFloorNumber = (floors) => {
+  if (!floors || floors.length === 0) return "Ground";
+  const last = floors[floors.length - 1].floorNumber;
+  if (last === "Ground") return "1";
+  if (!isNaN(Number(last))) return String(Number(last) + 1);
+  return String(floors.length + 1);
 };
 
 // ---------- Flat Form Dialog (Add/Edit) ----------
@@ -67,20 +95,18 @@ function FlatFormDialog({ open, onOpenChange, flat, onSave }) {
   }, [open, flat]);
 
   const handleSave = () => {
-    if (
-      !form.flatNumber ||
-      !form.area ||
-      !form.bedrooms ||
-      !form.bathrooms ||
-      !form.price
-    )
-      return;
+    if (!form.flatNumber) return;
     onSave({
       ...form,
-      area: Number(form.area),
-      bedrooms: Number(form.bedrooms),
-      bathrooms: Number(form.bathrooms),
-      price: Number(form.price),
+      area: Number(form.area) || 0,
+      bedrooms: Number(form.bedrooms) || 1,
+      bathrooms: Number(form.bathrooms) || 1,
+      price: Number(form.price) || 0,
+
+      typeOfBooking: form.typeOfBooking || undefined,
+      agreementStatus: form.agreementStatus || undefined,
+      agreementDate: form.agreementDate || undefined,
+      cancelled: form.cancelled || false,
     });
     onOpenChange(false);
   };
@@ -104,7 +130,7 @@ function FlatFormDialog({ open, onOpenChange, flat, onSave }) {
               />
             </div>
             <div>
-              <Label>Area (sq ft) *</Label>
+              <Label>Area (sq ft)</Label>
               <Input
                 type="number"
                 value={form.area}
@@ -113,7 +139,7 @@ function FlatFormDialog({ open, onOpenChange, flat, onSave }) {
               />
             </div>
             <div>
-              <Label>Bedrooms *</Label>
+              <Label>Bedrooms</Label>
               <Input
                 type="number"
                 value={form.bedrooms}
@@ -122,7 +148,7 @@ function FlatFormDialog({ open, onOpenChange, flat, onSave }) {
               />
             </div>
             <div>
-              <Label>Bathrooms *</Label>
+              <Label>Bathrooms</Label>
               <Input
                 type="number"
                 value={form.bathrooms}
@@ -133,7 +159,7 @@ function FlatFormDialog({ open, onOpenChange, flat, onSave }) {
               />
             </div>
             <div>
-              <Label>Price (₹) *</Label>
+              <Label>Price (₹)</Label>
               <Input
                 type="number"
                 value={form.price}
@@ -199,6 +225,76 @@ function FlatFormDialog({ open, onOpenChange, flat, onSave }) {
                 Balcony
               </label>
             </div>
+
+            <div className="col-span-2 border-t pt-3 mt-2">
+              <Label className="text-xs text-muted-foreground mb-2 block">
+                Booking & Agreement Details (Optional)
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label>Type of Booking</Label>
+                  <Select
+                    value={form.typeOfBooking}
+                    onValueChange={(v) =>
+                      setForm({ ...form, typeOfBooking: v })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TYPE_OF_BOOKING_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Agreement Status</Label>
+                  <Select
+                    value={form.agreementStatus}
+                    onValueChange={(v) =>
+                      setForm({ ...form, agreementStatus: v })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AGREEMENT_STATUS_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Agreement Date</Label>
+                  <Input
+                    type="date"
+                    value={form.agreementDate}
+                    onChange={(e) =>
+                      setForm({ ...form, agreementDate: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="flex items-center">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={form.cancelled}
+                      onChange={(e) =>
+                        setForm({ ...form, cancelled: e.target.checked })
+                      }
+                    />
+                    Cancelled
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <DialogFooter>
@@ -228,18 +324,16 @@ function AddTowerDialog({ open, onOpenChange, onSave }) {
   }, [open]);
 
   const addFloor = () => {
-    const nextNumber = floors.length + 1;
+    const nextNumber = getNextFloorNumber(floors);
     setFloors([...floors, { floorNumber: nextNumber, flats: [] }]);
   };
 
   const updateFloorNumber = (idx, value) => {
-    const updated = floors.map((floor, i) => {
-      if (i === idx) {
-        return { ...floor, floorNumber: Number(value) || 0 };
-      }
-      return floor;
-    });
-    setFloors(updated);
+    setFloors(
+      floors.map((floor, i) =>
+        i === idx ? { ...floor, floorNumber: value } : floor,
+      ),
+    );
   };
 
   const deleteFloor = (idx) => {
@@ -341,7 +435,6 @@ function AddTowerDialog({ open, onOpenChange, onSave }) {
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">Floor</span>
                           <Input
-                            type="number"
                             className="w-20 h-8 text-sm"
                             value={floor.floorNumber}
                             onChange={(e) =>
@@ -442,12 +535,10 @@ function AddFloorDialog({ open, onOpenChange, tower, onSave }) {
   const [editingFlat, setEditingFlat] = useState(null);
 
   useEffect(() => {
-    if (open) {
-      // Suggest floor number = max existing floor number + 1
-      const existingNumbers = tower.floors?.map((f) => f.floorNumber) || [];
-      const nextNum =
-        existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
-      setFloorNumber(nextNum);
+    if (open && tower) {
+      const existing = tower.floors || [];
+      const next = getNextFloorNumber(existing);
+      setFloorNumber(next);
       setFlats([]);
     }
   }, [open, tower]);
@@ -476,9 +567,9 @@ function AddFloorDialog({ open, onOpenChange, tower, onSave }) {
   };
 
   const handleSubmit = () => {
-    if (!floorNumber || floorNumber < 1) return;
+     if (!floorNumber.trim()) return;
     onSave({
-      floorNumber: Number(floorNumber),
+      floorNumber: floorNumber.trim(),
       flats,
     });
     onOpenChange(false);
@@ -495,10 +586,9 @@ function AddFloorDialog({ open, onOpenChange, tower, onSave }) {
             <div className="flex items-center gap-2">
               <Label>Floor Number *</Label>
               <Input
-                type="number"
                 className="w-24"
                 value={floorNumber}
-                onChange={(e) => setFloorNumber(Number(e.target.value) || 0)}
+                onChange={(e) => setFloorNumber(e.target.value)}
                 placeholder="e.g., 1"
               />
             </div>
@@ -944,7 +1034,7 @@ export function TowersTab({ projectId }) {
                                                             )}
                                                         </div>
                                                       </td>
-                                                       <td className="px-2 py-1">
+                                                      <td className="px-2 py-1">
                                                         {flat?.bookedBy || "-"}
                                                       </td>
                                                     </tr>

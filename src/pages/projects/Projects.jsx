@@ -250,6 +250,7 @@ export default function Projects() {
 
     const handleSave = async (formData) => {
         try {
+            delete formData.endDate
             if (editing) {
                 await projectApi.update(editing._id, formData);
                 toast.success("Project updated");

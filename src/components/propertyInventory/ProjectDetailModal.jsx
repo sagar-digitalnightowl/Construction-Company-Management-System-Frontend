@@ -148,7 +148,7 @@ export default function ProjectDetailModal({
                     <tr key={b.id}>
                       <td>
                         {b.clientName}
-                        <br />
+                        <br />             
                         <span className="text-xs text-muted-foreground">
                           {b.clientEmail}
                         </span>
