@@ -98,10 +98,10 @@ function FlatFormDialog({ open, onOpenChange, flat, onSave }) {
     if (!form.flatNumber) return;
     onSave({
       ...form,
-      area: Number(form.area) || 0,
-      bedrooms: Number(form.bedrooms) || 1,
-      bathrooms: Number(form.bathrooms) || 1,
-      price: Number(form.price) || 0,
+      area: Number(form.area) ? form.area : undefined,
+      bedrooms: Number(form.bedrooms) ? form.bedrooms : undefined,
+      bathrooms: Number(form.bathrooms) ? form.bathrooms : undefined,
+      price: Number(form.price) ? form.price : undefined,
 
       typeOfBooking: form.typeOfBooking || undefined,
       agreementStatus: form.agreementStatus || undefined,
