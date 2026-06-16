@@ -103,8 +103,8 @@ function FlatFormDialog({ open, onOpenChange, flat, onSave }) {
       ...form,
 
       area: Number(form.area) || 0,
-      bedrooms: Number(form.bedrooms) || 1,
-      bathrooms: Number(form.bathrooms) || 1,
+      bedrooms: Number(form.bedrooms) || 0,
+      bathrooms: Number(form.bathrooms) || 0,
       price: Number(form.price) || 0,
 
       typeOfBooking: form.typeOfBooking || undefined,
