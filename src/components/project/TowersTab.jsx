@@ -32,6 +32,8 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { canMutate } from "@/data/permissions";
+import { Pencil, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 
 const FACING_OPTIONS = [
   { value: "East", label: "East" },
@@ -567,7 +569,7 @@ function AddFloorDialog({ open, onOpenChange, tower, onSave }) {
   };
 
   const handleSubmit = () => {
-     if (!floorNumber.trim()) return;
+    if (!floorNumber.trim()) return;
     onSave({
       floorNumber: floorNumber.trim(),
       flats,
@@ -677,15 +679,31 @@ export function TowersTab({ projectId }) {
 
   const canEdit = canMutate(current?.role, "tower-operations");
 
-  const { towersData, loading, fetchTowers, addTower, addFloor, addFlat } =
-    useProject();
+  const {
+    towersData,
+    loading,
+    fetchTowers,
+    addTower,
+    addFloor,
+    addFlat,
+    updateFlat,
+    deleteFlat,
+  } = useProject();
 
   const [addTowerOpen, setAddTowerOpen] = useState(false);
   const [addFloorOpen, setAddFloorOpen] = useState(false);
   const [selectedTower, setSelectedTower] = useState(null);
-  const [flatDialogOpen, setFlatDialogOpen] = useState(false);
-  const [currentTowerForFlat, setCurrentTowerForFlat] = useState(null);
-  const [currentFloorForFlat, setCurrentFloorForFlat] = useState(null);
+
+  const [flatFormState, setFlatFormState] = useState({
+    open: false,
+    towerIdx: null,
+    floorIdx: null,
+    flatIdx: null,
+    flat: null,
+  });
+
+  const [deleteFlatTarget, setDeleteFlatTarget] = useState(null);
+
   const [expandedFloors, setExpandedFloors] = useState({});
 
   useEffect(() => {
@@ -727,17 +745,65 @@ export function TowersTab({ projectId }) {
     }
   };
 
-  const openAddFlatDialog = (tower, floor) => {
-    setCurrentTowerForFlat(tower);
-    setCurrentFloorForFlat(floor);
-    setFlatDialogOpen(true);
+  // Open dialog to add a new flat
+  const openAddFlatDialog = (towerIdx, floorIdx) => {
+    setFlatFormState({
+      open: true,
+      towerIdx,
+      floorIdx,
+      flatIdx: null,
+      flat: null,
+    });
   };
 
-  const saveFlat = async (flatData) => {
-    if (currentTowerForFlat && currentFloorForFlat) {
-      await handleAddFlat(currentTowerForFlat, currentFloorForFlat, flatData);
-      setFlatDialogOpen(false);
+  // Open dialog to edit an existing flat
+  const openEditFlatDialog = (towerIdx, floorIdx, flatIdx, flat) => {
+  const flatForForm = {
+    ...flat,
+    facing: flat.features?.facing || "",
+    parking: flat.features?.parking || false,
+    balcony: flat.features?.balcony || false,
+    furnished: flat.features?.furnished || "unfurnished",
+  };
+  setFlatFormState({
+    open: true,
+    towerIdx,
+    floorIdx,
+    flatIdx,
+    flat: flatForForm,
+  });
+};
+
+  // Save flat (add or update)
+  const handleSaveFlat = async (flatData) => {
+    const { towerIdx, floorIdx, flatIdx } = flatFormState;
+    if (towerIdx === null || floorIdx === null) return;
+
+    let success = false;
+    if (flatIdx !== null) {
+      // Edit mode
+      success = await updateFlat(
+        projectId,
+        towerIdx,
+        floorIdx,
+        flatIdx,
+        flatData,
+      );
+    } else {
+      // Add mode
+      success = await addFlat(projectId, towerIdx, floorIdx, flatData);
     }
+
+    if (success) {
+      setFlatFormState((prev) => ({ ...prev, open: false }));
+    }
+  };
+
+  const handleDeleteFlat = async () => {
+    if (!deleteFlatTarget) return;
+    const { towerIdx, floorIdx, flatIdx } = deleteFlatTarget;
+    await deleteFlat(projectId, towerIdx, floorIdx, flatIdx);
+    setDeleteFlatTarget(null);
   };
 
   const toggleFloorExpand = (towerName, floorNumber) => {
@@ -814,7 +880,7 @@ export function TowersTab({ projectId }) {
             </p>
           ) : (
             <div className="space-y-2">
-              {towers.map((tower) => {
+              {towers.map((tower, towerIdx) => {
                 const floors = tower.floors || [];
                 const flatCount = floors.reduce(
                   (sum, f) => sum + (f.flats?.length || 0),
@@ -867,7 +933,7 @@ export function TowersTab({ projectId }) {
                               </tr>
                             </thead>
                             <tbody>
-                              {floors.map((floor) => {
+                              {floors.map((floor, floorIdx) => {
                                 const flatList = floor.flats || [];
                                 const totalArea = flatList.reduce(
                                   (sum, f) => sum + (f.area || 0),
@@ -926,7 +992,7 @@ export function TowersTab({ projectId }) {
                                             size="sm"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              openAddFlatDialog(tower, floor);
+                                             openAddFlatDialog(towerIdx, floorIdx)
                                             }}
                                           >
                                             <Plus className="h-3 w-3 mr-1" />{" "}
@@ -969,6 +1035,9 @@ export function TowersTab({ projectId }) {
                                                   <th className="px-2 py-1 text-left font-medium">
                                                     Booked By
                                                   </th>
+                                                  <th className="px-2 py-1 text-left font-medium">
+                                                    Action
+                                                  </th>
                                                 </tr>
                                               </thead>
                                               <tbody>
@@ -982,9 +1051,9 @@ export function TowersTab({ projectId }) {
                                                     </td>
                                                   </tr>
                                                 ) : (
-                                                  flatList.map((flat, idx) => (
+                                                  flatList.map((flat, flatIdx) => (
                                                     <tr
-                                                      key={idx}
+                                                      key={flatIdx}
                                                       className="border-b last:border-0"
                                                     >
                                                       <td className="px-2 py-1 font-medium">
@@ -1037,6 +1106,53 @@ export function TowersTab({ projectId }) {
                                                       <td className="px-2 py-1">
                                                         {flat?.bookedBy || "-"}
                                                       </td>
+
+                                                      <td className="px-2 py-1">
+                                                        <div className="flex gap-1">
+                                                          {canEdit && (
+                                                            <>
+                                                              <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-6 w-6"
+                                                                onClick={(
+                                                                  e,
+                                                                ) => {
+                                                                  e.stopPropagation();
+                                                                  openEditFlatDialog(
+                                                                    towerIdx,
+                                                                    floorIdx,
+                                                                    flatIdx,
+                                                                    flat,
+                                                                  );
+                                                                }}
+                                                              >
+                                                                <Pencil className="h-3 w-3" />
+                                                              </Button>
+                                                              <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-6 w-6 text-destructive"
+                                                                onClick={(
+                                                                  e,
+                                                                ) => {
+                                                                  e.stopPropagation();
+                                                                  setDeleteFlatTarget(
+                                                                    {
+                                                                      towerIdx,
+                                                                      floorIdx,
+                                                                      flatIdx,
+                                                                      flat,
+                                                                    },
+                                                                  );
+                                                                }}
+                                                              >
+                                                                <Trash2 className="h-3 w-3" />
+                                                              </Button>
+                                                            </>
+                                                          )}
+                                                        </div>
+                                                      </td>
                                                     </tr>
                                                   ))
                                                 )}
@@ -1081,10 +1197,23 @@ export function TowersTab({ projectId }) {
 
       {/* Add Flat Dialog (direct) */}
       <FlatFormDialog
-        open={flatDialogOpen}
-        onOpenChange={setFlatDialogOpen}
-        flat={null}
-        onSave={saveFlat}
+        open={flatFormState.open}
+        onOpenChange={(open) => {
+          if (!open) setFlatFormState((prev) => ({ ...prev, open: false }));
+        }}
+        flat={flatFormState.flat}
+        onSave={handleSaveFlat}
+      />
+
+      <ConfirmDialog
+        open={!!deleteFlatTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteFlatTarget(null);
+        }}
+        title="Delete flat?"
+        description={`Are you sure you want to delete flat ${deleteFlatTarget?.flat?.flatNumber || ""}?`}
+        onConfirm={handleDeleteFlat}
+        confirmLabel="Delete"
       />
     </div>
   );

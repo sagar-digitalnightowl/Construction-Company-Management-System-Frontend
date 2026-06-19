@@ -23,6 +23,12 @@ export const PAYMENT_MODE = {
     CHEQUE: 'Cheque',
     BANK_TRANSFER: 'Bank Transfer',
     CARD: 'Card',
+    NEFT: 'NEFT',
+    RTGS: 'RTGS',
+    TRF: 'TRF',
+    L_NEFT: 'L-NEFT',
+    OTP: 'OTP',      
+    CLP: 'CLP',     
 };
 
 export const MILESTONE_KEYS = {

@@ -34,6 +34,7 @@ import { ResourceTab } from "@/components/project/ResourceTab";
 import { DocumentsTab } from "@/components/project/DocumentsTab";
 import { TowersTab } from "@/components/project/TowersTab";
 
+
 export default function ProjectDetail() {
   const { id } = useParams();
   const { current } = useAuthStore();

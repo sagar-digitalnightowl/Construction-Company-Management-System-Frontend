@@ -24,12 +24,12 @@ import { formatINR } from "@/lib/helpers";
 import { toast } from "sonner";
 import { useLeadList } from "@/hooks/useLeadList";
 
-const PAYMENT_MODEL_OPTIONS = [
-  { value: "NEW", label: "New" },
-  { value: "RESALE", label: "Resale" },
-  { value: "PART_EXCHANGE", label: "Part Exchange" },
-  { value: "RENT_TO_OWN", label: "Rent to Own" },
-];
+// const PAYMENT_MODEL_OPTIONS = [
+//   { value: "NEW", label: "New" },
+//   { value: "RESALE", label: "Resale" },
+//   { value: "PART_EXCHANGE", label: "Part Exchange" },
+//   { value: "RENT_TO_OWN", label: "Rent to Own" },
+// ];
 
 export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
   const [projects, setProjects] = useState([]);
@@ -56,7 +56,7 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
 
     // New booking-level fields
     keyNumber: "",
-    paymentModel: "",
+    // paymentModel: "",
     businessCode: "",
     businessName: "",
     teamManager: "",
@@ -268,7 +268,7 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
       nomineeName: form.nomineeName || undefined,
       nomineeRelation: form.nomineeRelation || undefined,
       keyNumber: form.keyNumber || undefined,
-      paymentModel: form.paymentModel || undefined,
+      // paymentModel: form.paymentModel || undefined,
       businessCode: form.businessCode || undefined,
       businessName: form.businessName || undefined,
       teamManager: form.teamManager || undefined,
@@ -600,6 +600,7 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
                 onChange={(e) => updateForm("keyNumber", e.target.value)}
               />
             </div>
+{/* 
             <div>
               <Label>Payment Model</Label>
               <Select
@@ -617,7 +618,8 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
+
             <div>
               <Label>Business Code</Label>
               <Input

@@ -39,6 +39,13 @@ export const useLead = () => {
 	const [assignmentStats, setAssignmentStats] = useState(null);
 	const [agentPerformance, setAgentPerformance] = useState([]);
 
+	 const [employees, setEmployees] = useState({
+    employees: [],
+    stats: null,
+    pagination: { page: 1, limit: 10, total: 0, pages: 0 },
+  });
+  const [employeeLoading, setEmployeeLoading] = useState(false);
+
 	// Projects (for conversion)
 	const [projects, setProjects] = useState([]);
 	const fetchProjects = useCallback(async () => {
@@ -505,6 +512,39 @@ export const useLead = () => {
 		}
 	};
 
+
+	  const fetchEmployees = useCallback(async (params = {}) => {
+    setEmployeeLoading(true);
+    try {
+      const res = await leadApi.getEmployees(params);
+      const data = res.data?.data || {};
+      setEmployees({
+        employees: data.employees || [],
+        stats: data.stats || null,
+        pagination: data.pagination || { page: 1, limit: 10, total: 0, pages: 0 },
+      });
+    } catch (err) {
+      toast.error('Failed to load employees');
+    } finally {
+      setEmployeeLoading(false);
+    }
+  }, []);
+
+  const convertEmployeeToLead = async (employeeId, additionalData) => {
+    setEmployeeLoading(true);
+    try {
+      const res = await leadApi.convertEmployeeToLead(employeeId, additionalData);
+      toast.success('Employee converted to lead successfully');
+      await fetchEmployees(); // refresh list
+      return res.data?.data;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Conversion failed');
+      return null;
+    } finally {
+      setEmployeeLoading(false);
+    }
+  };
+
 	return {
 		// Data
 		leads,
@@ -568,5 +608,11 @@ export const useLead = () => {
 		fetchFollowUpLeads,
 		updateLeadCallStatus,
 		recontactLead,
+
+
+		employees,
+		employeeLoading,
+		fetchEmployees,
+		convertEmployeeToLead,
 	};
 };

@@ -21,7 +21,7 @@ export const projectApi = {
     getStats: () => api.get('/project/stats'),
     getDelayed: () => api.get('/project/delayed'),
     compare: (ids) => api.get(`/project/compare?ids=${ids.join(',')}`),
-             
+
     // =========================
     // TEAM MANAGEMENT
     // =========================
@@ -169,7 +169,7 @@ export const projectApi = {
         addFlat: (projectId, towerIndex, floorIndex, data) =>
             api.post(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats`, data),
         updateFlat: (projectId, towerIndex, floorIndex, flatIndex, data) =>
-            api.put(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats/${flatIndex}`, data),
+            api.patch(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats/${flatIndex}`, data),
         deleteFlat: (projectId, towerIndex, floorIndex, flatIndex) =>
             api.delete(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats/${flatIndex}`),
         getAvailableFlats: (projectId, towerName) =>

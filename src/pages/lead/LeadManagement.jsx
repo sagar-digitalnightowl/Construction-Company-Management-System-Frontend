@@ -8,6 +8,7 @@ import CallingRecordsPage from "./CallingRecordsPage";
 import MyCallingListPage from "./MyCallingListPage";
 import LeadStatsPage from "./LeadStatsPage";
 import MyCallLogsPage from "./MyCallLogsPage";
+import EmployeeLeadsPage from "./EmployeeLeadsPage";
 
 const LeadManagement = () => {
   const { current } = useAuthStore();
@@ -44,6 +45,9 @@ const LeadManagement = () => {
           {(isAdminOrDirector || isHR) && (
             <TabsTrigger value="stats">Analytics</TabsTrigger>
           )}
+          {(isAdminOrDirector || isHR) && (
+            <TabsTrigger value="employees">Employees</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="kanban">
@@ -77,6 +81,12 @@ const LeadManagement = () => {
         {(isAdminOrDirector || isHR) && (
           <TabsContent value="stats">
             <LeadStatsPage />
+          </TabsContent>
+        )}
+
+        {(isAdminOrDirector || isHR) && (
+          <TabsContent value="employees">
+            <EmployeeLeadsPage />
           </TabsContent>
         )}
       </Tabs>

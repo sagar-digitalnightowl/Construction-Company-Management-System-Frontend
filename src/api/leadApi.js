@@ -46,4 +46,9 @@ export const leadApi = {
 	getLeadsForFollowUp: (params) => api.get("/lead/follow-up-required", { params }),
 	updateLeadCallStatus: (id, data) => api.patch(`/lead/${id}/call-status`, data),
 	recontactLead: (id, data) => api.post(`/lead/${id}/recontact`, data),
+
+
+	 getEmployees: (params) => api.get('/lead/employees', { params }),
+	  convertEmployeeToLead: (employeeId, data) =>
+    api.post(`/lead/employees/${employeeId}/convert-to-lead`, data),
 };
