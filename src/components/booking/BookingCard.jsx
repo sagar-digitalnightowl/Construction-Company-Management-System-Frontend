@@ -30,7 +30,7 @@ export function BookingCard({ booking, onClick }) {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Total Price:</span>
-          <span>{formatINR(booking.totalPrice)}</span>
+          <span>{formatINR(booking.flatSnapshot?.price)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Paid:</span>
