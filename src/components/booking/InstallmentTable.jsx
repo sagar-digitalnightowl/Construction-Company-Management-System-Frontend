@@ -28,7 +28,7 @@ export function InstallmentTable({ installments, onPay, canPay }) {
         <TableHeader>
           <TableRow>
             <TableHead className="w-12">#</TableHead>
-            <TableHead>Milestone</TableHead>
+            <TableHead>description</TableHead>
             <TableHead>Due Date</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Paid Amount</TableHead>
@@ -42,7 +42,7 @@ export function InstallmentTable({ installments, onPay, canPay }) {
           {installments.map((inst, idx) => (
             <TableRow key={inst._id}>
               <TableCell>{inst.installmentNumber}</TableCell>
-              <TableCell className="max-w-xs">{inst.milestoneName}</TableCell>
+              <TableCell className="max-w-xs">{inst.description}</TableCell>
               <TableCell>
                 {" "}
                 {inst.dueDate
