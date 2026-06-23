@@ -22,7 +22,7 @@ export function InstallmentTable({ installments, onPay, canPay }) {
     );
   }
 
-  return (
+  return (       
     <div className="rounded-lg border overflow-auto">
       <Table>
         <TableHeader>

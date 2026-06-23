@@ -1224,11 +1224,11 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
       }
       // Optionally warn if total doesn't match flat price
       const total = getTotalInstallmentAmount();
-      if (selectedFlat && total !== selectedFlat.price) {
-        toast.warning(
-          `Total installment amount (${formatINR(total)}) does not match flat price (${formatINR(selectedFlat.price)}). Backend will validate.`,
-        );
-      }
+      // if (selectedFlat && total !== selectedFlat.price) {
+      //   toast.warning(
+      //     `Total installment amount (${formatINR(total)}) does not match flat price (${formatINR(selectedFlat.price)}). Backend will validate.`,
+      //   );
+      // }
     }
 
     setLoading(true);

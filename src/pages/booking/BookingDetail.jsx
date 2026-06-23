@@ -638,6 +638,14 @@ export default function BookingDetail() {
                 {formatDate(booking.createdAt)}
               </div>
               <div>
+                <span className="text-muted-foreground">Booking Amount:</span>{" "}
+                {formatINR(booking.bookingAmount || 0)}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Payment Status :</span>{" "}
+                {booking.paymentStatus || "-"}
+              </div>
+              <div>
                 <span className="text-muted-foreground">Agreement Date:</span>{" "}
                 {booking.agreementDate
                   ? formatDate(booking.agreementDate)
