@@ -270,7 +270,7 @@ const CallingRecordsPage = () => {
   const eligibleAgents = employees?.employees?.filter(
     (u) =>
       u.isActive !== false &&
-      ["employee", "site_engineer", "project_manager"].includes(u.role),
+      (["employee", "site_engineer", "project_manager"].includes(u.role) || u.role.includes("manager")),
   );
 
   return (
