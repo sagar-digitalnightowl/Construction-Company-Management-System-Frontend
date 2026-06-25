@@ -793,7 +793,7 @@ export function ProjectForm({ open, onOpenChange, initialData, onSave }) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>End Date</Label>
+              <Label>End Date (optional)</Label>
               <Input
                 type="date"
                 value={form.endDate}
