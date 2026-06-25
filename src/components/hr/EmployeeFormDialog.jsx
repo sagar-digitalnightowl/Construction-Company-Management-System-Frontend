@@ -1529,7 +1529,7 @@ const ROLES = [
 
   // External
   { value: "vendor", label: "🤝 Vendor (L1)" },
-  { value: "client", label: "🏠 Client (L1)" },
+  { value: "client", label: "🏠 Buyer (L1)" },
 ];
 
 

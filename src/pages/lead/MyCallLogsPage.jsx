@@ -112,7 +112,7 @@ const MyCallLogsPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
-                <TableHead>Lead / Client</TableHead>
+                <TableHead>Lead / Buyer</TableHead>
                 <TableHead>Duration</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Notes</TableHead>

@@ -103,7 +103,7 @@ export default function ProjectDetailModal({
                             {flat.booking && (
                               <div className="text-xs space-y-1 mt-1 border-t pt-1">
                                 <p>Booking ID: {flat.booking.bookingId}</p>
-                                <p>Client: {flat.booking.client?.name}</p>
+                                <p>Buyer: {flat.booking.client?.name}</p>
                                 <p>
                                   Paid: ₹
                                   {flat.booking.totalPaid?.toLocaleString()}
@@ -135,7 +135,7 @@ export default function ProjectDetailModal({
               <table className="w-full text-sm">
                 <thead>
                   <tr>
-                    <th>Client</th>
+                    <th>Buyer</th>
                     <th>Flat</th>
                     <th>Booking Amount</th>
                     <th>Payment Status</th>
@@ -190,7 +190,7 @@ export default function ProjectDetailModal({
                 <thead>
                   <tr>
                     <th>Booking ID</th>
-                    <th>Client</th>
+                    <th>Buyer</th>
                     <th>Flat</th>
                     <th>Status</th>
                     <th>Agreement Date</th>

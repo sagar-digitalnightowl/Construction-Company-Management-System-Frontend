@@ -776,7 +776,7 @@ const MyCallingListPage = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-nowrap">Client Name</TableHead>
+                <TableHead className="text-nowrap">Buyer Name</TableHead>
                 <TableHead className="text-nowrap">Phone</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead className="text-nowrap">Call Status</TableHead>

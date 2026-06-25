@@ -571,7 +571,7 @@ export default function BookingDetail() {
                 {booking.projectId?.name}
               </div>
               <div>
-                <span className="text-muted-foreground">Client:</span>{" "}
+                <span className="text-muted-foreground">Buyer:</span>{" "}
                 {booking.clientId?.name || "Self"}
               </div>
 

@@ -28,7 +28,7 @@ export default function BookingPaymentModal({
               {bookingPayment.bookingId}
             </div>
             <div>
-              <span className="font-medium">Client:</span>{" "}
+              <span className="font-medium">Buyer:</span>{" "}
               {bookingPayment.clientName}
             </div>
             <div>

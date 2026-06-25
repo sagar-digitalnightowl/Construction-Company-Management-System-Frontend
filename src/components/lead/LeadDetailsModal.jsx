@@ -1594,7 +1594,7 @@ const CallHistorySection = ({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">Client Feedback</Label>
+                  <Label className="text-xs">Buyer Feedback</Label>
                   <Input
                     value={newCallLog.clientFeedback}
                     onChange={(e) =>

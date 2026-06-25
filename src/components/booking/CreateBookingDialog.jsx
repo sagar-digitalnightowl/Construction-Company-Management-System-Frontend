@@ -1502,7 +1502,7 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
                   <SelectValue placeholder="Select lead" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None (Create new client)</SelectItem>
+                  <SelectItem value="none">None (Create new buyer)</SelectItem>
                   {leads?.map((lead) => (
                     <SelectItem key={lead._id} value={lead._id}>
                       {lead.clientName}{" "}
@@ -1772,11 +1772,11 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
           {!form.leadId && (
             <>
               <div className="border-t pt-2">
-                <h3 className="font-semibold">Client Details</h3>
+                <h3 className="font-semibold">Buyer Details</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  placeholder="Client Name"
+                  placeholder="Buyer Name"
                   value={form.clientName}
                   onChange={(e) => updateForm("clientName", e.target.value)}
                 />

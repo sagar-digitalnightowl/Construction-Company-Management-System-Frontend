@@ -53,7 +53,7 @@ export default function PendingBookings() {
       <PageHeader
         eyebrow="Approvals"
         title="Pending Booking Requests"
-        description="Review and approve/reject client booking requests."
+        description="Review and approve/reject buyer booking requests."
       />
       {pendingBookings.length === 0 ? (
         <EmptyState
@@ -69,7 +69,7 @@ export default function PendingBookings() {
                   <p className="font-medium">
                     {b.unitNumber} - {b.projectId?.name}
                   </p>
-                  <p className="text-sm">Client: {b.clientId?.name}</p>
+                  <p className="text-sm">Buyer: {b.clientId?.name}</p>
                   <p className="text-xs text-muted-foreground">
                     Booking Ref: {b.bookingReferenceNumber}
                   </p>

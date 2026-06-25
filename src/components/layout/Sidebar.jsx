@@ -183,7 +183,7 @@ const navGroups = [
       },
       {
         to: "/crm",
-        label: "CRM & Clients",
+        label: "CRM & Buyers",
         icon: HeartHandshake,
         key: "crm",
       },

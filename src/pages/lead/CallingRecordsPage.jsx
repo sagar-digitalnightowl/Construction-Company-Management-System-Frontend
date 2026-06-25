@@ -369,7 +369,7 @@ const CallingRecordsPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8">Select</TableHead>
-                <TableHead>Client Name</TableHead>
+                <TableHead>Buyer Name</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Call Status</TableHead>

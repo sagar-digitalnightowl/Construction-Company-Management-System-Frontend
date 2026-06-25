@@ -572,7 +572,7 @@ export default function Finance() {
                   <TableRow>
                     <TableHead>Invoice #</TableHead>
                     <TableHead>Project</TableHead>
-                    <TableHead>Client</TableHead>
+                    <TableHead>Buyer</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead className="text-right">GST</TableHead>
                     <TableHead className="text-right">Total</TableHead>
@@ -1081,7 +1081,7 @@ export default function Finance() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Client name</Label>
+              <Label>Buyer name</Label>
               <Input
                 value={invForm.clientName}
                 onChange={(e) =>

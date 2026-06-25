@@ -25,7 +25,7 @@ export function BookingCard({ booking, onClick }) {
           />
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Client:</span>
+          <span className="text-muted-foreground">Buyer :</span>
           <span>{booking.clientId?.name || "Self"}</span>
         </div>
         <div className="flex justify-between text-sm">

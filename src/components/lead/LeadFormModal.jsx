@@ -1116,7 +1116,7 @@ const LeadFormModal = ({
             <h4 className="font-medium text-sm">Basic Information</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Lead / Client Name *</Label>
+                <Label>Lead / Buyer Name *</Label>
                 <Input
                   value={form.clientName}
                   onChange={(e) => handleChange("clientName", e.target.value)}

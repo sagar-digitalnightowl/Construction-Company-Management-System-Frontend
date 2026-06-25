@@ -983,7 +983,7 @@ function ProjectCard({ project, canEdit, onEdit, onDelete, onClone }) {
               {project.location}
             </div>
             <div className="text-xs text-muted-foreground mt-0.5">
-              Client:{" "}
+              Buyer:{" "}
               <span className="text-foreground">{project.clientName}</span>
             </div>
           </div>
