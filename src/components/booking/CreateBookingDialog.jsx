@@ -1214,7 +1214,7 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
       }
       // Check each installment has required fields
       const invalid = form.installments.some(
-        (inst) => !inst.description || !inst.amount || !inst.dueDate,
+        (inst) => !inst.description || !inst.amount
       );
       if (invalid) {
         toast.error(
