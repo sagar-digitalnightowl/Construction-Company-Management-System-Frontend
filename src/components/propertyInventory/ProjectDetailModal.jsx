@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,18 @@ export default function ProjectDetailModal({
   loading,
   onViewPayments,
 }) {
+  const [selectedTowerIdx, setSelectedTowerIdx] = useState(0);
+  const [selectedFloorIdx, setSelectedFloorIdx] = useState(0);
+  const [selectedFlat, setSelectedFlat] = useState(null);
+
+  const towers = project?.towers || [];
+  const selectedTower = towers[selectedTowerIdx] || null;
+  const floors = selectedTower?.floors || [];
+  // Keep floor index in bounds when tower changes
+  const safeFloorIdx = Math.min(selectedFloorIdx, floors.length - 1);
+  const currentFloor = floors[safeFloorIdx] || null;
+  const currentFlats = currentFloor?.flats || [];
+
   if (!project) return null;
 
   return (
@@ -62,7 +74,7 @@ export default function ProjectDetailModal({
           </TabsList>
 
           {/* Towers & Flats */}
-          <TabsContent value="towers">
+          {/* <TabsContent value="towers">
             {project.towers?.length ? (
               project.towers.map((tower) => (
                 <div key={tower.towerName} className="mb-6">
@@ -127,8 +139,97 @@ export default function ProjectDetailModal({
                 No tower data available.
               </p>
             )}
-          </TabsContent>
+          </TabsContent> */}
 
+          <TabsContent value="towers">
+            {towers.length > 0 ? (
+              <div className="space-y-4">
+                {/* Tower selection */}
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Select Tower</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {towers.map((tower, idx) => (
+                      <Button
+                        key={tower.towerName}
+                        variant={
+                          idx === selectedTowerIdx ? "default" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => {
+                          setSelectedTowerIdx(idx);
+                          setSelectedFloorIdx(0); // reset floor when tower changes
+                        }}
+                      >
+                        {tower.towerName}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Floor selection */}
+                {selectedTower && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-1">Select Floor</h4>
+                    <div className="flex gap-2 flex-wrap">
+                      {floors.map((floor, idx) => (
+                        <Button
+                          key={floor.floorNumber}
+                          variant={idx === safeFloorIdx ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedFloorIdx(idx)}
+                        >
+                          {floor.floorNumber}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Flats grid */}
+                {currentFlats.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-2">
+                      {selectedTower.towerName} – Floor{" "}
+                      {currentFloor.floorNumber}
+                    </h3>
+                    <div className="grid grid-cols-4 gap-4">
+                      {currentFlats.map((flat) => (
+                        <div
+                          key={flat.flatNumber}
+                          className="border rounded-lg p-3 cursor-pointer hover:bg-accent transition-colors"
+                          onClick={() => setSelectedFlat(flat)}
+                        >
+                          <div className="flex justify-between items-start">
+                            <span className="font-medium">
+                              {flat.flatNumber}
+                            </span>
+                            <StatusBadge status={flat.status} />
+                          </div>
+                          <p className="text-sm">{flat.area} sqft</p>
+                          <p className="text-sm font-semibold">
+                            ₹{flat.price?.toLocaleString()}
+                          </p>
+                          {flat.facing && (
+                            <p className="text-xs text-muted-foreground">
+                              Facing: {flat.facing}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {currentFlats.length === 0 && selectedTower && (
+                  <p className="text-sm text-muted-foreground">
+                    No flats on this floor.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No towers found.</p>
+            )}
+          </TabsContent>
           {/* Bookings */}
           <TabsContent value="bookings">
             {bookings.length ? (
@@ -148,7 +249,7 @@ export default function ProjectDetailModal({
                     <tr key={b.id}>
                       <td>
                         {b.clientName}
-                        <br />             
+                        <br />
                         <span className="text-xs text-muted-foreground">
                           {b.clientEmail}
                         </span>
@@ -254,6 +355,206 @@ export default function ProjectDetailModal({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <Dialog open={!!selectedFlat} onOpenChange={() => setSelectedFlat(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Flat {selectedFlat?.flatNumber} Details</span>
+              {selectedFlat && <StatusBadge status={selectedFlat.status} />}
+            </DialogTitle>
+            {selectedFlat && (
+              <p className="text-sm text-muted-foreground">
+                {selectedFlat.area} sqft · ₹{formatINR(selectedFlat.price)}
+              </p>
+            )}
+          </DialogHeader>
+
+          {selectedFlat && (
+            <div className="space-y-6">
+              {/* --- Flat Information Card --- */}
+              <div className="bg-muted/40 rounded-lg p-4 grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Bedrooms:</span>{" "}
+                  {selectedFlat.bedrooms}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Bathrooms:</span>{" "}
+                  {selectedFlat.bathrooms}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Facing:</span>{" "}
+                  {selectedFlat.facing || "—"}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Parking:</span>{" "}
+                  {selectedFlat.parking ? "Yes" : "No"}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Balcony:</span>{" "}
+                  {selectedFlat.balcony ? "Yes" : "No"}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Furnished:</span>{" "}
+                  {selectedFlat.furnished}
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">
+                    Type of Booking:
+                  </span>{" "}
+                  {selectedFlat.typeOfBooking || "—"}
+                </div>
+              </div>
+
+              {/* --- Agreement & Status Card --- */}
+              <div className="border rounded-lg p-4 grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">
+                    Agreement Status:
+                  </span>{" "}
+                  <Badge
+                    variant={
+                      selectedFlat.agreementStatus === "REGISTERED"
+                        ? "success"
+                        : "outline"
+                    }
+                  >
+                    {selectedFlat.agreementStatus}
+                  </Badge>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Agreement Date:</span>{" "}
+                  {selectedFlat.agreementDate
+                    ? formatDate(selectedFlat.agreementDate)
+                    : "—"}
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">Cancelled:</span>{" "}
+                  {selectedFlat.cancelled ? "Yes" : "No"}
+                </div>
+              </div>
+
+              {/* --- Booking Details Card --- */}
+              {selectedFlat.booking && (
+                <div className="border rounded-lg p-4 space-y-3">
+                  <h4 className="font-semibold text-base">Booking Details</h4>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Booking ID:</span>{" "}
+                      <span className="font-mono text-xs">
+                        {selectedFlat.booking.bookingId}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Status:</span>{" "}
+                      <Badge variant="outline">
+                        {selectedFlat.booking.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Approval:</span>{" "}
+                      <Badge
+                        variant={
+                          selectedFlat.booking.approvalStatus === "approved"
+                            ? "success"
+                            : "warning"
+                        }
+                      >
+                        {selectedFlat.booking.approvalStatus}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">
+                        Payment Status:
+                      </span>{" "}
+                      <Badge>{selectedFlat.booking.paymentStatus}</Badge>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">
+                        Booking Amount:
+                      </span>{" "}
+                      {formatINR(selectedFlat.booking.bookingAmount)}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Total Paid:</span>{" "}
+                      {formatINR(selectedFlat.booking.totalPaid)}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Remaining:</span>{" "}
+                      {formatINR(selectedFlat.booking.remainingAmount)}
+                    </div>
+                    {selectedFlat.booking.nextInstallmentDueDate && (
+                      <div>
+                        <span className="text-muted-foreground">Next Due:</span>{" "}
+                        {formatDate(
+                          selectedFlat.booking.nextInstallmentDueDate,
+                        )}
+                      </div>
+                    )}
+                    {selectedFlat.booking.nextInstallmentAmount > 0 && (
+                      <div>
+                        <span className="text-muted-foreground">
+                          Next Installment:
+                        </span>{" "}
+                        {formatINR(selectedFlat.booking.nextInstallmentAmount)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* --- Payment History Card --- */}
+              {selectedFlat.booking?.paymentDetails?.filter(
+                (p) => p.clearedAmount > 0 || p.unclearedAmount > 0,
+              ).length > 0 && (
+                <div className="border rounded-lg p-4 space-y-3">
+                  <h4 className="font-semibold text-base">Payment History</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-1 pr-2">Mode</th>
+                          <th className="text-left py-1 pr-2">Cleared</th>
+                          <th className="text-left py-1 pr-2">Uncleared</th>
+                          <th className="text-left py-1">Reference</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedFlat.booking.paymentDetails
+                          .filter(
+                            (p) => p.clearedAmount > 0 || p.unclearedAmount > 0,
+                          )
+                          .map((payment, idx) => (
+                            <tr key={idx} className="border-b last:border-0">
+                              <td className="py-1 pr-2">
+                                {payment.paymentMode || "—"}
+                              </td>
+                              <td className="py-1 pr-2">
+                                {formatINR(payment.clearedAmount)}
+                              </td>
+                              <td className="py-1 pr-2">
+                                {formatINR(payment.unclearedAmount)}
+                              </td>
+                              <td className="py-1">
+                                {payment.transactionId ||
+                                  payment.chequeNumber ||
+                                  payment.bankName ||
+                                  "—"}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
