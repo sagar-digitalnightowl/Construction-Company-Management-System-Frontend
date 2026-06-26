@@ -1218,7 +1218,7 @@ export function CreateBookingDialog({ open, onOpenChange, onSuccess }) {
       );
       if (invalid) {
         toast.error(
-          "All installment fields (description, amount, due date) are required",
+          "All installment fields (description, amount) are required",
         );
         return;
       }
