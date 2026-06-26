@@ -1069,7 +1069,8 @@ export function TowersTab({ projectId }) {
                                                         {flat.bathrooms}
                                                       </td>
                                                       <td className="px-2 py-1">
-                                                        {formatINR(flat.price)}
+                                                        {/* {formatINR(flat.price)} */}
+                                                        {flat?.price}
                                                       </td>
                                                       <td className="px-2 py-1">
                                                         {flat.features
