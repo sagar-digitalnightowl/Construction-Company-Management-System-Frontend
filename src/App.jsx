@@ -6,7 +6,6 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Users from "@/pages/Users";
 import Projects from "@/pages/projects/Projects";
-import Finance from "@/pages/Finance";
 import CRM from "@/pages/CRM";
 import Documents from "@/pages/Documents";
 import Reports from "@/pages/Reports";
@@ -49,6 +48,7 @@ import LaborDetail from "./pages/hr/LaborDetail";
 import EmployeeDashboard from "./pages/hr/EmployeeDashboard";
 import LeadManagement from "./pages/lead/LeadManagement";
 import PropertyInventory from "./pages/PropertyInventory";
+import Finance from "./pages/finance/Finance";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);

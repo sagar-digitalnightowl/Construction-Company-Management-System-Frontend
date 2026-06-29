@@ -10,4 +10,5 @@ export * from "./bookingApi";
 export * from "./leadApi";
 export * from "./hrApi";
 export * from "./propertyInventoryApi"
+export * from "./financeApi"; 
 

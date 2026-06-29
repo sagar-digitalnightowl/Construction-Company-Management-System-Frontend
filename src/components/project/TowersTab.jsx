@@ -945,7 +945,7 @@ export function TowersTab({ projectId }) {
                                         (sum, f) => sum + (f.price || 0),
                                         0,
                                       ) / flatList.length
-                                    : 0;
+                                    : 0;   
                                 const isExpanded =
                                   expandedFloors[
                                     `${tower.towerName}-${floor.floorNumber}`
