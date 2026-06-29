@@ -103,8 +103,8 @@ export function FinanceDashboard() {
                   {project.flats?.length || 0} flats
                 </Badge>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {project.flats?.slice(0, 4).map((flat, idx) => (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {project.flats?.map((flat, idx) => (
                   <div key={idx} className="border rounded-lg p-3 text-sm">
                     <div className="flex justify-between">
                       <span className="font-medium">
