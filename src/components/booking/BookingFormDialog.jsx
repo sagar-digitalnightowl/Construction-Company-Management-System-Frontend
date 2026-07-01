@@ -766,7 +766,7 @@ export function BookingFormDialog({
               <div>
                 <Label className="text-xs">Price</Label>
                 <p className="text-sm font-medium">
-                  {formatINR(selectedFlat.price)}
+                  {selectedFlat.price || 0}
                 </p>
               </div>
               <div>
