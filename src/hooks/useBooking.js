@@ -376,6 +376,38 @@ export const useBooking = () => {
 		}
 	};
 
+	// Update booking (all fields)
+	const updateBooking = async (id, data, params = {}) => {
+		setLoading(true);
+		try {
+			const res = await bookingApi.updateBooking(id, data);
+			toast.success("Booking updated successfully");
+			await fetchBookings(params);
+			return true;
+		} catch (err) {
+			toast.error(err.response?.data?.message || "Failed to update booking");
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// Soft delete booking
+	const softDeleteBooking = async (id, params = {}) => {
+		setLoading(true);
+		try {
+			await bookingApi.softDeleteBooking(id);
+			toast.success("Booking deleted");
+			await fetchBookings(params);
+			return true;
+		} catch (err) {
+			toast.error(err.response?.data?.message || "Failed to delete booking");
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return {
 		// Data
 		bookings,
@@ -410,5 +442,8 @@ export const useBooking = () => {
 		createInstallmentsFromTemplate,
 		createCustomInstallments,
 		uploadAgreement,
+
+		updateBooking,
+		softDeleteBooking,
 	};
 };

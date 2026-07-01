@@ -7,7 +7,7 @@ import { useBooking } from "@/hooks/useBooking";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CreateBookingDialog } from "@/components/booking/CreateBookingDialog";
+import { BookingFormDialog } from "@/components/booking/BookingFormDialog";
 
 export default function MyBookings() {
   const { myBookings, fetchMyBookings, loading } = useBooking();
@@ -54,9 +54,10 @@ export default function MyBookings() {
         </div>
       )}
 
-      <CreateBookingDialog
+      <BookingFormDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
+        editBooking={null} 
         onSuccess={() => fetchMyBookings()}
       />
     </div>

@@ -388,7 +388,7 @@ export function FinanceDashboard() {
                       )}
                       {flat.remainingAmount > 0 && (
                         <p className="text-xs text-destructive mt-1">
-                          Due: {formatINR(flat.remainingAmount)}
+                          Due: {formatINR(flat.remainingAmount)}   
                         </p>
                       )}
                     </div>

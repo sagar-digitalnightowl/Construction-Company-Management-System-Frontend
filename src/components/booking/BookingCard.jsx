@@ -3,14 +3,16 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "./BookingStatusBadge";
 import { formatINR, formatDate } from "@/lib/helpers";
+import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "../ui/button";
 
-export function BookingCard({ booking, onClick }) {
+export function BookingCard({ booking, onClick, onEdit, onDelete }) {
   return (
     <Card
-      className="cursor-pointer hover:shadow-md transition"
+      className="group transition-all hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
       onClick={() => onClick(booking._id)}
     >
-      <CardContent className="p-4 space-y-2">
+      <CardContent className="p-3 sm:p-5 space-y-4">
         <div className="flex justify-between">
           <div>
             <p className="font-medium">{booking.unitNumber}</p>
@@ -39,6 +41,33 @@ export function BookingCard({ booking, onClick }) {
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Booked: {formatDate(booking.createdAt)}</span>
           <span>Ref: {booking.bookingReferenceNumber}</span>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-border pt-3 -mb-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit?.(booking);
+            }}
+            className="p-2 rounded hover:bg-muted"
+            title="Edit booking"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+              variant="ghost"
+              size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.(booking);
+            }}
+            className="p-1 rounded hover:bg-muted text-destructive"
+            title="Soft delete booking"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
     </Card>

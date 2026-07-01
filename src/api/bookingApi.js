@@ -49,4 +49,9 @@ export const bookingApi = {
     getAgreementPresignedUrl: (bookingId, data) => api.post(`/booking/${bookingId}/agreement/presigned-url`, data),
     // Confirm agreement upload
     confirmAgreementUpload: (bookingId, data) => api.post(`/booking/${bookingId}/agreement/confirm`, data),
+
+    // UPDATE BOOKING (ALL FIELDS) – web app only
+    updateBooking: (id, data) => api.patch(`/booking/${id}`, data),
+    // SOFT DELETE BOOKING – web app only
+    softDeleteBooking: (id) => api.delete(`/booking/${id}/soft`),
 };
