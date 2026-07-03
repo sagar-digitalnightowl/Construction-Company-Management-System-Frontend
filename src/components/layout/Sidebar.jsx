@@ -56,83 +56,83 @@ const navGroups = [
         icon: HardHat,
         key: "site-management",
       },
-      {
-        label: "Procurement",
-        icon: ShoppingCart,
-        key: "procurement",
-        children: [
-          {
-            to: "/procurement/dashboard",
-            label: "Dashboard",
-            key: "procurement-overview",
-          },
-          { to: "/procurement/rfqs", label: "RFQs", key: "procurement-rfqs" },
-          {
-            to: "/procurement/quotations",
-            label: "Quotations",
-            key: "procurement-quotations",
-          },
-          {
-            to: "/procurement/purchase-orders",
-            label: "Purchase Orders",
-            key: "procurement-pos",
-          },
-          {
-            to: "/procurement/deliveries",
-            label: "Deliveries",
-            key: "procurement-deliveries",
-          },
-        ],
-      },
-      {
-        to: "/vendor/dashboard",
-        label: "Vendor",
-        icon: Truck,
-        key: "vendor",
-      },
-      {
-        // Inventory with sub-items
-        label: "Inventory",
-        icon: Boxes,
-        key: "inventory",
-        children: [
-          {
-            to: "/inventory/stock-management",
-            label: "Stock Management",
-            key: "inventory-stock-management",
-          },
-          {
-            to: "/inventory/materials",
-            label: "Materials Master",
-            key: "inventory-materials",
-          },
-          {
-            to: "/inventory/warehouses",
-            label: "Warehouses",
-            key: "inventory-warehouses",
-          },
-          {
-            to: "/inventory/transactions",
-            label: "Stock Transactions",
-            key: "inventory-transactions",
-          },
-          {
-            to: "/inventory/alerts",
-            label: "Low Stock Alerts",
-            key: "inventory-alerts",
-          },
-          {
-            to: "/inventory/valuation",
-            label: "Inventory Valuation",
-            key: "inventory-valuation",
-          },
-          {
-            to: "/inventory/counts",
-            label: "Physical Counts",
-            key: "inventory-counts",
-          },
-        ],
-      },
+      // {
+      //   label: "Procurement",
+      //   icon: ShoppingCart,
+      //   key: "procurement",
+      //   children: [
+      //     {
+      //       to: "/procurement/dashboard",
+      //       label: "Dashboard",
+      //       key: "procurement-overview",
+      //     },
+      //     { to: "/procurement/rfqs", label: "RFQs", key: "procurement-rfqs" },
+      //     {
+      //       to: "/procurement/quotations",
+      //       label: "Quotations",
+      //       key: "procurement-quotations",
+      //     },
+      //     {
+      //       to: "/procurement/purchase-orders",
+      //       label: "Purchase Orders",
+      //       key: "procurement-pos",
+      //     },
+      //     {
+      //       to: "/procurement/deliveries",
+      //       label: "Deliveries",
+      //       key: "procurement-deliveries",
+      //     },
+      //   ],
+      // },
+      // {
+      //   to: "/vendor/dashboard",
+      //   label: "Vendor",
+      //   icon: Truck,
+      //   key: "vendor",
+      // },
+      // {
+      //   // Inventory with sub-items
+      //   label: "Inventory",
+      //   icon: Boxes,
+      //   key: "inventory",
+      //   children: [
+      //     {
+      //       to: "/inventory/stock-management",
+      //       label: "Stock Management",
+      //       key: "inventory-stock-management",
+      //     },
+      //     {
+      //       to: "/inventory/materials",
+      //       label: "Materials Master",
+      //       key: "inventory-materials",
+      //     },
+      //     {
+      //       to: "/inventory/warehouses",
+      //       label: "Warehouses",
+      //       key: "inventory-warehouses",
+      //     },
+      //     {
+      //       to: "/inventory/transactions",
+      //       label: "Stock Transactions",
+      //       key: "inventory-transactions",
+      //     },
+      //     {
+      //       to: "/inventory/alerts",
+      //       label: "Low Stock Alerts",
+      //       key: "inventory-alerts",
+      //     },
+      //     {
+      //       to: "/inventory/valuation",
+      //       label: "Inventory Valuation",
+      //       key: "inventory-valuation",
+      //     },
+      //     {
+      //       to: "/inventory/counts",
+      //       label: "Physical Counts",
+      //       key: "inventory-counts",
+      //     },
+      //   ],
+      // },
       {
         label: "Booking",
         icon: BookCheck,
