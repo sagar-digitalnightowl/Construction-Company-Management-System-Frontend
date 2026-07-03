@@ -1,12 +1,22 @@
+
 // src/components/booking/BookingCard.jsx
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatusBadge } from "./BookingStatusBadge";
-import { formatINR, formatDate } from "@/lib/helpers";
+import { formatDate } from "@/lib/helpers"; 
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 
 export function BookingCard({ booking, onClick, onEdit, onDelete }) {
+  // Amount ko Indian format (₹ 8,00,000) mein convert karne ke liye helper function
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0, // Point ke baad wale zero (.00) hatane ke liye
+    }).format(amount || 0);
+  };
+
   return (
     <Card
       className="group transition-all hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
@@ -32,11 +42,11 @@ export function BookingCard({ booking, onClick, onEdit, onDelete }) {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Total Price:</span>
-          <span>{formatINR(booking.flatSnapshot?.price || 0)}</span>
+          <span>{formatCurrency(booking.flatSnapshot?.price)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Paid:</span>
-          <span>{formatINR(booking.totalPaid || 0)}</span>
+          <span>{formatCurrency(booking.totalPaid)}</span>
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Booked: {formatDate(booking.createdAt)}</span>

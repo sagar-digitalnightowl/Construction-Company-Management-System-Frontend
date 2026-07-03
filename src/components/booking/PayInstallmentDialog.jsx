@@ -1,3 +1,4 @@
+
 // src/components/booking/PayInstallmentDialog.jsx
 import React, { useState } from "react";
 import {
@@ -18,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { formatINR } from "@/lib/helpers";
 import { toast } from "sonner";
 import { PAYMENT_MODE } from "@/data/constants/booking";
 
@@ -80,6 +80,15 @@ export function PayInstallmentDialog({
     if (success) onOpenChange(false);
   };
 
+  // Amount ko Indian format (₹ 8,00,000) mein convert karne ke liye helper function
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
+  };
+
   if (!installment) return null;
 
   return (
@@ -100,17 +109,18 @@ export function PayInstallmentDialog({
               <span className="text-muted-foreground">Due Date:</span>{" "}
               {new Date(installment.dueDate).toLocaleDateString()}
             </div>
+            {/* formatCurrency add kar diya gaya hai */}
             <div>
               <span className="text-muted-foreground">Total Amount:</span>{" "}
-              {formatINR(installment.amount)}
+              {formatCurrency(installment.amount)}
             </div>
             <div>
               <span className="text-muted-foreground">Paid So Far:</span>{" "}
-              {formatINR(installment.paidAmount || 0)}
+              {formatCurrency(installment.paidAmount)}
             </div>
             <div>
               <span className="text-muted-foreground">Remaining:</span>{" "}
-              {formatINR(installment.amount - (installment.paidAmount || 0))}
+              {formatCurrency((installment.amount || 0) - (installment.paidAmount || 0))}
             </div>
           </div>
           <div>
@@ -121,7 +131,7 @@ export function PayInstallmentDialog({
               onChange={(e) =>
                 setForm({ ...form, amount: Number(e.target.value) })
               }
-              max={installment.amount - (installment.paidAmount || 0)}
+              max={(installment.amount || 0) - (installment.paidAmount || 0)}
             />
           </div>
           <div>

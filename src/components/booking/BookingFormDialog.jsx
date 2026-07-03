@@ -764,9 +764,13 @@ export function BookingFormDialog({
                 <p className="text-sm font-medium">{selectedFlat.bathrooms}</p>
               </div>
               <div>
-                <Label className="text-xs">Price</Label>
+                <Label className="text-xs">Pricesss</Label>
                 <p className="text-sm font-medium">
-                  {selectedFlat.price || 0}
+                  {new Intl.NumberFormat('en-IN', { 
+                            style: 'currency', 
+                             currency: 'INR',
+                             maximumFractionDigits: 0 
+                   }).format(selectedFlat.price || 0)}
                 </p>
               </div>
               <div>

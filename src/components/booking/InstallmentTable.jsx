@@ -1,3 +1,4 @@
+
 // src/components/booking/InstallmentTable.jsx
 import React from "react";
 import {
@@ -10,10 +11,19 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { InstallmentStatusBadge } from "./InstallmentStatusBadge";
-import { formatINR, formatDate } from "@/lib/helpers";
+import { formatDate } from "@/lib/helpers"; 
 import { PAYMENT_MODE } from "@/data/constants/booking";
 
 export function InstallmentTable({ installments, onPay, canPay }) {
+  // Amount ko Indian format (₹ 8,00,000) mein convert karne ke liye helper function
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
+  };
+
   if (!installments.length) {
     return (
       <p className="text-center text-muted-foreground py-8">
@@ -49,8 +59,9 @@ export function InstallmentTable({ installments, onPay, canPay }) {
                   ? formatDate(inst.dueDate)
                   : "Not scheduled"}
               </TableCell>
-              <TableCell>{formatINR(inst.amount)}</TableCell>
-              <TableCell>{formatINR(inst.paidAmount || 0)}</TableCell>
+              {/* formatCurrency lagaya gaya hai */}
+              <TableCell>{formatCurrency(inst.amount)}</TableCell>
+              <TableCell>{formatCurrency(inst.paidAmount)}</TableCell>
               <TableCell>
                 <InstallmentStatusBadge status={inst.status} />
               </TableCell>
