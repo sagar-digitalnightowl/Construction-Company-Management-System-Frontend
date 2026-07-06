@@ -4,7 +4,7 @@
 // import { Button } from "@/components/ui/button";
 // import { Input } from "@/components/ui/input";
 // import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// import { Plus, Search } from "lucide-react";
+// import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
 // import { Skeleton } from "@/components/ui/skeleton";
 // import { BookingCard } from "@/components/booking/BookingCard";
 // import { useBooking } from "@/hooks/useBooking";
@@ -25,19 +25,29 @@
 //     softDeleteBooking,
 //     updateBooking,
 //   } = useBooking();
+  
 //   const [search, setSearch] = useState("");
 //   const [statusFilter, setStatusFilter] = useState("all");
 //   const [formOpen, setFormOpen] = useState(false);
 //   const [editBookingData, setEditBookingData] = useState(null);
+  
+//   // 1. Pagination ke liye current page ki state
+//   const [currentPage, setCurrentPage] = useState(1);
 
+//   // 2. Jab bhi search ya filter change ho, page wapas 1 par reset kar do
+//   useEffect(() => {
+//     setCurrentPage(1);
+//   }, [search, statusFilter]);
+
+//   // 3. Data fetch karte waqt dynamic 'currentPage' bhejna hai
 //   useEffect(() => {
 //     fetchBookings({
-//       page: 1,
+//       page: currentPage,
 //       limit: 12,
 //       search: search || undefined,
 //       status: statusFilter === "all" ? undefined : statusFilter,
 //     });
-//   }, [search, statusFilter]);
+//   }, [currentPage, search, statusFilter]);
 
 //   const handleView = (id) => navigate(`/bookings/${id}`);
 
@@ -101,6 +111,7 @@
 //           />
 //         </div>
 //       </div>
+      
 //       {loading ? (
 //         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 //           {[...Array(6)].map((_, i) => (
@@ -125,7 +136,73 @@
 //               />
 //             ))}
 //           </div>
-//           {/* Pagination component can be added here */}
+
+//           {/* 4. Complete Pagination UI with Numbers */}
+//           {pagination && pagination.pages > 1 && (
+//             <div className="flex flex-col sm:flex-row items-center justify-between border-t border-border pt-4 mt-4 gap-4">
+//               <div className="text-sm text-muted-foreground">
+//                 Showing page <span className="font-medium">{pagination.page}</span> of{" "}
+//                 <span className="font-medium">{pagination.pages}</span> (Total {pagination.total} bookings)
+//               </div>
+              
+//               <div className="flex items-center gap-1">
+//                 {/* Previous Button */}
+//                 <Button
+//                   variant="outline"
+//                   size="sm"
+//                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+//                   disabled={currentPage === 1}
+//                   className="px-2"
+//                 >
+//                   <ChevronLeft className="h-4 w-4" />
+//                 </Button>
+
+//                 {/* Page Numbers */}
+//                 <div className="flex items-center gap-1 overflow-x-auto max-w-[200px] sm:max-w-none no-scrollbar">
+//                   {[...Array(pagination.pages)].map((_, index) => {
+//                     const pageNumber = index + 1;
+                    
+//                     // Logic to show limited pages with ellipsis (...)
+//                     if (
+//                       pagination.pages <= 7 ||
+//                       pageNumber === 1 ||
+//                       pageNumber === pagination.pages ||
+//                       (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+//                     ) {
+//                       return (
+//                         <Button
+//                           key={pageNumber}
+//                           variant={currentPage === pageNumber ? "default" : "outline"}
+//                           size="sm"
+//                           onClick={() => setCurrentPage(pageNumber)}
+//                           className={`w-8 h-8 p-0 ${currentPage === pageNumber ? "" : "text-muted-foreground"}`}
+//                         >
+//                           {pageNumber}
+//                         </Button>
+//                       );
+//                     }
+                    
+//                     if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+//                       return <span key={pageNumber} className="px-1 text-muted-foreground">...</span>;
+//                     }
+                    
+//                     return null;
+//                   })}
+//                 </div>
+
+//                 {/* Next Button */}
+//                 <Button
+//                   variant="outline"
+//                   size="sm"
+//                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pagination.pages))}
+//                   disabled={currentPage === pagination.pages}
+//                   className="px-2"
+//                 >
+//                   <ChevronRight className="h-4 w-4" />
+//                 </Button>
+//               </div>
+//             </div>
+//           )}
 //         </>
 //       )}
 
@@ -141,7 +218,6 @@
 //     </div>
 //   );
 // }
-
 
 
 
@@ -247,6 +323,7 @@ export default function Bookings() {
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="booked">Booked</TabsTrigger>
             <TabsTrigger value="sold">Sold</TabsTrigger>
+            <TabsTrigger value="on_hold">On Hold</TabsTrigger> {/* Naya Filter */}
             <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
           </TabsList>
         </Tabs>
