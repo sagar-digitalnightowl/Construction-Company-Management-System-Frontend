@@ -532,7 +532,7 @@ export default function PropertyInventory() {
       </Card>
 
       {/* Leads Table (New Section Added) */}
-      {leads && leads.length > 0 && (
+      {/* {leads && leads.length > 0 && (
         <Card>
           <CardHeader className="py-4">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -567,7 +567,7 @@ export default function PropertyInventory() {
             </Table>
           </CardContent>
         </Card>
-      )}
+      )} */}
 
       <ProjectDetailModal
         open={detailOpen}
