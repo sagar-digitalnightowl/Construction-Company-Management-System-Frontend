@@ -78,11 +78,27 @@ export const usePropertyInventory = () => {
     }, []);
 
     // Fetch site engineers for a project
+    // const fetchSiteEngineers = useCallback(async (id) => {
+    //     setLoading(true);
+    //     try {
+    //         const res = await propertyInventoryApi.getProjectSiteEngineers(id);
+    //         setSiteEngineers(res.data?.data || []);
+    //     } catch (err) {
+    //         toast.error("Failed to load site engineers");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }, []);
+
+
+    // Fetch site engineers for a project
     const fetchSiteEngineers = useCallback(async (id) => {
         setLoading(true);
         try {
             const res = await propertyInventoryApi.getProjectSiteEngineers(id);
-            setSiteEngineers(res.data?.data || []);
+            // Yahan change kiya gaya hai: (res.data?.data || res.data || [])
+            const data = res.data?.data || res.data; 
+            setSiteEngineers(Array.isArray(data) ? data : []);
         } catch (err) {
             toast.error("Failed to load site engineers");
         } finally {
