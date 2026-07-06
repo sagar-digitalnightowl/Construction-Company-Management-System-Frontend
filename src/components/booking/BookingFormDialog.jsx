@@ -736,7 +736,11 @@ export function BookingFormDialog({
                       disabled={f.status !== "available"}
                     >
                       {f.flatNumber} - {f.bedrooms} BHK - {f.area} sqft -{" "}
-                      {formatINR(f.price)} - ({f.status})
+                      {new Intl.NumberFormat('en-IN', { 
+                       style: 'currency', 
+                         currency: 'INR', 
+                          maximumFractionDigits: 0 
+                         }).format(f.price || 0)} - ({f.status})
                     </SelectItem>
                   ))}
                 </SelectContent>
