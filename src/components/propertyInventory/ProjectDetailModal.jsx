@@ -1342,7 +1342,6 @@ export default function ProjectDetailModal({
               <Building2 className="h-5 w-5" />
               {project.name} – Inventory
             </div>
-            {/* Project Timeline & Status */}
             <div className="flex flex-wrap items-center gap-4 text-sm font-normal text-muted-foreground mt-1">
               {project.startDate && project.endDate && (
                 <div className="flex items-center gap-1">
@@ -1372,7 +1371,6 @@ export default function ProjectDetailModal({
           <TabsContent value="towers">
             {towers.length > 0 ? (
               <div className="space-y-4">
-                {/* Tower selection */}
                 <div>
                   <h4 className="text-sm font-medium mb-1">Select Tower</h4>
                   <div className="flex gap-2 flex-wrap">
@@ -1392,7 +1390,6 @@ export default function ProjectDetailModal({
                   </div>
                 </div>
 
-                {/* Tower Level Stats */}
                 {selectedTower && (
                   <div className="bg-muted/40 p-3 rounded-lg border grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                     <div><span className="text-muted-foreground block text-xs">Total Floors</span> <span className="font-medium">{selectedTower.totalFloors}</span></div>
@@ -1403,7 +1400,6 @@ export default function ProjectDetailModal({
                   </div>
                 )}
 
-                {/* Floor selection */}
                 {selectedTower && (
                   <div>
                     <h4 className="text-sm font-medium mb-1">Select Floor</h4>
@@ -1422,7 +1418,6 @@ export default function ProjectDetailModal({
                   </div>
                 )}
 
-                {/* Flats grid */}
                 {currentFlats.length > 0 && (
                   <div>
                     <h3 className="font-semibold mb-2">
@@ -1476,33 +1471,42 @@ export default function ProjectDetailModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map((b) => (
-                    <tr key={b.bookingId || b.id} className="border-b last:border-0">
-                      <td className="py-2">
-                        {/* ✅ UPDATED: Safe handling for nested client name */}
-                        {b.client?.name || b.clientName || "N/A"}
-                        <br />
-                        {/* ✅ UPDATED: Safe handling for nested client email */}
-                        <span className="text-xs text-muted-foreground">
-                          {b.client?.email || b.clientEmail || ""}
-                        </span>
-                      </td>
-                      <td className="py-2">{b.flatNumber}</td>
-                      <td className="py-2">{formatINR(b.bookingAmount)}</td>
-                      <td className="py-2"><Badge>{b.paymentStatus}</Badge></td>
-                      <td className="py-2">
-                        {/* ✅ UPDATED: Handling API rename of nextInstallmentDueDate */}
-                        {(b.nextInstallmentDueDate || b.nextInstallmentDue) 
-                          ? formatDate(b.nextInstallmentDueDate || b.nextInstallmentDue) 
-                          : "—"}
-                      </td>
-                      <td className="py-2 text-right">
-                        <Button variant="outline" size="sm" onClick={() => onViewPayments(b.bookingId || b.id)}>
-                          Payments
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                  {bookings.map((b, idx) => {
+                    // ✅ ULTIMATE SMART MAPPING: Handle both Flat Object and Booking Object
+                    const bookingData = b.booking || b;
+                    const clientData = bookingData.client || {};
+                    
+                    const clientName = clientData.name || bookingData.clientName || b.clientName || "N/A";
+                    const clientEmail = clientData.email || bookingData.clientEmail || b.clientEmail || "";
+                    const flatNum = b.flatNumber || bookingData.flatNumber || b.flat?.flatNumber || "—";
+                    const bkgAmount = bookingData.bookingAmount || b.bookingAmount || 0;
+                    const payStatus = bookingData.paymentStatus || b.paymentStatus || "—";
+                    const nextDue = bookingData.nextInstallmentDueDate || bookingData.nextInstallmentDue || b.nextInstallmentDue;
+                    const bkgId = bookingData.bookingId || bookingData.id || b.bookingId || b.id;
+
+                    return (
+                      <tr key={bkgId || idx} className="border-b last:border-0 hover:bg-muted/20">
+                        <td className="py-2">
+                          {clientName}
+                          <br />
+                          {clientEmail && <span className="text-xs text-muted-foreground">{clientEmail}</span>}
+                        </td>
+                        <td className="py-2 font-medium">{flatNum}</td>
+                        <td className="py-2">{formatINR(bkgAmount)}</td>
+                        <td className="py-2 capitalize">
+                          {payStatus !== "—" ? <Badge variant={payStatus === 'cleared' ? 'success' : 'default'}>{payStatus}</Badge> : "—"}
+                        </td>
+                        <td className="py-2">{nextDue ? formatDate(nextDue) : "—"}</td>
+                        <td className="py-2 text-right">
+                          {bkgId && (
+                            <Button variant="outline" size="sm" onClick={() => onViewPayments(bkgId)}>
+                              Payments
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             ) : (
@@ -1526,26 +1530,39 @@ export default function ProjectDetailModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {agreements.map((a) => (
-                    <tr key={a.bookingId} className="border-b last:border-0">
-                      <td className="font-mono text-xs py-2">{a.bookingId}</td>
-                      <td className="py-2">
-                        {/* ✅ UPDATED: Added fallback for agreement client name just in case */}
-                        {a.client?.name || a.clientName || "N/A"}
-                      </td>
-                      <td className="py-2">{a.flatNumber}</td>
-                      <td className="py-2"><Badge>{a.status}</Badge></td>
-                      <td className="py-2">{a.agreementDate ? formatDate(a.agreementDate) : "—"}</td>
-                      <td className="py-2">{a.approvalStatus}</td>
-                      <td className="py-2">
-                        {a.documentUrl ? (
-                          <a href={a.documentUrl} target="_blank" rel="noreferrer" className="text-blue-600 flex items-center hover:underline">
-                            <LinkIcon className="h-3 w-3 mr-1" /> View
-                          </a>
-                        ) : "—"}
-                      </td>
-                    </tr>
-                  ))}
+                  {agreements.map((a, idx) => {
+                    // ✅ ULTIMATE SMART MAPPING FOR AGREEMENTS
+                    const bookingData = a.booking || a;
+                    const clientData = bookingData.client || {};
+                    
+                    const bkgId = bookingData.bookingId || bookingData.id || a.bookingId || a.id;
+                    const clientName = clientData.name || bookingData.clientName || a.clientName || "N/A";
+                    const flatNum = a.flatNumber || bookingData.flatNumber || a.flat?.flatNumber || "—";
+                    const agmStatus = a.agreementStatus || bookingData.agreementStatus || a.status || "—";
+                    const agmDate = a.agreementDate || bookingData.agreementDate;
+                    const approvalStatus = bookingData.approvalStatus || a.approvalStatus || "—";
+                    const docUrl = a.documentUrl || bookingData.documentUrl;
+
+                    return (
+                      <tr key={bkgId || idx} className="border-b last:border-0 hover:bg-muted/20">
+                        <td className="font-mono text-xs py-2">{bkgId || "—"}</td>
+                        <td className="py-2">{clientName}</td>
+                        <td className="py-2 font-medium">{flatNum}</td>
+                        <td className="py-2">
+                          {agmStatus !== "—" ? <Badge variant={agmStatus === 'REGISTERED' ? 'success' : 'outline'}>{agmStatus}</Badge> : "—"}
+                        </td>
+                        <td className="py-2">{agmDate ? formatDate(agmDate) : "—"}</td>
+                        <td className="py-2 capitalize">{approvalStatus}</td>
+                        <td className="py-2">
+                          {docUrl ? (
+                            <a href={docUrl} target="_blank" rel="noreferrer" className="text-blue-600 flex items-center hover:underline">
+                              <LinkIcon className="h-3 w-3 mr-1" /> View
+                            </a>
+                          ) : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             ) : (
@@ -1647,7 +1664,6 @@ export default function ProjectDetailModal({
                       <div><span className="text-muted-foreground">Payment Model:</span> {selectedFlat.booking.paymentModel}</div>
                     )}
                     
-                    {/* ✅ UPDATED: Crash Fix! Handled object type for teamManager */}
                     {selectedFlat.booking.teamManager && (
                       <div>
                         <span className="text-muted-foreground">Team Manager:</span>{" "}
