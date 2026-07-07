@@ -69,7 +69,7 @@ export const usePropertyInventory = () => {
         setLoading(true);
         try {
             const res = await propertyInventoryApi.getProjectAgreements(id);
-            setProjectAgreements(res.data?.data || []);
+            setProjectAgreements(res?.data || []);
         } catch (err) {
             toast.error("Failed to load agreements");
         } finally {
