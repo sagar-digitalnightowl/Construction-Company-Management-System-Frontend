@@ -1,3 +1,5 @@
+// // src/pages/hr/EmployeeDetail.tsx
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -81,8 +83,7 @@ export default function EmployeeDetail() {
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [assignShiftDialogOpen, setAssignShiftDialogOpen] = useState(false);
-  const [generateSalaryDialogOpen, setGenerateSalaryDialogOpen] =
-    useState(false);
+  const [generateSalaryDialogOpen, setGenerateSalaryDialogOpen] = useState(false);
   const [selectedShiftId, setSelectedShiftId] = useState("");
   const [salaryForm, setSalaryForm] = useState({
     month: "January",
@@ -94,26 +95,131 @@ export default function EmployeeDetail() {
     message: "",
     onConfirm: null,
   });
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
+  // ✅ FIXED: Individual load functions with proper error handling
+  const loadEmployeeData = async () => {
+    try {
+      const emp = await fetchEmployeeById(id);
+      if (!emp) {
+        // Only navigate if it's initial load and employee not found
+        if (isInitialLoad) {
+          toast.error("Employee not found");
+          navigate("/hr");
+        }
+        return false;
+      }
+      setEmployee(emp);
+      return true;
+    } catch (err) {
+      console.error("Failed to load employee:", err);
+      if (isInitialLoad) {
+        toast.error("Failed to load employee details");
+      }
+      return false;
+    }
+  };
+
+  const loadAttendanceData = async () => {
+    try {
+      const res = await fetchEmployeeAttendanceById(id);
+      setAttendance(res?.records || res?.data?.records || []);
+      return true;
+    } catch (err) {
+      console.error("Failed to load attendance:", err);
+      return false;
+    }
+  };
+
+  const loadSalaryData = async () => {
+    try {
+      const res = await fetchEmployeeSalarySlips(id);
+      setSalarySlips(res || []);
+      return true;
+    } catch (err) {
+      console.error("Failed to load salary slips:", err);
+      return false;
+    }
+  };
+
+  const loadLeaveBalanceData = async () => {
+    try {
+      const res = await fetchEmployeeLeaveBalance(id);
+      setLeaveBalance(res);
+      return true;
+    } catch (err) {
+      console.error("Failed to load leave balance:", err);
+      return false;
+    }
+  };
+
+  const loadShiftData = async () => {
+    try {
+      const res = await fetchEmployeeCurrentShift(id);
+      setShift(res);
+      return true;
+    } catch (err) {
+      console.error("Failed to load shift:", err);
+      return false;
+    }
+  };
+
+  const loadLeavesData = async () => {
+    try {
+      const res = await fetchLeaves({ employeeId: id });
+      setEmployeeLeaves(res?.leaves || res?.data?.leaves || []);
+      return true;
+    } catch (err) {
+      console.error("Failed to load leaves:", err);
+      return false;
+    }
+  };
+
+  // ✅ FIXED: loadAllData with error handling - won't break if one API fails
   const loadAllData = async () => {
-    const emp = await fetchEmployeeById(id);
-    if (!emp) {
-      navigate("/hr");
+    setIsInitialLoad(true);
+    
+    // Employee data is critical - show error if fails
+    const empSuccess = await loadEmployeeData();
+    if (!empSuccess && isInitialLoad) {
       return;
     }
-    setEmployee(emp);
-    const [attRes, salRes, balRes, shiftRes, leavesRes] = await Promise.all([
-      fetchEmployeeAttendanceById(id),
-      fetchEmployeeSalarySlips(id),
-      fetchEmployeeLeaveBalance(id),
-      fetchEmployeeCurrentShift(id),
-      fetchLeaves({ employeeId: id }),
+
+    // Other data loads independently - won't break the page
+    await Promise.allSettled([
+      loadAttendanceData(),
+      loadSalaryData(),
+      loadLeaveBalanceData(),
+      loadShiftData(),
+      loadLeavesData(),
     ]);
-    setAttendance(attRes?.data?.attendance || []);
-    setSalarySlips(salRes?.data || []);
-    setLeaveBalance(balRes?.data);
-    setShift(shiftRes?.data);
-    setEmployeeLeaves(leavesRes?.data?.leaves || []);
+    
+    setIsInitialLoad(false);
+  };
+
+  // ✅ NEW: Refresh only salary slips (for after generate/update)
+  const refreshSalaryOnly = async () => {
+    try {
+      const res = await fetchEmployeeSalarySlips(id);
+      setSalarySlips(res || []);
+      return true;
+    } catch (err) {
+      console.error("Failed to refresh salary slips:", err);
+      toast.error("Failed to refresh salary data");
+      return false;
+    }
+  };
+
+  // ✅ NEW: Refresh only attendance (for check-in/check-out)
+  const refreshAttendanceOnly = async () => {
+    try {
+      const res = await fetchEmployeeAttendanceById(id);
+      setAttendance(res?.records || res?.data?.records || []);
+      return true;
+    } catch (err) {
+      console.error("Failed to refresh attendance:", err);
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -132,7 +238,7 @@ export default function EmployeeDetail() {
       toast.success("Shift assigned");
       setAssignShiftDialogOpen(false);
       const newShift = await fetchEmployeeCurrentShift(id);
-      setShift(newShift?.data);
+      setShift(newShift);
     }
   };
 
@@ -145,24 +251,32 @@ export default function EmployeeDetail() {
     if (slip) {
       toast.success("Salary slip generated");
       setGenerateSalaryDialogOpen(false);
-      await loadAllData();
+      // ✅ FIXED: Only refresh salary data, not everything
+      await refreshSalaryOnly();
     }
   };
 
   const handleManualCheckIn = async () => {
     await checkIn(id);
-    loadAllData();
+    await refreshAttendanceOnly();
   };
+
   const handleManualCheckOut = async () => {
     await checkOut(id);
-    loadAllData();
+    await refreshAttendanceOnly();
   };
+
   const handleUpdateEmployee = async (data) => {
     const success = await updateEmployee(id, data);
     if (success) {
-      loadAllData();
+      await loadEmployeeData();
       setEditDialogOpen(false);
     }
+  };
+
+  // ✅ NEW: Handle salary status update refresh from SalaryTab
+  const handleSalaryUpdate = async () => {
+    await refreshSalaryOnly();
   };
 
   if (!employee && loading) return <Skeleton className="h-96" />;
@@ -185,7 +299,7 @@ export default function EmployeeDetail() {
           )}
         </div>
         {canEdit && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={handleManualCheckIn}>
               <UserCheck className="h-4 w-4 mr-1" /> Check In
             </Button>
@@ -285,7 +399,7 @@ export default function EmployeeDetail() {
             </CardHeader>
             <CardContent>
               <p>
-                {shift.name} ({shift.startTime} - {shift.endTime})
+                {shift.shiftId?.name || shift.name} ({shift.shiftId?.startTime || shift.startTime} - {shift.shiftId?.endTime || shift.endTime})
               </p>
             </CardContent>
           </Card>
@@ -321,7 +435,13 @@ export default function EmployeeDetail() {
           />
         </TabsContent>
         <TabsContent value="salary">
-          <SalaryTab salarySlips={salarySlips} canEdit={canEdit} />
+          <SalaryTab
+            salarySlips={salarySlips}
+            canEdit={canEdit}
+            employeeId={id}
+            onGenerate={() => setGenerateSalaryDialogOpen(true)}
+            onStatusUpdate={handleSalaryUpdate}
+          />
         </TabsContent>
       </Tabs>
 
@@ -332,94 +452,76 @@ export default function EmployeeDetail() {
         employee={employee}
         onSuccess={loadAllData}
       />
-      <Dialog
-        open={assignShiftDialogOpen}
-        onOpenChange={setAssignShiftDialogOpen}
-      >
+      <Dialog open={assignShiftDialogOpen} onOpenChange={setAssignShiftDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign Shift</DialogTitle>
           </DialogHeader>
-          <div>
-            <Label>Select Shift</Label>
-            <Select value={selectedShiftId} onValueChange={setSelectedShiftId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a shift" />
-              </SelectTrigger>
-              <SelectContent>
-                {shifts.map((s) => (
-                  <SelectItem key={s._id} value={s._id}>
-                    {s.name} ({s.startTime} - {s.endTime})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Shift</Label>
+              <Select value={selectedShiftId} onValueChange={setSelectedShiftId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a shift" />
+                </SelectTrigger>
+                <SelectContent>
+                  {shifts.map((s) => (
+                    <SelectItem key={s._id} value={s._id}>
+                      {s.name} ({s.startTime} - {s.endTime})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setAssignShiftDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setAssignShiftDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleAssignShift}>Assign</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Dialog
-        open={generateSalaryDialogOpen}
-        onOpenChange={setGenerateSalaryDialogOpen}
-      >
+      <Dialog open={generateSalaryDialogOpen} onOpenChange={setGenerateSalaryDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Generate Salary Slip</DialogTitle>
           </DialogHeader>
-          <div>
-            <Label>Month</Label>
-            <Select
-              value={salaryForm.month}
-              onValueChange={(v) => setSalaryForm({ ...salaryForm, month: v })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[
-                  "January",
-                  "February",
-                  "March",
-                  "April",
-                  "May",
-                  "June",
-                  "July",
-                  "August",
-                  "September",
-                  "October",
-                  "November",
-                  "December",
-                ].map((m) => (
-                  <SelectItem key={m} value={m}>
-                    {m}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Year</Label>
-            <Input
-              type="number"
-              value={salaryForm.year}
-              onChange={(e) =>
-                setSalaryForm({ ...salaryForm, year: parseInt(e.target.value) })
-              }
-            />
+          <div className="space-y-4">
+            <div>
+              <Label>Month</Label>
+              <Select
+                value={salaryForm.month}
+                onValueChange={(v) => setSalaryForm({ ...salaryForm, month: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December",
+                  ].map((m) => (
+                    <SelectItem key={m} value={m}>
+                      {m}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Year</Label>
+              <Input
+                type="number"
+                value={salaryForm.year}
+                onChange={(e) =>
+                  setSalaryForm({ ...salaryForm, year: parseInt(e.target.value) })
+                }
+              />
+            </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setGenerateSalaryDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setGenerateSalaryDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleGenerateSalary}>Generate</Button>

@@ -1,120 +1,6 @@
-// // src/pages/finance/FinanceReminders.jsx
-// import React, { useEffect, useState } from "react";
-// import { useFinance } from "@/hooks/useFinance";
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import {
-//   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-// } from "@/components/ui/table";
-// import {
-//   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-// } from "@/components/ui/select";
-// import { useProjectsStore } from "@/store/dataStore";
-// import { formatDate } from "@/lib/helpers";
-// import { Mail, AlertTriangle, Loader2 } from "lucide-react";
-// import { projectApi } from "@/api";
-
-// export function FinanceReminders() {
-//   const { reminders, fetchReminderLogs, loading } = useFinance();
-//   const [projects, setProjects] = useState([]);
-//   const [projectFilter, setProjectFilter] = useState("all");
-
-
-//   const fetchProjects = async () => {
-//       try {
-//         const res = await projectApi.getAll();
-//         if (res.data.success) {
-//           setProjects(res.data.data?.projects || []);
-//         }
-//       } catch (err) {
-//         console.error(err);
-//         toast.error("Failed to load projects");
-//       }
-//     };
-
-//   useEffect(() => {
-//     fetchReminderLogs({ projectId: projectFilter === "all" ? undefined : projectFilter });
-//   }, [projectFilter, fetchReminderLogs]);
-
-//   useEffect(() => {
-//     fetchProjects();
-//   }, [])
-
-//   return (
-//     <div className="space-y-4">
-//       <div className="flex items-center gap-2">
-//         <span className="text-sm font-medium">Filter by Project:</span>
-//         <Select value={projectFilter} onValueChange={setProjectFilter}>
-//           <SelectTrigger className="w-[200px]">
-//             <SelectValue placeholder="All Projects" />
-//           </SelectTrigger>
-//           <SelectContent>
-//             <SelectItem value="all">All Projects</SelectItem>
-//             {projects.map((p) => (
-//               <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>
-//             ))}
-//           </SelectContent>
-//         </Select>
-//       </div>
-
-//       <Card>
-//         <CardContent className="p-0">
-//           <Table>
-//             <TableHeader>
-//               <TableRow>
-//                 <TableHead>Type</TableHead>
-//                 <TableHead>Recipient</TableHead>
-//                 <TableHead>Subject</TableHead>
-//                 <TableHead>Milestone / Installment</TableHead>
-//                 <TableHead>Project</TableHead>
-//                 <TableHead>Booking Ref</TableHead>
-//                 <TableHead>Sent At</TableHead>
-//               </TableRow>
-//             </TableHeader>
-//             <TableBody>
-//               {reminders.length === 0 && !loading ? (
-//                 <TableRow>
-//                   <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-//                     No reminders found.
-//                   </TableCell>
-//                 </TableRow>
-//               ) : (
-//                 reminders.map((log) => (
-//                   <TableRow key={log._id}>
-//                     <TableCell>
-//                       {log.reminderType === "penalty" ? (
-//                         <Badge variant="destructive" className="gap-1">
-//                           <AlertTriangle className="h-3 w-3" /> Penalty
-//                         </Badge>
-//                       ) : (
-//                         <Badge variant="default" className="gap-1">
-//                           <Mail className="h-3 w-3" /> Normal
-//                         </Badge>
-//                       )}
-//                     </TableCell>
-//                     <TableCell>{log.recipient}</TableCell>
-//                     <TableCell className="max-w-[200px] truncate">{log.subject}</TableCell>
-//                     <TableCell>{log.milestone}</TableCell>
-//                     <TableCell>{log.projectId?.name || "—"}</TableCell>
-//                     <TableCell>{log.bookingId?.bookingReferenceNumber || "—"}</TableCell>
-//                     <TableCell>{formatDate(log.sentAt)}</TableCell>
-//                   </TableRow>
-//                 ))
-//               )}
-//             </TableBody>
-//           </Table>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   );
-// }
-
-
-
-
+// src/pages/finance/FinanceReminders.jsx
 import React, { useEffect, useState } from "react";
 import { useFinance } from "@/hooks/useFinance";
-import { Button } from "@/components/ui/button"; // Added missing Button import
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -124,21 +10,47 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { formatDate } from "@/lib/helpers";
-import { Mail, AlertTriangle } from "lucide-react";
+import { Mail, AlertTriangle, Loader2 } from "lucide-react";
 import { projectApi } from "@/api";
-import { toast } from "sonner"; // Added missing toast import
+import { toast } from "sonner";
 
 export function FinanceReminders() {
+  // Extract reminders pagination from useFinance
   const { reminders, fetchReminderLogs, loading, pagination } = useFinance();
   const [projects, setProjects] = useState([]);
   const [projectFilter, setProjectFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchProjects = async () => {
+  // State: Reminders table pagination
+  const [page, setPage] = useState(1);
+  const limit = 20;
+
+  // State: Projects dropdown pagination
+  const [projectPage, setProjectPage] = useState(1);
+  const [hasMoreProjects, setHasMoreProjects] = useState(true);
+
+  // Projects fetch function with pagination support
+  const fetchProjects = async (pageNo = 1) => {
     try {
-      const res = await projectApi.getAll();
+      // Backend ko exact limit 10 aur required page bhej rahe hain
+      const res = await projectApi.getAll({ page: pageNo, limit: 10 });
+      
       if (res.data.success) {
-        setProjects(res.data.data?.projects || []);
+        const fetchedProjects = res.data.data?.projects || [];
+        const projectPagination = res.data.data?.pagination;
+
+        if (pageNo === 1) {
+          setProjects(fetchedProjects);
+        } else {
+          // Naye projects ko purane list mein append karo
+          setProjects((prev) => [...prev, ...fetchedProjects]);
+        }
+
+        // Check karein ki aur pages available hain ya nahi
+        if (projectPagination && pageNo >= projectPagination.pages) {
+          setHasMoreProjects(false);
+        } else {
+          setHasMoreProjects(true);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -146,22 +58,33 @@ export function FinanceReminders() {
     }
   };
 
-  // Reset to page 1 on filter change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [projectFilter]);
-
+  // Jab bhi filter ya page change ho, reminders API call karo
   useEffect(() => {
     fetchReminderLogs({ 
       projectId: projectFilter === "all" ? undefined : projectFilter,
-      page: currentPage,
-      limit: 10,
+      page,
+      limit
     });
-  }, [projectFilter, currentPage, fetchReminderLogs]);
+  }, [projectFilter, page, fetchReminderLogs]);
 
+  // Project filter change hone pe reminder table ko page 1 par wapas aao
   useEffect(() => {
-    fetchProjects();
+    setPage(1);
+  }, [projectFilter]);
+
+  // Initial load par pehle 10 projects fetch karo
+  useEffect(() => {
+    fetchProjects(1);
   }, []);
+
+  // Dropdown ke andar "Load More" handle karne ke liye
+  const handleLoadMoreProjects = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nextPage = projectPage + 1;
+    setProjectPage(nextPage);
+    fetchProjects(nextPage);
+  };
 
   return (
     <div className="space-y-4">
@@ -176,6 +99,16 @@ export function FinanceReminders() {
             {projects.map((p) => (
               <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>
             ))}
+            
+            {/* Load More Button for Projects */}
+            {hasMoreProjects && (
+              <div 
+                className="w-full text-left px-2 py-1.5 text-xs text-blue-600 font-medium hover:bg-muted border-t mt-1 cursor-pointer"
+                onClick={handleLoadMoreProjects}
+              >
+                + Load More Projects
+              </div>
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -220,36 +153,38 @@ export function FinanceReminders() {
                     <TableCell>{log.milestone}</TableCell>
                     <TableCell>{log.projectId?.name || "—"}</TableCell>
                     <TableCell>{log.bookingId?.bookingReferenceNumber || "—"}</TableCell>
-                    <TableCell>{formatDate(log.sentAt)}</TableCell>
+                    {/* Fallback to createdAt if sentAt is null */}
+                    <TableCell>{formatDate(log.sentAt || log.createdAt)}</TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
 
-          {/* Pagination Controls */}
-          {pagination && pagination.pages > 1 && (
-            <div className="flex items-center justify-between px-4 py-4 border-t">
-              <div className="text-sm text-muted-foreground">
-                Showing page {pagination.page} of {pagination.pages} ({pagination.total} total reminders)
-              </div>
+          {/* Reminders Table Pagination Controls */}
+          {reminders.length > 0 && pagination?.pages > 1 && (
+            <div className="flex items-center justify-end gap-4 p-4 border-t">
+              <span className="text-sm text-muted-foreground">
+                Showing {reminders.length} of {pagination.total} reminders
+              </span>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1 || loading}
+                <button
+                  className="px-3 py-1 text-sm border rounded bg-background disabled:opacity-50 hover:bg-muted"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => p - 1)}
                 >
                   Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                  disabled={currentPage === pagination.pages || loading}
+                </button>
+                <span className="text-sm py-1 font-medium">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                <button
+                  className="px-3 py-1 text-sm border rounded bg-background disabled:opacity-50 hover:bg-muted"
+                  disabled={page >= pagination.pages}
+                  onClick={() => setPage((p) => p + 1)}
                 >
                   Next
-                </Button>
+                </button>
               </div>
             </div>
           )}

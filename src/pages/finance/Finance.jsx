@@ -6,6 +6,8 @@ import { FinanceDashboard } from "./FinanceDashboard";
 import { FinanceBookings } from "./FinanceBookings";
 import { FinanceMilestones } from "./FinanceMilestones";
 import { FinanceReminders } from "./FinanceReminders";
+// Naya Payroll Approval component import
+import { FinancePayrollApprovals } from "./FinancePayrollApprovals";
 
 export default function Finance() {
   return (
@@ -13,7 +15,7 @@ export default function Finance() {
       <PageHeader
         eyebrow="Finance"
         title="Finance Overview"
-        description="Project‑wise dashboards, bookings, milestones, and reminders."
+        description="Project‑wise dashboards, bookings, milestones, reminders, and payroll approvals."
       />
 
       <Tabs defaultValue="dashboard">
@@ -22,6 +24,8 @@ export default function Finance() {
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
           <TabsTrigger value="milestones">Milestones</TabsTrigger>
           <TabsTrigger value="reminders">Reminder Logs</TabsTrigger>
+          {/* Naya tab trigger */}
+          <TabsTrigger value="payroll">Payroll Approvals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
@@ -38,6 +42,11 @@ export default function Finance() {
 
         <TabsContent value="reminders">
           <FinanceReminders />
+        </TabsContent>
+
+        {/* Naya tab content */}
+        <TabsContent value="payroll">
+          <FinancePayrollApprovals />
         </TabsContent>
       </Tabs>
     </div>
