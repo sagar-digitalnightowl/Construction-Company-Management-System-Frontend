@@ -14,7 +14,7 @@ export const propertyInventoryApi = {
     getProjectById: (id) => api.get(`/property-inventory/project/${id}`),
 
     // Bookings for a project (summary list)
-    getProjectBookings: (id) => api.get(`/property-inventory/project/${id}/bookings`),
+    getProjectBookings: (id,params) => api.get(`/property-inventory/project/${id}/bookings`,{params}),
 
     // Site engineers for a project
     getProjectSiteEngineers: (id) =>
