@@ -163,7 +163,7 @@ export const useFinance = () => {
         try {
             await financeApi.acknowledgeReceipt(id);
             toast.success("Payroll batch acknowledged successfully");
-            await fetchPendingPayrollApprovals(); // Refresh the queue
+            // Refetch is handled by the UI component to maintain pagination state
             return true;
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to acknowledge payroll batch");
@@ -178,7 +178,7 @@ export const useFinance = () => {
         try {
             await financeApi.approvePayrollBatch(id);
             toast.success("Payroll batch approved successfully");
-            await fetchPendingPayrollApprovals(); // Refresh the queue
+            // Refetch is handled by the UI component to maintain pagination state
             return true;
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to approve payroll batch");
@@ -193,7 +193,7 @@ export const useFinance = () => {
         try {
             await financeApi.rejectPayrollBatch(id, reasonData); // reasonData = { reason: "..." }
             toast.success("Payroll batch rejected");
-            await fetchPendingPayrollApprovals(); // Refresh the queue
+            // Refetch is handled by the UI component to maintain pagination state
             return true;
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to reject payroll batch");
