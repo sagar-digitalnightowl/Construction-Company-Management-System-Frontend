@@ -1,4 +1,4 @@
-// src/pages/finance/FinancePayrollApprovals.jsx
+// // src/pages/finance/FinancePayrollApprovals.jsx
 import React, { useEffect, useState } from "react";
 import { 
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
@@ -55,6 +55,15 @@ export function FinancePayrollApprovals() {
         setCurrentPage(1);
     };
 
+    // Helper function to refresh current view
+    const refreshData = () => {
+        if (activeTab === "pending") {
+            fetchPendingPayrollApprovals({ page: currentPage, limit });
+        } else {
+            fetchAllPayrollBatches({ page: currentPage, limit });
+        }
+    };
+
     const handleActionSubmit = async () => {
         if (!selectedBatch) return;
         
@@ -73,19 +82,29 @@ export function FinancePayrollApprovals() {
         if (success) {
             setAction(null);
             setFormData({});
-            // Action ke baad current page ko wapas fetch karo
-            if (activeTab === "pending") fetchPendingPayrollApprovals({ page: currentPage, limit });
-            else fetchAllPayrollBatches({ page: currentPage, limit });
+            // Action ke baad current page ko clean refetch karo
+            refreshData();
         }
     };
 
     const handleDownloadExcel = async (id) => {
         const batchDetail = await fetchPayrollBatchById(id);
-        if (batchDetail && batchDetail.excelUrl) {
-            window.open(batchDetail.excelUrl, "_blank");
+        // Updated to use fileUrl instead of excelUrl
+        if (batchDetail && batchDetail.fileUrl) {
+            window.open(batchDetail.fileUrl, "_blank");
         } else {
             toast.error("Excel file not found for this batch.");
         }
+    };
+
+    const handleAcknowledge = async (id) => {
+        const success = await acknowledgePayrollBatch(id);
+        if (success) refreshData();
+    };
+
+    const handleApprove = async (id) => {
+        const success = await approvePayrollBatch(id);
+        if (success) refreshData();
     };
 
     const getStatusVariant = (status) => {
@@ -116,7 +135,7 @@ export function FinancePayrollApprovals() {
                     batches.map((batch) => (
                         <TableRow key={batch._id}>
                             <TableCell className="font-medium">{batch.month} {batch.year}</TableCell>
-                            <TableCell>₹{batch.totalAmount.toLocaleString('en-IN')}</TableCell>
+                            <TableCell>₹{batch.totalAmount?.toLocaleString('en-IN')}</TableCell>
                             <TableCell>
                                 <Badge variant={getStatusVariant(batch.status)}>{batch.status}</Badge>
                             </TableCell>
@@ -134,10 +153,10 @@ export function FinancePayrollApprovals() {
                                 {/* Acknowledge & Approve/Reject */}
                                 {batch.status === 'Pending Finance Approval' && (
                                     <>
-                                        <Button size="sm" variant="outline" onClick={() => acknowledgePayrollBatch(batch._id)}>
+                                        <Button size="sm" variant="outline" onClick={() => handleAcknowledge(batch._id)}>
                                             <CheckSquare className="mr-2 h-4 w-4"/>Acknowledge
                                         </Button>
-                                        <Button size="sm" onClick={() => approvePayrollBatch(batch._id)}>
+                                        <Button size="sm" onClick={() => handleApprove(batch._id)}>
                                             <CheckCircle className="mr-2 h-4 w-4"/>Approve
                                         </Button>
                                         <Button size="sm" variant="destructive" onClick={() => { setSelectedBatch(batch); setAction('reject'); }}>
