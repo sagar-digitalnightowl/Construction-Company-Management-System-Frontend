@@ -1,4 +1,4 @@
-import api from "./axios";
+ import api from "./axios";
 
 export const authApi = {
     login: (data) => api.post("/auth/login", data),
@@ -13,7 +13,8 @@ export const authApi = {
 
     forgotPassword: (data) => api.post("/auth/forgot-password", data),
 
-    getUsers: () => api.get("/auth/users"),
+    // Yahan params add kiye hain for pagination, search, etc.
+    getUsers: (params) => api.get("/auth/users", { params }),
 
     registerUser: (data) => api.post("/auth/register", data),
 

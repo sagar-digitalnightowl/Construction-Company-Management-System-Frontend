@@ -1345,74 +1345,74 @@ export function SalaryTab() {
             </Tabs>
 
             {/* ==================== UNIFIED PAYROLL PROCESSING DIALOG ==================== */}
-            <Dialog open={payrollDialogOpen} onOpenChange={setPayrollDialogOpen}>
-                <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                        <DialogTitle>Monthly Payroll Processing</DialogTitle>
-                        <DialogDescription>
-                            Pehle report generate karke download karein, verify hone ke baad Finance ko submit karein.
-                        </DialogDescription>
-                    </DialogHeader>
+             <Dialog open={payrollDialogOpen} onOpenChange={setPayrollDialogOpen}>
+    <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+            <DialogTitle>Monthly Payroll Processing</DialogTitle>
+            <DialogDescription>
+                Please generate and download the report first. After verification, submit it to the Finance department.
+            </DialogDescription>
+        </DialogHeader>
 
-                    <div className="grid gap-4 py-4">
-                        <div className="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 p-3 rounded-md border border-amber-200">
-                            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-                            <span>Kripya Finance ko submit karne se pehle downloaded Excel sheet ka data carefully verify kar lein.</span>
-                        </div>
-                        
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right">Month</Label>
-                            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select Month" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {months.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right">Year</Label>
-                            <Select value={selectedYear} onValueChange={setSelectedYear}>
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select Year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
+        <div className="grid gap-4 py-4">
+            <div className="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 p-3 rounded-md border border-amber-200">
+                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                <span>Please carefully verify the downloaded Excel sheet data before submitting to Finance.</span>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Month</Label>
+                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                    <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {months.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Year</Label>
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
 
-                    <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between w-full">
-                        {/* Action 1: Download Preview */}
-                        <Button 
-                            variant="outline" 
-                            onClick={handleDownloadPreview} 
-                            disabled={loading}
-                            className="w-full sm:w-auto"
-                        >
-                            <Download className="mr-2 h-4 w-4" />
-                            Preview Excel
-                        </Button>
-                        
-                        {/* Action 2: Submit */}
-                        <Button 
-                            onClick={handleSubmitPayroll} 
-                            disabled={loading}
-                            className="w-full sm:w-auto"
-                        >
-                            {loading ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <Send className="mr-2 h-4 w-4" />
-                            )}
-                            {loading ? "Processing..." : "Submit to Finance"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between w-full">
+            {/* Action 1: Download Preview */}
+            <Button 
+                variant="outline" 
+                onClick={handleDownloadPreview} 
+                disabled={loading}
+                className="w-full sm:w-auto"
+            >
+                <Download className="mr-2 h-4 w-4" />
+                Preview Excel
+            </Button>
+            
+            {/* Action 2: Submit */}
+            <Button 
+                onClick={handleSubmitPayroll} 
+                disabled={loading}
+                className="w-full sm:w-auto"
+            >
+                {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                )}
+                {loading ? "Processing..." : "Submit to Finance"}
+            </Button>
+        </DialogFooter>
+    </DialogContent>
+</Dialog>
 
             {/* ==================== BULK GENERATE DIALOG ==================== */}
             <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
