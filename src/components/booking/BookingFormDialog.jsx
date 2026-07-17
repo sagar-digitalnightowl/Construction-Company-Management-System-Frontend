@@ -6671,6 +6671,2305 @@
 
 
 
+// import React, { useState, useEffect, useRef } from "react";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogFooter,
+// } from "@/components/ui/dialog";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { projectApi, authApi } from "@/api";
+// import { bookingApi } from "@/api/bookingApi";
+// import { PAYMENT_MODE } from "@/data/constants/booking";
+// import { toast } from "sonner";
+// import { useLeadList } from "@/hooks/useLeadList";
+// import { Trash2, Plus } from "lucide-react";
+
+// // ✅ Currency formatter (INR without L/Cr)
+// const formatCurrency = (val) => {
+//   if (val === null || val === undefined || isNaN(val)) return "₹0";
+//   return "₹" + Number(val).toLocaleString("en-IN");
+// };
+
+// export function BookingFormDialog({
+//   open,
+//   onOpenChange,
+//   onSuccess,
+//   editBooking,
+// }) {
+//   const [projects, setProjects] = useState([]);
+//   const [towers, setTowers] = useState([]);
+//   const [floors, setFloors] = useState([]);
+//   const [flats, setFlats] = useState([]);
+//   const [selectedFlat, setSelectedFlat] = useState(null);
+//   const [loading, setLoading] = useState(false);
+//   const [teamManagers, setTeamManagers] = useState([]);
+//   const [gstAmountOnBooking, setGstAmountOnBooking] = useState(""); // ✅ renamed
+
+//   const [projectsLoaded, setProjectsLoaded] = useState(false);
+//   const editInitialized = useRef(false);
+
+//   const initialForm = {
+//     projectId: "",
+//     towerName: "",
+//     floor: "",
+//     flatId: "",
+
+//     bookingAmount: "",
+//     paymentMode: "",
+//     agreementDate: "",
+//     nomineeName: "",
+//     nomineeRelation: "",
+
+//     keyNumber: "",
+//     businessCode: "",
+//     businessName: "",
+//     teamManager: "",
+//     serviceTaxPaid: "",
+//     remarks: "",
+//     transactionId: "",
+
+//     leadId: "",
+//     clientName: "",
+//     clientEmail: "",
+//     clientPhone: "",
+//     clientPassword: "",
+
+//     dateOfBirth: "",
+//     gender: "",
+//     bloodGroup: "",
+//     maritalStatus: "",
+//     aadharNumber: "",
+//     panNumber: "",
+//     fatherName: "",
+//     motherName: "",
+//     emergencyContactName: "",
+//     emergencyContactPhone: "",
+//     emergencyContactRelation: "",
+//     addressLine1: "",
+//     city: "",
+//     state: "",
+//     country: "India",
+//     pincode: "",
+
+//     bankName: "",
+//     accountNumber: "",
+//     ifscCode: "",
+//     upiId: "",
+//     accountHolderName: "",
+//     accountType: "",
+//     branchName: "",
+
+//     useCustomPlan: false,
+//     installments: [],
+//   };
+
+//   const [form, setForm] = useState(initialForm);
+//   const isEdit = Boolean(editBooking);
+
+//   // ---- GST Helper Functions ----
+//   const getGSTPercentage = () => {
+//     if (!selectedFlat) return 0;
+//     const flatPrice = selectedFlat.price || 0;
+//     return flatPrice >= 4500000 ? 5 : 1;
+//   };
+
+//   const getTotalGSTAmount = () => {
+//     if (!selectedFlat) return 0;
+//     const flatPrice = selectedFlat.price || 0;
+//     const gstPercent = getGSTPercentage();
+//     return Math.round((flatPrice * gstPercent) / 100);
+//   };
+
+//   const getGSTOnBooking = () => {
+//     return Number(gstAmountOnBooking) || 0;
+//   };
+
+//   const getGSTOnInstallments = () => {
+//     return getTotalGSTAmount() - getGSTOnBooking();
+//   };
+
+//   const getTotalPayable = () => {
+//     const amount = parseFloat(form.bookingAmount) || 0;
+//     return amount + getGSTOnBooking();
+//   };
+
+//   const getInstallmentTarget = () => {
+//     if (!selectedFlat) return 0;
+//     const flatPrice = selectedFlat.price || 0;
+//     const bookingAmt = parseFloat(form.bookingAmount) || 0;
+//     const totalGst = getTotalGSTAmount();
+//     const gstOnBooking = getGSTOnBooking();
+//     return (flatPrice - bookingAmt) + (totalGst - gstOnBooking);
+//   };
+
+//   useEffect(() => {
+//     if (!editBooking || !open) {
+//       editInitialized.current = false;
+//       return;
+//     }
+//     if (!projectsLoaded) return;
+//     if (editInitialized.current) return;
+//     editInitialized.current = true;
+
+//     const projectId = editBooking.projectId?._id || editBooking.projectId;
+//     const towerName = editBooking.flatSnapshot?.towerName || "";
+//     const floor = editBooking.flatSnapshot?.floor || "";
+//     const flatId = editBooking.flatId;
+
+//     const project = projects.find((p) => p._id === projectId);
+//     if (project?.towers) setTowers(project.towers);
+
+//     const tower = project?.towers?.find((t) => t.towerName === towerName);
+//     if (tower?.floors) setFloors(tower.floors);
+
+//     const floorObj = tower?.floors?.find(
+//       (f) => String(f.floorNumber) === String(floor)
+//     );
+//     if (floorObj?.flats) setFlats(floorObj.flats);
+
+//     setForm({
+//       projectId: projectId || "",
+//       towerName: towerName,
+//       floor: floor.toString(),
+//       flatId: flatId || "",
+//       bookingAmount: editBooking.bookingAmount || "",
+//       paymentMode: editBooking.paymentMode || "",
+//       agreementDate: editBooking.agreementDate
+//         ? editBooking.agreementDate.slice(0, 10)
+//         : "",
+//       nomineeName: editBooking.nomineeName || "",
+//       nomineeRelation: editBooking.nomineeRelation || "",
+//       keyNumber: editBooking.keyNumber || "",
+//       businessCode: editBooking.businessCode || "",
+//       businessName: editBooking.businessName || "",
+//       teamManager: editBooking.teamManager?._id || editBooking.teamManager || "",
+//       serviceTaxPaid: editBooking.serviceTaxPaid || "",
+//       remarks: editBooking.remarks || "",
+//       transactionId: editBooking.transactionId || "",
+//       leadId: editBooking.leadId?._id || editBooking.leadId || "",
+
+//       clientName: editBooking.clientId?.name || "",
+//       clientEmail: editBooking.clientId?.email || "",
+//       clientPhone: editBooking.clientId?.phone || "",
+//       clientPassword: "",
+
+//       dateOfBirth: editBooking.personalDetails?.dateOfBirth?.slice?.(0, 10) || "",
+//       gender: editBooking.personalDetails?.gender || "",
+//       bloodGroup: editBooking.personalDetails?.bloodGroup || "",
+//       maritalStatus: editBooking.personalDetails?.maritalStatus || "",
+//       aadharNumber: editBooking.personalDetails?.aadharNumber || "",
+//       panNumber: editBooking.personalDetails?.panNumber || "",
+//       fatherName: editBooking.personalDetails?.fatherName || "",
+//       motherName: editBooking.personalDetails?.motherName || "",
+//       emergencyContactName:
+//         editBooking.personalDetails?.emergencyContactName || "",
+//       emergencyContactPhone:
+//         editBooking.personalDetails?.emergencyContactPhone || "",
+//       emergencyContactRelation:
+//         editBooking.personalDetails?.emergencyContactRelation || "",
+//       addressLine1: editBooking.personalDetails?.permanentAddress?.line1 || "",
+//       city: editBooking.personalDetails?.permanentAddress?.city || "",
+//       state: editBooking.personalDetails?.permanentAddress?.state || "",
+//       country: editBooking.personalDetails?.permanentAddress?.country || "India",
+//       pincode: editBooking.personalDetails?.permanentAddress?.pincode || "",
+
+//       bankName: editBooking.bankDetails?.bankName || "",
+//       accountNumber: editBooking.bankDetails?.accountNumber || "",
+//       ifscCode: editBooking.bankDetails?.ifscCode || "",
+//       upiId: editBooking.bankDetails?.upiId || "",
+//       accountHolderName: editBooking.bankDetails?.accountHolderName || "",
+//       accountType: editBooking.bankDetails?.accountType || "",
+//       branchName: editBooking.bankDetails?.branchName || "",
+
+//       useCustomPlan: Boolean(editBooking.installmentPlan?.length),
+//       installments: editBooking.installmentPlan?.length
+//         ? editBooking.installmentPlan.map((inst) => ({
+//             installmentNumber: inst.installmentNumber,
+//             description: inst.description,
+//             amount: inst.amount,
+//             dueDate: inst.dueDate?.slice?.(0, 10) || "",
+//           }))
+//         : [],
+//     });
+
+//     // ✅ Updated to handle both legacy gstPaid and new gstAmountOnBooking
+//     setGstAmountOnBooking(
+//       editBooking.gstPaid ||
+//       editBooking.gstAmountOnBooking ||
+//       0
+//     );
+
+//     const flatObj = floorObj?.flats?.find((f) => f._id === flatId);
+//     if (flatObj) setSelectedFlat(flatObj);
+//   }, [editBooking, open, projectsLoaded, projects]);
+
+//   const resetForm = () => {
+//     setForm(initialForm);
+//     setTowers([]);
+//     setFloors([]);
+//     setFlats([]);
+//     setSelectedFlat(null);
+//     setProjectsLoaded(false);
+//     editInitialized.current = false;
+//     setGstAmountOnBooking(""); // ✅ reset
+//   };
+
+//   const { leads, loading: leadsLoading } = useLeadList();
+
+//   const fetchProjects = async () => {
+//     try {
+//       const res = await projectApi.getAll();
+//       if (res.data.success) {
+//         setProjects(res.data.data?.projects || []);
+//         setProjectsLoaded(true);
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Failed to load projects");
+//     }
+//   };
+
+//   const fetchTeamManagers = async () => {
+//     try {
+//       const res = await authApi.getUsers();
+//       if (res.data.success) {
+//         const managers = res.data.data?.users?.filter(
+//           (user) =>
+//             user.role?.includes("manager") ||
+//             user.role === "manager" ||
+//             user.role === "admin"
+//         );
+//         setTeamManagers(managers || []);
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch team managers", err);
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (open) {
+//       fetchProjects();
+//       fetchTeamManagers();
+//     } else {
+//       resetForm();
+//     }
+//   }, [open]);
+
+//   useEffect(() => {
+//     if (form.projectId) {
+//       const project = projects.find((p) => p._id === form.projectId);
+//       if (project?.towers?.length) {
+//         setTowers(project.towers);
+//         const towerExists =
+//           form.towerName &&
+//           project.towers.some((t) => t.towerName === form.towerName);
+//         if (!towerExists) {
+//           setFloors([]);
+//           setFlats([]);
+//           setSelectedFlat(null);
+//           setForm((prev) => ({
+//             ...prev,
+//             towerName: "",
+//             floor: "",
+//             flatId: "",
+//           }));
+//         }
+//       } else {
+//         setTowers([]);
+//         setFloors([]);
+//         setFlats([]);
+//         setSelectedFlat(null);
+//       }
+//     } else {
+//       setTowers([]);
+//       setFloors([]);
+//       setFlats([]);
+//       setSelectedFlat(null);
+//     }
+//   }, [form.projectId, projects]);
+
+//   useEffect(() => {
+//     if (form.towerName) {
+//       const tower = towers.find((t) => t.towerName === form.towerName);
+//       if (tower) {
+//         setFloors(tower.floors || []);
+//         const floorExists =
+//           form.floor &&
+//           tower.floors.some((f) => String(f.floorNumber) === String(form.floor));
+//         if (!floorExists) {
+//           setFlats([]);
+//           setSelectedFlat(null);
+//           setForm((prev) => ({ ...prev, floor: "", flatId: "" }));
+//         }
+//       } else {
+//         setFloors([]);
+//         setFlats([]);
+//         setSelectedFlat(null);
+//       }
+//     } else {
+//       setFloors([]);
+//       setFlats([]);
+//       setSelectedFlat(null);
+//     }
+//   }, [form.towerName, towers]);
+
+//   useEffect(() => {
+//     if (form.floor !== "" && form.floor !== undefined) {
+//       const floor = floors.find(
+//         (f) => String(f.floorNumber) === String(form.floor)
+//       );
+//       if (floor) {
+//         setFlats(floor.flats || []);
+//         const flatExists =
+//           form.flatId && floor.flats.some((f) => f._id === form.flatId);
+//         if (!flatExists) {
+//           setSelectedFlat(null);
+//           setForm((prev) => ({ ...prev, flatId: "" }));
+//         }
+//       } else {
+//         setFlats([]);
+//         setSelectedFlat(null);
+//       }
+//     } else {
+//       setFlats([]);
+//       setSelectedFlat(null);
+//     }
+//   }, [form.floor, floors]);
+
+//   useEffect(() => {
+//     if (form.flatId && flats.length) {
+//       const flat = flats.find((f) => f._id === form.flatId);
+//       setSelectedFlat(flat || null);
+//     } else {
+//       setSelectedFlat(null);
+//     }
+//   }, [form.flatId, flats]);
+
+//   const updateForm = (field, value) => {
+//     setForm((prev) => ({ ...prev, [field]: value }));
+//   };
+
+//   const addInstallment = () => {
+//     const newNumber = form.installments.length + 1;
+//     const newInstallment = {
+//       installmentNumber: newNumber,
+//       description: "",
+//       amount: "",
+//       dueDate: "",
+//     };
+//     setForm((prev) => ({
+//       ...prev,
+//       installments: [...prev.installments, newInstallment],
+//     }));
+//   };
+
+//   const removeInstallment = (index) => {
+//     if (form.installments.length <= 1) {
+//       toast.warning("At least one installment is required");
+//       return;
+//     }
+//     const updated = form.installments.filter((_, i) => i !== index);
+//     const renumbered = updated.map((inst, idx) => ({
+//       ...inst,
+//       installmentNumber: idx + 1,
+//     }));
+//     setForm((prev) => ({
+//       ...prev,
+//       installments: renumbered,
+//     }));
+//   };
+
+//   const updateInstallment = (index, field, value) => {
+//     const updated = [...form.installments];
+//     updated[index][field] = value;
+//     setForm((prev) => ({
+//       ...prev,
+//       installments: updated,
+//     }));
+//   };
+
+//   const getTotalInstallmentAmount = () => {
+//     return form.installments.reduce(
+//       (sum, inst) => sum + (parseFloat(inst.amount) || 0),
+//       0
+//     );
+//   };
+
+//   const handleSubmit = async () => {
+//     if (!form.projectId || !form.towerName || !form.floor || !form.flatId) {
+//       toast.error("Project, Tower, Floor, and Flat are required");
+//       return;
+//     }
+
+//     if (form.useCustomPlan) {
+//       if (form.installments.length === 0) {
+//         toast.error("Please add at least one installment");
+//         return;
+//       }
+//       const invalid = form.installments.some(
+//         (inst) => !inst.description || !inst.amount
+//       );
+//       if (invalid) {
+//         toast.error(
+//           "All installment fields (description, amount) are required"
+//         );
+//         return;
+//       }
+//     }
+
+//     setLoading(true);
+
+//     const flatPrice = selectedFlat?.price || 0;
+//     const calculatedGstPercent = flatPrice >= 4500000 ? 5 : 1;
+
+//     const payload = {
+//       projectId: form.projectId,
+//       flatId: form.flatId,
+//       bookingAmount: Number(form.bookingAmount),
+//       paymentMode: form.paymentMode,
+//       agreementDate: form.agreementDate || undefined,
+//       nomineeName: form.nomineeName || undefined,
+//       nomineeRelation: form.nomineeRelation || undefined,
+//       keyNumber: form.keyNumber || undefined,
+//       businessCode: form.businessCode || undefined,
+//       businessName: form.businessName || undefined,
+//       teamManager: form.teamManager || undefined,
+//       serviceTaxPaid: form.serviceTaxPaid ? Number(form.serviceTaxPaid) : undefined,
+//       remarks: form.remarks || undefined,
+//       transactionId: form.transactionId || undefined,
+//       gstPercentage: calculatedGstPercent,
+//       // ✅ Use new field name
+//       gstAmountOnBooking: Number(gstAmountOnBooking) || 0,
+//     };
+
+//     if (form.useCustomPlan && form.installments.length > 0) {
+//       const installments = form.installments.map((inst) => ({
+//         installmentNumber: inst.installmentNumber,
+//         description: inst.description,
+//         amount: Number(inst.amount),
+//         dueDate: inst.dueDate,
+//       }));
+//       payload.installmentPlan = { installments };
+//     }
+
+//     if (form.leadId) {
+//       payload.leadId = form.leadId;
+//     } else {
+//       payload.clientName = form.clientName;
+//       payload.clientEmail = form.clientEmail;
+//       payload.clientPhone = form.clientPhone;
+//       payload.clientPassword = form.clientPassword;
+
+//       const personalDetails = {};
+//       if (form.dateOfBirth) personalDetails.dateOfBirth = form.dateOfBirth;
+//       if (form.gender) personalDetails.gender = form.gender;
+//       if (form.bloodGroup) personalDetails.bloodGroup = form.bloodGroup;
+//       if (form.maritalStatus) personalDetails.maritalStatus = form.maritalStatus;
+//       if (form.aadharNumber) personalDetails.aadharNumber = form.aadharNumber;
+//       if (form.panNumber) personalDetails.panNumber = form.panNumber;
+//       if (form.fatherName) personalDetails.fatherName = form.fatherName;
+//       if (form.motherName) personalDetails.motherName = form.motherName;
+//       if (form.emergencyContactName)
+//         personalDetails.emergencyContactName = form.emergencyContactName;
+//       if (form.emergencyContactPhone)
+//         personalDetails.emergencyContactPhone = form.emergencyContactPhone;
+//       if (form.emergencyContactRelation)
+//         personalDetails.emergencyContactRelation = form.emergencyContactRelation;
+
+//       if (form.addressLine1 || form.city || form.state || form.pincode) {
+//         personalDetails.permanentAddress = {
+//           line1: form.addressLine1 || undefined,
+//           city: form.city || undefined,
+//           state: form.state || undefined,
+//           country: form.country || "India",
+//           pincode: form.pincode || undefined,
+//         };
+//       }
+
+//       if (Object.keys(personalDetails).length) {
+//         payload.personalDetails = personalDetails;
+//       }
+
+//       const bankDetails = {};
+//       if (form.bankName) bankDetails.bankName = form.bankName;
+//       if (form.accountNumber) bankDetails.accountNumber = form.accountNumber;
+//       if (form.ifscCode) bankDetails.ifscCode = form.ifscCode;
+//       if (form.upiId) bankDetails.upiId = form.upiId;
+//       if (form.accountHolderName)
+//         bankDetails.accountHolderName = form.accountHolderName;
+//       if (form.accountType) bankDetails.accountType = form.accountType;
+//       if (form.branchName) bankDetails.branchName = form.branchName;
+
+//       if (Object.keys(bankDetails).length) {
+//         payload.bankDetails = bankDetails;
+//       }
+//     }
+
+//     try {
+//       let res;
+//       if (isEdit) {
+//         res = await bookingApi.updateBooking(editBooking._id, payload);
+//       } else {
+//         res = await bookingApi.createBooking(payload);
+//       }
+//       toast.success(isEdit ? "Booking updated" : "Booking created");
+//       onSuccess?.(res.data?.data);
+//       onOpenChange(false);
+//       resetForm();
+//     } catch (err) {
+//       toast.error(err.response?.data?.message || "Failed to create booking");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <Dialog open={open} onOpenChange={onOpenChange}>
+//       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+//         <DialogHeader>
+//           <DialogTitle>
+//             {isEdit ? "Edit Booking" : "Create New Booking"}
+//           </DialogTitle>
+//         </DialogHeader>
+//         <div className="space-y-6 p-1">
+//           {/* Flat Selection */}
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             <div>
+//               <Label>Project *</Label>
+//               <Select
+//                 value={form.projectId}
+//                 onValueChange={(v) => {
+//                   updateForm("projectId", v);
+//                   updateForm("towerName", "");
+//                   updateForm("floor", "");
+//                   updateForm("flatId", "");
+//                 }}
+//               >
+//                 <SelectTrigger>
+//                   <SelectValue placeholder="Select project" />
+//                 </SelectTrigger>
+//                 <SelectContent>
+//                   {projects.map((p) => (
+//                     <SelectItem key={p._id} value={p._id}>
+//                       {p.name}
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+
+//             <div>
+//               <Label>Tower *</Label>
+//               <Select
+//                 value={form.towerName}
+//                 onValueChange={(v) => {
+//                   updateForm("towerName", v);
+//                   updateForm("floor", "");
+//                   updateForm("flatId", "");
+//                 }}
+//                 disabled={!form.projectId || towers.length === 0}
+//               >
+//                 <SelectTrigger>
+//                   <SelectValue placeholder="Select tower" />
+//                 </SelectTrigger>
+//                 <SelectContent>
+//                   {towers.map((t) => (
+//                     <SelectItem key={t.towerName} value={t.towerName}>
+//                       {t.towerName} ({t.totalFloors || t.floors?.length} floors)
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+
+//             <div>
+//               <Label>Floor *</Label>
+//               <Select
+//                 value={form.floor.toString()}
+//                 onValueChange={(v) => {
+//                   updateForm("floor", v);
+//                   updateForm("flatId", "");
+//                 }}
+//                 disabled={!form.towerName || floors.length === 0}
+//               >
+//                 <SelectTrigger>
+//                   <SelectValue placeholder="Select floor" />
+//                 </SelectTrigger>
+//                 <SelectContent>
+//                   {floors.map((f) => (
+//                     <SelectItem
+//                       key={f.floorNumber}
+//                       value={f.floorNumber.toString()}
+//                     >
+//                       Floor {f.floorNumber}
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+
+//             <div>
+//               <Label>Flat *</Label>
+//               <Select
+//                 value={form.flatId}
+//                 onValueChange={(v) => updateForm("flatId", v)}
+//                 disabled={!form.floor || flats.length === 0}
+//               >
+//                 <SelectTrigger>
+//                   <SelectValue placeholder="Select flat" />
+//                 </SelectTrigger>
+//                 <SelectContent>
+//                   {flats.map((f) => (
+//                     <SelectItem
+//                       key={f._id}
+//                       value={f._id}
+//                       disabled={f.status !== "available" && !isEdit}
+//                     >
+//                       {f.flatNumber} - {f.bedrooms} BHK - {f.area} sqft -{" "}
+//                       {formatCurrency(f.price || 0)} - ({f.status})
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+//           </div>
+
+//           {/* Flat Summary */}
+//           {selectedFlat && (
+//             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-3 bg-muted/40 rounded-md">
+//               <div>
+//                 <Label className="text-xs">Flat No.</Label>
+//                 <p className="text-sm font-medium">{selectedFlat.flatNumber}</p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs">Area (sqft)</Label>
+//                 <p className="text-sm font-medium">{selectedFlat.area}</p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs">Bedrooms</Label>
+//                 <p className="text-sm font-medium">{selectedFlat.bedrooms}</p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs">Bathrooms</Label>
+//                 <p className="text-sm font-medium">{selectedFlat.bathrooms}</p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs">Price</Label>
+//                 <p className="text-sm font-medium">{formatCurrency(selectedFlat.price || 0)}</p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs">Facing</Label>
+//                 <p className="text-sm font-medium">
+//                   {selectedFlat.features?.facing || "-"}
+//                 </p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs">Furnished</Label>
+//                 <p className="text-sm font-medium capitalize">
+//                   {selectedFlat.features?.furnished || "unfurnished"}
+//                 </p>
+//               </div>
+//               <div className="col-span-2 md:col-span-1 flex gap-4 text-sm">
+//                 <span>
+//                   Parking: {selectedFlat.features?.parking ? "Yes" : "No"}
+//                 </span>
+//                 <span>
+//                   Balcony: {selectedFlat.features?.balcony ? "Yes" : "No"}
+//                 </span>
+//               </div>
+//             </div>
+//           )}
+
+//           {/* Lead Selection */}
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             <div>
+//               <Label>Lead (Optional)</Label>
+//               <Select
+//                 value={form.leadId || "none"}
+//                 onValueChange={(v) =>
+//                   updateForm("leadId", v === "none" ? "" : v)
+//                 }
+//               >
+//                 <SelectTrigger>
+//                   <SelectValue placeholder="Select lead" />
+//                 </SelectTrigger>
+//                 <SelectContent>
+//                   <SelectItem value="none">None (Create new buyer)</SelectItem>
+//                   {leads?.map((lead) => (
+//                     <SelectItem key={lead._id} value={lead._id}>
+//                       {lead.clientName}{" "}
+//                       {lead.clientPhone ? `(${lead.clientPhone})` : ""}
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+//           </div>
+
+//           {/* Booking Details */}
+//           <div className="border-t pt-2">
+//             <h3 className="font-semibold">Booking Details</h3>
+//           </div>
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             <div className="md:col-span-2">
+//               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+//                 <div>
+//                   <Label>Booking Amount *</Label>
+//                   <Input
+//                     type="number"
+//                     value={form.bookingAmount}
+//                     onChange={(e) => updateForm("bookingAmount", e.target.value)}
+//                     placeholder="e.g. 150000"
+//                     className="font-medium"
+//                   />
+//                   <span className="text-xs text-muted-foreground">
+//                     Advance Token Amount
+//                   </span>
+//                 </div>
+
+//                 <div>
+//                   {/* ✅ Updated label and hint */}
+//                   <Label>GST Paid at Booking (₹)</Label>
+//                   <Input
+//                     type="number"
+//                     min={0}
+//                     max={getTotalGSTAmount()}
+//                     value={gstAmountOnBooking}
+//                     onChange={(e) => {
+//                       const val = e.target.value;
+//                       const numVal = Number(val);
+
+//                       // ✅ Validation: Booking amount must be entered first
+//                       if (!form.bookingAmount || Number(form.bookingAmount) <= 0) {
+//                         toast.error("Please enter Booking Amount first");
+//                         return;
+//                       }
+
+//                       const totalGst = getTotalGSTAmount();
+//                       if (val !== "" && !isNaN(numVal) && (numVal < 0 || numVal > totalGst)) {
+//                         toast.error(
+//                           `GST paid cannot exceed Total GST of ${formatCurrency(totalGst)}`
+//                         );
+//                         return;
+//                       }
+//                       setGstAmountOnBooking(val);
+//                     }}
+//                     placeholder={`e.g. 15000`}
+//                     disabled={!selectedFlat}
+//                   />
+//                   <span className="text-xs text-muted-foreground">
+//                     Enter GST amount customer wants to pay during booking
+//                   </span>
+//                 </div>
+
+//                 <div>
+//                   <Label className="text-xs text-muted-foreground">
+//                     Total Flat GST ({getGSTPercentage()}%)
+//                   </Label>
+//                   <div className="text-lg font-semibold text-primary">
+//                     {formatCurrency(getTotalGSTAmount())}
+//                   </div>
+//                   <span className="text-xs text-muted-foreground">
+//                     Calculated on Flat Price
+//                   </span>
+//                 </div>
+
+//                 <div>
+//                   <Label className="text-xs text-muted-foreground">
+//                     Customer Pays Today
+//                   </Label>
+//                   <div className="text-xl font-bold text-green-600">
+//                     {formatCurrency(getTotalPayable())}
+//                   </div>
+//                   <span className="text-xs text-muted-foreground">
+//                     Booking Amount + GST paid now
+//                   </span>
+//                 </div>
+//               </div>
+
+//               {selectedFlat && parseFloat(form.bookingAmount) > 0 && (
+//                 <div className="mt-2 p-2 bg-muted/30 rounded-md text-xs flex gap-6 flex-wrap">
+//                   <span>
+//                     Booking Amount:{" "}
+//                     <strong>{formatCurrency(parseFloat(form.bookingAmount) || 0)}</strong>
+//                   </span>
+//                   <span>
+//                     + GST Paid Now:{" "}
+//                     <strong>{formatCurrency(getGSTOnBooking())}</strong>
+//                   </span>
+//                   <span>
+//                     = Customer Pays Today:{" "}
+//                     <strong className="text-primary">{formatCurrency(getTotalPayable())}</strong>
+//                   </span>
+//                   <span className="text-muted-foreground">
+//                     Remaining GST for Installments:{" "}
+//                     <strong>{formatCurrency(getGSTOnInstallments())}</strong>
+//                   </span>
+//                 </div>
+//               )}
+//             </div>
+
+//             <div>
+//               <Label>Payment Mode</Label>
+//               <Select
+//                 value={form.paymentMode}
+//                 onValueChange={(v) => updateForm("paymentMode", v)}
+//               >
+//                 <SelectTrigger>
+//                   <SelectValue placeholder="Select payment mode" />
+//                 </SelectTrigger>
+//                 <SelectContent>
+//                   {Object.values(PAYMENT_MODE).map((mode) => (
+//                     <SelectItem key={mode} value={mode}>
+//                       {mode}
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+//             <div>
+//               <Label>Transaction ID</Label>
+//               <Input
+//                 placeholder="Optional"
+//                 value={form.transactionId}
+//                 onChange={(e) => updateForm("transactionId", e.target.value)}
+//               />
+//             </div>
+//             <div>
+//               <Label>Agreement Date</Label>
+//               <Input
+//                 type="date"
+//                 value={form.agreementDate}
+//                 onChange={(e) => updateForm("agreementDate", e.target.value)}
+//               />
+//             </div>
+//             <div>
+//               <Label>Nominee Name</Label>
+//               <Input
+//                 placeholder="Optional"
+//                 value={form.nomineeName}
+//                 onChange={(e) => updateForm("nomineeName", e.target.value)}
+//               />
+//             </div>
+//             <div>
+//               <Label>Nominee Relation</Label>
+//               <Input
+//                 placeholder="Optional"
+//                 value={form.nomineeRelation}
+//                 onChange={(e) => updateForm("nomineeRelation", e.target.value)}
+//               />
+//             </div>
+//             <div>
+//               <Label>Key Number (KYC ID)</Label>
+//               <Input
+//                 placeholder="Optional"
+//                 value={form.keyNumber}
+//                 onChange={(e) => updateForm("keyNumber", e.target.value)}
+//               />
+//             </div>
+
+//             <div>
+//               <Label>Business Code</Label>
+//               <Input
+//                 placeholder="Optional"
+//                 value={form.businessCode}
+//                 onChange={(e) => updateForm("businessCode", e.target.value)}
+//               />
+//             </div>
+//             <div>
+//               <Label>Business Name</Label>
+//               <Input
+//                 placeholder="Optional"
+//                 value={form.businessName}
+//                 onChange={(e) => updateForm("businessName", e.target.value)}
+//               />
+//             </div>
+//             <div>
+//               <Label>Team Manager</Label>
+//               <Select
+//                 value={form.teamManager}
+//                 onValueChange={(v) => updateForm("teamManager", v)}
+//               >
+//                 <SelectTrigger>
+//                   <SelectValue placeholder="Select manager" />
+//                 </SelectTrigger>
+//                 <SelectContent>
+//                   {teamManagers.map((mgr) => (
+//                     <SelectItem key={mgr._id} value={mgr._id}>
+//                       {mgr.name || mgr.email} ({mgr.role})
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+//             <div>
+//               <Label>Service Tax Paid (₹)</Label>
+//               <Input
+//                 type="number"
+//                 placeholder="Optional"
+//                 value={form.serviceTaxPaid}
+//                 onChange={(e) => updateForm("serviceTaxPaid", e.target.value)}
+//               />
+//             </div>
+//             <div className="md:col-span-2">
+//               <Label>Remarks</Label>
+//               <Input
+//                 placeholder="Optional"
+//                 value={form.remarks}
+//                 onChange={(e) => updateForm("remarks", e.target.value)}
+//               />
+//             </div>
+//           </div>
+
+//           {/* Installment Plan Section */}
+//           <div className="border-t pt-2">
+//             <div className="flex items-center gap-3 mb-2">
+//               <h3 className="font-semibold">Installment Plan</h3>
+//               <label className="flex items-center gap-2 text-sm cursor-pointer">
+//                 <input
+//                   type="checkbox"
+//                   checked={form.useCustomPlan}
+//                   onChange={(e) => {
+//                     const checked = e.target.checked;
+//                     if (checked && form.installments.length === 0) {
+//                       addInstallment();
+//                     }
+//                     updateForm("useCustomPlan", checked);
+//                   }}
+//                   className="w-4 h-4"
+//                 />
+//                 <span>Custom plan</span>
+//               </label>
+//               <span className="text-xs text-muted-foreground">
+//                 (If unchecked, backend will create 3 equal installments)
+//               </span>
+//             </div>
+
+//             {form.useCustomPlan && (
+//               <div className="space-y-3">
+//                 <div className="flex justify-between items-start gap-4">
+//                   <div className="text-sm text-muted-foreground flex-1">
+//                     <p className="mb-2">
+//                       Current Installment Total:{" "}
+//                       <span className="font-medium text-foreground text-base">
+//                         {formatCurrency(getTotalInstallmentAmount())}
+//                       </span>
+//                     </p>
+
+//                     {selectedFlat &&
+//                       (() => {
+//                         const flatPrice = selectedFlat.price || 0;
+//                         const gstPercent = getGSTPercentage();
+//                         const totalGst = getTotalGSTAmount();
+//                         const bookingAmt = Number(form.bookingAmount) || 0;
+//                         const gstOnBooking = getGSTOnBooking();
+
+//                         const targetTotal = getInstallmentTarget();
+//                         const currentTotal = getTotalInstallmentAmount();
+//                         const diff = targetTotal - currentTotal;
+
+//                         return (
+//                           <div className="p-3 bg-muted/30 border rounded-md space-y-1.5 text-xs">
+//                             <div className="flex justify-between">
+//                               <span>Base Price:</span>{" "}
+//                               <strong>{formatCurrency(flatPrice)}</strong>
+//                             </div>
+//                             <div className="flex justify-between">
+//                               <span>Total GST ({gstPercent}%):</span>{" "}
+//                               <strong>+ {formatCurrency(totalGst)}</strong>
+//                             </div>
+//                             <div className="flex justify-between text-blue-600">
+//                               <span>GST Paid at Booking:</span>{" "}
+//                               <strong>- {formatCurrency(gstOnBooking)}</strong>
+//                             </div>
+//                             <div className="flex justify-between">
+//                               <span>Booking Amount:</span>{" "}
+//                               <strong>- {formatCurrency(bookingAmt)}</strong>
+//                             </div>
+//                             <div className="flex justify-between text-primary font-semibold mt-1 pt-2 border-t">
+//                               <span>Target Installments Total:</span>
+//                               <span>{formatCurrency(targetTotal)}</span>
+//                             </div>
+//                             <div className="flex justify-between text-muted-foreground">
+//                               <span>Breakup:</span>
+//                               <span>
+//                                 Base: {formatCurrency(flatPrice - bookingAmt)} + GST:{" "}
+//                                 {formatCurrency(totalGst - gstOnBooking)}
+//                               </span>
+//                             </div>
+//                             {diff !== 0 && (
+//                               <div
+//                                 className={`mt-1 font-medium ${
+//                                   diff > 0
+//                                     ? "text-amber-600"
+//                                     : "text-destructive"
+//                                 }`}
+//                               >
+//                                 {diff > 0
+//                                   ? `⚠️ You need to add ${formatCurrency(
+//                                       diff
+//                                     )} more to match the target.`
+//                                   : `⚠️ Total exceeds the target by ${formatCurrency(
+//                                       Math.abs(diff)
+//                                     )}.`}
+//                               </div>
+//                             )}
+//                           </div>
+//                         );
+//                       })()}
+//                   </div>
+//                   <Button
+//                     type="button"
+//                     variant="outline"
+//                     size="sm"
+//                     onClick={addInstallment}
+//                     className="gap-1 mt-1"
+//                   >
+//                     <Plus className="h-4 w-4" /> Add
+//                   </Button>
+//                 </div>
+
+//                 <div className="space-y-2 max-h-60 overflow-y-auto">
+//                   {form.installments.map((inst, index) => (
+//                     <div
+//                       key={index}
+//                       className="grid grid-cols-12 gap-2 items-center p-2 bg-muted/30 rounded-md"
+//                     >
+//                       <div className="col-span-1 text-sm font-medium text-center">
+//                         {inst.installmentNumber}
+//                       </div>
+//                       <div className="col-span-3">
+//                         <Input
+//                           placeholder="Description"
+//                           value={inst.description}
+//                           onChange={(e) =>
+//                             updateInstallment(
+//                               index,
+//                               "description",
+//                               e.target.value
+//                             )
+//                           }
+//                           className="h-8 text-sm"
+//                         />
+//                       </div>
+//                       <div className="col-span-2">
+//                         <Input
+//                           type="number"
+//                           placeholder="Amount"
+//                           value={inst.amount}
+//                           onChange={(e) =>
+//                             updateInstallment(index, "amount", e.target.value)
+//                           }
+//                           className="h-8 text-sm"
+//                         />
+//                       </div>
+//                       <div className="col-span-3">
+//                         <Input
+//                           type="date"
+//                           value={inst.dueDate}
+//                           onChange={(e) =>
+//                             updateInstallment(index, "dueDate", e.target.value)
+//                           }
+//                           className="h-8 text-sm"
+//                         />
+//                       </div>
+//                       <div className="col-span-2 flex justify-end">
+//                         <Button
+//                           type="button"
+//                           variant="ghost"
+//                           size="sm"
+//                           onClick={() => removeInstallment(index)}
+//                           className="h-8 w-8 p-0 text-destructive"
+//                           disabled={form.installments.length <= 1}
+//                         >
+//                           <Trash2 className="h-4 w-4" />
+//                         </Button>
+//                       </div>
+//                     </div>
+//                   ))}
+//                 </div>
+
+//                 {form.installments.length === 0 && (
+//                   <p className="text-sm text-muted-foreground text-center py-2">
+//                     No installments added. Click "Add" to start.
+//                   </p>
+//                 )}
+//               </div>
+//             )}
+//           </div>
+
+//           {/* New Client Fields */}
+//           {!form.leadId && (
+//             <>
+//               <div className="border-t pt-2">
+//                 <h3 className="font-semibold">Buyer Details</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input
+//                   placeholder="Buyer Name"
+//                   value={form.clientName}
+//                   onChange={(e) => updateForm("clientName", e.target.value)}
+//                 />
+//                 <Input
+//                   type="email"
+//                   placeholder="Email"
+//                   value={form.clientEmail}
+//                   onChange={(e) => updateForm("clientEmail", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="Phone"
+//                   value={form.clientPhone}
+//                   onChange={(e) => updateForm("clientPhone", e.target.value)}
+//                 />
+//                 <Input
+//                   type="password"
+//                   placeholder="Password"
+//                   value={form.clientPassword}
+//                   onChange={(e) => updateForm("clientPassword", e.target.value)}
+//                 />
+//               </div>
+
+//               <div className="border-t pt-2">
+//                 <h3 className="font-semibold">Personal Details</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input
+//                   type="date"
+//                   placeholder="Date of Birth"
+//                   value={form.dateOfBirth}
+//                   onChange={(e) => updateForm("dateOfBirth", e.target.value)}
+//                 />
+//                 <Select
+//                   value={form.gender}
+//                   onValueChange={(v) => updateForm("gender", v)}
+//                 >
+//                   <SelectTrigger>
+//                     <SelectValue placeholder="Gender" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="Male">Male</SelectItem>
+//                     <SelectItem value="Female">Female</SelectItem>
+//                     <SelectItem value="Other">Other</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <Select
+//                   value={form.bloodGroup}
+//                   onValueChange={(v) => updateForm("bloodGroup", v)}
+//                 >
+//                   <SelectTrigger>
+//                     <SelectValue placeholder="Blood Group" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(
+//                       (bg) => (
+//                         <SelectItem key={bg} value={bg}>
+//                           {bg}
+//                         </SelectItem>
+//                       )
+//                     )}
+//                   </SelectContent>
+//                 </Select>
+//                 <Select
+//                   value={form.maritalStatus}
+//                   onValueChange={(v) => updateForm("maritalStatus", v)}
+//                 >
+//                   <SelectTrigger>
+//                     <SelectValue placeholder="Marital Status" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="Single">Single</SelectItem>
+//                     <SelectItem value="Married">Married</SelectItem>
+//                     <SelectItem value="Divorced">Divorced</SelectItem>
+//                     <SelectItem value="Widowed">Widowed</SelectItem>
+//                     <SelectItem value="Separated">Separated</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <Input
+//                   placeholder="Aadhar Number"
+//                   value={form.aadharNumber}
+//                   onChange={(e) => updateForm("aadharNumber", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="PAN Number"
+//                   value={form.panNumber}
+//                   onChange={(e) => updateForm("panNumber", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="Father's Name"
+//                   value={form.fatherName}
+//                   onChange={(e) => updateForm("fatherName", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="Mother's Name"
+//                   value={form.motherName}
+//                   onChange={(e) => updateForm("motherName", e.target.value)}
+//                 />
+//               </div>
+
+//               <div className="border-t pt-2">
+//                 <h3 className="font-semibold">Emergency Contact</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input
+//                   placeholder="Emergency Contact Name"
+//                   value={form.emergencyContactName}
+//                   onChange={(e) =>
+//                     updateForm("emergencyContactName", e.target.value)
+//                   }
+//                 />
+//                 <Input
+//                   placeholder="Emergency Contact Phone"
+//                   value={form.emergencyContactPhone}
+//                   onChange={(e) =>
+//                     updateForm("emergencyContactPhone", e.target.value)
+//                   }
+//                 />
+//                 <Input
+//                   placeholder="Relationship"
+//                   value={form.emergencyContactRelation}
+//                   onChange={(e) =>
+//                     updateForm("emergencyContactRelation", e.target.value)
+//                   }
+//                 />
+//               </div>
+
+//               <div className="border-t pt-2">
+//                 <h3 className="font-semibold">Permanent Address</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input
+//                   placeholder="Address Line 1"
+//                   value={form.addressLine1}
+//                   onChange={(e) => updateForm("addressLine1", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="City"
+//                   value={form.city}
+//                   onChange={(e) => updateForm("city", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="State"
+//                   value={form.state}
+//                   onChange={(e) => updateForm("state", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="Country"
+//                   value={form.country}
+//                   onChange={(e) => updateForm("country", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="Pincode"
+//                   value={form.pincode}
+//                   onChange={(e) => updateForm("pincode", e.target.value)}
+//                 />
+//               </div>
+
+//               <div className="border-t pt-2">
+//                 <h3 className="font-semibold">Bank Details</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input
+//                   placeholder="Bank Name"
+//                   value={form.bankName}
+//                   onChange={(e) => updateForm("bankName", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="Account Number"
+//                   value={form.accountNumber}
+//                   onChange={(e) => updateForm("accountNumber", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="IFSC Code"
+//                   value={form.ifscCode}
+//                   onChange={(e) => updateForm("ifscCode", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="UPI ID"
+//                   value={form.upiId}
+//                   onChange={(e) => updateForm("upiId", e.target.value)}
+//                 />
+//                 <Input
+//                   placeholder="Account Holder Name"
+//                   value={form.accountHolderName}
+//                   onChange={(e) =>
+//                     updateForm("accountHolderName", e.target.value)
+//                   }
+//                 />
+//                 <Select
+//                   value={form.accountType}
+//                   onValueChange={(v) => updateForm("accountType", v)}
+//                 >
+//                   <SelectTrigger>
+//                     <SelectValue placeholder="Account Type" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="Savings">Savings</SelectItem>
+//                     <SelectItem value="Current">Current</SelectItem>
+//                     <SelectItem value="Salary">Salary</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <Input
+//                   placeholder="Branch Name"
+//                   value={form.branchName}
+//                   onChange={(e) => updateForm("branchName", e.target.value)}
+//                 />
+//               </div>
+//             </>
+//           )}
+//         </div>
+
+//         <DialogFooter>
+//           <Button variant="outline" onClick={() => onOpenChange(false)}>
+//             Cancel
+//           </Button>
+//           <Button onClick={handleSubmit} disabled={loading}>
+//             {loading
+//               ? "Saving..."
+//               : isEdit
+//               ? "Update Booking"
+//               : "Create Booking"}
+//           </Button>
+//         </DialogFooter>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+
+
+
+// import React, { useState, useEffect, useRef } from "react";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogFooter,
+// } from "@/components/ui/dialog";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { projectApi, authApi } from "@/api";
+// import { bookingApi } from "@/api/bookingApi";
+// import { PAYMENT_MODE } from "@/data/constants/booking";
+// import { toast } from "sonner";
+// import { useLeadList } from "@/hooks/useLeadList";
+// import { Trash2, Plus, Info } from "lucide-react";
+
+// // ✅ Currency formatter (INR without L/Cr)
+// const formatCurrency = (val) => {
+//   if (val === null || val === undefined || isNaN(val)) return "₹0";
+//   return "₹" + Number(val).toLocaleString("en-IN");
+// };
+
+// export function BookingFormDialog({
+//   open,
+//   onOpenChange,
+//   onSuccess,
+//   editBooking,
+// }) {
+//   const [projects, setProjects] = useState([]);
+//   const [towers, setTowers] = useState([]);
+//   const [floors, setFloors] = useState([]);
+//   const [flats, setFlats] = useState([]);
+//   const [selectedFlat, setSelectedFlat] = useState(null);
+//   const [loading, setLoading] = useState(false);
+//   const [teamManagers, setTeamManagers] = useState([]);
+
+//   const [projectsLoaded, setProjectsLoaded] = useState(false);
+//   const editInitialized = useRef(false);
+
+//   const initialForm = {
+//     projectId: "",
+//     towerName: "",
+//     floor: "",
+//     flatId: "",
+
+//     bookingAmount: "", // Base Amount (No GST)
+//     paymentMode: "",
+//     agreementDate: "",
+//     nomineeName: "",
+//     nomineeRelation: "",
+
+//     keyNumber: "",
+//     businessCode: "",
+//     businessName: "",
+//     teamManager: "",
+//     serviceTaxPaid: "",
+//     remarks: "",
+//     transactionId: "",
+
+//     leadId: "",
+//     clientName: "",
+//     clientEmail: "",
+//     clientPhone: "",
+//     clientPassword: "",
+
+//     dateOfBirth: "",
+//     gender: "",
+//     bloodGroup: "",
+//     maritalStatus: "",
+//     aadharNumber: "",
+//     panNumber: "",
+//     fatherName: "",
+//     motherName: "",
+//     emergencyContactName: "",
+//     emergencyContactPhone: "",
+//     emergencyContactRelation: "",
+//     addressLine1: "",
+//     city: "",
+//     state: "",
+//     country: "India",
+//     pincode: "",
+
+//     bankName: "",
+//     accountNumber: "",
+//     ifscCode: "",
+//     upiId: "",
+//     accountHolderName: "",
+//     accountType: "",
+//     branchName: "",
+
+//     useCustomPlan: false,
+//     installments: [],
+//   };
+
+//   const [form, setForm] = useState(initialForm);
+//   const isEdit = Boolean(editBooking);
+
+//   // ---- TRANSPARENT GST CALCULATIONS FOR UI ----
+//   const getGSTPercentage = () => {
+//     if (!selectedFlat) return 0;
+//     const flatPrice = selectedFlat.price || 0;
+//     return flatPrice >= 4500000 ? 5 : 1;
+//   };
+
+//   const getFlatBasePrice = () => selectedFlat?.price || 0;
+//   const getTotalFlatGST = () => Math.round((getFlatBasePrice() * getGSTPercentage()) / 100);
+//   const getGrandTotal = () => getFlatBasePrice() + getTotalFlatGST();
+
+//   const getBookingBase = () => parseFloat(form.bookingAmount) || 0;
+//   const getBookingGST = () => Math.round((getBookingBase() * getGSTPercentage()) / 100);
+//   const getTotalPayableToday = () => getBookingBase() + getBookingGST();
+
+//   const getInstallmentTargetBase = () => getFlatBasePrice() - getBookingBase();
+//   const getInstallmentTargetGST = () => getTotalFlatGST() - getBookingGST();
+//   const getInstallmentTargetTotal = () => getInstallmentTargetBase() + getInstallmentTargetGST();
+
+//   useEffect(() => {
+//     if (!editBooking || !open) {
+//       editInitialized.current = false;
+//       return;
+//     }
+//     if (!projectsLoaded) return;
+//     if (editInitialized.current) return;
+//     editInitialized.current = true;
+
+//     const projectId = editBooking.projectId?._id || editBooking.projectId;
+//     const towerName = editBooking.flatSnapshot?.towerName || "";
+//     const floor = editBooking.flatSnapshot?.floor || "";
+//     const flatId = editBooking.flatId;
+
+//     const project = projects.find((p) => p._id === projectId);
+//     if (project?.towers) setTowers(project.towers);
+
+//     const tower = project?.towers?.find((t) => t.towerName === towerName);
+//     if (tower?.floors) setFloors(tower.floors);
+
+//     const floorObj = tower?.floors?.find(
+//       (f) => String(f.floorNumber) === String(floor)
+//     );
+//     if (floorObj?.flats) setFlats(floorObj.flats);
+
+//     setForm({
+//       ...initialForm,
+//       projectId: projectId || "",
+//       towerName: towerName,
+//       floor: floor.toString(),
+//       flatId: flatId || "",
+//       bookingAmount: editBooking.bookingBaseAmount || editBooking.bookingAmount || "",
+//       paymentMode: editBooking.paymentMode || "",
+//       agreementDate: editBooking.agreementDate ? editBooking.agreementDate.slice(0, 10) : "",
+//       nomineeName: editBooking.nomineeName || "",
+//       nomineeRelation: editBooking.nomineeRelation || "",
+//       keyNumber: editBooking.keyNumber || "",
+//       businessCode: editBooking.businessCode || "",
+//       businessName: editBooking.businessName || "",
+//       teamManager: editBooking.teamManager?._id || editBooking.teamManager || "",
+//       serviceTaxPaid: editBooking.serviceTaxPaid || "",
+//       remarks: editBooking.remarks || "",
+//       transactionId: editBooking.transactionId || "",
+//       leadId: editBooking.leadId?._id || editBooking.leadId || "",
+
+//       clientName: editBooking.clientId?.name || "",
+//       clientEmail: editBooking.clientId?.email || "",
+//       clientPhone: editBooking.clientId?.phone || "",
+//       clientPassword: "",
+
+//       dateOfBirth: editBooking.personalDetails?.dateOfBirth?.slice?.(0, 10) || "",
+//       gender: editBooking.personalDetails?.gender || "",
+//       bloodGroup: editBooking.personalDetails?.bloodGroup || "",
+//       maritalStatus: editBooking.personalDetails?.maritalStatus || "",
+//       aadharNumber: editBooking.personalDetails?.aadharNumber || "",
+//       panNumber: editBooking.personalDetails?.panNumber || "",
+//       fatherName: editBooking.personalDetails?.fatherName || "",
+//       motherName: editBooking.personalDetails?.motherName || "",
+//       emergencyContactName: editBooking.personalDetails?.emergencyContactName || "",
+//       emergencyContactPhone: editBooking.personalDetails?.emergencyContactPhone || "",
+//       emergencyContactRelation: editBooking.personalDetails?.emergencyContactRelation || "",
+//       addressLine1: editBooking.personalDetails?.permanentAddress?.line1 || "",
+//       city: editBooking.personalDetails?.permanentAddress?.city || "",
+//       state: editBooking.personalDetails?.permanentAddress?.state || "",
+//       country: editBooking.personalDetails?.permanentAddress?.country || "India",
+//       pincode: editBooking.personalDetails?.permanentAddress?.pincode || "",
+
+//       bankName: editBooking.bankDetails?.bankName || "",
+//       accountNumber: editBooking.bankDetails?.accountNumber || "",
+//       ifscCode: editBooking.bankDetails?.ifscCode || "",
+//       upiId: editBooking.bankDetails?.upiId || "",
+//       accountHolderName: editBooking.bankDetails?.accountHolderName || "",
+//       accountType: editBooking.bankDetails?.accountType || "",
+//       branchName: editBooking.bankDetails?.branchName || "",
+
+//       useCustomPlan: Boolean(editBooking.installmentPlan?.length),
+//       installments: editBooking.installmentPlan?.length
+//         ? editBooking.installmentPlan.map((inst) => ({
+//             installmentNumber: inst.installmentNumber,
+//             description: inst.description,
+//             amount: inst.baseAmount || inst.amount,
+//             dueDate: inst.dueDate?.slice?.(0, 10) || "",
+//           }))
+//         : [],
+//     });
+
+//     const flatObj = floorObj?.flats?.find((f) => f._id === flatId);
+//     if (flatObj) setSelectedFlat(flatObj);
+//   }, [editBooking, open, projectsLoaded, projects]);
+
+//   const resetForm = () => {
+//     setForm(initialForm);
+//     setTowers([]);
+//     setFloors([]);
+//     setFlats([]);
+//     setSelectedFlat(null);
+//     setProjectsLoaded(false);
+//     editInitialized.current = false;
+//   };
+
+//   const { leads, loading: leadsLoading } = useLeadList();
+
+//   const fetchProjects = async () => {
+//     try {
+//       const res = await projectApi.getAll();
+//       if (res.data.success) {
+//         setProjects(res.data.data?.projects || []);
+//         setProjectsLoaded(true);
+//       }
+//     } catch (err) {
+//       toast.error("Failed to load projects");
+//     }
+//   };
+
+//   const fetchTeamManagers = async () => {
+//     try {
+//       const res = await authApi.getUsers();
+//       if (res.data.success) {
+//         const managers = res.data.data?.users?.filter(
+//           (user) =>
+//             user.role?.includes("manager") ||
+//             user.role === "manager" ||
+//             user.role === "admin"
+//         );
+//         setTeamManagers(managers || []);
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch team managers", err);
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (open) {
+//       fetchProjects();
+//       fetchTeamManagers();
+//     } else {
+//       resetForm();
+//     }
+//   }, [open]);
+
+//   useEffect(() => {
+//     if (form.projectId) {
+//       const project = projects.find((p) => p._id === form.projectId);
+//       if (project?.towers?.length) {
+//         setTowers(project.towers);
+//         const towerExists = form.towerName && project.towers.some((t) => t.towerName === form.towerName);
+//         if (!towerExists) {
+//           setForm((prev) => ({ ...prev, towerName: "", floor: "", flatId: "" }));
+//           setFloors([]);
+//           setFlats([]);
+//           setSelectedFlat(null);
+//         }
+//       } else {
+//         setTowers([]);
+//         setFloors([]);
+//         setFlats([]);
+//         setSelectedFlat(null);
+//       }
+//     } else {
+//       setTowers([]);
+//       setFloors([]);
+//       setFlats([]);
+//       setSelectedFlat(null);
+//     }
+//   }, [form.projectId, projects]);
+
+//   useEffect(() => {
+//     if (form.towerName) {
+//       const tower = towers.find((t) => t.towerName === form.towerName);
+//       if (tower) {
+//         setFloors(tower.floors || []);
+//         const floorExists = form.floor && tower.floors.some((f) => String(f.floorNumber) === String(form.floor));
+//         if (!floorExists) {
+//           setForm((prev) => ({ ...prev, floor: "", flatId: "" }));
+//           setFlats([]);
+//           setSelectedFlat(null);
+//         }
+//       } else {
+//         setFloors([]);
+//         setFlats([]);
+//         setSelectedFlat(null);
+//       }
+//     } else {
+//       setFloors([]);
+//       setFlats([]);
+//       setSelectedFlat(null);
+//     }
+//   }, [form.towerName, towers]);
+
+//   useEffect(() => {
+//     if (form.floor !== "" && form.floor !== undefined) {
+//       const floor = floors.find((f) => String(f.floorNumber) === String(form.floor));
+//       if (floor) {
+//         setFlats(floor.flats || []);
+//         const flatExists = form.flatId && floor.flats.some((f) => f._id === form.flatId);
+//         if (!flatExists) {
+//           setForm((prev) => ({ ...prev, flatId: "" }));
+//           setSelectedFlat(null);
+//         }
+//       } else {
+//         setFlats([]);
+//         setSelectedFlat(null);
+//       }
+//     } else {
+//       setFlats([]);
+//       setSelectedFlat(null);
+//     }
+//   }, [form.floor, floors]);
+
+//   useEffect(() => {
+//     if (form.flatId && flats.length) {
+//       const flat = flats.find((f) => f._id === form.flatId);
+//       setSelectedFlat(flat || null);
+//     } else {
+//       setSelectedFlat(null);
+//     }
+//   }, [form.flatId, flats]);
+
+//   const updateForm = (field, value) => {
+//     setForm((prev) => ({ ...prev, [field]: value }));
+//   };
+
+//   const addInstallment = () => {
+//     const newNumber = form.installments.length + 1;
+//     const newInstallment = {
+//       installmentNumber: newNumber,
+//       description: "",
+//       amount: "",
+//       dueDate: "",
+//     };
+//     setForm((prev) => ({
+//       ...prev,
+//       installments: [...prev.installments, newInstallment],
+//     }));
+//   };
+
+//   const removeInstallment = (index) => {
+//     if (form.installments.length <= 1) {
+//       toast.warning("At least one installment is required");
+//       return;
+//     }
+//     const updated = form.installments.filter((_, i) => i !== index);
+//     const renumbered = updated.map((inst, idx) => ({ ...inst, installmentNumber: idx + 1 }));
+//     setForm((prev) => ({ ...prev, installments: renumbered }));
+//   };
+
+//   const updateInstallment = (index, field, value) => {
+//     const updated = [...form.installments];
+//     updated[index][field] = value;
+//     setForm((prev) => ({ ...prev, installments: updated }));
+//   };
+
+//   const getTotalInstallmentAmount = () => {
+//     return form.installments.reduce((sum, inst) => sum + (parseFloat(inst.amount) || 0), 0);
+//   };
+
+//   const handleSubmit = async () => {
+//     if (!form.projectId || !form.towerName || !form.floor || !form.flatId) {
+//       toast.error("Project, Tower, Floor, and Flat are required");
+//       return;
+//     }
+
+//     if (form.useCustomPlan) {
+//       if (form.installments.length === 0) {
+//         toast.error("Please add at least one installment");
+//         return;
+//       }
+//       const invalid = form.installments.some((inst) => !inst.description || !inst.amount);
+//       if (invalid) {
+//         toast.error("All installment fields (description, amount) are required");
+//         return;
+//       }
+//     }
+
+//     setLoading(true);
+
+//     const payload = {
+//       projectId: form.projectId,
+//       flatId: form.flatId,
+//       bookingAmount: Number(form.bookingAmount),
+//       paymentMode: form.paymentMode || undefined,
+//       agreementDate: form.agreementDate || undefined,
+//       nomineeName: form.nomineeName || undefined,
+//       nomineeRelation: form.nomineeRelation || undefined,
+//       keyNumber: form.keyNumber || undefined,
+//       businessCode: form.businessCode || undefined,
+//       businessName: form.businessName || undefined,
+//       teamManager: form.teamManager || undefined,
+//       serviceTaxPaid: form.serviceTaxPaid ? Number(form.serviceTaxPaid) : undefined,
+//       remarks: form.remarks || undefined,
+//       transactionId: form.transactionId || undefined,
+//     };
+
+//     if (form.useCustomPlan && form.installments.length > 0) {
+//       const installments = form.installments.map((inst) => ({
+//         installmentNumber: inst.installmentNumber,
+//         description: inst.description,
+//         amount: Number(inst.amount), // Sirf Base amount jayega, backend GST calculate karega
+//         dueDate: inst.dueDate || undefined,
+//       }));
+//       payload.installmentPlan = { installments };
+//     }
+
+//     if (form.leadId) {
+//       payload.leadId = form.leadId;
+//     } else {
+//       payload.clientName = form.clientName;
+//       payload.clientEmail = form.clientEmail || undefined;
+//       payload.clientPhone = form.clientPhone;
+//       payload.clientPassword = form.clientPassword;
+
+//       const personalDetails = {};
+//       if (form.dateOfBirth) personalDetails.dateOfBirth = form.dateOfBirth;
+//       if (form.gender) personalDetails.gender = form.gender;
+//       if (form.bloodGroup) personalDetails.bloodGroup = form.bloodGroup;
+//       if (form.maritalStatus) personalDetails.maritalStatus = form.maritalStatus;
+//       if (form.aadharNumber) personalDetails.aadharNumber = form.aadharNumber;
+//       if (form.panNumber) personalDetails.panNumber = form.panNumber;
+//       if (form.fatherName) personalDetails.fatherName = form.fatherName;
+//       if (form.motherName) personalDetails.motherName = form.motherName;
+//       if (form.emergencyContactName) personalDetails.emergencyContactName = form.emergencyContactName;
+//       if (form.emergencyContactPhone) personalDetails.emergencyContactPhone = form.emergencyContactPhone;
+//       if (form.emergencyContactRelation) personalDetails.emergencyContactRelation = form.emergencyContactRelation;
+
+//       if (form.addressLine1 || form.city || form.state || form.pincode) {
+//         personalDetails.permanentAddress = {
+//           line1: form.addressLine1 || undefined,
+//           city: form.city || undefined,
+//           state: form.state || undefined,
+//           country: form.country || "India",
+//           pincode: form.pincode || undefined,
+//         };
+//       }
+
+//       if (Object.keys(personalDetails).length) {
+//         payload.personalDetails = personalDetails;
+//       }
+
+//       const bankDetails = {};
+//       if (form.bankName) bankDetails.bankName = form.bankName;
+//       if (form.accountNumber) bankDetails.accountNumber = form.accountNumber;
+//       if (form.ifscCode) bankDetails.ifscCode = form.ifscCode;
+//       if (form.upiId) bankDetails.upiId = form.upiId;
+//       if (form.accountHolderName) bankDetails.accountHolderName = form.accountHolderName;
+//       if (form.accountType) bankDetails.accountType = form.accountType;
+//       if (form.branchName) bankDetails.branchName = form.branchName;
+
+//       if (Object.keys(bankDetails).length) {
+//         payload.bankDetails = bankDetails;
+//       }
+//     }
+
+//     try {
+//       let res;
+//       if (isEdit) {
+//         res = await bookingApi.updateBooking(editBooking._id, payload);
+//       } else {
+//         res = await bookingApi.createBooking(payload);
+//       }
+//       toast.success(isEdit ? "Booking updated" : "Booking created");
+//       onSuccess?.(res.data?.data);
+//       onOpenChange(false);
+//       resetForm();
+//     } catch (err) {
+//       toast.error(err.response?.data?.message || "Failed to create booking");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <Dialog open={open} onOpenChange={onOpenChange}>
+//       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+//         <DialogHeader>
+//           <DialogTitle>
+//             {isEdit ? "Edit Booking" : "Create New Booking"}
+//           </DialogTitle>
+//         </DialogHeader>
+//         <div className="space-y-6 p-1">
+//           {/* Flat Selection */}
+//           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+//             <div>
+//               <Label>Project *</Label>
+//               <Select value={form.projectId} onValueChange={(v) => { updateForm("projectId", v); updateForm("towerName", ""); updateForm("floor", ""); updateForm("flatId", ""); }}>
+//                 <SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger>
+//                 <SelectContent>
+//                   {projects.map((p) => (<SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+
+//             <div>
+//               <Label>Tower *</Label>
+//               <Select value={form.towerName} disabled={!form.projectId || towers.length === 0} onValueChange={(v) => { updateForm("towerName", v); updateForm("floor", ""); updateForm("flatId", ""); }}>
+//                 <SelectTrigger><SelectValue placeholder="Select tower" /></SelectTrigger>
+//                 <SelectContent>
+//                   {towers.map((t) => (<SelectItem key={t.towerName} value={t.towerName}>{t.towerName}</SelectItem>))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+
+//             <div>
+//               <Label>Floor *</Label>
+//               <Select value={form.floor.toString()} disabled={!form.towerName || floors.length === 0} onValueChange={(v) => { updateForm("floor", v); updateForm("flatId", ""); }}>
+//                 <SelectTrigger><SelectValue placeholder="Select floor" /></SelectTrigger>
+//                 <SelectContent>
+//                   {floors.map((f) => (<SelectItem key={f.floorNumber} value={f.floorNumber.toString()}>Floor {f.floorNumber}</SelectItem>))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+
+//             <div>
+//               <Label>Flat *</Label>
+//               <Select value={form.flatId} disabled={!form.floor || flats.length === 0} onValueChange={(v) => updateForm("flatId", v)}>
+//                 <SelectTrigger><SelectValue placeholder="Select flat" /></SelectTrigger>
+//                 <SelectContent>
+//                   {flats.map((f) => (
+//                     <SelectItem key={f._id} value={f._id} disabled={f.status !== "available" && !isEdit}>
+//                       {f.flatNumber} - {f.bedrooms} BHK - {formatCurrency(f.price || 0)} - ({f.status})
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+//           </div>
+
+//           {/* Flat & GST Summary */}
+//           {selectedFlat && (
+//             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-4 bg-primary/5 border border-primary/20 rounded-md">
+//               <div>
+//                 <Label className="text-xs text-muted-foreground">Flat Price</Label>
+//                 <p className="text-sm font-semibold">{formatCurrency(getFlatBasePrice())}</p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs text-muted-foreground">GST Slab</Label>
+//                 <p className="text-sm font-semibold">{getGSTPercentage()}%</p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs text-muted-foreground">Total GST</Label>
+//                 <p className="text-sm font-semibold">{formatCurrency(getTotalFlatGST())}</p>
+//               </div>
+//               <div>
+//                 <Label className="text-xs text-primary font-bold">Total Flat Value</Label>
+//                 <p className="text-base font-bold text-primary">{formatCurrency(getGrandTotal())}</p>
+//               </div>
+//             </div>
+//           )}
+
+//           {/* Lead Selection */}
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             <div>
+//               <Label>Lead (Optional)</Label>
+//               <Select value={form.leadId || "none"} onValueChange={(v) => updateForm("leadId", v === "none" ? "" : v)}>
+//                 <SelectTrigger><SelectValue placeholder="Select lead" /></SelectTrigger>
+//                 <SelectContent>
+//                   <SelectItem value="none">None (Create new buyer)</SelectItem>
+//                   {leads?.map((lead) => (
+//                     <SelectItem key={lead._id} value={lead._id}>
+//                       {lead.clientName} {lead.clientPhone ? `(${lead.clientPhone})` : ""}
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+//           </div>
+
+//           {/* Booking & Payment Details */}
+//           <div className="border-t pt-4">
+//             <h3 className="font-semibold text-lg flex items-center gap-2">
+//               Booking Details
+//               <Info className="h-4 w-4 text-muted-foreground" />
+//             </h3>
+//             <p className="text-xs text-muted-foreground mb-4">
+//               Enter the Booking Amount. GST will be automatically calculated based on the flat's GST slab.
+//             </p>
+//           </div>
+
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             {/* Payment Calculator Box */}
+//             <div className="md:col-span-2">
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-muted/40 rounded-lg border">
+//                 <div>
+//                   <Label className="font-semibold text-foreground">Booking Amount *</Label>
+//                   <Input
+//                     type="number"
+//                     value={form.bookingAmount}
+//                     onChange={(e) => updateForm("bookingAmount", e.target.value)}
+//                     placeholder="e.g. 150000"
+//                     className="font-bold text-lg mt-1"
+//                   />
+//                   <span className="text-xs text-muted-foreground block mt-1">Amount excluding GST</span>
+//                 </div>
+
+//                 <div className="flex flex-col justify-center">
+//                   <Label className="text-sm text-muted-foreground mb-1">
+//                     + Auto-Calculated GST ({getGSTPercentage()}%)
+//                   </Label>
+//                   <div className="text-xl font-bold text-amber-600">
+//                     {formatCurrency(getBookingGST())}
+//                   </div>
+//                 </div>
+
+//                 <div className="flex flex-col justify-center">
+//                   <Label className="text-sm text-muted-foreground mb-1">
+//                     = Client Pays Today
+//                   </Label>
+//                   <div className="text-2xl font-black text-green-600">
+//                     {formatCurrency(getTotalPayableToday())}
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Rest of the original Booking Details Inputs */}
+//             <div>
+//               <Label>Payment Mode</Label>
+//               <Select value={form.paymentMode} onValueChange={(v) => updateForm("paymentMode", v)}>
+//                 <SelectTrigger><SelectValue placeholder="Select payment mode" /></SelectTrigger>
+//                 <SelectContent>
+//                   {Object.values(PAYMENT_MODE || {
+//                     CASH: 'Cash', CHEQUE: 'Cheque', BANK_TRANSFER: 'Bank Transfer', 
+//                     CARD: 'Card', NEFT: 'NEFT', RTGS: 'RTGS', TRF: 'TRF', L_NEFT: 'L-NEFT'
+//                   }).map((mode) => (
+//                     <SelectItem key={mode} value={mode}>{mode}</SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+//             <div>
+//               <Label>Transaction ID</Label>
+//               <Input placeholder="Optional" value={form.transactionId} onChange={(e) => updateForm("transactionId", e.target.value)} />
+//             </div>
+//             <div>
+//               <Label>Agreement Date</Label>
+//               <Input type="date" value={form.agreementDate} onChange={(e) => updateForm("agreementDate", e.target.value)} />
+//             </div>
+//             <div>
+//               <Label>Nominee Name</Label>
+//               <Input placeholder="Optional" value={form.nomineeName} onChange={(e) => updateForm("nomineeName", e.target.value)} />
+//             </div>
+//             <div>
+//               <Label>Nominee Relation</Label>
+//               <Input placeholder="Optional" value={form.nomineeRelation} onChange={(e) => updateForm("nomineeRelation", e.target.value)} />
+//             </div>
+//             <div>
+//               <Label>Key Number (KYC ID)</Label>
+//               <Input placeholder="Optional" value={form.keyNumber} onChange={(e) => updateForm("keyNumber", e.target.value)} />
+//             </div>
+//             <div>
+//               <Label>Business Code</Label>
+//               <Input placeholder="Optional" value={form.businessCode} onChange={(e) => updateForm("businessCode", e.target.value)} />
+//             </div>
+//             <div>
+//               <Label>Business Name</Label>
+//               <Input placeholder="Optional" value={form.businessName} onChange={(e) => updateForm("businessName", e.target.value)} />
+//             </div>
+//             <div>
+//               <Label>Team Manager</Label>
+//               <Select value={form.teamManager} onValueChange={(v) => updateForm("teamManager", v)}>
+//                 <SelectTrigger><SelectValue placeholder="Select manager" /></SelectTrigger>
+//                 <SelectContent>
+//                   {teamManagers.map((mgr) => (
+//                     <SelectItem key={mgr._id} value={mgr._id}>
+//                       {mgr.name || mgr.email} ({mgr.role})
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//             </div>
+//             <div>
+//               <Label>Service Tax Paid (₹)</Label>
+//               <Input type="number" placeholder="Optional" value={form.serviceTaxPaid} onChange={(e) => updateForm("serviceTaxPaid", e.target.value)} />
+//             </div>
+//             <div className="md:col-span-2">
+//               <Label>Remarks</Label>
+//               <Input placeholder="Optional" value={form.remarks} onChange={(e) => updateForm("remarks", e.target.value)} />
+//             </div>
+//           </div>
+
+//           {/* Installment Plan Section */}
+//           <div className="border-t pt-4">
+//             <div className="flex items-center gap-3 mb-2">
+//               <h3 className="font-semibold text-lg">Installment Plan</h3>
+//               <label className="flex items-center gap-2 text-sm cursor-pointer ml-4 p-2 bg-muted/50 rounded-md">
+//                 <input
+//                   type="checkbox"
+//                   checked={form.useCustomPlan}
+//                   onChange={(e) => {
+//                     const checked = e.target.checked;
+//                     if (checked && form.installments.length === 0) {
+//                       addInstallment();
+//                     }
+//                     updateForm("useCustomPlan", checked);
+//                   }}
+//                   className="w-4 h-4"
+//                 />
+//                 <span className="font-medium">Use Custom Plan</span>
+//               </label>
+//               <span className="text-xs text-muted-foreground ml-2">(If unchecked, system creates 3 equal installments)</span>
+//             </div>
+
+//             {form.useCustomPlan && (
+//               <div className="space-y-4">
+                
+//                 {/* Visual Target Tracker */}
+//                 {selectedFlat && (
+//                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-muted/30 p-4 border rounded-md">
+//                     <div className="space-y-1 w-full md:w-auto text-sm">
+//                       <div className="flex justify-between md:justify-start gap-4 text-muted-foreground">
+//                         <span>Remaining Target:</span> 
+//                         <span className="font-mono">{formatCurrency(getInstallmentTargetBase())}</span>
+//                       </div>
+//                       <div className="flex justify-between md:justify-start gap-4 text-muted-foreground">
+//                         <span>Remaining GST:</span> 
+//                         <span className="font-mono">{formatCurrency(getInstallmentTargetGST())}</span>
+//                       </div>
+//                       <div className="flex justify-between md:justify-start gap-4 font-bold text-foreground">
+//                         <span>Total (Payable):</span> 
+//                         <span className="font-mono text-primary">{formatCurrency(getInstallmentTargetTotal())}</span>
+//                       </div>
+//                     </div>
+                    
+//                     <div className="flex-1 flex justify-end">
+//                       {(() => {
+//                         const diff = getInstallmentTargetBase() - getTotalInstallmentAmount();
+//                         return (
+//                           <div className={`px-4 py-2 rounded-md font-bold text-sm ${diff === 0 ? "bg-green-100 text-green-700" : diff > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+//                             {diff === 0 
+//                               ? "✅ Amounts matched perfectly!" 
+//                               : diff > 0 
+//                                 ? `⚠️ Add ${formatCurrency(diff)} more.` 
+//                                 : `⚠️ Amount exceeds by ${formatCurrency(Math.abs(diff))}.`}
+//                           </div>
+//                         );
+//                       })()}
+//                     </div>
+
+//                     <Button type="button" variant="default" size="sm" onClick={addInstallment} className="gap-1">
+//                       <Plus className="h-4 w-4" /> Add Row
+//                     </Button>
+//                   </div>
+//                 )}
+
+//                 {/* Installment Rows */}
+//                 <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
+//                   {form.installments.map((inst, index) => {
+//                     const instBase = parseFloat(inst.amount) || 0;
+//                     const instGST = Math.round((instBase * getGSTPercentage()) / 100);
+//                     const instTotal = instBase + instGST;
+
+//                     return (
+//                       <div key={index} className="grid grid-cols-12 gap-3 items-start p-3 bg-white border shadow-sm rounded-md relative">
+//                         <div className="col-span-12 md:col-span-1 flex items-center justify-center font-bold text-muted-foreground h-10 bg-muted/40 rounded">
+//                           #{inst.installmentNumber}
+//                         </div>
+                        
+//                         <div className="col-span-12 md:col-span-3">
+//                           <Label className="text-xs mb-1 block">Description</Label>
+//                           <Input placeholder="e.g. 1st Installment" value={inst.description} onChange={(e) => updateInstallment(index, "description", e.target.value)} />
+//                         </div>
+                        
+//                         <div className="col-span-12 md:col-span-4 bg-primary/5 p-2 rounded border border-primary/10">
+//                           <Label className="text-xs font-semibold text-primary mb-1 block">Amount *</Label>
+//                           <Input type="number" placeholder="Enter Amount" value={inst.amount} onChange={(e) => updateInstallment(index, "amount", e.target.value)} className="font-bold" />
+//                           <div className="text-[11px] text-muted-foreground mt-2 flex justify-between font-mono">
+//                             <span>+ GST: {formatCurrency(instGST)}</span>
+//                             <span className="font-bold text-foreground">= Total: {formatCurrency(instTotal)}</span>
+//                           </div>
+//                         </div>
+
+//                         <div className="col-span-12 md:col-span-3">
+//                           <Label className="text-xs mb-1 block">Due Date</Label>
+//                           <Input type="date" value={inst.dueDate} onChange={(e) => updateInstallment(index, "dueDate", e.target.value)} />
+//                         </div>
+                        
+//                         <div className="col-span-12 md:col-span-1 flex justify-end items-center h-full">
+//                           <Button type="button" variant="ghost" onClick={() => removeInstallment(index)} className="text-destructive hover:bg-destructive/10" disabled={form.installments.length <= 1}>
+//                             <Trash2 className="h-4 w-4" />
+//                           </Button>
+//                         </div>
+//                       </div>
+//                     );
+//                   })}
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+
+//           {/* New Client Fields (Original structure preserved exactly) */}
+//           {!form.leadId && (
+//             <>
+//               <div className="border-t pt-4">
+//                 <h3 className="font-semibold text-lg">Buyer Details</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input placeholder="Buyer Name" value={form.clientName} onChange={(e) => updateForm("clientName", e.target.value)} />
+//                 <Input type="email" placeholder="Email" value={form.clientEmail} onChange={(e) => updateForm("clientEmail", e.target.value)} />
+//                 <Input placeholder="Phone" value={form.clientPhone} onChange={(e) => updateForm("clientPhone", e.target.value)} />
+//                 <Input type="password" placeholder="Password" value={form.clientPassword} onChange={(e) => updateForm("clientPassword", e.target.value)} />
+//               </div>
+
+//               <div className="border-t pt-4">
+//                 <h3 className="font-semibold text-lg">Personal Details</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input type="date" placeholder="Date of Birth" value={form.dateOfBirth} onChange={(e) => updateForm("dateOfBirth", e.target.value)} />
+//                 <Select value={form.gender} onValueChange={(v) => updateForm("gender", v)}>
+//                   <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="Male">Male</SelectItem>
+//                     <SelectItem value="Female">Female</SelectItem>
+//                     <SelectItem value="Other">Other</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <Select value={form.bloodGroup} onValueChange={(v) => updateForm("bloodGroup", v)}>
+//                   <SelectTrigger><SelectValue placeholder="Blood Group" /></SelectTrigger>
+//                   <SelectContent>
+//                     {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
+//                       <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+//                     ))}
+//                   </SelectContent>
+//                 </Select>
+//                 <Select value={form.maritalStatus} onValueChange={(v) => updateForm("maritalStatus", v)}>
+//                   <SelectTrigger><SelectValue placeholder="Marital Status" /></SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="Single">Single</SelectItem>
+//                     <SelectItem value="Married">Married</SelectItem>
+//                     <SelectItem value="Divorced">Divorced</SelectItem>
+//                     <SelectItem value="Widowed">Widowed</SelectItem>
+//                     <SelectItem value="Separated">Separated</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <Input placeholder="Aadhar Number" value={form.aadharNumber} onChange={(e) => updateForm("aadharNumber", e.target.value)} />
+//                 <Input placeholder="PAN Number" value={form.panNumber} onChange={(e) => updateForm("panNumber", e.target.value)} />
+//                 <Input placeholder="Father's Name" value={form.fatherName} onChange={(e) => updateForm("fatherName", e.target.value)} />
+//                 <Input placeholder="Mother's Name" value={form.motherName} onChange={(e) => updateForm("motherName", e.target.value)} />
+//               </div>
+
+//               <div className="border-t pt-4">
+//                 <h3 className="font-semibold text-lg">Emergency Contact</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input placeholder="Emergency Contact Name" value={form.emergencyContactName} onChange={(e) => updateForm("emergencyContactName", e.target.value)} />
+//                 <Input placeholder="Emergency Contact Phone" value={form.emergencyContactPhone} onChange={(e) => updateForm("emergencyContactPhone", e.target.value)} />
+//                 <Input placeholder="Relationship" value={form.emergencyContactRelation} onChange={(e) => updateForm("emergencyContactRelation", e.target.value)} />
+//               </div>
+
+//               <div className="border-t pt-4">
+//                 <h3 className="font-semibold text-lg">Permanent Address</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input placeholder="Address Line 1" value={form.addressLine1} onChange={(e) => updateForm("addressLine1", e.target.value)} />
+//                 <Input placeholder="City" value={form.city} onChange={(e) => updateForm("city", e.target.value)} />
+//                 <Input placeholder="State" value={form.state} onChange={(e) => updateForm("state", e.target.value)} />
+//                 <Input placeholder="Country" value={form.country} onChange={(e) => updateForm("country", e.target.value)} />
+//                 <Input placeholder="Pincode" value={form.pincode} onChange={(e) => updateForm("pincode", e.target.value)} />
+//               </div>
+
+//               <div className="border-t pt-4">
+//                 <h3 className="font-semibold text-lg">Bank Details</h3>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <Input placeholder="Bank Name" value={form.bankName} onChange={(e) => updateForm("bankName", e.target.value)} />
+//                 <Input placeholder="Account Number" value={form.accountNumber} onChange={(e) => updateForm("accountNumber", e.target.value)} />
+//                 <Input placeholder="IFSC Code" value={form.ifscCode} onChange={(e) => updateForm("ifscCode", e.target.value)} />
+//                 <Input placeholder="UPI ID" value={form.upiId} onChange={(e) => updateForm("upiId", e.target.value)} />
+//                 <Input placeholder="Account Holder Name" value={form.accountHolderName} onChange={(e) => updateForm("accountHolderName", e.target.value)} />
+//                 <Select value={form.accountType} onValueChange={(v) => updateForm("accountType", v)}>
+//                   <SelectTrigger><SelectValue placeholder="Account Type" /></SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="Savings">Savings</SelectItem>
+//                     <SelectItem value="Current">Current</SelectItem>
+//                     <SelectItem value="Salary">Salary</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <Input placeholder="Branch Name" value={form.branchName} onChange={(e) => updateForm("branchName", e.target.value)} />
+//               </div>
+//             </>
+//           )}
+//         </div>
+
+//         <DialogFooter className="bg-muted/30 p-4 border-t">
+//           <Button variant="outline" onClick={() => onOpenChange(false)}>
+//             Cancel
+//           </Button>
+//           <Button onClick={handleSubmit} disabled={loading} size="lg">
+//             {loading ? "Saving..." : isEdit ? "Update Booking" : "Create Booking"}
+//           </Button>
+//         </DialogFooter>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+
+
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
@@ -6694,13 +8993,229 @@ import { bookingApi } from "@/api/bookingApi";
 import { PAYMENT_MODE } from "@/data/constants/booking";
 import { toast } from "sonner";
 import { useLeadList } from "@/hooks/useLeadList";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Info, Calculator } from "lucide-react";
 
 // ✅ Currency formatter (INR without L/Cr)
 const formatCurrency = (val) => {
   if (val === null || val === undefined || isNaN(val)) return "₹0";
   return "₹" + Number(val).toLocaleString("en-IN");
 };
+
+// Amount Calculator Component
+function AmountCalculatorDialog({ open, onOpenChange, onApply, remainingAmount }) {
+  const [totalAmount, setTotalAmount] = useState(remainingAmount ? remainingAmount.toString() : "");
+  const [numberOfInstallments, setNumberOfInstallments] = useState("3");
+  const [firstInstallmentPercentage, setFirstInstallmentPercentage] = useState("");
+  const [calculatedInstallments, setCalculatedInstallments] = useState([]);
+
+  useEffect(() => {
+    if (remainingAmount) {
+      setTotalAmount(remainingAmount.toString());
+    }
+  }, [remainingAmount, open]);
+
+  const calculateInstallments = () => {
+    const amount = parseFloat(totalAmount);
+    const numInst = parseInt(numberOfInstallments);
+    
+    if (!amount || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+    if (!numInst || numInst < 1) {
+      toast.error("Number of installments must be at least 1");
+      return;
+    }
+    if (numInst > 12) {
+      toast.error("Maximum 12 installments allowed");
+      return;
+    }
+
+    const firstPct = parseFloat(firstInstallmentPercentage) || 0;
+    const installments = [];
+    let remaining = amount;
+
+    if (firstPct > 0 && firstPct <= 100) {
+      const firstAmount = Math.round((amount * firstPct) / 100);
+      installments.push({
+        description: `1st Installment (${firstPct}%)`,
+        amount: firstAmount,
+        dueDate: "",
+        isFirst: true,
+      });
+      remaining -= firstAmount;
+    }
+
+    const equalAmount = Math.round(remaining / (numInst - (firstPct > 0 ? 1 : 0)));
+    let adjustedRemaining = remaining;
+
+    for (let i = firstPct > 0 ? 1 : 0; i < numInst; i++) {
+      const isLast = i === numInst - 1;
+      const installmentAmount = isLast 
+        ? adjustedRemaining 
+        : equalAmount;
+      
+      adjustedRemaining -= installmentAmount;
+      
+      installments.push({
+        description: `${i + 1}${getOrdinalSuffix(i + 1)} Installment${isLast ? " (Balance)" : ""}`,
+        amount: installmentAmount,
+        dueDate: "",
+      });
+    }
+
+    setCalculatedInstallments(installments);
+  };
+
+  const getOrdinalSuffix = (num) => {
+    const j = num % 10;
+    const k = num % 100;
+    if (j === 1 && k !== 11) return "st";
+    if (j === 2 && k !== 12) return "nd";
+    if (j === 3 && k !== 13) return "rd";
+    return "th";
+  };
+
+  const handleApply = () => {
+    if (calculatedInstallments.length === 0) {
+      toast.error("Please calculate installments first");
+      return;
+    }
+    
+    const formattedInstallments = calculatedInstallments.map((inst, index) => ({
+      installmentNumber: index + 1,
+      description: inst.description,
+      amount: inst.amount.toString(),
+      dueDate: inst.dueDate || "",
+    }));
+    
+    onApply(formattedInstallments);
+    onOpenChange(false);
+    toast.success("Installment plan applied!");
+  };
+
+  const totalCalculated = calculatedInstallments.reduce((sum, inst) => sum + inst.amount, 0);
+  const difference = parseFloat(totalAmount) - totalCalculated;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Calculator className="h-5 w-5" />
+            Installment Calculator
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <div className="bg-muted/50 p-4 rounded-lg space-y-4">
+            <div>
+              <Label className="font-semibold">Total Amount to Distribute *</Label>
+              <Input
+                type="number"
+                placeholder="Enter total amount"
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(e.target.value)}
+                className="text-lg font-bold mt-1"
+              />
+              <span className="text-xs text-muted-foreground mt-1 block">
+                Remaining target: {formatCurrency(remainingAmount)}
+              </span>
+            </div>
+
+            <div>
+              <Label className="font-semibold">Number of Installments *</Label>
+              <Select value={numberOfInstallments} onValueChange={setNumberOfInstallments}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select number" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num} Installment{num > 1 ? "s" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="font-semibold">First Installment Percentage (Optional)</Label>
+              <div className="flex items-center gap-2 mt-1">
+                <Input
+                  type="number"
+                  placeholder="e.g., 30"
+                  value={firstInstallmentPercentage}
+                  onChange={(e) => setFirstInstallmentPercentage(e.target.value)}
+                  min="0"
+                  max="100"
+                />
+                <span className="text-muted-foreground">%</span>
+              </div>
+              <span className="text-xs text-muted-foreground mt-1 block">
+                Leave empty for equal distribution
+              </span>
+            </div>
+
+            <Button 
+              onClick={calculateInstallments} 
+              className="w-full"
+              variant="secondary"
+            >
+              <Calculator className="h-4 w-4 mr-2" />
+              Calculate Installments
+            </Button>
+          </div>
+
+          {calculatedInstallments.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <h4 className="font-semibold text-sm">Calculated Plan</h4>
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Total: </span>
+                  <span className="font-bold">{formatCurrency(totalCalculated)}</span>
+                  {difference !== 0 && (
+                    <span className={`ml-2 ${difference > 0 ? "text-amber-600" : "text-red-600"}`}>
+                      ({difference > 0 ? "-" : "+"}{formatCurrency(Math.abs(difference))})
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="max-h-60 overflow-y-auto space-y-2">
+                {calculatedInstallments.map((inst, index) => (
+                  <div 
+                    key={index} 
+                    className="flex items-center justify-between p-3 bg-white border rounded-md"
+                  >
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{inst.description}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Installment #{index + 1}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-primary">{formatCurrency(inst.amount)}</p>
+                      {inst.isFirst && firstInstallmentPercentage && (
+                        <span className="text-xs text-muted-foreground">
+                          {firstInstallmentPercentage}% of total
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button onClick={handleApply} className="w-full">
+                Apply This Plan
+              </Button>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function BookingFormDialog({
   open,
@@ -6715,7 +9230,7 @@ export function BookingFormDialog({
   const [selectedFlat, setSelectedFlat] = useState(null);
   const [loading, setLoading] = useState(false);
   const [teamManagers, setTeamManagers] = useState([]);
-  const [gstAmountOnBooking, setGstAmountOnBooking] = useState(""); // ✅ renamed
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
 
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const editInitialized = useRef(false);
@@ -6726,7 +9241,7 @@ export function BookingFormDialog({
     floor: "",
     flatId: "",
 
-    bookingAmount: "",
+    bookingAmount: "", // Base Amount (No GST)
     paymentMode: "",
     agreementDate: "",
     nomineeName: "",
@@ -6778,41 +9293,24 @@ export function BookingFormDialog({
   const [form, setForm] = useState(initialForm);
   const isEdit = Boolean(editBooking);
 
-  // ---- GST Helper Functions ----
+  // ---- TRANSPARENT GST CALCULATIONS FOR UI ----
   const getGSTPercentage = () => {
     if (!selectedFlat) return 0;
     const flatPrice = selectedFlat.price || 0;
     return flatPrice >= 4500000 ? 5 : 1;
   };
 
-  const getTotalGSTAmount = () => {
-    if (!selectedFlat) return 0;
-    const flatPrice = selectedFlat.price || 0;
-    const gstPercent = getGSTPercentage();
-    return Math.round((flatPrice * gstPercent) / 100);
-  };
+  const getFlatBasePrice = () => selectedFlat?.price || 0;
+  const getTotalFlatGST = () => Math.round((getFlatBasePrice() * getGSTPercentage()) / 100);
+  const getGrandTotal = () => getFlatBasePrice() + getTotalFlatGST();
 
-  const getGSTOnBooking = () => {
-    return Number(gstAmountOnBooking) || 0;
-  };
+  const getBookingBase = () => parseFloat(form.bookingAmount) || 0;
+  const getBookingGST = () => Math.round((getBookingBase() * getGSTPercentage()) / 100);
+  const getTotalPayableToday = () => getBookingBase() + getBookingGST();
 
-  const getGSTOnInstallments = () => {
-    return getTotalGSTAmount() - getGSTOnBooking();
-  };
-
-  const getTotalPayable = () => {
-    const amount = parseFloat(form.bookingAmount) || 0;
-    return amount + getGSTOnBooking();
-  };
-
-  const getInstallmentTarget = () => {
-    if (!selectedFlat) return 0;
-    const flatPrice = selectedFlat.price || 0;
-    const bookingAmt = parseFloat(form.bookingAmount) || 0;
-    const totalGst = getTotalGSTAmount();
-    const gstOnBooking = getGSTOnBooking();
-    return (flatPrice - bookingAmt) + (totalGst - gstOnBooking);
-  };
+  const getInstallmentTargetBase = () => getFlatBasePrice() - getBookingBase();
+  const getInstallmentTargetGST = () => getTotalFlatGST() - getBookingGST();
+  const getInstallmentTargetTotal = () => getInstallmentTargetBase() + getInstallmentTargetGST();
 
   useEffect(() => {
     if (!editBooking || !open) {
@@ -6840,15 +9338,14 @@ export function BookingFormDialog({
     if (floorObj?.flats) setFlats(floorObj.flats);
 
     setForm({
+      ...initialForm,
       projectId: projectId || "",
       towerName: towerName,
       floor: floor.toString(),
       flatId: flatId || "",
-      bookingAmount: editBooking.bookingAmount || "",
+      bookingAmount: editBooking.bookingBaseAmount || editBooking.bookingAmount || "",
       paymentMode: editBooking.paymentMode || "",
-      agreementDate: editBooking.agreementDate
-        ? editBooking.agreementDate.slice(0, 10)
-        : "",
+      agreementDate: editBooking.agreementDate ? editBooking.agreementDate.slice(0, 10) : "",
       nomineeName: editBooking.nomineeName || "",
       nomineeRelation: editBooking.nomineeRelation || "",
       keyNumber: editBooking.keyNumber || "",
@@ -6873,12 +9370,9 @@ export function BookingFormDialog({
       panNumber: editBooking.personalDetails?.panNumber || "",
       fatherName: editBooking.personalDetails?.fatherName || "",
       motherName: editBooking.personalDetails?.motherName || "",
-      emergencyContactName:
-        editBooking.personalDetails?.emergencyContactName || "",
-      emergencyContactPhone:
-        editBooking.personalDetails?.emergencyContactPhone || "",
-      emergencyContactRelation:
-        editBooking.personalDetails?.emergencyContactRelation || "",
+      emergencyContactName: editBooking.personalDetails?.emergencyContactName || "",
+      emergencyContactPhone: editBooking.personalDetails?.emergencyContactPhone || "",
+      emergencyContactRelation: editBooking.personalDetails?.emergencyContactRelation || "",
       addressLine1: editBooking.personalDetails?.permanentAddress?.line1 || "",
       city: editBooking.personalDetails?.permanentAddress?.city || "",
       state: editBooking.personalDetails?.permanentAddress?.state || "",
@@ -6898,18 +9392,11 @@ export function BookingFormDialog({
         ? editBooking.installmentPlan.map((inst) => ({
             installmentNumber: inst.installmentNumber,
             description: inst.description,
-            amount: inst.amount,
+            amount: inst.baseAmount || inst.amount,
             dueDate: inst.dueDate?.slice?.(0, 10) || "",
           }))
         : [],
     });
-
-    // ✅ Updated to handle both legacy gstPaid and new gstAmountOnBooking
-    setGstAmountOnBooking(
-      editBooking.gstPaid ||
-      editBooking.gstAmountOnBooking ||
-      0
-    );
 
     const flatObj = floorObj?.flats?.find((f) => f._id === flatId);
     if (flatObj) setSelectedFlat(flatObj);
@@ -6923,7 +9410,6 @@ export function BookingFormDialog({
     setSelectedFlat(null);
     setProjectsLoaded(false);
     editInitialized.current = false;
-    setGstAmountOnBooking(""); // ✅ reset
   };
 
   const { leads, loading: leadsLoading } = useLeadList();
@@ -6936,7 +9422,6 @@ export function BookingFormDialog({
         setProjectsLoaded(true);
       }
     } catch (err) {
-      console.error(err);
       toast.error("Failed to load projects");
     }
   };
@@ -6972,19 +9457,12 @@ export function BookingFormDialog({
       const project = projects.find((p) => p._id === form.projectId);
       if (project?.towers?.length) {
         setTowers(project.towers);
-        const towerExists =
-          form.towerName &&
-          project.towers.some((t) => t.towerName === form.towerName);
+        const towerExists = form.towerName && project.towers.some((t) => t.towerName === form.towerName);
         if (!towerExists) {
+          setForm((prev) => ({ ...prev, towerName: "", floor: "", flatId: "" }));
           setFloors([]);
           setFlats([]);
           setSelectedFlat(null);
-          setForm((prev) => ({
-            ...prev,
-            towerName: "",
-            floor: "",
-            flatId: "",
-          }));
         }
       } else {
         setTowers([]);
@@ -7005,13 +9483,11 @@ export function BookingFormDialog({
       const tower = towers.find((t) => t.towerName === form.towerName);
       if (tower) {
         setFloors(tower.floors || []);
-        const floorExists =
-          form.floor &&
-          tower.floors.some((f) => String(f.floorNumber) === String(form.floor));
+        const floorExists = form.floor && tower.floors.some((f) => String(f.floorNumber) === String(form.floor));
         if (!floorExists) {
+          setForm((prev) => ({ ...prev, floor: "", flatId: "" }));
           setFlats([]);
           setSelectedFlat(null);
-          setForm((prev) => ({ ...prev, floor: "", flatId: "" }));
         }
       } else {
         setFloors([]);
@@ -7027,16 +9503,13 @@ export function BookingFormDialog({
 
   useEffect(() => {
     if (form.floor !== "" && form.floor !== undefined) {
-      const floor = floors.find(
-        (f) => String(f.floorNumber) === String(form.floor)
-      );
+      const floor = floors.find((f) => String(f.floorNumber) === String(form.floor));
       if (floor) {
         setFlats(floor.flats || []);
-        const flatExists =
-          form.flatId && floor.flats.some((f) => f._id === form.flatId);
+        const flatExists = form.flatId && floor.flats.some((f) => f._id === form.flatId);
         if (!flatExists) {
-          setSelectedFlat(null);
           setForm((prev) => ({ ...prev, flatId: "" }));
+          setSelectedFlat(null);
         }
       } else {
         setFlats([]);
@@ -7081,30 +9554,26 @@ export function BookingFormDialog({
       return;
     }
     const updated = form.installments.filter((_, i) => i !== index);
-    const renumbered = updated.map((inst, idx) => ({
-      ...inst,
-      installmentNumber: idx + 1,
-    }));
-    setForm((prev) => ({
-      ...prev,
-      installments: renumbered,
-    }));
+    const renumbered = updated.map((inst, idx) => ({ ...inst, installmentNumber: idx + 1 }));
+    setForm((prev) => ({ ...prev, installments: renumbered }));
   };
 
   const updateInstallment = (index, field, value) => {
     const updated = [...form.installments];
     updated[index][field] = value;
-    setForm((prev) => ({
-      ...prev,
-      installments: updated,
-    }));
+    setForm((prev) => ({ ...prev, installments: updated }));
   };
 
   const getTotalInstallmentAmount = () => {
-    return form.installments.reduce(
-      (sum, inst) => sum + (parseFloat(inst.amount) || 0),
-      0
-    );
+    return form.installments.reduce((sum, inst) => sum + (parseFloat(inst.amount) || 0), 0);
+  };
+
+  const handleCalculatorApply = (calculatedInstallments) => {
+    setForm((prev) => ({
+      ...prev,
+      installments: calculatedInstallments,
+      useCustomPlan: true,
+    }));
   };
 
   const handleSubmit = async () => {
@@ -7118,27 +9587,20 @@ export function BookingFormDialog({
         toast.error("Please add at least one installment");
         return;
       }
-      const invalid = form.installments.some(
-        (inst) => !inst.description || !inst.amount
-      );
+      const invalid = form.installments.some((inst) => !inst.description || !inst.amount);
       if (invalid) {
-        toast.error(
-          "All installment fields (description, amount) are required"
-        );
+        toast.error("All installment fields (description, amount) are required");
         return;
       }
     }
 
     setLoading(true);
 
-    const flatPrice = selectedFlat?.price || 0;
-    const calculatedGstPercent = flatPrice >= 4500000 ? 5 : 1;
-
     const payload = {
       projectId: form.projectId,
       flatId: form.flatId,
       bookingAmount: Number(form.bookingAmount),
-      paymentMode: form.paymentMode,
+      paymentMode: form.paymentMode || undefined,
       agreementDate: form.agreementDate || undefined,
       nomineeName: form.nomineeName || undefined,
       nomineeRelation: form.nomineeRelation || undefined,
@@ -7149,17 +9611,14 @@ export function BookingFormDialog({
       serviceTaxPaid: form.serviceTaxPaid ? Number(form.serviceTaxPaid) : undefined,
       remarks: form.remarks || undefined,
       transactionId: form.transactionId || undefined,
-      gstPercentage: calculatedGstPercent,
-      // ✅ Use new field name
-      gstAmountOnBooking: Number(gstAmountOnBooking) || 0,
     };
 
     if (form.useCustomPlan && form.installments.length > 0) {
       const installments = form.installments.map((inst) => ({
         installmentNumber: inst.installmentNumber,
         description: inst.description,
-        amount: Number(inst.amount),
-        dueDate: inst.dueDate,
+        amount: Number(inst.amount), // Sirf Base amount jayega, backend GST calculate karega
+        dueDate: inst.dueDate || undefined,
       }));
       payload.installmentPlan = { installments };
     }
@@ -7168,7 +9627,7 @@ export function BookingFormDialog({
       payload.leadId = form.leadId;
     } else {
       payload.clientName = form.clientName;
-      payload.clientEmail = form.clientEmail;
+      payload.clientEmail = form.clientEmail || undefined;
       payload.clientPhone = form.clientPhone;
       payload.clientPassword = form.clientPassword;
 
@@ -7181,12 +9640,9 @@ export function BookingFormDialog({
       if (form.panNumber) personalDetails.panNumber = form.panNumber;
       if (form.fatherName) personalDetails.fatherName = form.fatherName;
       if (form.motherName) personalDetails.motherName = form.motherName;
-      if (form.emergencyContactName)
-        personalDetails.emergencyContactName = form.emergencyContactName;
-      if (form.emergencyContactPhone)
-        personalDetails.emergencyContactPhone = form.emergencyContactPhone;
-      if (form.emergencyContactRelation)
-        personalDetails.emergencyContactRelation = form.emergencyContactRelation;
+      if (form.emergencyContactName) personalDetails.emergencyContactName = form.emergencyContactName;
+      if (form.emergencyContactPhone) personalDetails.emergencyContactPhone = form.emergencyContactPhone;
+      if (form.emergencyContactRelation) personalDetails.emergencyContactRelation = form.emergencyContactRelation;
 
       if (form.addressLine1 || form.city || form.state || form.pincode) {
         personalDetails.permanentAddress = {
@@ -7207,8 +9663,7 @@ export function BookingFormDialog({
       if (form.accountNumber) bankDetails.accountNumber = form.accountNumber;
       if (form.ifscCode) bankDetails.ifscCode = form.ifscCode;
       if (form.upiId) bankDetails.upiId = form.upiId;
-      if (form.accountHolderName)
-        bankDetails.accountHolderName = form.accountHolderName;
+      if (form.accountHolderName) bankDetails.accountHolderName = form.accountHolderName;
       if (form.accountType) bankDetails.accountType = form.accountType;
       if (form.branchName) bankDetails.branchName = form.branchName;
 
@@ -7237,7 +9692,7 @@ export function BookingFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? "Edit Booking" : "Create New Booking"}
@@ -7245,100 +9700,45 @@ export function BookingFormDialog({
         </DialogHeader>
         <div className="space-y-6 p-1">
           {/* Flat Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label>Project *</Label>
-              <Select
-                value={form.projectId}
-                onValueChange={(v) => {
-                  updateForm("projectId", v);
-                  updateForm("towerName", "");
-                  updateForm("floor", "");
-                  updateForm("flatId", "");
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select project" />
-                </SelectTrigger>
+              <Select value={form.projectId} onValueChange={(v) => { updateForm("projectId", v); updateForm("towerName", ""); updateForm("floor", ""); updateForm("flatId", ""); }}>
+                <SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger>
                 <SelectContent>
-                  {projects.map((p) => (
-                    <SelectItem key={p._id} value={p._id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
+                  {projects.map((p) => (<SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
               <Label>Tower *</Label>
-              <Select
-                value={form.towerName}
-                onValueChange={(v) => {
-                  updateForm("towerName", v);
-                  updateForm("floor", "");
-                  updateForm("flatId", "");
-                }}
-                disabled={!form.projectId || towers.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select tower" />
-                </SelectTrigger>
+              <Select value={form.towerName} disabled={!form.projectId || towers.length === 0} onValueChange={(v) => { updateForm("towerName", v); updateForm("floor", ""); updateForm("flatId", ""); }}>
+                <SelectTrigger><SelectValue placeholder="Select tower" /></SelectTrigger>
                 <SelectContent>
-                  {towers.map((t) => (
-                    <SelectItem key={t.towerName} value={t.towerName}>
-                      {t.towerName} ({t.totalFloors || t.floors?.length} floors)
-                    </SelectItem>
-                  ))}
+                  {towers.map((t) => (<SelectItem key={t.towerName} value={t.towerName}>{t.towerName}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
               <Label>Floor *</Label>
-              <Select
-                value={form.floor.toString()}
-                onValueChange={(v) => {
-                  updateForm("floor", v);
-                  updateForm("flatId", "");
-                }}
-                disabled={!form.towerName || floors.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select floor" />
-                </SelectTrigger>
+              <Select value={form.floor.toString()} disabled={!form.towerName || floors.length === 0} onValueChange={(v) => { updateForm("floor", v); updateForm("flatId", ""); }}>
+                <SelectTrigger><SelectValue placeholder="Select floor" /></SelectTrigger>
                 <SelectContent>
-                  {floors.map((f) => (
-                    <SelectItem
-                      key={f.floorNumber}
-                      value={f.floorNumber.toString()}
-                    >
-                      Floor {f.floorNumber}
-                    </SelectItem>
-                  ))}
+                  {floors.map((f) => (<SelectItem key={f.floorNumber} value={f.floorNumber.toString()}>Floor {f.floorNumber}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
               <Label>Flat *</Label>
-              <Select
-                value={form.flatId}
-                onValueChange={(v) => updateForm("flatId", v)}
-                disabled={!form.floor || flats.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select flat" />
-                </SelectTrigger>
+              <Select value={form.flatId} disabled={!form.floor || flats.length === 0} onValueChange={(v) => updateForm("flatId", v)}>
+                <SelectTrigger><SelectValue placeholder="Select flat" /></SelectTrigger>
                 <SelectContent>
                   {flats.map((f) => (
-                    <SelectItem
-                      key={f._id}
-                      value={f._id}
-                      disabled={f.status !== "available" && !isEdit}
-                    >
-                      {f.flatNumber} - {f.bedrooms} BHK - {f.area} sqft -{" "}
-                      {formatCurrency(f.price || 0)} - ({f.status})
+                    <SelectItem key={f._id} value={f._id} disabled={f.status !== "available" && !isEdit}>
+                      {f.flatNumber} - {f.bedrooms} BHK - {formatCurrency(f.price || 0)} - ({f.status})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -7346,48 +9746,24 @@ export function BookingFormDialog({
             </div>
           </div>
 
-          {/* Flat Summary */}
+          {/* Flat & GST Summary */}
           {selectedFlat && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-3 bg-muted/40 rounded-md">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-4 bg-primary/5 border border-primary/20 rounded-md">
               <div>
-                <Label className="text-xs">Flat No.</Label>
-                <p className="text-sm font-medium">{selectedFlat.flatNumber}</p>
+                <Label className="text-xs text-muted-foreground">Flat Price</Label>
+                <p className="text-sm font-semibold">{formatCurrency(getFlatBasePrice())}</p>
               </div>
               <div>
-                <Label className="text-xs">Area (sqft)</Label>
-                <p className="text-sm font-medium">{selectedFlat.area}</p>
+                <Label className="text-xs text-muted-foreground">GST Slab</Label>
+                <p className="text-sm font-semibold">{getGSTPercentage()}%</p>
               </div>
               <div>
-                <Label className="text-xs">Bedrooms</Label>
-                <p className="text-sm font-medium">{selectedFlat.bedrooms}</p>
+                <Label className="text-xs text-muted-foreground">Total GST</Label>
+                <p className="text-sm font-semibold">{formatCurrency(getTotalFlatGST())}</p>
               </div>
               <div>
-                <Label className="text-xs">Bathrooms</Label>
-                <p className="text-sm font-medium">{selectedFlat.bathrooms}</p>
-              </div>
-              <div>
-                <Label className="text-xs">Price</Label>
-                <p className="text-sm font-medium">{formatCurrency(selectedFlat.price || 0)}</p>
-              </div>
-              <div>
-                <Label className="text-xs">Facing</Label>
-                <p className="text-sm font-medium">
-                  {selectedFlat.features?.facing || "-"}
-                </p>
-              </div>
-              <div>
-                <Label className="text-xs">Furnished</Label>
-                <p className="text-sm font-medium capitalize">
-                  {selectedFlat.features?.furnished || "unfurnished"}
-                </p>
-              </div>
-              <div className="col-span-2 md:col-span-1 flex gap-4 text-sm">
-                <span>
-                  Parking: {selectedFlat.features?.parking ? "Yes" : "No"}
-                </span>
-                <span>
-                  Balcony: {selectedFlat.features?.balcony ? "Yes" : "No"}
-                </span>
+                <Label className="text-xs text-primary font-bold">Total Flat Value</Label>
+                <p className="text-base font-bold text-primary">{formatCurrency(getGrandTotal())}</p>
               </div>
             </div>
           )}
@@ -7396,21 +9772,13 @@ export function BookingFormDialog({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Lead (Optional)</Label>
-              <Select
-                value={form.leadId || "none"}
-                onValueChange={(v) =>
-                  updateForm("leadId", v === "none" ? "" : v)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select lead" />
-                </SelectTrigger>
+              <Select value={form.leadId || "none"} onValueChange={(v) => updateForm("leadId", v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Select lead" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None (Create new buyer)</SelectItem>
                   {leads?.map((lead) => (
                     <SelectItem key={lead._id} value={lead._id}>
-                      {lead.clientName}{" "}
-                      {lead.clientPhone ? `(${lead.clientPhone})` : ""}
+                      {lead.clientName} {lead.clientPhone ? `(${lead.clientPhone})` : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -7418,193 +9786,100 @@ export function BookingFormDialog({
             </div>
           </div>
 
-          {/* Booking Details */}
-          <div className="border-t pt-2">
-            <h3 className="font-semibold">Booking Details</h3>
+          {/* Booking & Payment Details */}
+          <div className="border-t pt-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2">
+              Booking Details
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Enter the Booking Amount. GST will be automatically calculated based on the flat's GST slab.
+            </p>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Payment Calculator Box */}
             <div className="md:col-span-2">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-muted/40 rounded-lg border">
                 <div>
-                  <Label>Booking Amount *</Label>
+                  <Label className="font-semibold text-foreground">Booking Amount *</Label>
                   <Input
                     type="number"
                     value={form.bookingAmount}
                     onChange={(e) => updateForm("bookingAmount", e.target.value)}
                     placeholder="e.g. 150000"
-                    className="font-medium"
+                    className="font-bold text-lg mt-1"
                   />
-                  <span className="text-xs text-muted-foreground">
-                    Advance Token Amount
-                  </span>
+                  <span className="text-xs text-muted-foreground block mt-1">Amount excluding GST</span>
                 </div>
 
-                <div>
-                  {/* ✅ Updated label and hint */}
-                  <Label>GST Paid at Booking (₹)</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={getTotalGSTAmount()}
-                    value={gstAmountOnBooking}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const numVal = Number(val);
-
-                      // ✅ Validation: Booking amount must be entered first
-                      if (!form.bookingAmount || Number(form.bookingAmount) <= 0) {
-                        toast.error("Please enter Booking Amount first");
-                        return;
-                      }
-
-                      const totalGst = getTotalGSTAmount();
-                      if (val !== "" && !isNaN(numVal) && (numVal < 0 || numVal > totalGst)) {
-                        toast.error(
-                          `GST paid cannot exceed Total GST of ${formatCurrency(totalGst)}`
-                        );
-                        return;
-                      }
-                      setGstAmountOnBooking(val);
-                    }}
-                    placeholder={`e.g. 15000`}
-                    disabled={!selectedFlat}
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    Enter GST amount customer wants to pay during booking
-                  </span>
-                </div>
-
-                <div>
-                  <Label className="text-xs text-muted-foreground">
-                    Total Flat GST ({getGSTPercentage()}%)
+                <div className="flex flex-col justify-center">
+                  <Label className="text-sm text-muted-foreground mb-1">
+                    + Auto-Calculated GST ({getGSTPercentage()}%)
                   </Label>
-                  <div className="text-lg font-semibold text-primary">
-                    {formatCurrency(getTotalGSTAmount())}
+                  <div className="text-xl font-bold text-amber-600">
+                    {formatCurrency(getBookingGST())}
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    Calculated on Flat Price
-                  </span>
                 </div>
 
-                <div>
-                  <Label className="text-xs text-muted-foreground">
-                    Customer Pays Today
+                <div className="flex flex-col justify-center">
+                  <Label className="text-sm text-muted-foreground mb-1">
+                    = Client Pays Today
                   </Label>
-                  <div className="text-xl font-bold text-green-600">
-                    {formatCurrency(getTotalPayable())}
+                  <div className="text-2xl font-black text-green-600">
+                    {formatCurrency(getTotalPayableToday())}
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    Booking Amount + GST paid now
-                  </span>
                 </div>
               </div>
-
-              {selectedFlat && parseFloat(form.bookingAmount) > 0 && (
-                <div className="mt-2 p-2 bg-muted/30 rounded-md text-xs flex gap-6 flex-wrap">
-                  <span>
-                    Booking Amount:{" "}
-                    <strong>{formatCurrency(parseFloat(form.bookingAmount) || 0)}</strong>
-                  </span>
-                  <span>
-                    + GST Paid Now:{" "}
-                    <strong>{formatCurrency(getGSTOnBooking())}</strong>
-                  </span>
-                  <span>
-                    = Customer Pays Today:{" "}
-                    <strong className="text-primary">{formatCurrency(getTotalPayable())}</strong>
-                  </span>
-                  <span className="text-muted-foreground">
-                    Remaining GST for Installments:{" "}
-                    <strong>{formatCurrency(getGSTOnInstallments())}</strong>
-                  </span>
-                </div>
-              )}
             </div>
 
+            {/* Rest of the original Booking Details Inputs */}
             <div>
               <Label>Payment Mode</Label>
-              <Select
-                value={form.paymentMode}
-                onValueChange={(v) => updateForm("paymentMode", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment mode" />
-                </SelectTrigger>
+              <Select value={form.paymentMode} onValueChange={(v) => updateForm("paymentMode", v)}>
+                <SelectTrigger><SelectValue placeholder="Select payment mode" /></SelectTrigger>
                 <SelectContent>
-                  {Object.values(PAYMENT_MODE).map((mode) => (
-                    <SelectItem key={mode} value={mode}>
-                      {mode}
-                    </SelectItem>
+                  {Object.values(PAYMENT_MODE || {
+                    CASH: 'Cash', CHEQUE: 'Cheque', BANK_TRANSFER: 'Bank Transfer', 
+                    CARD: 'Card', NEFT: 'NEFT', RTGS: 'RTGS', TRF: 'TRF', L_NEFT: 'L-NEFT'
+                  }).map((mode) => (
+                    <SelectItem key={mode} value={mode}>{mode}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Transaction ID</Label>
-              <Input
-                placeholder="Optional"
-                value={form.transactionId}
-                onChange={(e) => updateForm("transactionId", e.target.value)}
-              />
+              <Input placeholder="Optional" value={form.transactionId} onChange={(e) => updateForm("transactionId", e.target.value)} />
             </div>
             <div>
               <Label>Agreement Date</Label>
-              <Input
-                type="date"
-                value={form.agreementDate}
-                onChange={(e) => updateForm("agreementDate", e.target.value)}
-              />
+              <Input type="date" value={form.agreementDate} onChange={(e) => updateForm("agreementDate", e.target.value)} />
             </div>
             <div>
               <Label>Nominee Name</Label>
-              <Input
-                placeholder="Optional"
-                value={form.nomineeName}
-                onChange={(e) => updateForm("nomineeName", e.target.value)}
-              />
+              <Input placeholder="Optional" value={form.nomineeName} onChange={(e) => updateForm("nomineeName", e.target.value)} />
             </div>
             <div>
               <Label>Nominee Relation</Label>
-              <Input
-                placeholder="Optional"
-                value={form.nomineeRelation}
-                onChange={(e) => updateForm("nomineeRelation", e.target.value)}
-              />
+              <Input placeholder="Optional" value={form.nomineeRelation} onChange={(e) => updateForm("nomineeRelation", e.target.value)} />
             </div>
             <div>
               <Label>Key Number (KYC ID)</Label>
-              <Input
-                placeholder="Optional"
-                value={form.keyNumber}
-                onChange={(e) => updateForm("keyNumber", e.target.value)}
-              />
+              <Input placeholder="Optional" value={form.keyNumber} onChange={(e) => updateForm("keyNumber", e.target.value)} />
             </div>
-
             <div>
               <Label>Business Code</Label>
-              <Input
-                placeholder="Optional"
-                value={form.businessCode}
-                onChange={(e) => updateForm("businessCode", e.target.value)}
-              />
+              <Input placeholder="Optional" value={form.businessCode} onChange={(e) => updateForm("businessCode", e.target.value)} />
             </div>
             <div>
               <Label>Business Name</Label>
-              <Input
-                placeholder="Optional"
-                value={form.businessName}
-                onChange={(e) => updateForm("businessName", e.target.value)}
-              />
+              <Input placeholder="Optional" value={form.businessName} onChange={(e) => updateForm("businessName", e.target.value)} />
             </div>
             <div>
               <Label>Team Manager</Label>
-              <Select
-                value={form.teamManager}
-                onValueChange={(v) => updateForm("teamManager", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select manager" />
-                </SelectTrigger>
+              <Select value={form.teamManager} onValueChange={(v) => updateForm("teamManager", v)}>
+                <SelectTrigger><SelectValue placeholder="Select manager" /></SelectTrigger>
                 <SelectContent>
                   {teamManagers.map((mgr) => (
                     <SelectItem key={mgr._id} value={mgr._id}>
@@ -7616,28 +9891,19 @@ export function BookingFormDialog({
             </div>
             <div>
               <Label>Service Tax Paid (₹)</Label>
-              <Input
-                type="number"
-                placeholder="Optional"
-                value={form.serviceTaxPaid}
-                onChange={(e) => updateForm("serviceTaxPaid", e.target.value)}
-              />
+              <Input type="number" placeholder="Optional" value={form.serviceTaxPaid} onChange={(e) => updateForm("serviceTaxPaid", e.target.value)} />
             </div>
             <div className="md:col-span-2">
               <Label>Remarks</Label>
-              <Input
-                placeholder="Optional"
-                value={form.remarks}
-                onChange={(e) => updateForm("remarks", e.target.value)}
-              />
+              <Input placeholder="Optional" value={form.remarks} onChange={(e) => updateForm("remarks", e.target.value)} />
             </div>
           </div>
 
           {/* Installment Plan Section */}
-          <div className="border-t pt-2">
-            <div className="flex items-center gap-3 mb-2">
-              <h3 className="font-semibold">Installment Plan</h3>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <div className="border-t pt-4">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
+              <h3 className="font-semibold text-lg">Installment Plan</h3>
+              <label className="flex items-center gap-2 text-sm cursor-pointer ml-4 p-2 bg-muted/50 rounded-md">
                 <input
                   type="checkbox"
                   checked={form.useCustomPlan}
@@ -7650,244 +9916,146 @@ export function BookingFormDialog({
                   }}
                   className="w-4 h-4"
                 />
-                <span>Custom plan</span>
+                <span className="font-medium">Use Custom Plan</span>
               </label>
-              <span className="text-xs text-muted-foreground">
-                (If unchecked, backend will create 3 equal installments)
-              </span>
+              <span className="text-xs text-muted-foreground">(If unchecked, system creates 3 equal installments)</span>
+              {form.useCustomPlan && selectedFlat && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCalculatorOpen(true)}
+                  className="ml-auto gap-2"
+                >
+                  <Calculator className="h-4 w-4" />
+                  Amount Calculator
+                </Button>
+              )}
             </div>
 
             {form.useCustomPlan && (
-              <div className="space-y-3">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="text-sm text-muted-foreground flex-1">
-                    <p className="mb-2">
-                      Current Installment Total:{" "}
-                      <span className="font-medium text-foreground text-base">
-                        {formatCurrency(getTotalInstallmentAmount())}
-                      </span>
-                    </p>
-
-                    {selectedFlat &&
-                      (() => {
-                        const flatPrice = selectedFlat.price || 0;
-                        const gstPercent = getGSTPercentage();
-                        const totalGst = getTotalGSTAmount();
-                        const bookingAmt = Number(form.bookingAmount) || 0;
-                        const gstOnBooking = getGSTOnBooking();
-
-                        const targetTotal = getInstallmentTarget();
-                        const currentTotal = getTotalInstallmentAmount();
-                        const diff = targetTotal - currentTotal;
-
+              <div className="space-y-4">
+                
+                {/* Visual Target Tracker */}
+                {selectedFlat && (
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-muted/30 p-4 border rounded-md">
+                    <div className="space-y-1 w-full md:w-auto text-sm">
+                      <div className="flex justify-between md:justify-start gap-4 text-muted-foreground">
+                        <span>Remaining Target:</span> 
+                        <span className="font-mono">{formatCurrency(getInstallmentTargetBase())}</span>
+                      </div>
+                      <div className="flex justify-between md:justify-start gap-4 text-muted-foreground">
+                        <span>Remaining GST:</span> 
+                        <span className="font-mono">{formatCurrency(getInstallmentTargetGST())}</span>
+                      </div>
+                      <div className="flex justify-between md:justify-start gap-4 font-bold text-foreground">
+                        <span>Total (Payable):</span> 
+                        <span className="font-mono text-primary">{formatCurrency(getInstallmentTargetTotal())}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 flex justify-end">
+                      {(() => {
+                        const diff = getInstallmentTargetBase() - getTotalInstallmentAmount();
                         return (
-                          <div className="p-3 bg-muted/30 border rounded-md space-y-1.5 text-xs">
-                            <div className="flex justify-between">
-                              <span>Base Price:</span>{" "}
-                              <strong>{formatCurrency(flatPrice)}</strong>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Total GST ({gstPercent}%):</span>{" "}
-                              <strong>+ {formatCurrency(totalGst)}</strong>
-                            </div>
-                            <div className="flex justify-between text-blue-600">
-                              <span>GST Paid at Booking:</span>{" "}
-                              <strong>- {formatCurrency(gstOnBooking)}</strong>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Booking Amount:</span>{" "}
-                              <strong>- {formatCurrency(bookingAmt)}</strong>
-                            </div>
-                            <div className="flex justify-between text-primary font-semibold mt-1 pt-2 border-t">
-                              <span>Target Installments Total:</span>
-                              <span>{formatCurrency(targetTotal)}</span>
-                            </div>
-                            <div className="flex justify-between text-muted-foreground">
-                              <span>Breakup:</span>
-                              <span>
-                                Base: {formatCurrency(flatPrice - bookingAmt)} + GST:{" "}
-                                {formatCurrency(totalGst - gstOnBooking)}
-                              </span>
-                            </div>
-                            {diff !== 0 && (
-                              <div
-                                className={`mt-1 font-medium ${
-                                  diff > 0
-                                    ? "text-amber-600"
-                                    : "text-destructive"
-                                }`}
-                              >
-                                {diff > 0
-                                  ? `⚠️ You need to add ${formatCurrency(
-                                      diff
-                                    )} more to match the target.`
-                                  : `⚠️ Total exceeds the target by ${formatCurrency(
-                                      Math.abs(diff)
-                                    )}.`}
-                              </div>
-                            )}
+                          <div className={`px-4 py-2 rounded-md font-bold text-sm ${diff === 0 ? "bg-green-100 text-green-700" : diff > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                            {diff === 0 
+                              ? "✅ Amounts matched perfectly!" 
+                              : diff > 0 
+                                ? `⚠️ Add ${formatCurrency(diff)} more.` 
+                                : `⚠️ Amount exceeds by ${formatCurrency(Math.abs(diff))}.`}
                           </div>
                         );
                       })()}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addInstallment}
-                    className="gap-1 mt-1"
-                  >
-                    <Plus className="h-4 w-4" /> Add
-                  </Button>
-                </div>
-
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {form.installments.map((inst, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-12 gap-2 items-center p-2 bg-muted/30 rounded-md"
-                    >
-                      <div className="col-span-1 text-sm font-medium text-center">
-                        {inst.installmentNumber}
-                      </div>
-                      <div className="col-span-3">
-                        <Input
-                          placeholder="Description"
-                          value={inst.description}
-                          onChange={(e) =>
-                            updateInstallment(
-                              index,
-                              "description",
-                              e.target.value
-                            )
-                          }
-                          className="h-8 text-sm"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          type="number"
-                          placeholder="Amount"
-                          value={inst.amount}
-                          onChange={(e) =>
-                            updateInstallment(index, "amount", e.target.value)
-                          }
-                          className="h-8 text-sm"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <Input
-                          type="date"
-                          value={inst.dueDate}
-                          onChange={(e) =>
-                            updateInstallment(index, "dueDate", e.target.value)
-                          }
-                          className="h-8 text-sm"
-                        />
-                      </div>
-                      <div className="col-span-2 flex justify-end">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeInstallment(index)}
-                          className="h-8 w-8 p-0 text-destructive"
-                          disabled={form.installments.length <= 1}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
                     </div>
-                  ))}
-                </div>
 
-                {form.installments.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-2">
-                    No installments added. Click "Add" to start.
-                  </p>
+                    <Button type="button" variant="default" size="sm" onClick={addInstallment} className="gap-1">
+                      <Plus className="h-4 w-4" /> Add Row
+                    </Button>
+                  </div>
                 )}
+
+                {/* Installment Rows */}
+                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
+                  {form.installments.map((inst, index) => {
+                    const instBase = parseFloat(inst.amount) || 0;
+                    const instGST = Math.round((instBase * getGSTPercentage()) / 100);
+                    const instTotal = instBase + instGST;
+
+                    return (
+                      <div key={index} className="grid grid-cols-12 gap-3 items-start p-3 bg-white border shadow-sm rounded-md relative">
+                        <div className="col-span-12 md:col-span-1 flex items-center justify-center font-bold text-muted-foreground h-10 bg-muted/40 rounded">
+                          #{inst.installmentNumber}
+                        </div>
+                        
+                        <div className="col-span-12 md:col-span-3">
+                          <Label className="text-xs mb-1 block">Description</Label>
+                          <Input placeholder="e.g. 1st Installment" value={inst.description} onChange={(e) => updateInstallment(index, "description", e.target.value)} />
+                        </div>
+                        
+                        <div className="col-span-12 md:col-span-4 bg-primary/5 p-2 rounded border border-primary/10">
+                          <Label className="text-xs font-semibold text-primary mb-1 block">Amount *</Label>
+                          <Input type="number" placeholder="Enter Amount" value={inst.amount} onChange={(e) => updateInstallment(index, "amount", e.target.value)} className="font-bold" />
+                          <div className="text-[11px] text-muted-foreground mt-2 flex justify-between font-mono">
+                            <span>+ GST: {formatCurrency(instGST)}</span>
+                            <span className="font-bold text-foreground">= Total: {formatCurrency(instTotal)}</span>
+                          </div>
+                        </div>
+
+                        <div className="col-span-12 md:col-span-3">
+                          <Label className="text-xs mb-1 block">Due Date</Label>
+                          <Input type="date" value={inst.dueDate} onChange={(e) => updateInstallment(index, "dueDate", e.target.value)} />
+                        </div>
+                        
+                        <div className="col-span-12 md:col-span-1 flex justify-end items-center h-full">
+                          <Button type="button" variant="ghost" onClick={() => removeInstallment(index)} className="text-destructive hover:bg-destructive/10" disabled={form.installments.length <= 1}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
 
-          {/* New Client Fields */}
+          {/* New Client Fields (Original structure preserved exactly) */}
           {!form.leadId && (
             <>
-              <div className="border-t pt-2">
-                <h3 className="font-semibold">Buyer Details</h3>
+              <div className="border-t pt-4">
+                <h3 className="font-semibold text-lg">Buyer Details</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  placeholder="Buyer Name"
-                  value={form.clientName}
-                  onChange={(e) => updateForm("clientName", e.target.value)}
-                />
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={form.clientEmail}
-                  onChange={(e) => updateForm("clientEmail", e.target.value)}
-                />
-                <Input
-                  placeholder="Phone"
-                  value={form.clientPhone}
-                  onChange={(e) => updateForm("clientPhone", e.target.value)}
-                />
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={form.clientPassword}
-                  onChange={(e) => updateForm("clientPassword", e.target.value)}
-                />
+                <Input placeholder="Buyer Name" value={form.clientName} onChange={(e) => updateForm("clientName", e.target.value)} />
+                <Input type="email" placeholder="Email" value={form.clientEmail} onChange={(e) => updateForm("clientEmail", e.target.value)} />
+                <Input placeholder="Phone" value={form.clientPhone} onChange={(e) => updateForm("clientPhone", e.target.value)} />
+                <Input type="password" placeholder="Password" value={form.clientPassword} onChange={(e) => updateForm("clientPassword", e.target.value)} />
               </div>
 
-              <div className="border-t pt-2">
-                <h3 className="font-semibold">Personal Details</h3>
+              <div className="border-t pt-4">
+                <h3 className="font-semibold text-lg">Personal Details</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  type="date"
-                  placeholder="Date of Birth"
-                  value={form.dateOfBirth}
-                  onChange={(e) => updateForm("dateOfBirth", e.target.value)}
-                />
-                <Select
-                  value={form.gender}
-                  onValueChange={(v) => updateForm("gender", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Gender" />
-                  </SelectTrigger>
+                <Input type="date" placeholder="Date of Birth" value={form.dateOfBirth} onChange={(e) => updateForm("dateOfBirth", e.target.value)} />
+                <Select value={form.gender} onValueChange={(v) => updateForm("gender", v)}>
+                  <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Male">Male</SelectItem>
                     <SelectItem value="Female">Female</SelectItem>
                     <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select
-                  value={form.bloodGroup}
-                  onValueChange={(v) => updateForm("bloodGroup", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Blood Group" />
-                  </SelectTrigger>
+                <Select value={form.bloodGroup} onValueChange={(v) => updateForm("bloodGroup", v)}>
+                  <SelectTrigger><SelectValue placeholder="Blood Group" /></SelectTrigger>
                   <SelectContent>
-                    {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(
-                      (bg) => (
-                        <SelectItem key={bg} value={bg}>
-                          {bg}
-                        </SelectItem>
-                      )
-                    )}
+                    {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
+                      <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                <Select
-                  value={form.maritalStatus}
-                  onValueChange={(v) => updateForm("maritalStatus", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Marital Status" />
-                  </SelectTrigger>
+                <Select value={form.maritalStatus} onValueChange={(v) => updateForm("maritalStatus", v)}>
+                  <SelectTrigger><SelectValue placeholder="Marital Status" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Single">Single</SelectItem>
                     <SelectItem value="Married">Married</SelectItem>
@@ -7896,153 +10064,72 @@ export function BookingFormDialog({
                     <SelectItem value="Separated">Separated</SelectItem>
                   </SelectContent>
                 </Select>
-                <Input
-                  placeholder="Aadhar Number"
-                  value={form.aadharNumber}
-                  onChange={(e) => updateForm("aadharNumber", e.target.value)}
-                />
-                <Input
-                  placeholder="PAN Number"
-                  value={form.panNumber}
-                  onChange={(e) => updateForm("panNumber", e.target.value)}
-                />
-                <Input
-                  placeholder="Father's Name"
-                  value={form.fatherName}
-                  onChange={(e) => updateForm("fatherName", e.target.value)}
-                />
-                <Input
-                  placeholder="Mother's Name"
-                  value={form.motherName}
-                  onChange={(e) => updateForm("motherName", e.target.value)}
-                />
+                <Input placeholder="Aadhar Number" value={form.aadharNumber} onChange={(e) => updateForm("aadharNumber", e.target.value)} />
+                <Input placeholder="PAN Number" value={form.panNumber} onChange={(e) => updateForm("panNumber", e.target.value)} />
+                <Input placeholder="Father's Name" value={form.fatherName} onChange={(e) => updateForm("fatherName", e.target.value)} />
+                <Input placeholder="Mother's Name" value={form.motherName} onChange={(e) => updateForm("motherName", e.target.value)} />
               </div>
 
-              <div className="border-t pt-2">
-                <h3 className="font-semibold">Emergency Contact</h3>
+              <div className="border-t pt-4">
+                <h3 className="font-semibold text-lg">Emergency Contact</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  placeholder="Emergency Contact Name"
-                  value={form.emergencyContactName}
-                  onChange={(e) =>
-                    updateForm("emergencyContactName", e.target.value)
-                  }
-                />
-                <Input
-                  placeholder="Emergency Contact Phone"
-                  value={form.emergencyContactPhone}
-                  onChange={(e) =>
-                    updateForm("emergencyContactPhone", e.target.value)
-                  }
-                />
-                <Input
-                  placeholder="Relationship"
-                  value={form.emergencyContactRelation}
-                  onChange={(e) =>
-                    updateForm("emergencyContactRelation", e.target.value)
-                  }
-                />
+                <Input placeholder="Emergency Contact Name" value={form.emergencyContactName} onChange={(e) => updateForm("emergencyContactName", e.target.value)} />
+                <Input placeholder="Emergency Contact Phone" value={form.emergencyContactPhone} onChange={(e) => updateForm("emergencyContactPhone", e.target.value)} />
+                <Input placeholder="Relationship" value={form.emergencyContactRelation} onChange={(e) => updateForm("emergencyContactRelation", e.target.value)} />
               </div>
 
-              <div className="border-t pt-2">
-                <h3 className="font-semibold">Permanent Address</h3>
+              <div className="border-t pt-4">
+                <h3 className="font-semibold text-lg">Permanent Address</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  placeholder="Address Line 1"
-                  value={form.addressLine1}
-                  onChange={(e) => updateForm("addressLine1", e.target.value)}
-                />
-                <Input
-                  placeholder="City"
-                  value={form.city}
-                  onChange={(e) => updateForm("city", e.target.value)}
-                />
-                <Input
-                  placeholder="State"
-                  value={form.state}
-                  onChange={(e) => updateForm("state", e.target.value)}
-                />
-                <Input
-                  placeholder="Country"
-                  value={form.country}
-                  onChange={(e) => updateForm("country", e.target.value)}
-                />
-                <Input
-                  placeholder="Pincode"
-                  value={form.pincode}
-                  onChange={(e) => updateForm("pincode", e.target.value)}
-                />
+                <Input placeholder="Address Line 1" value={form.addressLine1} onChange={(e) => updateForm("addressLine1", e.target.value)} />
+                <Input placeholder="City" value={form.city} onChange={(e) => updateForm("city", e.target.value)} />
+                <Input placeholder="State" value={form.state} onChange={(e) => updateForm("state", e.target.value)} />
+                <Input placeholder="Country" value={form.country} onChange={(e) => updateForm("country", e.target.value)} />
+                <Input placeholder="Pincode" value={form.pincode} onChange={(e) => updateForm("pincode", e.target.value)} />
               </div>
 
-              <div className="border-t pt-2">
-                <h3 className="font-semibold">Bank Details</h3>
+              <div className="border-t pt-4">
+                <h3 className="font-semibold text-lg">Bank Details</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  placeholder="Bank Name"
-                  value={form.bankName}
-                  onChange={(e) => updateForm("bankName", e.target.value)}
-                />
-                <Input
-                  placeholder="Account Number"
-                  value={form.accountNumber}
-                  onChange={(e) => updateForm("accountNumber", e.target.value)}
-                />
-                <Input
-                  placeholder="IFSC Code"
-                  value={form.ifscCode}
-                  onChange={(e) => updateForm("ifscCode", e.target.value)}
-                />
-                <Input
-                  placeholder="UPI ID"
-                  value={form.upiId}
-                  onChange={(e) => updateForm("upiId", e.target.value)}
-                />
-                <Input
-                  placeholder="Account Holder Name"
-                  value={form.accountHolderName}
-                  onChange={(e) =>
-                    updateForm("accountHolderName", e.target.value)
-                  }
-                />
-                <Select
-                  value={form.accountType}
-                  onValueChange={(v) => updateForm("accountType", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Account Type" />
-                  </SelectTrigger>
+                <Input placeholder="Bank Name" value={form.bankName} onChange={(e) => updateForm("bankName", e.target.value)} />
+                <Input placeholder="Account Number" value={form.accountNumber} onChange={(e) => updateForm("accountNumber", e.target.value)} />
+                <Input placeholder="IFSC Code" value={form.ifscCode} onChange={(e) => updateForm("ifscCode", e.target.value)} />
+                <Input placeholder="UPI ID" value={form.upiId} onChange={(e) => updateForm("upiId", e.target.value)} />
+                <Input placeholder="Account Holder Name" value={form.accountHolderName} onChange={(e) => updateForm("accountHolderName", e.target.value)} />
+                <Select value={form.accountType} onValueChange={(v) => updateForm("accountType", v)}>
+                  <SelectTrigger><SelectValue placeholder="Account Type" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Savings">Savings</SelectItem>
                     <SelectItem value="Current">Current</SelectItem>
                     <SelectItem value="Salary">Salary</SelectItem>
                   </SelectContent>
                 </Select>
-                <Input
-                  placeholder="Branch Name"
-                  value={form.branchName}
-                  onChange={(e) => updateForm("branchName", e.target.value)}
-                />
+                <Input placeholder="Branch Name" value={form.branchName} onChange={(e) => updateForm("branchName", e.target.value)} />
               </div>
             </>
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="bg-muted/30 p-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={loading}>
-            {loading
-              ? "Saving..."
-              : isEdit
-              ? "Update Booking"
-              : "Create Booking"}
+          <Button onClick={handleSubmit} disabled={loading} size="lg">
+            {loading ? "Saving..." : isEdit ? "Update Booking" : "Create Booking"}
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Amount Calculator Dialog */}
+      <AmountCalculatorDialog
+        open={calculatorOpen}
+        onOpenChange={setCalculatorOpen}
+        onApply={handleCalculatorApply}
+        remainingAmount={getInstallmentTargetBase()}
+      />
     </Dialog>
   );
 }
