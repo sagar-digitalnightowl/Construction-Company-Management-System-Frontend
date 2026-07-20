@@ -92,7 +92,7 @@ export const usePropertyInventory = () => {
         setLoading(true);
         try {
             const res = await propertyInventoryApi.getProjectSiteEngineers(id);
-            setSiteEngineers(res.data?.data || []);
+            setSiteEngineers(res?.data || []);
         } catch (err) {
             toast.error("Failed to load site engineers");
         } finally {
