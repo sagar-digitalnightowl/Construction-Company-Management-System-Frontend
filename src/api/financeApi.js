@@ -63,6 +63,13 @@ export const financeApi = {
     // NOTE: This call will automatically update all related Salary Slips to 'Paid'
     markPayrollBankProcessed: (id, data) => 
         api.put(`/finance/payroll/${id}/bank-processed`, data),
+
+    // ================= NEW WHATSAPP REMINDER APIs =================
+// 16. Get Due Installments (Accepts dueDate, overdue, page, limit)
+getDueInstallments: (params) => api.get('/finance/installments/due', { params }),
+
+// 17. Send WhatsApp Reminders (Requires body: { installmentIds: [...] })
+sendWhatsAppReminders: (data) => api.post('/finance/reminders/whatsapp/send', data),
         
     // =============================================================
 };

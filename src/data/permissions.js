@@ -610,3 +610,4 @@ export function canMutate(role, resource) {
   const lowerCaseRole = role.toLowerCase();
   return Boolean(MUTATE[resource]?.includes(lowerCaseRole));
 }
+

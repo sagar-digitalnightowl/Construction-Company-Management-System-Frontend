@@ -294,6 +294,8 @@ export const useFinance = () => {
     
     // Default pagination state
     const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
+    const [dueInstallments, setDueInstallments] = useState([]);
+    const [duePagination, setDuePagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
 
     // ----- Dashboard -----
     const fetchDashboard = useCallback(async (params = {}) => {
@@ -540,6 +542,35 @@ export const useFinance = () => {
         }
     };
 
+    const fetchDueInstallments = useCallback(async (params = {}) => {
+        setLoading(true);
+        try {
+            const res = await financeApi.getDueInstallments(params);
+            setDueInstallments(res.data?.data || []);
+            if (res.data?.pagination) setDuePagination(res.data.pagination);
+        } catch (err) {
+            toast.error("Failed to load due installments");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const sendWhatsAppReminders = async (installmentIds) => {
+        setLoading(true);
+        try {
+            const res = await financeApi.sendWhatsAppReminders({ installmentIds });
+            toast.success(res.data?.message || "WhatsApp reminders processing started!");
+            // Remove sent ones from the current list or refresh
+            await fetchDueInstallments(); 
+            return true;
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to send WhatsApp reminders");
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         // Core State
         dashboardData,
@@ -548,6 +579,8 @@ export const useFinance = () => {
         reminders,
         loading,
         pagination,
+        dueInstallments,
+        duePagination,
         
         // Payroll State
         pendingPayrollBatches,
@@ -579,5 +612,7 @@ export const useFinance = () => {
         rejectPayrollBatch,
         sendPayrollToBank,
         markPayrollBankProcessed,
+        fetchDueInstallments,
+        sendWhatsAppReminders,
     };
 };
