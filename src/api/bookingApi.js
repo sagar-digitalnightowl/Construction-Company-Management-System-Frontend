@@ -54,4 +54,5 @@ export const bookingApi = {
     updateBooking: (id, data) => api.patch(`/booking/${id}`, data),
     // SOFT DELETE BOOKING – web app only
     softDeleteBooking: (id) => api.delete(`/booking/${id}/soft`),
+    searchCustomer: (searchTerm) => api.get(`/booking/customer/search?search=${encodeURIComponent(searchTerm)}`),
 };
