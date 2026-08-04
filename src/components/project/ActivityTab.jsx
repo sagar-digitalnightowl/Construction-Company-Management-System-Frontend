@@ -1,32 +1,3 @@
-// // src/components/project/ActivityTab.jsx
-// import React, { useEffect, useState } from 'react';
-// import { Card, CardContent } from '@/components/ui/card';
-// import { Skeleton } from '@/components/ui/skeleton';
-// import { projectApi } from '@/api/projectApi';
-// import { formatDate } from '@/lib/helpers';
-
-// export function ActivityTab({ projectId }) {
-//     const [activities, setActivities] = useState([]);
-//     const [loading, setLoading] = useState(true);
-
-//     useEffect(() => {
-//         const fetch = async () => {
-//             try {
-//                 const res = await projectApi.getActivity(projectId);
-//                 setActivities(res.data?.data || []);
-//             } catch (err) { } finally { setLoading(false); }
-//         };
-//         fetch();
-//     }, [projectId]);
-
-//     if (loading) return <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>;
-//     if (activities.length === 0) return <Card><CardContent className="p-8 text-center">No activity yet</CardContent></Card>;
-//     return (
-//         <div className="relative pl-4"><div className="absolute left-[7px] top-0 bottom-0 w-px bg-border" />{activities.map(a => <div key={a._id} className="relative flex gap-3 pb-4"><div className="absolute -left-[5px] mt-1.5 h-2.5 w-2.5 rounded-full bg-primary" /><div className="ml-3 flex-1"><p className="text-sm">{a.action}</p><p className="text-xs text-muted-foreground mt-0.5">{a.user?.name} · {formatDate(a.createdAt)}</p></div></div>)}</div>
-//     );
-// }
-
-
 
 // src/components/project/ActivityTab.jsx
 import React, { useEffect, useState } from 'react';
