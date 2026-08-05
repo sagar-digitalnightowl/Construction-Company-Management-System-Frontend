@@ -26,7 +26,7 @@ export function AppShell() {
     return (
         <div className="h-lvh flex overflow-hidden">
 
-            <div className={` fixed top-0 left-0 h-lvh w-64 z-50 
+            <div className={` fixed top-0 left-0 h-lvh w-60 z-50 
                     transform transition-transform duration-300
                     ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
                     md:relative md:translate-x-0 md:h-lvh`}

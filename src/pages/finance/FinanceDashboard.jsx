@@ -214,6 +214,7 @@ export function FinanceDashboard() {
 			{/* Overview Stats */}
 			<div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 				<StatCard
+					size="compact"
 					label="Total Flats"
 					value={stats.totalFlats}
 					icon={Home}
@@ -221,6 +222,7 @@ export function FinanceDashboard() {
 					valueClassName="text-xl sm:text-2xl"
 				/>
 				<StatCard
+					size="compact"
 					label="Booked / Sold"
 					value={stats.bookedFlats}
 					icon={UserCheck}
@@ -229,6 +231,7 @@ export function FinanceDashboard() {
 				/>
 				{/* 🔥 Updated Label: Included GST explicitly */}
 				<StatCard
+					size="compact"
 					label="Total Received (Incl. GST)"
 					value={formatINR(stats.totalPaid)}
 					icon={TrendingUp}
@@ -237,6 +240,7 @@ export function FinanceDashboard() {
 				/>
 				{/* 🔥 Updated Label: Included GST explicitly */}
 				<StatCard
+					size="compact"
 					label="Outstanding Due (Incl. GST)"
 					value={formatINR(stats.totalRemaining)}
 					icon={TrendingDown}
@@ -249,6 +253,7 @@ export function FinanceDashboard() {
 			<h3 className="text-sm font-semibold text-muted-foreground mt-4 mb-2">Finance Breakdown</h3>
 			<div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
 				<StatCard
+					size="compact"
 					label="Pure Revenue (No GST)"
 					value={formatINR(pureBaseReceived > 0 ? pureBaseReceived : 0)}
 					icon={Landmark}
@@ -256,6 +261,7 @@ export function FinanceDashboard() {
 					valueClassName="text-xl sm:text-2xl"
 				/>
 				{/* <StatCard
+					size="compact"
 					label="Pure Due (No GST)"
 					value={formatINR(pureBaseOutstanding > 0 ? pureBaseOutstanding : 0)}
 					icon={Landmark}
@@ -263,6 +269,7 @@ export function FinanceDashboard() {
 					valueClassName="text-xl sm:text-2xl"
 				/> */}
 				{/* <StatCard
+					size="compact"
 					label="Total GST"
 					value={formatINR(stats.totalGst)}
 					icon={Receipt}
@@ -270,6 +277,7 @@ export function FinanceDashboard() {
 					valueClassName="text-xl sm:text-2xl"
 				/> */}
 				<StatCard
+					size="compact"
 					label="GST Collected"
 					value={formatINR(stats.gstCollected)}
 					icon={CheckCircle2}
@@ -277,6 +285,7 @@ export function FinanceDashboard() {
 					valueClassName="text-xl sm:text-2xl"
 				/>
 				{/* <StatCard
+					size="compact"
 					label="GST Remaining"
 					value={formatINR(stats.gstRemaining)}
 					icon={Hourglass}
