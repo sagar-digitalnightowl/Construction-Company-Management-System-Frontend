@@ -23,21 +23,31 @@ export function PageHeader({ title, eyebrow, description, actions, className }) 
 	);
 }
 
-export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Icon, accent = "primary", valueClassName }) {
+export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Icon, accent = "primary", valueClassName, size = "default", }) {
 	const toneCls = {
 		up: "text-[color:var(--color-success)]",
 		down: "text-destructive",
 		neutral: "text-muted-foreground",
 	}[deltaTone];
 
+	const compact = size === "compact";
+
 	return (
-		<div data-testid={`stat-${label?.replace(/s+/g, '-').toLowerCase()}`} className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md">
+		<div data-testid={`stat-${label?.replace(/s+/g, '-').toLowerCase()}`} className={cn(
+			"group relative overflow-hidden rounded-xl border border-border transition-shadow hover:shadow-md",
+			compact ? "p-3" : "p-5"
+		)}>
 			<div className="flex items-start justify-between">
 				<div>
-					<div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground font-medium">{label}</div>
+					<div className={cn(
+						"uppercase tracking-[0.16em] text-muted-foreground font-medium",
+						compact ? "text-[10px]" : "text-[11px]"
+					)}>{label}</div>
 					<div
 						className={cn(
-							"font-display text-[1.85rem] font-semibold mt-1.5 leading-none",
+							compact
+								? "font-display text-lg font-semibold mt-1"
+								: "font-display text-[1.85rem] font-semibold mt-1.5",
 							valueClassName
 						)}
 					>
@@ -49,14 +59,20 @@ export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Ico
 						)}
 				</div>
 				{Icon && (
-					<div className={cn(
-						"h-10 w-10 rounded-lg grid place-items-center shrink-0 transition-transform group-hover:scale-105",
-						accent === "primary" && "bg-primary/10 text-primary",
-						accent === "neutral" && "bg-muted text-foreground",
-						accent === "warning" && "bg-[color-mix(in_oklab,var(--color-warning)_18%,transparent)] text-[color:color-mix(in_oklab,var(--color-warning)_60%,black)]",
-						accent === "success" && "bg-[color-mix(in_oklab,var(--color-success)_18%,transparent)] text-[color:var(--color-success)]",
-					)}>
-						<Icon className="h-5 w-5" />
+					<div
+						className={cn(
+							"rounded-lg grid place-items-center shrink-0 transition-transform group-hover:scale-105",
+							compact ? "h-8 w-8" : "h-10 w-10",
+
+							accent === "primary" && "bg-primary/10 text-primary",
+							accent === "neutral" && "bg-muted text-foreground",
+							accent === "warning" &&
+							"bg-[color-mix(in_oklab,var(--color-warning)_18%,transparent)] text-[color:color-mix(in_oklab,var(--color-warning)_60%,black)]",
+							accent === "success" &&
+							"bg-[color-mix(in_oklab,var(--color-success)_18%,transparent)] text-[color:var(--color-success)]",
+						)}
+					>
+						<Icon className={cn(compact ? "h-4 w-4" : "h-5 w-5")} />
 					</div>
 				)
 				}
