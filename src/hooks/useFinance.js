@@ -295,7 +295,7 @@ export const useFinance = () => {
         setLoading(true);
         try {
             const res = await financeApi.sendWhatsAppReminders({ installmentIds, language });
-            toast.success(res.data?.message || "WhatsApp reminders processing started!");
+            // toast.success(res.data?.message || "WhatsApp reminders processing started!");
             await fetchDueInstallments(); 
             return true;
         } catch (err) {
