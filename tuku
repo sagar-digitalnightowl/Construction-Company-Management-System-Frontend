@@ -1,0 +1,434 @@
+6a69e1e27c81b3ec514c3409
+6a69e1e27c81b3ec514c340a
+6a69e1e27c81b3ec514c340b
+6a69e1e27c81b3ec514c340c
+6a69e1e27c81b3ec514c340d
+
+
+{
+                "_id": "6a61b33a235bb9fb6a30bfe6",
+                "name": "SKY HIGH",
+                "description": "",
+                "clientName": null,
+                "clientPhone": null,
+                "clientEmail": null,
+                "location": "63, Sector 63 Rd, D Block, Sector 63, Noida, Uttar Pradesh 201309, India",
+                "coverImage": "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791247241-ad30809c-Crypto.png",
+                "galleryImages": [
+                    "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791453636-511a3cd1-Logo.png",
+                    "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791810644-6030c82c-logo__2_.png",
+                    "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791810647-9f530cd0-becomelast1.png"
+                ],
+                "projectVideo": "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791249715-949e9a37-videoplayback__1_.mp4",
+                "createdBy": {
+                    "_id": "69fe99a4149d83053fd0437b",
+                    "email": "aman.codemail@gmail.com",
+                    "name": "Shashi",
+                    "profileImage": ""
+                },
+                "projectManager": {
+                    "_id": "69fe99a4149d83053fd0437b",
+                    "email": "aman.codemail@gmail.com",
+                    "phone": "+919504724061",
+                    "name": "Shashi",
+                    "role": "admin",
+                    "profileImage": ""
+                },
+                "teamMembers": [],
+                "status": "planning",
+                "currentPhase": "tender",
+                "phaseHistory": [
+                    {
+                        "phase": "tender",
+                        "startDate": "2026-07-23T06:22:50.109Z",
+                        "isCompleted": false
+                    }
+                ],
+                "priority": "medium",
+                "startDate": "2026-07-01T00:00:00.000Z",
+                "progress": 0,
+                "budget": 100000000,
+                "actualCost": 0,
+                "address": {
+                    "street": "wazidpur, sector 63, near metro station,",
+                    "city": "Noida",
+                    "state": "Uttar Pradesh",
+                    "pincode": "845456",
+                    "country": "India"
+                },
+                "dependencies": [],
+                "resources": [],
+                "risks": [],
+                "issues": [],
+                "documents": [],
+                "comments": [],
+                "isArchived": false,
+                "health": "green",
+                "autoStatusUpdate": false,
+                "towers": [
+                    {
+                        "towerName": "Tower A",
+                        "totalFloors": 0,
+                        "floors": [
+                            {
+                                "floorNumber": "Ground",
+                                "flats": [
+                                    {
+                                        "flatNumber": "101",
+                                        "area": 1200,
+                                        "bedrooms": 3,
+                                        "bathrooms": 1,
+                                        "price": 4500000,
+                                        "status": "available",
+                                        "bookedBy": null,
+                                        "bookedAt": null,
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-07-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a71d7b821c2f1428fa40987"
+                                    },
+                                    {
+                                        "flatNumber": "102",
+                                        "area": 1000,
+                                        "bedrooms": 2,
+                                        "bathrooms": 1,
+                                        "price": 6000000,
+                                        "status": "available",
+                                        "bookedBy": null,
+                                        "bookedAt": null,
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-07-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a71d7b821c2f1428fa40988"
+                                    },
+                                    {
+                                        "flatNumber": "103",
+                                        "area": 1200,
+                                        "bedrooms": 3,
+                                        "bathrooms": 1,
+                                        "price": 5000000,
+                                        "status": "available",
+                                        "bookedBy": null,
+                                        "bookedAt": null,
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-08-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a71d7b821c2f1428fa40989"
+                                    },
+                                    {
+                                        "flatNumber": "105",
+                                        "area": 1200,
+                                        "bedrooms": 3,
+                                        "bathrooms": 1,
+                                        "price": 5000000,
+                                        "status": "available",
+                                        "bookedBy": null,
+                                        "bookedAt": null,
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-07-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a71d7b821c2f1428fa4098a"
+                                    },
+                                    {
+                                        "flatNumber": "104",
+                                        "area": 1000,
+                                        "bedrooms": 3,
+                                        "bathrooms": 1,
+                                        "price": 4500000,
+                                        "status": "available",
+                                        "bookedBy": null,
+                                        "bookedAt": null,
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-07-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a71d7b821c2f1428fa4098b"
+                                    },
+                                    {
+                                        "flatNumber": "108",
+                                        "area": 120,
+                                        "bedrooms": 3,
+                                        "bathrooms": 2,
+                                        "price": 6000000,
+                                        "status": "available",
+                                        "bookedBy": null,
+                                        "bookedAt": null,
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-08-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a71d7b821c2f1428fa4098c"
+                                    }
+                                ]
+                            }
+                        ],
+                        "totalFlats": 0,
+                        "availableFlats": 0,
+                        "bookedFlats": 0,
+                        "soldFlats": 0
+                    }
+                ],
+                "totalTowers": 1,
+                "totalFlats": 5,
+                "availableFlats": 0,
+                "bookedFlats": 0,
+                "soldFlats": 0,
+                "activeCheckIns": [],
+                "createdAt": "2026-07-23T06:22:50.110Z",
+                "updatedAt": "2026-08-04T12:14:48.232Z",
+                "__v": 0
+            },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+                "_id": "6a61b33a235bb9fb6a30bfe6",
+                "name": "SKY HIGH",
+                "description": "",
+                "clientName": null,
+                "clientPhone": null,
+                "clientEmail": null,
+                "location": "63, Sector 63 Rd, D Block, Sector 63, Noida, Uttar Pradesh 201309, India",
+                "coverImage": "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791247241-ad30809c-Crypto.png",
+                "galleryImages": [
+                    "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791453636-511a3cd1-Logo.png",
+                    "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791810644-6030c82c-logo__2_.png",
+                    "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791810647-9f530cd0-becomelast1.png"
+                ],
+                "projectVideo": "https://storage.loanzo.in/design-craft/projects/69fe99a4149d83053fd0437b/1784791249715-949e9a37-videoplayback__1_.mp4",
+                "createdBy": {
+                    "_id": "69fe99a4149d83053fd0437b",
+                    "email": "aman.codemail@gmail.com",
+                    "name": "Shashi",
+                    "profileImage": ""
+                },
+                "projectManager": {
+                    "_id": "69fe99a4149d83053fd0437b",
+                    "email": "aman.codemail@gmail.com",
+                    "phone": "+919504724061",
+                    "name": "Shashi",
+                    "role": "admin",
+                    "profileImage": ""
+                },
+                "teamMembers": [],
+                "status": "planning",
+                "currentPhase": "tender",
+                "phaseHistory": [
+                    {
+                        "phase": "tender",
+                        "startDate": "2026-07-23T06:22:50.109Z",
+                        "isCompleted": false
+                    }
+                ],
+                "priority": "medium",
+                "startDate": "2026-07-01T00:00:00.000Z",
+                "progress": 0,
+                "budget": 100000000,
+                "actualCost": 0,
+                "address": {
+                    "street": "wazidpur, sector 63, near metro station,",
+                    "city": "Noida",
+                    "state": "Uttar Pradesh",
+                    "pincode": "845456",
+                    "country": "India"
+                },
+                "dependencies": [],
+                "resources": [],
+                "risks": [],
+                "issues": [],
+                "documents": [],
+                "comments": [],
+                "isArchived": false,
+                "health": "green",
+                "autoStatusUpdate": false,
+                "towers": [
+                    {
+                        "towerName": "Tower A",
+                        "totalFloors": 0,
+                        "floors": [
+                            {
+                                "floorNumber": "Ground",
+                                "flats": [
+                                    {
+                                        "flatNumber": "101",
+                                        "area": 1200,
+                                        "bedrooms": 3,
+                                        "bathrooms": 1,
+                                        "price": 4500000,
+                                        "status": "pending",
+                                        "bookedBy": "6a5ecc7266564998c3fb35b7",
+                                        "bookedAt": "2026-07-31T09:36:01.185Z",
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-07-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a69e1e27c81b3ec514c3409"
+                                    },
+                                    {
+                                        "flatNumber": "102",
+                                        "area": 1000,
+                                        "bedrooms": 2,
+                                        "bathrooms": 1,
+                                        "price": 6000000,
+                                        "status": "pending",
+                                        "bookedBy": "6a707ce63b941a4e7a4f7983",
+                                        "bookedAt": "2026-08-03T11:35:02.072Z",
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-07-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a69e1e27c81b3ec514c340a"
+                                    },
+                                    {
+                                        "flatNumber": "103",
+                                        "area": 1200,
+                                        "bedrooms": 3,
+                                        "bathrooms": 1,
+                                        "price": 5000000,
+                                        "status": "pending",
+                                        "bookedBy": "6a707ce63b941a4e7a4f7983",
+                                        "bookedAt": "2026-08-03T11:43:57.507Z",
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-08-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a69e1e27c81b3ec514c340b"
+                                    },
+                                    {
+                                        "flatNumber": "105",
+                                        "area": 1200,
+                                        "bedrooms": 3,
+                                        "bathrooms": 1,
+                                        "price": 5000000,
+                                        "status": "pending",
+                                        "bookedBy": "6a5f3ec366564998c3fc59f0",
+                                        "bookedAt": "2026-07-31T09:05:38.624Z",
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-07-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a69e1e27c81b3ec514c340c"
+                                    },
+                                    {
+                                        "flatNumber": "104",
+                                        "area": 1000,
+                                        "bedrooms": 3,
+                                        "bathrooms": 1,
+                                        "price": 4500000,
+                                        "status": "pending",
+                                        "bookedBy": "6a6c70a521e0818a87d2fef5",
+                                        "bookedAt": "2026-07-31T09:53:41.632Z",
+                                        "features": {
+                                            "facing": null,
+                                            "parking": true,
+                                            "balcony": true,
+                                            "furnished": "unfurnished"
+                                        },
+                                        "typeOfBooking": "CLP",
+                                        "agreementStatus": "REGISTERED",
+                                        "agreementDate": "2026-07-01T00:00:00.000Z",
+                                        "cancelled": false,
+                                        "_id": "6a69e1e27c81b3ec514c340d"
+                                    }
+                                ]
+                            }
+                        ],
+                        "totalFlats": 5,
+                        "availableFlats": 0,
+                        "bookedFlats": 0,
+                        "soldFlats": 0
+                    }
+                ],
+                "totalTowers": 1,
+                "totalFlats": 5,
+                "availableFlats": 0,
+                "bookedFlats": 0,
+                "soldFlats": 0,
+                "activeCheckIns": [],
+                "createdAt": "2026-07-23T06:22:50.110Z",
+                "updatedAt": "2026-08-03T12:45:42.529Z",
+                "__v": 0
+            },
