@@ -3,6 +3,7 @@ import {
 	Plus, Receipt, FileText, Search, Filter, ChevronLeft, ChevronRight,
 	Eye, X, Hash, Tag, CheckCircle, XCircle, DollarSign, ArrowDownRight, ArrowUpRight
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -225,6 +226,12 @@ export default function MyExpenses() {
 
 	const formatCurrency = (amount) => {
 		return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(amount);
+	};
+
+	const renderDynamicIcon = (iconName, className) => {
+		const DynamicIcon = LucideIcons[iconName];
+		if (!DynamicIcon) return <LucideIcons.Tag className={className} />;
+		return <DynamicIcon className={className} />;
 	};
 
 	const renderPaginationButtons = (paginationData) => {
@@ -592,7 +599,15 @@ export default function MyExpenses() {
 												.filter((cat) => cat.isActive)
 												.map((cat) => (
 													<SelectItem key={cat._id} value={cat._id}>
-														{cat.name}
+														<div className="flex items-center gap-2">
+															<div
+																className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-white"
+																style={{ backgroundColor: cat?.color || "#3b82f6" }}
+															>
+																{renderDynamicIcon(cat?.icon, "h-3 w-3")}
+															</div>
+															{cat.name}
+														</div>
 													</SelectItem>
 												))}
 										</SelectContent>
