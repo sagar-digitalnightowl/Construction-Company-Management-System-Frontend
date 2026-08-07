@@ -326,6 +326,8 @@ export default function MyExpenses() {
 							filteredExpenses.map((expense) => {
 								// Extract category name whether it's an object (new format) or string (old format)
 								const categoryName = expense?.categoryId?.name || expense?.category;
+								const categoryIcon = expense?.categoryId?.icon;
+								const categoryColor = expense?.categoryId?.color || "#3b82f6";
 
 								return (
 									<TableRow key={expense._id || Math.random()}>
@@ -337,7 +339,19 @@ export default function MyExpenses() {
 										</TableCell>
 										<TableCell className="max-w-[180px] truncate">{expense.title}</TableCell>
 										<TableCell>
-											{categoryName ? <Badge variant="outline" className="text-[10px] font-normal">{categoryName}</Badge> : <span className="text-xs text-muted-foreground">None</span>}
+											{categoryName ? (
+												<Badge variant="outline" className="text-[10px] font-normal flex items-center w-fit gap-1.5 pl-1 pr-2 py-1">
+													<div
+														className="h-4 w-4 rounded-full flex items-center justify-center shrink-0 text-white"
+														style={{ backgroundColor: categoryColor }}
+													>
+														{categoryIcon && renderDynamicIcon(categoryIcon, "h-2.5 w-2.5")}
+													</div>
+													{categoryName}
+												</Badge>
+											) : (
+												<span className="text-xs text-muted-foreground">None</span>
+											)}
 										</TableCell>
 										<TableCell className="font-medium">₹{Number(expense.amount).toFixed(2)}</TableCell>
 										<TableCell>{getStatusBadge(expense.status)}</TableCell>
