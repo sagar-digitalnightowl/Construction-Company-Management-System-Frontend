@@ -57,6 +57,7 @@ const getFlatDisplay = (flat) => {
 export function FinanceDashboard() {
 	const { dashboardData, dashboardSummary, fetchDashboard, fetchProjectDetails, loading } = useFinance();
 
+	const [towerSummary, setTowerSummary] = useState(null);
 	const [selectedProject, setSelectedProject] = useState(null);
 	const [selectedTower, setSelectedTower] = useState("");
 	const [selectedFloor, setSelectedFloor] = useState("");
@@ -87,6 +88,18 @@ export function FinanceDashboard() {
 
 	// Use backend summary if present, fallback to client calculation
 	const stats = useMemo(() => {
+		if (selectedTower && towerSummary) {
+			return {
+				totalFlats: towerSummary.totalFlats || 0,
+				bookedFlats: towerSummary.bookedSold || 0,
+				totalPaid: towerSummary.totalReceived || 0,
+				totalRemaining: towerSummary.outstanding || 0,
+				totalGst: towerSummary.totalGst || 0,
+				gstCollected: towerSummary.gstCollected || 0,
+				gstRemaining: towerSummary.gstRemaining || 0,
+			};
+		}
+
 		if (selectedProject) {
 			return {
 				totalFlats: selectedProject.totalFlats || 0,
@@ -137,33 +150,55 @@ export function FinanceDashboard() {
 		});
 
 		return { totalFlats, bookedFlats, totalRemaining, totalPaid, totalGst, gstCollected, gstRemaining };
-	}, [projects, dashboardSummary]);
+	}, [
+		projects,
+		dashboardSummary,
+		selectedProject,
+		selectedTower,
+		towerSummary,
+	]);
 
 	// Derived Pure Base (Without GST)
 	const pureBaseReceived = stats.totalPaid - stats.gstCollected;
 	const pureBaseOutstanding = stats.totalRemaining - stats.gstRemaining;
 
-	const goToProjects = useCallback(() => {
+	const goToProjects = useCallback(async () => {
+		await fetchDashboard({ page });
+
 		setCurrentView("projects");
 		setSelectedProject(null);
 		setSelectedTower("");
 		setSelectedFloor("");
-	}, []);
+		setTowerSummary(null);
+	}, [fetchDashboard, page]);
 
 	// Fetch full details (with GST/Amounts) when project is clicked
 	const goToTowers = useCallback(async (project) => {
 		const fullProject = await fetchProjectDetails(project.projectId);
+
+		setTowerSummary(null);
+
 		setSelectedProject(fullProject || project);
 		setSelectedTower("");
 		setSelectedFloor("");
 		setCurrentView("towers");
 	}, [fetchProjectDetails]);
 
-	const goToFloors = useCallback((tower) => {
+	const goToFloors = useCallback(async (tower) => {
 		setSelectedTower(tower);
 		setSelectedFloor("");
+
+		const response = await fetchDashboard({
+			page: 1,
+			limit: 10,
+			projectId: selectedProject.projectId,
+			tower,
+		});
+
+		setTowerSummary(response.summary);
+
 		setCurrentView("floors");
-	}, []);
+	}, [fetchDashboard, selectedProject]);
 
 	const goToFlats = useCallback((floor) => {
 		setSelectedFloor(floor);
@@ -423,9 +458,14 @@ export function FinanceDashboard() {
 						<Button
 							variant="ghost"
 							size="icon"
-							onClick={() => {
-								setCurrentView("towers");
+							onClick={async () => {
+								const fullProject = await fetchProjectDetails(selectedProject.projectId);
+
+								setSelectedProject(fullProject);
+
+								setSelectedTower("");
 								setSelectedFloor("");
+								setCurrentView("towers");
 							}}
 						>
 							<ChevronLeft className="h-5 w-5" />
