@@ -245,9 +245,9 @@ export function Sidebar({ role, onClickLink }) {
 		setExpandedMenus((prev) => ({ ...prev, [key]: !prev[key] }));
 	};
 
-	// Helper to check if a route is active (exact or starts with)
+	// Helper to check if a route is active
 	const isActive = (to) =>
-		location.pathname === to || location.pathname.startsWith(to);
+		location.pathname === to || location.pathname.startsWith(`${to}/`);
 
 	return (
 		<aside className="h-screen flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
