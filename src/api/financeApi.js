@@ -1,64 +1,65 @@
-
-
-import api from './axios';
+import api from "./axios";
 
 export const financeApi = {
-    // 1. Finance Dashboard
-    getDashboard: (params) => api.get('/finance/dashboard', { params }),
+	// 1. Finance Dashboard
+	getDashboard: (params) => api.get("/finance/dashboard", { params }),
 
-    // 🔥 NEW: Fetch single project finance details with GST
-    getProjectDetails: (projectId) => api.get(`/finance/project/${projectId}`),
+	exportDashboard: (params = {}) =>
+		api.get("/finance/dashboard/export", {
+			params,
+			responseType: "blob",
+		}),
 
-    // 2. Project Milestones
-    getProjectMilestones: (projectId) =>
-        api.get(`/finance/project/${projectId}/milestones`),
+	// 🔥 NEW: Fetch single project finance details with GST
+	getProjectDetails: (projectId) => api.get(`/finance/project/${projectId}`),
 
-    // 3. Mark Milestone Completed
-    markMilestone: (projectId, data) =>
-        api.post(`/finance/project/${projectId}/milestone`, data),
+	// 2. Project Milestones
+	getProjectMilestones: (projectId) =>
+		api.get(`/finance/project/${projectId}/milestones`),
 
-    // 4. Manual Normal Reminder
-    sendManualReminder: (bookingId, data) =>
-        api.post(`/finance/booking/${bookingId}/reminder`, data),
+	// 3. Mark Milestone Completed
+	markMilestone: (projectId, data) =>
+		api.post(`/finance/project/${projectId}/milestone`, data),
 
-    // 5. Manual Penalty Reminder
-    sendManualPenaltyReminder: (bookingId, data) =>
-        api.post(`/finance/booking/${bookingId}/penalty-reminder`, data),
+	// 4. Manual Normal Reminder
+	sendManualReminder: (bookingId, data) =>
+		api.post(`/finance/booking/${bookingId}/reminder`, data),
 
-    // 6. All Bookings
-    getAllBookings: (params) =>
-        api.get('/finance/bookings', { params }),
+	// 5. Manual Penalty Reminder
+	sendManualPenaltyReminder: (bookingId, data) =>
+		api.post(`/finance/booking/${bookingId}/penalty-reminder`, data),
 
-    // 7. Reminder Logs
-    getReminderLogs: (params) =>
-        api.get('/finance/reminders', { params }),
+	// 6. All Bookings
+	getAllBookings: (params) => api.get("/finance/bookings", { params }),
 
-    // Payroll APIs
-    getPendingPayrollApprovals: (params) => 
-        api.get('/finance/payroll/pending', { params }),
+	// 7. Reminder Logs
+	getReminderLogs: (params) => api.get("/finance/reminders", { params }),
 
-    getAllPayrollBatches: (params) => 
-        api.get('/finance/payroll', { params }),
+	// Payroll APIs
+	getPendingPayrollApprovals: (params) =>
+		api.get("/finance/payroll/pending", { params }),
 
-    getPayrollBatchById: (id) => 
-        api.get(`/finance/payroll/${id}`),
+	getAllPayrollBatches: (params) => api.get("/finance/payroll", { params }),
 
-    acknowledgeReceipt: (id) => 
-        api.put(`/finance/payroll/${id}/acknowledge-receipt`),
+	getPayrollBatchById: (id) => api.get(`/finance/payroll/${id}`),
 
-    approvePayrollBatch: (id) => 
-        api.put(`/finance/payroll/${id}/approve`),
+	acknowledgeReceipt: (id) =>
+		api.put(`/finance/payroll/${id}/acknowledge-receipt`),
 
-    rejectPayrollBatch: (id, data) => 
-        api.put(`/finance/payroll/${id}/reject`, data),
+	approvePayrollBatch: (id) => api.put(`/finance/payroll/${id}/approve`),
 
-    sendPayrollToBank: (id, data) => 
-        api.put(`/finance/payroll/${id}/send-to-bank`, data),
+	rejectPayrollBatch: (id, data) =>
+		api.put(`/finance/payroll/${id}/reject`, data),
 
-    markPayrollBankProcessed: (id, data) => 
-        api.put(`/finance/payroll/${id}/bank-processed`, data),
+	sendPayrollToBank: (id, data) =>
+		api.put(`/finance/payroll/${id}/send-to-bank`, data),
 
-    // WhatsApp Reminder APIs
-    getDueInstallments: (params) => api.get('/finance/installments/due', { params }),
-    sendWhatsAppReminders: (data) => api.post('/finance/reminders/whatsapp/send', data),
+	markPayrollBankProcessed: (id, data) =>
+		api.put(`/finance/payroll/${id}/bank-processed`, data),
+
+	// WhatsApp Reminder APIs
+	getDueInstallments: (params) =>
+		api.get("/finance/installments/due", { params }),
+	sendWhatsAppReminders: (data) =>
+		api.post("/finance/reminders/whatsapp/send", data),
 };
