@@ -153,31 +153,28 @@ export function Sidebar({ role, onClickLink }) {
 				...(isEmployee
 					? [
 						{
-							label: "Leaves & Attendance",
+							to: "/employee-attendance",
+							label: "My Attendance",
 							icon: Users2,
 							key: "leaves",
-							children: [
-								{
-									to: "/leaves/attendance",
-									label: "My Attendance",
-									key: "leaves",
-								},
-								{
-									to: "/leaves/leaves",
-									label: "My Leaves",
-									key: "leaves",
-								},
-								{
-									to: "/leaves/salary",
-									label: "Salary Slips",
-									key: "leaves",
-								},
-								{
-									to: "/leaves/announcements",
-									label: "Announcements",
-									key: "leaves",
-								},
-							],
+						},
+						{
+							to: "/employee-leaves",
+							label: "My Leaves",
+							icon: Users2,
+							key: "leaves",
+						},
+						{
+							to: "/employee-salary",
+							label: "Salary Slips",
+							icon: BadgeIndianRupee,
+							key: "leaves",
+						},
+						{
+							to: "/employee-announcements",
+							label: "Announcements",
+							icon: FileText,
+							key: "leaves",
 						},
 					]
 					: [
