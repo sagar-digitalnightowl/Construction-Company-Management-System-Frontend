@@ -1,27 +1,13 @@
-
 // src/pages/finance/FinanceBookings.jsx
-import React, { useEffect, useState } from "react";
-import { useFinance } from "@/hooks/useFinance";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { PageHeader, EmptyState } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Select,
 	SelectContent,
@@ -29,507 +15,295 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { formatINR, formatDate } from "@/lib/helpers";
-import { Mail, AlertTriangle, Loader2, Search, X, MessageCircle } from "lucide-react";
+import {
+	Search,
+	ChevronLeft,
+	ChevronRight,
+	X,
+	Wallet,
+	ArrowRight,
+	Building
+} from "lucide-react";
+import { useBooking } from "@/hooks/useBooking";
+import { projectApi } from "@/api/projectApi";
 import { toast } from "sonner";
-import { projectApi } from "@/api";
-import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate } from "@/lib/helpers";
 
-export function FinanceBookings() {
-	const {
-		bookings,
-		pagination,
-		fetchBookings,
-		sendNormalReminder,
-		sendPenaltyReminder,
-		sendWhatsAppReminders,
-		loading,
-	} = useFinance();
+// Upgraded Finance Card Component (Neutral Theme)
+const FinanceBookingCard = ({ booking, onClick }) => {
+	const flat = booking.flatSnapshot || {};
 
-	// Projects Dropdown States
-	const [projects, setProjects] = useState([]);
-	const [projectFilter, setProjectFilter] = useState("all");
-	const [projectPage, setProjectPage] = useState(1);
-	const [hasMoreProjects, setHasMoreProjects] = useState(true);
-
-	// Bookings Table State
-	const [currentPage, setCurrentPage] = useState(1);
-
-	// Search States
-	const [searchQuery, setSearchQuery] = useState("");
-	const [searchInputValue, setSearchInputValue] = useState("");
-
-	// Reminder States
-	const [reminderOpen, setReminderOpen] = useState(null);
-	const [reminderType, setReminderType] = useState("normal");
-	const [reminderData, setReminderData] = useState({
-		dueDate: "",
-		milestoneName: "",
-		installmentId: null, // ✅ Added to store WhatsApp installment ID
-		language: "en", // ✅ Added language for WhatsApp notification
-	});
-
-	const fetchProjects = async (pageNo = 1) => {
-		try {
-			const res = await projectApi.getAll({ page: pageNo, limit: 10 });
-			if (res.data.success) {
-				const fetchedProjects = res.data.data?.projects || res.data.data?.docs || res.data.data || [];
-				const projectPagination = res.data.data?.pagination;
-
-				if (pageNo === 1) {
-					setProjects(fetchedProjects);
-				} else {
-					setProjects((prev) => [...prev, ...fetchedProjects]);
-				}
-
-				if (projectPagination && pageNo >= projectPagination.pages) {
-					setHasMoreProjects(false);
-				} else {
-					setHasMoreProjects(true);
-				}
-			}
-		} catch (err) {
-			console.error(err);
-			toast.error("Failed to load projects");
-		}
-	};
-
-	const handleProjectFilterChange = (val) => {
-		setProjectFilter(val);
-		setCurrentPage(1);
-	};
-
-	// ✅ Server-Side Search trigger
-	const handleSearch = (e) => {
-		e.preventDefault();
-		const trimmedQuery = searchInputValue.trim();
-		if (trimmedQuery !== searchQuery) {
-			setSearchQuery(trimmedQuery);
-			setCurrentPage(1);
-		}
-	};
-
-	// ✅ Clear search triggers an API call without the search param
-	const clearSearch = () => {
-		setSearchInputValue("");
-		if (searchQuery) {
-			setSearchQuery("");
-			setCurrentPage(1);
-		}
-	};
-
-	useEffect(() => {
-		fetchBookings({
-			projectId: projectFilter === "all" ? undefined : projectFilter,
-			search: searchQuery || undefined,
-			page: currentPage,
-			limit: 10,
-		});
-	}, [projectFilter, currentPage, searchQuery, fetchBookings]);
-
-	useEffect(() => {
-		fetchProjects(1);
-	}, []);
-
-	const handleLoadMoreProjects = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		const nextPage = projectPage + 1;
-		setProjectPage(nextPage);
-		fetchProjects(nextPage);
-	};
-
-	// ✅ Updated to handle WhatsApp sending with language
-	const handleSendReminder = async (bookingId) => {
-		if (reminderType === "whatsapp") {
-			await sendWhatsAppReminders([reminderData.installmentId], reminderData.language);
-		} else {
-			const payload = {
-				dueDate: reminderData.dueDate || undefined,
-				milestoneName: reminderData.milestoneName || undefined,
-			};
-			if (reminderType === "normal") {
-				await sendNormalReminder(bookingId, payload);
-			} else if (reminderType === "penalty") {
-				await sendPenaltyReminder(bookingId, payload);
-			}
-		}
-
-		// Close dialog and reset state
-		setReminderOpen(null);
-		setReminderData({ dueDate: "", milestoneName: "", installmentId: null, language: "en" });
-	};
-
-	// ✅ Updated to accept extra data for WhatsApp and reset language
-	const openReminderDialog = (bookingId, type, extraData = null) => {
-		setReminderOpen(bookingId);
-		setReminderType(type);
-
-		if (type === "whatsapp" && extraData) {
-			setReminderData({ dueDate: "", milestoneName: "", installmentId: extraData.installmentId, language: "en" });
-		} else {
-			setReminderData({ dueDate: "", milestoneName: "", installmentId: null, language: "en" });
-		}
-	};
+	// Dynamic styling based on status using theme colors rather than hardcoded blues
+	const isBooked = booking.status === "booked";
+	const statusColor = isBooked
+		? "bg-primary/70" // Uses your theme's primary color (likely dark/black based on your image)
+		: booking.status === "sold"
+			? "bg-emerald-500/80"
+			: "bg-destructive/80";
 
 	return (
-		<div className="space-y-4">
-			<div className="flex flex-wrap items-center gap-3">
-				<div className="flex items-center gap-2">
-					<span className="text-sm font-medium whitespace-nowrap">Filter by Project:</span>
-					<Select value={projectFilter} onValueChange={handleProjectFilterChange}>
-						<SelectTrigger className="w-[200px]">
-							<SelectValue placeholder="All Projects" />
+		<Card
+			className="relative overflow-hidden cursor-pointer group hover:shadow-xl hover:-translate-y-0.5 border-border/50 hover:border-primary/40 transition-all duration-300 flex flex-col h-full bg-card"
+			onClick={() => onClick(booking._id)}
+		>
+			{/* Subtle top indicator line for quick status recognition */}
+			<div className={`absolute top-0 left-0 w-full h-1 ${statusColor}`} />
+
+			<CardContent className="p-5 flex flex-col flex-grow justify-between space-y-5 pt-6">
+				{/* Header & Main Info */}
+				<div className="space-y-4">
+					<div className="flex justify-between items-start">
+						<span className="text-[11px] font-bold text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-md tracking-wider border border-border/50">
+							{booking.bookingReferenceNumber}
+						</span>
+						<Badge variant={isBooked ? "outline" : "secondary"} className="capitalize shadow-sm">
+							{booking.status}
+						</Badge>
+					</div>
+
+					<div>
+						<h3 className="font-semibold text-lg text-foreground truncate group-hover:text-primary transition-colors" title={booking.clientId?.name || "Self"}>
+							{booking.clientId?.name || "Self"}
+						</h3>
+
+						{/* Project & Unit Container */}
+						<div className="flex items-center text-sm mt-2 gap-2 bg-accent/40 p-2.5 rounded-lg border border-border/30">
+							<Building className="h-4 w-4 text-muted-foreground" />
+							<span className="truncate font-medium text-muted-foreground">{booking.projectId?.name}</span>
+							<span className="text-border">•</span>
+							<span className="whitespace-nowrap font-semibold text-foreground">Flat {flat.flatNumber || "—"}</span>
+						</div>
+					</div>
+				</div>
+
+				{/* Footer */}
+				<div className="flex justify-between items-center pt-4 border-t border-border/40 mt-auto">
+					<span className="text-xs text-muted-foreground font-medium">
+						{formatDate(booking.createdAt)}
+					</span>
+					{/* View Details Indicator */}
+					<div className="flex items-center text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">
+						View Details
+						<ArrowRight className="h-4 w-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+};
+
+export default function FinanceBookings() {
+	const navigate = useNavigate();
+
+	const {
+		bookings,
+		fetchBookings,
+		loading,
+		pagination,
+	} = useBooking();
+
+	// Core filter states
+	const [searchInput, setSearchInput] = useState("");
+	const [search, setSearch] = useState("");
+	const [statusFilter, setStatusFilter] = useState("booked");
+
+	// Project Dropdown states
+	const [filterProjects, setFilterProjects] = useState([]);
+	const [projectName, setProjectName] = useState("all");
+
+	const [currentPage, setCurrentPage] = useState(1);
+
+	// Debounce Effect for Search
+	useEffect(() => {
+		const handler = setTimeout(() => {
+			setSearch(searchInput);
+		}, 500);
+		return () => clearTimeout(handler);
+	}, [searchInput]);
+
+	// Load projects on mount
+	useEffect(() => {
+		const loadProjectsForFilter = async () => {
+			try {
+				const res = await projectApi.getAll({ page: 1, limit: 100 });
+				const projectsData = res.data?.data?.projects || [];
+				setFilterProjects(projectsData);
+			} catch (err) {
+				toast.error("Failed to load projects for filter");
+			}
+		};
+		loadProjectsForFilter();
+	}, []);
+
+	const fetchParams = {
+		page: currentPage,
+		limit: 12,
+		search: search || undefined,
+		projectName: projectName === "all" ? undefined : projectName,
+		status: statusFilter,
+		approvalStatus: "approved",
+	};
+
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [search, projectName, statusFilter]);
+
+	useEffect(() => {
+		fetchBookings(fetchParams);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentPage, search, projectName, statusFilter]);
+
+	// Scroll to top whenever page changes
+	useEffect(() => {
+		window.scrollTo({
+			top: 0,
+			behavior: "smooth",
+		});
+	}, [currentPage]);
+
+	// Navigate to Details Page
+	const handleView = (id) => navigate(`/finance/bookings/${id}`);
+
+	return (
+		<div className="space-y-6">
+
+			<div className="flex flex-col xl:flex-row gap-3 justify-between items-start xl:items-center bg-card p-4 rounded-xl border shadow-sm">
+				<Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full xl:w-auto">
+					<TabsList className="bg-muted/60 p-1">
+						<TabsTrigger value="booked" className="rounded-md">Booked</TabsTrigger>
+						<TabsTrigger value="sold" className="rounded-md">Sold</TabsTrigger>
+						<TabsTrigger value="cancelled" className="rounded-md">Cancelled</TabsTrigger>
+					</TabsList>
+				</Tabs>
+
+				<div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
+					<Select
+						value={projectName}
+						onValueChange={(val) => setProjectName(val)}
+					>
+						<SelectTrigger className="w-full sm:w-56 bg-background border-border/50">
+							<SelectValue placeholder="Select Project" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">All Projects</SelectItem>
-							{projects.map((p) => (
-								<SelectItem key={p._id} value={p._id}>
-									{p.name}
+							{filterProjects.map((project) => (
+								<SelectItem key={project._id} value={project.name}>
+									{project.name}
 								</SelectItem>
 							))}
-
-							{hasMoreProjects && (
-								<div
-									className="w-full text-left px-2 py-1.5 text-xs text-blue-600 font-medium hover:bg-muted border-t mt-1 cursor-pointer"
-									onClick={handleLoadMoreProjects}
-								>
-									+ Load More Projects
-								</div>
-							)}
 						</SelectContent>
 					</Select>
-				</div>
 
-				<form onSubmit={handleSearch} className="flex items-center gap-2 flex-1 max-w-md">
-					<div className="relative flex-1">
-						<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+					<div className="relative w-full sm:w-80 lg:w-96">
+						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<Input
-							placeholder="Search by name, email, phone, ref, flat..."
-							value={searchInputValue}
-							onChange={(e) => {
-								setSearchInputValue(e.target.value);
-								// Auto-clear if user deletes the text manually
-								if (e.target.value === "" && searchQuery !== "") {
-									clearSearch();
-								}
-							}}
-							className="pl-8 pr-8"
+							className="pl-9 pr-9 w-full bg-background border-border/50 transition-all focus-visible:ring-primary/30"
+							placeholder="Search reference, client name, flat..."
+							value={searchInput}
+							onChange={(e) => setSearchInput(e.target.value)}
 						/>
-						{searchInputValue && (
+						{searchInput && (
 							<button
 								type="button"
-								onClick={clearSearch}
-								className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+								onClick={() => setSearchInput("")}
+								className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground hover:bg-muted p-1 rounded-full transition-colors"
+								aria-label="Clear search"
 							>
-								<X className="h-4 w-4" />
+								<X className="h-3 w-3" />
 							</button>
 						)}
 					</div>
-					<Button type="submit" variant="default" size="sm" disabled={!searchInputValue.trim()}>
-						Search
-					</Button>
-					{searchQuery && (
-						<Button
-							type="button"
-							variant="ghost"
-							size="sm"
-							onClick={clearSearch}
-							className="text-muted-foreground"
-						>
-							Clear
-						</Button>
-					)}
-				</form>
+				</div>
 			</div>
 
-			{searchQuery && (
-				<div className="flex items-center gap-2 text-sm">
-					<Badge variant="secondary" className="gap-1">
-						<Search className="h-3 w-3" />
-						{searchQuery}
-					</Badge>
-					<span className="text-muted-foreground">
-						{pagination?.total > 0
-							? `Found ${pagination.total} result${pagination.total > 1 ? 's' : ''}`
-							: 'No results found'}
-					</span>
+			{loading ? (
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+					{[...Array(8)].map((_, i) => (
+						<Skeleton key={i} className="h-[200px] rounded-xl" />
+					))}
 				</div>
-			)}
-
-			<Card>
-				<CardContent className="p-0">
-					<Table>
-						<TableHeader>
-							<TableRow>
-
-								<TableHead>Buyer</TableHead>
-								<TableHead>Flat</TableHead>
-								<TableHead>Project</TableHead>
-								<TableHead className="text-right text-nowrap">
-									Total Paid
-								</TableHead>
-								<TableHead className="text-right text-nowrap">
-									Remaining
-								</TableHead>
-								<TableHead className="text-nowrap">Next Installment</TableHead>
-								<TableHead className="text-right text-nowrap">
-									Actions
-								</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{loading && (
-								<TableRow>
-									<TableCell colSpan={8}>
-										<div className="flex items-center gap-4">
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-										</div>
-									</TableCell>
-								</TableRow>
-							)}
-
-							{!loading && !searchQuery && bookings.length === 0 && (
-								<TableRow>
-									<TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-										No bookings found
-									</TableCell>
-								</TableRow>
-							)}
-
-							{!loading && searchQuery && bookings.length === 0 && (
-								<TableRow>
-									<TableCell colSpan={8} className="text-center py-8">
-										<div className="flex flex-col items-center gap-2">
-											<Search className="h-8 w-8 text-muted-foreground" />
-											<p className="text-muted-foreground">No bookings found matching "<span className="font-medium text-foreground">{searchQuery}</span>"</p>
-											<Button variant="link" onClick={clearSearch} className="text-sm">
-												Clear search
-											</Button>
-										</div>
-									</TableCell>
-								</TableRow>
-							)}
-
-							{!loading && bookings.map((b) => (
-								<TableRow key={b.bookingId}>
-
-									<TableCell>
-										<div>{b.buyer?.name}</div>
-										<div className="text-xs text-muted-foreground text-nowrap">
-											{b.buyer?.email}
-										</div>
-										{b.buyer?.phone && (
-											<div className="text-xs text-muted-foreground">
-												{b.buyer.phone}
-											</div>
-										)}
-									</TableCell>
-									<TableCell className="min-w-40">
-										Flat {b.flat?.flatNumber}, Tower {b.flat?.tower}
-									</TableCell>
-									<TableCell className="min-w-40">{b.projectName}</TableCell>
-									<TableCell className="text-right">
-										{formatINR(b.totalPaid)}
-									</TableCell>
-									<TableCell className="text-right font-medium text-destructive">
-										{formatINR(b.remainingAmount)}
-									</TableCell>
-									<TableCell className="text-xs">
-										{b.installmentSummary?.pendingInstallments > 0 ? (
-											<>
-												<span>
-													{formatINR(
-														b.installments?.find((i) => !i.paid)?.amount || 0,
-													)}
-												</span>
-												<span className="text-muted-foreground ml-1 block text-nowrap">
-													due{" "}
-													{formatDate(
-														b.installments?.find((i) => !i.paid)?.dueDate,
-													)}
-												</span>
-											</>
-										) : (
-											"All paid"
-										)}
-									</TableCell>
-									<TableCell>
-										<div className="flex gap-1 justify-end">
-
-											{/* Email - Normal */}
-											<Button
-												variant="ghost"
-												size="icon"
-												title="Send Normal Reminder"
-												onClick={() => openReminderDialog(b.bookingId, "normal")}
-												disabled={!b.buyer?.email}
-											>
-												<Mail className="h-4 w-4" />
-											</Button>
-
-											{/* Email - Penalty */}
-											<Button
-												variant="ghost"
-												size="icon"
-												title="Send Penalty Reminder"
-												onClick={() => openReminderDialog(b.bookingId, "penalty")}
-												disabled={!b.buyer?.email}
-											>
-												<AlertTriangle className="h-4 w-4 text-destructive" />
-											</Button>
-
-											{/* WhatsApp Reminder -> Opens Popup */}
-											<Button
-												variant="ghost"
-												size="icon"
-												title="Send WhatsApp Reminder"
-												onClick={() => {
-													const pendingInstallment = b.installments?.find((i) => !i.paid);
-													if (pendingInstallment) {
-														const id = pendingInstallment._id || pendingInstallment.id;
-														// Open dialog with 'whatsapp' type
-														openReminderDialog(b.bookingId, "whatsapp", { installmentId: id });
-													} else {
-														toast.error("No pending installment found to send reminder.");
-													}
-												}}
-												disabled={!b.buyer?.phone || b.installmentSummary?.pendingInstallments === 0 || loading}
-											>
-												<MessageCircle className="h-4 w-4 text-green-600" />
-											</Button>
-
-										</div>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</CardContent>
-			</Card>
-
-			{!loading && pagination && pagination.total > 0 && (
-				<div className="flex items-center justify-between pt-2">
-					<div className="text-sm text-muted-foreground">
-						Showing page {pagination.page} of {pagination.pages} (Total: {pagination.total} bookings)
+			) : bookings.length === 0 ? (
+				<EmptyState
+					title="No financial records found"
+					description="Try adjusting your filters or search query to find specific bookings."
+				/>
+			) : (
+				<>
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 items-stretch">
+						{bookings.map((b) => (
+							<FinanceBookingCard
+								key={b._id}
+								booking={b}
+								onClick={handleView}
+							/>
+						))}
 					</div>
-					<div className="flex gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setCurrentPage((prev) => prev - 1)}
-							disabled={pagination.page <= 1}
-						>
-							Previous
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setCurrentPage((prev) => prev + 1)}
-							disabled={pagination.page >= pagination.pages}
-						>
-							Next
-						</Button>
-					</div>
-				</div>
-			)}
 
-			{/* ✅ Popup / Dialog Section */}
-			<Dialog
-				open={!!reminderOpen}
-				onOpenChange={(v) => !v && setReminderOpen(null)}
-			>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>
-							{reminderType === "normal"
-								? "Send Normal Email Reminder"
-								: reminderType === "penalty"
-									? "Send Penalty Email Reminder"
-									: "Send WhatsApp Reminder"}
-						</DialogTitle>
-					</DialogHeader>
-
-					<div className="grid gap-3">
-						{/* Show confirmation text for WhatsApp */}
-						{reminderType === "whatsapp" ? (
-							<div className="space-y-4">
-								<div className="text-sm text-muted-foreground">
-									<p>Are you sure you want to send a WhatsApp payment reminder to this client?</p>
-									<p className="mt-2 text-amber-600 font-medium">This will immediately send a message to their registered mobile number.</p>
-								</div>
-
-								{/* ✅ Added Language Selector */}
-								<div className="space-y-1.5">
-									<Label>Message Language</Label>
-									<Select
-										value={reminderData.language}
-										onValueChange={(val) => setReminderData({ ...reminderData, language: val })}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Select Language" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="en">English</SelectItem>
-											<SelectItem value="hi">Hindi</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
+					{pagination && pagination.pages > 1 && (
+						<div className="flex flex-col sm:flex-row items-center justify-between border-t border-border pt-6 mt-6 gap-4">
+							<div className="text-sm text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-lg border border-border/30">
+								Showing page <span className="font-semibold text-foreground">{pagination.page}</span> of{" "}
+								<span className="font-semibold text-foreground">{pagination.pages}</span>
+								<span className="mx-1">•</span>
+								Total <span className="font-semibold text-foreground">{pagination.total}</span> records
 							</div>
-						) : (
-							/* Show inputs for Email Reminders */
-							<>
-								{reminderType === "normal" && (
-									<div className="space-y-1.5">
-										<Label>Milestone Name (optional)</Label>
-										<Input
-											placeholder="e.g. 2nd Slab Casting"
-											value={reminderData.milestoneName}
-											onChange={(e) =>
-												setReminderData({
-													...reminderData,
-													milestoneName: e.target.value,
-												})
-											}
-										/>
-									</div>
-								)}
-								<div className="space-y-1.5">
-									<Label>Due Date (optional)</Label>
-									<Input
-										type="date"
-										value={reminderData.dueDate}
-										onChange={(e) =>
-											setReminderData({ ...reminderData, dueDate: e.target.value })
-										}
-									/>
-								</div>
-							</>
-						)}
-					</div>
 
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setReminderOpen(null)}>
-							Cancel
-						</Button>
-						<Button
-							onClick={() => handleSendReminder(reminderOpen)}
-							disabled={loading}
-							className={reminderType === "whatsapp" ? "bg-green-600 hover:bg-green-700 text-white" : ""}
-						>
-							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-							Yes, Send
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+							<div className="flex items-center gap-1">
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+									disabled={currentPage === 1}
+									className="px-2"
+								>
+									<ChevronLeft className="h-4 w-4" />
+								</Button>
+
+								<div className="flex items-center gap-1 overflow-x-auto max-w-[200px] sm:max-w-none no-scrollbar px-1">
+									{[...Array(pagination.pages)].map((_, index) => {
+										const pageNumber = index + 1;
+
+										if (
+											pagination.pages <= 7 ||
+											pageNumber === 1 ||
+											pageNumber === pagination.pages ||
+											(pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+										) {
+											return (
+												<Button
+													key={pageNumber}
+													variant={currentPage === pageNumber ? "default" : "outline"}
+													size="sm"
+													onClick={() => setCurrentPage(pageNumber)}
+													className={`w-8 h-8 p-0 ${currentPage === pageNumber ? "shadow-md" : "text-muted-foreground border-border/50"}`}
+												>
+													{pageNumber}
+												</Button>
+											);
+										}
+
+										if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+											return <span key={pageNumber} className="px-1 text-muted-foreground">...</span>;
+										}
+
+										return null;
+									})}
+								</div>
+
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pagination.pages))}
+									disabled={currentPage === pagination.pages}
+									className="px-2"
+								>
+									<ChevronRight className="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
+					)}
+				</>
+			)}
 		</div>
 	);
 }
