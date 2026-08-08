@@ -149,12 +149,41 @@ export default function App() {
 
 					<Route path="/leaves" element={<EmployeeDashboard />} />
 
-					<Route path="/leaves" element={<EmployeeLayout />}>
-						<Route path="attendance" element={<EmployeeAttendance />} />
-						<Route path="leaves" element={<EmployeeLeaves />} />
-						<Route path="salary" element={<EmployeeSalary />} />
-						<Route path="announcements" element={<EmployeeAnnouncements />} />
-					</Route>
+					<Route
+						path="/employee-attendance"
+						element={
+							<EmployeeLayout>
+								<EmployeeAttendance />
+							</EmployeeLayout>
+						}
+					/>
+
+					<Route
+						path="/employee-leaves"
+						element={
+							<EmployeeLayout>
+								<EmployeeLeaves />
+							</EmployeeLayout>
+						}
+					/>
+
+					<Route
+						path="/employee-salary"
+						element={
+							<EmployeeLayout>
+								<EmployeeSalary />
+							</EmployeeLayout>
+						}
+					/>
+
+					<Route
+						path="/employee-announcements"
+						element={
+							<EmployeeLayout>
+								<EmployeeAnnouncements />
+							</EmployeeLayout>
+						}
+					/>
 
 					{/* My Expenses Route */}
 					<Route path="/my-expenses" element={<MyExpenses />} />

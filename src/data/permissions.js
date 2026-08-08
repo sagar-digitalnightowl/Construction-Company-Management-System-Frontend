@@ -172,6 +172,14 @@ export const VIEW = {
 		"employee",
 	],
 
+	"employee-attendance": ["employee"],
+
+	"employee-leaves": ["employee"],
+
+	"employee-salary": ["employee"],
+
+	"employee-announcements": ["employee"],
+
 	// 👇 CHANGED: Removed "employee" from crm
 	crm: ["admin", "director", "project_manager"],
 
