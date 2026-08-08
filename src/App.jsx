@@ -62,6 +62,11 @@ import { FinanceReminders } from "./pages/finance/FinanceReminders";
 
 // 👇 NEW COMPONENTS IMPORTED HERE 👇
 import MyExpenses from "./pages/hr/MyExpenses";
+import { EmployeeAttendance } from "./pages/hr/EmployeeAttendance";
+import { EmployeeLeaves } from "./pages/hr/EmployeeLeaves";
+import { EmployeeSalary } from "./pages/hr/EmployeeSalary";
+import { EmployeeAnnouncements } from "./pages/hr/EmployeeAnnouncements";
+import EmployeeLayout from "./pages/hr/EmployeeLayout";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -141,7 +146,15 @@ export default function App() {
 					<Route path="/hr" element={<HR />} />
 					<Route path="/hr/employees/:id" element={<EmployeeDetail />} />
 					<Route path="/hr/labors/:id" element={<LaborDetail />} />
+
 					<Route path="/leaves" element={<EmployeeDashboard />} />
+
+					<Route path="/leaves" element={<EmployeeLayout />}>
+						<Route path="attendance" element={<EmployeeAttendance />} />
+						<Route path="leaves" element={<EmployeeLeaves />} />
+						<Route path="salary" element={<EmployeeSalary />} />
+						<Route path="announcements" element={<EmployeeAnnouncements />} />
+					</Route>
 
 					{/* My Expenses Route */}
 					<Route path="/my-expenses" element={<MyExpenses />} />
