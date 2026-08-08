@@ -3,7 +3,7 @@ import React from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinanceDashboard } from "./FinanceDashboard";
-import { FinanceBookings } from "./FinanceBookings";
+import { FinanceBookingsReminder } from "./FinanceBookingsReminder";
 import { FinanceMilestones } from "./FinanceMilestones";
 import { FinanceReminders } from "./FinanceReminders";
 import { FinancePayrollApprovals } from "./FinancePayrollApprovals";
@@ -25,7 +25,7 @@ export default function Finance() {
 				<div className="w-full overflow-auto scrollbar-none">
 					<TabsList>
 						<TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-						<TabsTrigger value="bookings">Bookings</TabsTrigger>
+						<TabsTrigger value="bookings">Bookings Reminder</TabsTrigger>
 						{/* ✅ New WhatsApp Reminders Tab */}
 						<TabsTrigger value="due-installments">WhatsApp Reminders</TabsTrigger>
 						<TabsTrigger value="milestones">Milestones</TabsTrigger>
@@ -40,7 +40,7 @@ export default function Finance() {
 				</TabsContent>
 
 				<TabsContent value="bookings">
-					<FinanceBookings />
+					<FinanceBookingsReminder />
 				</TabsContent>
 
 				{/* ✅ New WhatsApp Reminders Content */}

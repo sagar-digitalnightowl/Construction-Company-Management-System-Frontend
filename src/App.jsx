@@ -53,7 +53,7 @@ import Finance from "./pages/finance/Finance";
 
 import FinanceLayout from "./pages/finance/FinanceLayout";
 import { FinanceDashboard } from "./pages/finance/FinanceDashboard";
-import { FinanceBookings } from "./pages/finance/FinanceBookings";
+import { FinanceBookingsReminder } from "./pages/finance/FinanceBookingsReminder";
 import { FinanceDueInstallments } from "./pages/finance/FinanceDueInstallments";
 import { FinanceMilestones } from "./pages/finance/FinanceMilestones";
 import { FinancePayrollApprovals } from "./pages/finance/FinancePayrollApprovals";
@@ -67,6 +67,8 @@ import { EmployeeLeaves } from "./pages/hr/EmployeeLeaves";
 import { EmployeeSalary } from "./pages/hr/EmployeeSalary";
 import { EmployeeAnnouncements } from "./pages/hr/EmployeeAnnouncements";
 import EmployeeLayout from "./pages/hr/EmployeeLayout";
+import FinanceBookings from "./pages/finance/FinanceBookings";
+import FinanceBookingDetail from "./pages/finance/FinanceBookingDetail";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -196,7 +198,9 @@ export default function App() {
 
 					<Route path="/finance" element={<FinanceLayout />}>
 						<Route path="dashboard" element={<FinanceDashboard />} />
+						<Route path="bookings-reminder" element={<FinanceBookingsReminder />} />
 						<Route path="bookings" element={<FinanceBookings />} />
+						<Route path="bookings/:id" element={<FinanceBookingDetail />} />
 						<Route
 							path="due-installments"
 							element={<FinanceDueInstallments />}

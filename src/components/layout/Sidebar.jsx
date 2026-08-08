@@ -99,6 +99,11 @@ export function Sidebar({ role, onClickLink }) {
 								key: "finance",
 							},
 							{
+								to: "/finance/bookings-reminder",
+								label: "Bookings Reminder",
+								key: "finance",
+							},
+							{
 								to: "/finance/bookings",
 								label: "Bookings",
 								key: "finance",

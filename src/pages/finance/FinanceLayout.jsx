@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 const pageTitles = {
 	"/finance/dashboard": "Finance Overview",
 	"/finance/bookings": "Bookings",
+	"/finance/bookings-reminder": "Bookings Reminder",
 	"/finance/due-installments": "WhatsApp Reminders",
 	"/finance/milestones": "Milestones",
 	"/finance/payroll": "Payroll Approvals",
