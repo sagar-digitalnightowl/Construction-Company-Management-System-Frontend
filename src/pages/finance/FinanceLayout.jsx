@@ -15,7 +15,11 @@ const pageTitles = {
 export default function FinanceLayout() {
 	const { pathname } = useLocation();
 
-	const title = pageTitles[pathname] || "Finance";
+	let title = pageTitles[pathname] || "Finance";
+
+	if (pathname.startsWith("/finance/bookings/")) {
+		title = "Booking Details";
+	}
 
 	return (
 		<div className="space-y-6">
