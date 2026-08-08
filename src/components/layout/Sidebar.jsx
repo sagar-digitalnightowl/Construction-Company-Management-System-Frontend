@@ -28,6 +28,7 @@ import AshirwadLogo from "@/assets/logo.jpg";
 export function Sidebar({ role, onClickLink }) {
 	const isFinanceExecutive =
 		role?.toLowerCase() === "finance_executive";
+	const isEmployee = role?.toLowerCase() === "employee";
 
 	const navGroups = [
 		{
@@ -149,12 +150,44 @@ export function Sidebar({ role, onClickLink }) {
 					icon: Receipt,
 					key: "my-expenses",
 				},
-				{
-					to: "/leaves",
-					label: "Leaves & Attendance",
-					icon: Users2, // You can change this to Calendar or CalendarDays if you want
-					key: "leaves",
-				},
+				...(isEmployee
+					? [
+						{
+							label: "Leaves & Attendance",
+							icon: Users2,
+							key: "leaves",
+							children: [
+								{
+									to: "/leaves/attendance",
+									label: "My Attendance",
+									key: "leaves",
+								},
+								{
+									to: "/leaves/leaves",
+									label: "My Leaves",
+									key: "leaves",
+								},
+								{
+									to: "/leaves/salary",
+									label: "Salary Slips",
+									key: "leaves",
+								},
+								{
+									to: "/leaves/announcements",
+									label: "Announcements",
+									key: "leaves",
+								},
+							],
+						},
+					]
+					: [
+						{
+							to: "/leaves",
+							label: "Leaves & Attendance",
+							icon: Users2,
+							key: "leaves",
+						},
+					]),
 				{
 					to: "/crm",
 					label: "CRM & Buyers",
