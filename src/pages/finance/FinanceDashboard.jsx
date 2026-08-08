@@ -18,7 +18,8 @@ import {
 	Receipt,
 	CheckCircle2,
 	Hourglass,
-	Landmark
+	Landmark,
+	Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -55,7 +56,7 @@ const getFlatDisplay = (flat) => {
 };
 
 export function FinanceDashboard() {
-	const { dashboardData, dashboardSummary, fetchDashboard, fetchProjectDetails, loading } = useFinance();
+	const { dashboardData, dashboardSummary, fetchDashboard, fetchProjectDetails, exportFinanceDashboard, loading } = useFinance();
 
 	const [towerSummary, setTowerSummary] = useState(null);
 	const [selectedProject, setSelectedProject] = useState(null);
@@ -332,11 +333,27 @@ export function FinanceDashboard() {
 			{/* Projects View */}
 			{currentView === "projects" && (
 				<>
-					<div className="flex items-center justify-between mt-6">
-						<h2 className="text-lg font-semibold">Projects</h2>
-						<span className="text-sm text-muted-foreground">
-							{pagination ? `Page ${page} of ${pagination.pages}` : ""}
-						</span>
+					<div className="flex items-center justify-between mt-6 gap-3">
+						<div>
+							<h2 className="text-lg font-semibold">Projects</h2>
+
+							<span className="text-sm text-muted-foreground">
+								{pagination
+									? `Page ${page} of ${pagination.pages}`
+									: ""}
+							</span>
+						</div>
+
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => exportFinanceDashboard()}
+							disabled={loading}
+							className="cursor-pointer"
+						>
+							<Download className="h-4 w-4 mr-2" />
+							Export
+						</Button>
 					</div>
 					{projects.length === 0 ? (
 						<div className="text-center text-muted-foreground py-10 bg-muted/20 rounded-lg border border-dashed">
@@ -420,18 +437,41 @@ export function FinanceDashboard() {
 			{/* Towers View */}
 			{currentView === "towers" && selectedProject && (
 				<>
-					<div className="flex items-center gap-3 mb-4">
-						<Button variant="ghost" size="icon" onClick={goToProjects}>
-							<ChevronLeft className="h-5 w-5" />
-						</Button>
-						<div>
-							<h2 className="text-lg font-semibold">
-								{selectedProject.projectName}
-							</h2>
-							<p className="text-sm text-muted-foreground">
-								{selectedProject.location}
-							</p>
+					<div className="flex items-center justify-between gap-3 mb-4">
+						<div className="flex items-center gap-3">
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={goToProjects}
+							>
+								<ChevronLeft className="h-5 w-5" />
+							</Button>
+
+							<div>
+								<h2 className="text-lg font-semibold">
+									{selectedProject.projectName}
+								</h2>
+
+								<p className="text-sm text-muted-foreground">
+									{selectedProject.location}
+								</p>
+							</div>
 						</div>
+
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() =>
+								exportFinanceDashboard({
+									projectId: selectedProject.projectId,
+								})
+							}
+							disabled={loading}
+							className="cursor-pointer"
+						>
+							<Download className="h-4 w-4 mr-2" />
+							Export
+						</Button>
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Tower</h3>
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -454,30 +494,53 @@ export function FinanceDashboard() {
 			{/* Floors View */}
 			{currentView === "floors" && selectedProject && selectedTower && (
 				<>
-					<div className="flex items-center gap-3 mb-4">
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={async () => {
-								const fullProject = await fetchProjectDetails(selectedProject.projectId);
+					<div className="flex items-center justify-between gap-3 mb-4">
+						<div className="flex items-center gap-3">
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={async () => {
+									const fullProject =
+										await fetchProjectDetails(
+											selectedProject.projectId
+										);
 
-								setSelectedProject(fullProject);
+									setSelectedProject(fullProject);
 
-								setSelectedTower("");
-								setSelectedFloor("");
-								setCurrentView("towers");
-							}}
-						>
-							<ChevronLeft className="h-5 w-5" />
-						</Button>
-						<div>
-							<h2 className="text-lg font-semibold">
-								{selectedProject.projectName} — {selectedTower}
-							</h2>
-							<p className="text-sm text-muted-foreground">
-								{selectedProject.location}
-							</p>
+									setSelectedTower("");
+									setSelectedFloor("");
+									setCurrentView("towers");
+								}}
+							>
+								<ChevronLeft className="h-5 w-5" />
+							</Button>
+
+							<div>
+								<h2 className="text-lg font-semibold">
+									{selectedProject.projectName} — {selectedTower}
+								</h2>
+
+								<p className="text-sm text-muted-foreground">
+									{selectedProject.location}
+								</p>
+							</div>
 						</div>
+
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() =>
+								exportFinanceDashboard({
+									projectId: selectedProject.projectId,
+									tower: selectedTower,
+								})
+							}
+							disabled={loading}
+							className="cursor-pointer"
+						>
+							<Download className="h-4 w-4 mr-2" />
+							Export
+						</Button>
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Floor</h3>
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">

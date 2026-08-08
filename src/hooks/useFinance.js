@@ -53,6 +53,48 @@ export const useFinance = () => {
 		}
 	}, []);
 
+	const exportFinanceDashboard = useCallback(async (params = {}) => {
+		setLoading(true);
+
+		try {
+			const response = await financeApi.exportDashboard(params);
+
+			const blob = new Blob([response.data], {
+				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			});
+
+			const url = window.URL.createObjectURL(blob);
+
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = `Finance_Dashboard_${new Date()
+				.toISOString()
+				.slice(0, 19)
+				.replace(/:/g, "-")}.xlsx`;
+
+			document.body.appendChild(link);
+			link.click();
+
+			link.remove();
+			window.URL.revokeObjectURL(url);
+
+			toast.success("Finance dashboard exported successfully");
+
+			return true;
+		} catch (err) {
+			console.error("Finance export error:", err);
+
+			toast.error(
+				err.response?.data?.message ||
+					"Failed to export finance dashboard",
+			);
+
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
 	// ----- 🔥 NEW: Project Details -----
 	const fetchProjectDetails = useCallback(async (projectId) => {
 		setLoading(true);
@@ -370,6 +412,7 @@ export const useFinance = () => {
 		approvedExpenses,
 
 		fetchDashboard,
+		exportFinanceDashboard,
 		fetchProjectDetails, // 🔥 Exported
 		fetchProjectMilestones,
 		markMilestone,
