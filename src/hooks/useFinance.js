@@ -11,6 +11,10 @@ export const useFinance = () => {
 	const [bookings, setBookings] = useState([]);
 	const [reminders, setReminders] = useState([]);
 
+	const [expenseSummary, setExpenseSummary] = useState(null);
+	const [projectExpenseReport, setProjectExpenseReport] = useState(null);
+	const [employeeExpenseReport, setEmployeeExpenseReport] = useState(null);
+
 	// Payroll State
 	const [pendingPayrollBatches, setPendingPayrollBatches] = useState([]);
 	const [payrollBatches, setPayrollBatches] = useState([]);
@@ -395,6 +399,56 @@ export const useFinance = () => {
 		}
 	};
 
+	const fetchExpenseSummary = async () => {
+		try {
+			setLoading(true);
+			const response = await financeApi.getExpenseSummary();
+			setExpenseSummary(response.data?.data || null);
+			return response.data?.data;
+		} catch (error) {
+			console.error("Failed to fetch expense summary:", error);
+			toast.error("Failed to fetch expense summary");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const fetchProjectExpenseReport = async (projectId) => {
+		if (!projectId) return;
+		try {
+			setLoading(true);
+			const response =
+				await financeApi.getProjectExpenseReport(projectId);
+			setProjectExpenseReport(response.data?.data || null);
+			return response.data?.data;
+		} catch (error) {
+			console.error("Failed to fetch project expense report:", error);
+			toast.error("Failed to fetch project report");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const fetchEmployeeExpenseReport = async (employeeId, projectId = "") => {
+		if (!employeeId) return;
+		try {
+			setLoading(true);
+			const response = await financeApi.getEmployeeExpenseReport(
+				employeeId,
+				{
+					...(projectId && { projectId }),
+				},
+			);
+			setEmployeeExpenseReport(response.data?.data || null);
+			return response.data?.data;
+		} catch (error) {
+			console.error("Failed to fetch employee expense report:", error);
+			toast.error("Failed to fetch employee report");
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return {
 		dashboardData,
 		dashboardSummary, // 🔥 Exported
@@ -410,6 +464,9 @@ export const useFinance = () => {
 		payrollBatches,
 		currentPayrollBatch,
 		approvedExpenses,
+		expenseSummary,
+		projectExpenseReport,
+		employeeExpenseReport,
 
 		fetchDashboard,
 		exportFinanceDashboard,
@@ -432,5 +489,8 @@ export const useFinance = () => {
 		markPayrollBankProcessed,
 		fetchDueInstallments,
 		sendWhatsAppReminders,
+		fetchExpenseSummary,
+		fetchProjectExpenseReport,
+		fetchEmployeeExpenseReport,
 	};
 };

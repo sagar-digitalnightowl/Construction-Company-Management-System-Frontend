@@ -62,4 +62,16 @@ export const financeApi = {
 		api.get("/finance/installments/due", { params }),
 	sendWhatsAppReminders: (data) =>
 		api.post("/finance/reminders/whatsapp/send", data),
+
+	// =========================
+	// EXPENSE REPORTING
+	// =========================
+
+	getExpenseSummary: () => api.get("/finance/expenses/summary"),
+
+	getProjectExpenseReport: (projectId) =>
+		api.get(`/finance/expenses/project/${projectId}`),
+
+	getEmployeeExpenseReport: (employeeId, params = {}) =>
+		api.get(`/finance/expenses/employee/${employeeId}`, { params }),
 };

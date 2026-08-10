@@ -5,6 +5,7 @@ const pageTitles = {
 	"/finance/dashboard": "Finance Overview",
 	"/finance/bookings": "Bookings",
 	"/finance/bookings-reminder": "Bookings Reminder",
+	"/finance/expense-reports": "Expense Reports",
 	"/finance/due-installments": "WhatsApp Reminders",
 	"/finance/milestones": "Milestones",
 	"/finance/payroll": "Payroll Approvals",
