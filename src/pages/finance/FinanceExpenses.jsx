@@ -633,6 +633,45 @@ export function FinanceExpenses() {
 
 							<Separator />
 
+							{/* 🟢 NEW PROJECT & CATEGORY DETAILS BLOCK 🟢 */}
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/30 p-3 rounded-lg border">
+								<div>
+									<Label className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Project</Label>
+									<div className="font-medium text-sm mt-0.5">{selectedExpense.projectId?.name || "N/A"}</div>
+								</div>
+								<div>
+									<Label className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Category</Label>
+									<div className="font-medium text-sm mt-0.5 flex items-center gap-2">
+										{selectedExpense.categoryId?.name ? (
+											<Badge variant="outline" className="text-xs font-normal flex items-center gap-1.5 px-2 py-0.5">
+												<div
+													className="h-3 w-3 rounded-full flex items-center justify-center shrink-0 text-white"
+													style={{ backgroundColor: selectedExpense.categoryId?.color || "#3b82f6" }}
+												>
+													{selectedExpense.categoryId?.icon && renderDynamicIcon(selectedExpense.categoryId.icon, "h-2 w-2")}
+												</div>
+												{selectedExpense.categoryId.name}
+											</Badge>
+										) : (
+											<span>{selectedExpense.category || "N/A"}</span>
+										)}
+									</div>
+								</div>
+							</div>
+
+							<div className="space-y-4">
+								<div>
+									<Label className="text-muted-foreground">Title</Label>
+									<div className="font-medium text-lg">{selectedExpense.title}</div>
+								</div>
+								<div>
+									<Label className="text-muted-foreground">Description</Label>
+									<div className="p-3 bg-muted/50 rounded-md text-sm whitespace-pre-wrap mt-1">{selectedExpense.description || "No description."}</div>
+								</div>
+							</div>
+
+							<Separator />
+
 							<div className="space-y-4">
 								<div>
 									<Label className="text-muted-foreground">Title</Label>
