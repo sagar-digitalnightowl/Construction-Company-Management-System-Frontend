@@ -249,86 +249,104 @@ export function FinanceDashboard() {
 		<div className="space-y-6">
 			{/* Overview Stats */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-				<StatCard
-					size="compact"
-					label="Total Flats"
-					value={stats.totalFlats}
-					icon={Home}
-					accent="info"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/>
-				<StatCard
-					size="compact"
-					label="Booked / Sold"
-					value={stats.bookedFlats}
-					icon={UserCheck}
-					accent="info"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/>
+				<div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="Total Flats"
+						value={stats.totalFlats}
+						icon={Home}
+						accent="info"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div>
+				<div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="Booked / Sold"
+						value={stats.bookedFlats}
+						icon={UserCheck}
+						accent="info"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div>
 				{/* 🔥 Updated Label: Included GST explicitly */}
-				<StatCard
-					size="compact"
-					label="Total Received (Incl. GST)"
-					value={formatINR(stats.totalPaid)}
-					icon={TrendingUp}
-					accent="info"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/>
+				<div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="Total Received (Incl. GST)"
+						value={formatINR(stats.totalPaid)}
+						icon={TrendingUp}
+						accent="info"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div>
 				{/* 🔥 Updated Label: Included GST explicitly */}
-				<StatCard
-					size="compact"
-					label="Outstanding Due (Incl. GST)"
-					value={formatINR(stats.totalRemaining)}
-					icon={TrendingDown}
-					accent="destructive"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/>
+				<div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="Outstanding Due (Incl. GST)"
+						value={formatINR(stats.totalRemaining)}
+						icon={TrendingDown}
+						accent="destructive"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div>
 			</div>
 
 			{/* Finance Breakdown Stats (Pure Base vs GST) */}
 			<h3 className="text-sm font-semibold text-muted-foreground mt-6 mb-3">Finance Breakdown</h3>
 			{/* Changed grid layout to handle the 2 active cards elegantly without looking empty */}
 			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-				<StatCard
-					size="compact"
-					label="Pure Revenue (No GST)"
-					value={formatINR(pureBaseReceived > 0 ? pureBaseReceived : 0)}
-					icon={Landmark}
-					accent="info"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/>
-				{/* <StatCard
-					size="compact"
-					label="Pure Due (No GST)"
-					value={formatINR(pureBaseOutstanding > 0 ? pureBaseOutstanding : 0)}
-					icon={Landmark}
-					accent="warning"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/> */}
-				{/* <StatCard
-					size="compact"
-					label="Total GST"
-					value={formatINR(stats.totalGst)}
-					icon={Receipt}
-					accent="info"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/> */}
-				<StatCard
-					size="compact"
-					label="GST Collected"
-					value={formatINR(stats.gstCollected)}
-					icon={CheckCircle2}
-					accent="info"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/>
-				{/* <StatCard
-					size="compact"
-					label="GST Remaining"
-					value={formatINR(stats.gstRemaining)}
-					icon={Hourglass}
-					accent="destructive"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-				/> */}
+				<div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="Pure Revenue (No GST)"
+						value={formatINR(pureBaseReceived > 0 ? pureBaseReceived : 0)}
+						icon={Landmark}
+						accent="info"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div>
+				{/* <div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="Pure Due (No GST)"
+						value={formatINR(pureBaseOutstanding > 0 ? pureBaseOutstanding : 0)}
+						icon={Landmark}
+						accent="warning"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div> */}
+				{/* <div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="Total GST"
+						value={formatINR(stats.totalGst)}
+						icon={Receipt}
+						accent="info"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div> */}
+				<div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="GST Collected"
+						value={formatINR(stats.gstCollected)}
+						icon={CheckCircle2}
+						accent="info"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div>
+				{/* <div className="bg-white dark:bg-card rounded-xl shadow-sm">
+					<StatCard
+						size="compact"
+						label="GST Remaining"
+						value={formatINR(stats.gstRemaining)}
+						icon={Hourglass}
+						accent="destructive"
+						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					/>
+				</div> */}
 			</div>
 
 			{/* Projects View */}
@@ -350,7 +368,7 @@ export function FinanceDashboard() {
 							size="sm"
 							onClick={() => exportFinanceDashboard()}
 							disabled={loading}
-							className="cursor-pointer"
+							className="cursor-pointer bg-white dark:bg-card hover:bg-muted/50"
 						>
 							<Download className="h-4 w-4 mr-2" />
 							Export
@@ -516,7 +534,7 @@ export function FinanceDashboard() {
 								})
 							}
 							disabled={loading}
-							className="cursor-pointer"
+							className="cursor-pointer bg-white dark:bg-card hover:bg-muted/50"
 						>
 							<Download className="h-4 w-4 mr-2" />
 							Export
@@ -628,7 +646,7 @@ export function FinanceDashboard() {
 								})
 							}
 							disabled={loading}
-							className="cursor-pointer"
+							className="cursor-pointer bg-white dark:bg-card hover:bg-muted/50"
 						>
 							<Download className="h-4 w-4 mr-2" />
 							Export
@@ -737,17 +755,17 @@ export function FinanceDashboard() {
 									key={uniqueKey}
 									// Added h-full and flex-col to force uniform stretching across the grid
 									className={`group h-full flex flex-col justify-between overflow-hidden rounded-xl border p-4 transition-all duration-300 hover:shadow-md bg-card ${isSold
-											? "border-primary/40 hover:border-primary"
-											: isPending
-												? "border-amber-500/40 hover:border-amber-500"
-												: "hover:border-foreground/30"
+										? "border-primary/40 hover:border-primary"
+										: isPending
+											? "border-amber-500/40 hover:border-amber-500"
+											: "hover:border-foreground/30"
 										}`}
 								>
 									{/* 1. Header: Flat Number and Status Badge */}
 									<div>
 										<div className="flex justify-between items-start mb-1 gap-2">
 											<span className={`font-bold text-lg truncate transition-colors ${isSold ? "text-primary group-hover:text-primary/80" :
-													isPending ? "text-amber-600 dark:text-amber-500" : ""
+												isPending ? "text-amber-600 dark:text-amber-500" : ""
 												}`}>
 												{flat.flatNumber}
 											</span>

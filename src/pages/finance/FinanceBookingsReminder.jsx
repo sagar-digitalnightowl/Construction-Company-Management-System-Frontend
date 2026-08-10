@@ -174,11 +174,13 @@ export function FinanceBookingsReminder() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-wrap items-center gap-3">
-				<div className="flex items-center gap-2">
-					<span className="text-sm font-medium whitespace-nowrap">Filter by Project:</span>
+			<div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center bg-card p-4 rounded-xl border shadow-sm">
+				<div className="flex items-center gap-3 w-full xl:w-auto">
+					<span className="text-sm font-semibold text-muted-foreground whitespace-nowrap hidden sm:inline-block">
+						Filter by Project:
+					</span>
 					<Select value={projectFilter} onValueChange={handleProjectFilterChange}>
-						<SelectTrigger className="w-[200px]">
+						<SelectTrigger className="w-full sm:w-64 bg-background border-border/50 transition-all focus:ring-primary/30">
 							<SelectValue placeholder="All Projects" />
 						</SelectTrigger>
 						<SelectContent>
@@ -191,7 +193,7 @@ export function FinanceBookingsReminder() {
 
 							{hasMoreProjects && (
 								<div
-									className="w-full text-left px-2 py-1.5 text-xs text-blue-600 font-medium hover:bg-muted border-t mt-1 cursor-pointer"
+									className="w-full text-left px-2 py-2 text-xs text-primary font-medium hover:bg-muted/60 border-t border-border/50 mt-1 cursor-pointer transition-colors"
 									onClick={handleLoadMoreProjects}
 								>
 									+ Load More Projects
@@ -201,9 +203,9 @@ export function FinanceBookingsReminder() {
 					</Select>
 				</div>
 
-				<form onSubmit={handleSearch} className="flex items-center gap-2 flex-1 max-w-md">
-					<div className="relative flex-1">
-						<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+				<form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+					<div className="relative w-full sm:w-80 lg:w-96">
+						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<Input
 							placeholder="Search by name, email, phone, ref, flat..."
 							value={searchInputValue}
@@ -214,42 +216,44 @@ export function FinanceBookingsReminder() {
 									clearSearch();
 								}
 							}}
-							className="pl-8 pr-8"
+							className="pl-9 pr-9 w-full bg-background border-border/50 transition-all focus-visible:ring-primary/30 shadow-sm"
 						/>
 						{searchInputValue && (
 							<button
 								type="button"
 								onClick={clearSearch}
-								className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+								className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground hover:bg-muted p-1 rounded-full transition-colors"
 							>
-								<X className="h-4 w-4" />
+								<X className="h-3 w-3" />
 							</button>
 						)}
 					</div>
-					<Button type="submit" variant="default" size="sm" disabled={!searchInputValue.trim()}>
-						Search
-					</Button>
-					{searchQuery && (
-						<Button
-							type="button"
-							variant="ghost"
-							size="sm"
-							onClick={clearSearch}
-							className="text-muted-foreground"
-						>
-							Clear
+					<div className="flex gap-2 w-full sm:w-auto">
+						<Button type="submit" variant="default" size="sm" disabled={!searchInputValue.trim()} className="w-full sm:w-auto shadow-sm">
+							Search
 						</Button>
-					)}
+						{searchQuery && (
+							<Button
+								type="button"
+								variant="secondary"
+								size="sm"
+								onClick={clearSearch}
+								className="w-full sm:w-auto shadow-sm bg-muted/60 hover:bg-muted"
+							>
+								Clear
+							</Button>
+						)}
+					</div>
 				</form>
 			</div>
 
 			{searchQuery && (
-				<div className="flex items-center gap-2 text-sm">
-					<Badge variant="secondary" className="gap-1">
-						<Search className="h-3 w-3" />
-						{searchQuery}
+				<div className="flex items-center gap-2 text-sm bg-accent/40 px-3 py-2 rounded-lg border border-border/30 w-fit">
+					<Badge variant="secondary" className="gap-1.5 bg-background border-border/50 shadow-sm">
+						<Search className="h-3 w-3 text-muted-foreground" />
+						<span className="max-w-[150px] truncate">{searchQuery}</span>
 					</Badge>
-					<span className="text-muted-foreground">
+					<span className="text-muted-foreground font-medium">
 						{pagination?.total > 0
 							? `Found ${pagination.total} result${pagination.total > 1 ? 's' : ''}`
 							: 'No results found'}
@@ -257,23 +261,22 @@ export function FinanceBookingsReminder() {
 				</div>
 			)}
 
-			<Card>
+			<Card className="overflow-hidden border-border shadow-sm">
 				<CardContent className="p-0">
 					<Table>
-						<TableHeader>
-							<TableRow>
-
-								<TableHead>Buyer</TableHead>
-								<TableHead>Flat</TableHead>
-								<TableHead>Project</TableHead>
-								<TableHead className="text-right text-nowrap">
+						<TableHeader className="bg-muted/30">
+							<TableRow className="hover:bg-transparent">
+								<TableHead className="font-semibold text-muted-foreground">Buyer Details</TableHead>
+								<TableHead className="font-semibold text-muted-foreground">Property Details</TableHead>
+								<TableHead className="font-semibold text-muted-foreground">Project</TableHead>
+								<TableHead className="text-right text-nowrap font-semibold text-muted-foreground">
 									Total Paid
 								</TableHead>
-								<TableHead className="text-right text-nowrap">
+								<TableHead className="text-right text-nowrap font-semibold text-muted-foreground">
 									Remaining
 								</TableHead>
-								<TableHead className="text-nowrap">Next Installment</TableHead>
-								<TableHead className="text-right text-nowrap">
+								<TableHead className="text-nowrap font-semibold text-muted-foreground">Next Installment</TableHead>
+								<TableHead className="text-right text-nowrap font-semibold text-muted-foreground">
 									Actions
 								</TableHead>
 							</TableRow>
@@ -281,16 +284,15 @@ export function FinanceBookingsReminder() {
 						<TableBody>
 							{loading && (
 								<TableRow>
-									<TableCell colSpan={8}>
-										<div className="flex items-center gap-4">
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
-											<Skeleton className="h-8 w-full" />
+									<TableCell colSpan={7}>
+										<div className="flex items-center gap-4 py-2">
+											<Skeleton className="h-10 w-full" />
+											<Skeleton className="h-10 w-full" />
+											<Skeleton className="h-10 w-full" />
+											<Skeleton className="h-10 w-full" />
+											<Skeleton className="h-10 w-full" />
+											<Skeleton className="h-10 w-full" />
+											<Skeleton className="h-10 w-full" />
 										</div>
 									</TableCell>
 								</TableRow>
@@ -298,19 +300,24 @@ export function FinanceBookingsReminder() {
 
 							{!loading && !searchQuery && bookings.length === 0 && (
 								<TableRow>
-									<TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-										No bookings found
+									<TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+										<div className="flex flex-col items-center justify-center gap-2">
+											<span className="text-2xl opacity-40">📄</span>
+											<p>No bookings found.</p>
+										</div>
 									</TableCell>
 								</TableRow>
 							)}
 
 							{!loading && searchQuery && bookings.length === 0 && (
 								<TableRow>
-									<TableCell colSpan={8} className="text-center py-8">
-										<div className="flex flex-col items-center gap-2">
-											<Search className="h-8 w-8 text-muted-foreground" />
+									<TableCell colSpan={7} className="text-center py-12">
+										<div className="flex flex-col items-center gap-3">
+											<div className="bg-muted p-3 rounded-full">
+												<Search className="h-6 w-6 text-muted-foreground" />
+											</div>
 											<p className="text-muted-foreground">No bookings found matching "<span className="font-medium text-foreground">{searchQuery}</span>"</p>
-											<Button variant="link" onClick={clearSearch} className="text-sm">
+											<Button variant="outline" size="sm" onClick={clearSearch} className="mt-2">
 												Clear search
 											</Button>
 										</div>
@@ -319,55 +326,65 @@ export function FinanceBookingsReminder() {
 							)}
 
 							{!loading && bookings.map((b) => (
-								<TableRow key={b.bookingId}>
-
+								<TableRow key={b.bookingId} className="group hover:bg-muted/40 transition-colors cursor-default">
 									<TableCell>
-										<div>{b.buyer?.name}</div>
-										<div className="text-xs text-muted-foreground text-nowrap">
+										<div className="font-semibold text-foreground">{b.buyer?.name}</div>
+										<div className="text-[11px] text-muted-foreground mt-0.5 text-nowrap">
 											{b.buyer?.email}
 										</div>
 										{b.buyer?.phone && (
-											<div className="text-xs text-muted-foreground">
+											<div className="text-[11px] text-muted-foreground">
 												{b.buyer.phone}
 											</div>
 										)}
 									</TableCell>
-									<TableCell className="min-w-40">
-										Flat {b.flat?.flatNumber}, Tower {b.flat?.tower}
+									<TableCell className="min-w-32">
+										<div className="font-semibold text-foreground">
+											Flat: {b.flat?.flatNumber}
+										</div>
+										<div className="text-[11px] text-muted-foreground mt-0.5 text-nowrap">
+											Tower: {b.flat?.tower}
+										</div>
+										<div className="text-[11px] text-muted-foreground text-nowrap">
+											Floor: {b.flat?.floor}
+										</div>
 									</TableCell>
-									<TableCell className="min-w-40">{b.projectName}</TableCell>
-									<TableCell className="text-right">
+									<TableCell className="min-w-32 font-medium text-sm text-muted-foreground">
+										{b.projectName}
+									</TableCell>
+									<TableCell className="text-right font-medium text-success tabular-nums">
 										{formatINR(b.totalPaid)}
 									</TableCell>
-									<TableCell className="text-right font-medium text-destructive">
+									<TableCell className="text-right font-bold text-destructive tabular-nums">
 										{formatINR(b.remainingAmount)}
 									</TableCell>
 									<TableCell className="text-xs">
 										{b.installmentSummary?.pendingInstallments > 0 ? (
-											<>
-												<span>
+											<div className="flex flex-col gap-0.5">
+												<span className="font-semibold text-foreground tabular-nums">
 													{formatINR(
 														b.installments?.find((i) => !i.paid)?.amount || 0,
 													)}
 												</span>
-												<span className="text-muted-foreground ml-1 block text-nowrap">
-													due{" "}
-													{formatDate(
+												<span className="text-[10px] text-muted-foreground uppercase tracking-wider block text-nowrap">
+													Due: {formatDate(
 														b.installments?.find((i) => !i.paid)?.dueDate,
 													)}
 												</span>
-											</>
+											</div>
 										) : (
-											"All paid"
+											<Badge variant="secondary" className="bg-success/10 text-success border-none hover:bg-success/20 pointer-events-none">
+												All Paid
+											</Badge>
 										)}
 									</TableCell>
 									<TableCell>
-										<div className="flex gap-1 justify-end">
-
+										<div className="flex gap-1.5 justify-end opacity-80 group-hover:opacity-100 transition-opacity">
 											{/* Email - Normal */}
 											<Button
 												variant="ghost"
 												size="icon"
+												className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
 												title="Send Normal Reminder"
 												onClick={() => openReminderDialog(b.bookingId, "normal")}
 												disabled={!b.buyer?.email}
@@ -379,23 +396,24 @@ export function FinanceBookingsReminder() {
 											<Button
 												variant="ghost"
 												size="icon"
+												className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors"
 												title="Send Penalty Reminder"
 												onClick={() => openReminderDialog(b.bookingId, "penalty")}
 												disabled={!b.buyer?.email}
 											>
-												<AlertTriangle className="h-4 w-4 text-destructive" />
+												<AlertTriangle className="h-4 w-4 text-destructive/80" />
 											</Button>
 
-											{/* WhatsApp Reminder -> Opens Popup */}
+											{/* WhatsApp Reminder */}
 											<Button
 												variant="ghost"
 												size="icon"
+												className="h-8 w-8 hover:bg-green-600/10 hover:text-green-600 transition-colors"
 												title="Send WhatsApp Reminder"
 												onClick={() => {
 													const pendingInstallment = b.installments?.find((i) => !i.paid);
 													if (pendingInstallment) {
 														const id = pendingInstallment._id || pendingInstallment.id;
-														// Open dialog with 'whatsapp' type
 														openReminderDialog(b.bookingId, "whatsapp", { installmentId: id });
 													} else {
 														toast.error("No pending installment found to send reminder.");
@@ -403,9 +421,8 @@ export function FinanceBookingsReminder() {
 												}}
 												disabled={!b.buyer?.phone || b.installmentSummary?.pendingInstallments === 0 || loading}
 											>
-												<MessageCircle className="h-4 w-4 text-green-600" />
+												<MessageCircle className="h-4 w-4 text-green-600/80" />
 											</Button>
-
 										</div>
 									</TableCell>
 								</TableRow>
