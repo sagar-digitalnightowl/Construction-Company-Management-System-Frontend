@@ -11,6 +11,8 @@ import { FinancePayrollApprovals } from "./FinancePayrollApprovals";
 import { FinanceExpenses } from "./FinanceExpenses";
 // ✅ Import the new WhatsApp Reminders component
 import { FinanceDueInstallments } from "./FinanceDueInstallments";
+import FinanceBookings from "./FinanceBookings";
+import ExpenseReports from "./ExpenseReports";
 
 export default function Finance() {
 	return (
@@ -26,6 +28,9 @@ export default function Finance() {
 					<TabsList>
 						<TabsTrigger value="dashboard">Dashboard</TabsTrigger>
 						<TabsTrigger value="bookings">Bookings Reminder</TabsTrigger>
+						<TabsTrigger value="expense-reports">
+							Expense Reports
+						</TabsTrigger>
 						{/* ✅ New WhatsApp Reminders Tab */}
 						<TabsTrigger value="due-installments">WhatsApp Reminders</TabsTrigger>
 						<TabsTrigger value="milestones">Milestones</TabsTrigger>
@@ -41,6 +46,10 @@ export default function Finance() {
 
 				<TabsContent value="bookings">
 					<FinanceBookingsReminder />
+				</TabsContent>
+
+				<TabsContent value="expense-reports">
+					<ExpenseReports />
 				</TabsContent>
 
 				{/* ✅ New WhatsApp Reminders Content */}
