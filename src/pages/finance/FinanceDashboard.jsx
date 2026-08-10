@@ -248,22 +248,22 @@ export function FinanceDashboard() {
 	return (
 		<div className="space-y-6">
 			{/* Overview Stats */}
-			<div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 				<StatCard
 					size="compact"
 					label="Total Flats"
 					value={stats.totalFlats}
 					icon={Home}
 					accent="info"
-					valueClassName="text-xl sm:text-2xl"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				<StatCard
 					size="compact"
 					label="Booked / Sold"
 					value={stats.bookedFlats}
 					icon={UserCheck}
-					accent="success"
-					valueClassName="text-xl sm:text-2xl"
+					accent="info"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				{/* 🔥 Updated Label: Included GST explicitly */}
 				<StatCard
@@ -271,8 +271,8 @@ export function FinanceDashboard() {
 					label="Total Received (Incl. GST)"
 					value={formatINR(stats.totalPaid)}
 					icon={TrendingUp}
-					accent="success"
-					valueClassName="text-xl sm:text-2xl"
+					accent="info"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				{/* 🔥 Updated Label: Included GST explicitly */}
 				<StatCard
@@ -281,20 +281,21 @@ export function FinanceDashboard() {
 					value={formatINR(stats.totalRemaining)}
 					icon={TrendingDown}
 					accent="destructive"
-					valueClassName="text-xl sm:text-2xl"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 			</div>
 
 			{/* Finance Breakdown Stats (Pure Base vs GST) */}
-			<h3 className="text-sm font-semibold text-muted-foreground mt-4 mb-2">Finance Breakdown</h3>
-			<div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+			<h3 className="text-sm font-semibold text-muted-foreground mt-6 mb-3">Finance Breakdown</h3>
+			{/* Changed grid layout to handle the 2 active cards elegantly without looking empty */}
+			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 				<StatCard
 					size="compact"
 					label="Pure Revenue (No GST)"
 					value={formatINR(pureBaseReceived > 0 ? pureBaseReceived : 0)}
 					icon={Landmark}
 					accent="info"
-					valueClassName="text-xl sm:text-2xl"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				{/* <StatCard
 					size="compact"
@@ -302,7 +303,7 @@ export function FinanceDashboard() {
 					value={formatINR(pureBaseOutstanding > 0 ? pureBaseOutstanding : 0)}
 					icon={Landmark}
 					accent="warning"
-					valueClassName="text-xl sm:text-2xl"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/> */}
 				{/* <StatCard
 					size="compact"
@@ -310,15 +311,15 @@ export function FinanceDashboard() {
 					value={formatINR(stats.totalGst)}
 					icon={Receipt}
 					accent="info"
-					valueClassName="text-xl sm:text-2xl"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/> */}
 				<StatCard
 					size="compact"
 					label="GST Collected"
 					value={formatINR(stats.gstCollected)}
 					icon={CheckCircle2}
-					accent="success"
-					valueClassName="text-xl sm:text-2xl"
+					accent="info"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				{/* <StatCard
 					size="compact"
@@ -326,7 +327,7 @@ export function FinanceDashboard() {
 					value={formatINR(stats.gstRemaining)}
 					icon={Hourglass}
 					accent="destructive"
-					valueClassName="text-xl sm:text-2xl"
+					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/> */}
 			</div>
 
@@ -361,51 +362,99 @@ export function FinanceDashboard() {
 						</div>
 					) : (
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-							{projects.map((project) => (
-								<Card
-									key={project.projectId}
-									className="cursor-pointer hover:shadow-md transition-shadow"
-									onClick={() => goToTowers(project)}
-								>
-									<CardContent className="p-4 space-y-3">
-										<div className="flex items-start justify-between">
-											<div>
-												<h3 className="font-semibold text-base">
-													{project.projectName}
-												</h3>
-												<p className="text-sm text-muted-foreground">
-													{project.location}
-												</p>
-											</div>
-											<Building2 className="h-5 w-5 text-muted-foreground" />
-										</div>
+							{projects.map((project) => {
+								// Calculate stats for the project
+								const bookedFlats = project.bookedSold || 0;
+								const totalFlats = project.totalFlats || (project.flats ? project.flats.length : 0);
 
-										<div className="flex flex-col gap-1 text-xs text-muted-foreground border-t pt-2">
-											<div className="flex justify-between items-center">
-												<span>Booked: <strong className="text-foreground">{project.bookedSold || 0}</strong></span>
-												{/* 🔥 Mentioned explicitly */}
-												<span>Total Recv: <strong className="text-success">{formatINR(project.totalReceived || 0)}</strong> <span className="text-[10px]">(Incl. GST)</span></span>
-											</div>
-										</div>
+								// Calculate percentage for progress bar
+								const bookingPercentage = totalFlats > 0 ? (bookedFlats / totalFlats) * 100 : 0;
 
-										{/* GST Breakdown Per Project */}
-										<div className="bg-muted/40 rounded p-2 text-xs grid grid-cols-3 gap-1 text-center">
-											<div>
-												<p className="text-muted-foreground text-[10px]">Total GST</p>
-												<p className="font-medium">{formatINR(project.totalGst || 0)}</p>
+								// Determine styling states
+								const isFullyBooked = totalFlats > 0 && bookedFlats >= totalFlats;
+								const hasBookings = bookedFlats > 0 && !isFullyBooked;
+
+								return (
+									<Card
+										key={project.projectId}
+										className={`group flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg ${isFullyBooked
+											? "bg-primary/5 border-primary/40 dark:bg-primary/10 hover:border-primary"
+											: hasBookings
+												? "border-primary/30 hover:border-primary/70"
+												: "hover:border-foreground/30"
+											}`}
+										onClick={() => goToTowers(project)}
+									>
+										<CardContent className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col">
+
+											{/* 1. Header: Title, Location, and Building Icon */}
+											<div className="flex justify-between items-start gap-3">
+												<div className="min-w-0 flex-1">
+													<h3 className="font-semibold text-base sm:text-lg truncate group-hover:text-primary transition-colors" title={project.projectName}>
+														{project.projectName}
+													</h3>
+													<p className="text-xs sm:text-sm text-muted-foreground truncate" title={project.location}>
+														{project.location}
+													</p>
+												</div>
+												{/* Restored Building Icon with dynamic color */}
+												<Building2 className={`h-5 w-5 shrink-0 ${isFullyBooked || hasBookings ? "text-primary" : "text-muted-foreground"}`} />
 											</div>
-											<div>
-												<p className="text-muted-foreground text-[10px]">Collected</p>
-												<p className="font-medium text-success">{formatINR(project.gstCollected || 0)}</p>
+
+											{/* 2. Progress Bar Section */}
+											<div className="space-y-1.5 mt-auto pt-2">
+												<div className="flex justify-between items-center text-xs sm:text-sm">
+													{/* Changed label to "Booked" */}
+													<span className="text-muted-foreground font-medium">Booked</span>
+													<span className="font-medium">
+														<span className={isFullyBooked ? "text-primary font-bold" : "text-foreground"}>{bookedFlats}</span>
+														<span className="text-muted-foreground"> / {totalFlats} Flats</span>
+													</span>
+												</div>
+												<div className="w-full bg-secondary h-2 sm:h-2.5 rounded-full overflow-hidden">
+													<div
+														className={`h-full transition-all duration-500 ${isFullyBooked ? 'bg-primary' : 'bg-primary/70'}`}
+														style={{ width: `${bookingPercentage}%` }}
+													/>
+												</div>
 											</div>
-											<div>
-												<p className="text-muted-foreground text-[10px]">Remaining</p>
-												<p className="font-medium text-warning">{formatINR(project.gstRemaining || 0)}</p>
+
+											{/* 3. Primary Financial Overview */}
+											<div className="grid grid-cols-2 gap-3 pt-3 border-t">
+												<div>
+													<p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Received</p>
+													<p className="font-bold text-success text-sm sm:text-base truncate" title={formatINR(project.totalReceived || 0)}>
+														{formatINR(project.totalReceived || 0)}
+													</p>
+												</div>
+												<div className="text-right">
+													<p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Outstanding Due</p>
+													<p className="font-bold text-destructive text-sm sm:text-base truncate" title={formatINR(project.outstanding || 0)}>
+														{formatINR(project.outstanding || 0)}
+													</p>
+												</div>
 											</div>
-										</div>
-									</CardContent>
-								</Card>
-							))}
+
+											{/* 4. GST Breakdown (Compact & Responsive Grid) */}
+											<div className={`rounded-md p-2.5 text-xs grid grid-cols-3 gap-1 sm:gap-2 text-center mt-2 ${isFullyBooked ? "bg-primary/10" : "bg-muted/50"}`}>
+												<div className="flex flex-col justify-center">
+													<p className="text-muted-foreground text-[9px] sm:text-[10px] uppercase font-medium">Total GST</p>
+													<p className="font-semibold text-[11px] sm:text-xs truncate">{formatINR(project.totalGst || 0)}</p>
+												</div>
+												<div className="flex flex-col justify-center border-x border-foreground/10 px-1">
+													<p className="text-muted-foreground text-[9px] sm:text-[10px] uppercase font-medium">Collected</p>
+													<p className="font-semibold text-success text-[11px] sm:text-xs truncate">{formatINR(project.gstCollected || 0)}</p>
+												</div>
+												<div className="flex flex-col justify-center">
+													<p className="text-muted-foreground text-[9px] sm:text-[10px] uppercase font-medium">Remaining</p>
+													<p className="font-semibold text-warning text-[11px] sm:text-xs truncate">{formatINR(project.gstRemaining || 0)}</p>
+												</div>
+											</div>
+
+										</CardContent>
+									</Card>
+								);
+							})}
 						</div>
 					)}
 					{pagination && pagination.pages > 1 && (
@@ -475,18 +524,61 @@ export function FinanceDashboard() {
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Tower</h3>
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-						{towers.map((tower) => (
-							<Card
-								key={tower}
-								className="cursor-pointer hover:bg-muted/40 transition-colors"
-								onClick={() => goToFloors(tower)}
-							>
-								<CardContent className="p-4 flex items-center gap-3">
-									<Building2 className="h-5 w-5 text-muted-foreground" />
-									<span className="font-medium">{tower}</span>
-								</CardContent>
-							</Card>
-						))}
+						{towers.map((tower) => {
+							const towerFlats = selectedProject.flats.filter((f) => f.tower === tower);
+							const totalFlats = towerFlats.length;
+							const bookedFlats = towerFlats.filter((f) => {
+								const eff = getEffectiveFlatStatus(f);
+								return eff === "sold" || eff === "pending";
+							}).length;
+
+							// Calculate percentage for progress bar
+							const bookingPercentage = totalFlats > 0 ? (bookedFlats / totalFlats) * 100 : 0;
+
+							// Determine styling states
+							const isFullyBooked = totalFlats > 0 && bookedFlats === totalFlats;
+							const hasBookings = bookedFlats > 0 && !isFullyBooked;
+
+							return (
+								<Card
+									key={tower}
+									className={`group flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-md ${isFullyBooked
+										? "bg-primary/5 border-primary/40 dark:bg-primary/10 hover:border-primary"
+										: hasBookings
+											? "border-primary/30 hover:border-primary/70"
+											: "hover:border-foreground/30"
+										}`}
+									onClick={() => goToFloors(tower)}
+								>
+									<CardContent className="p-4 space-y-4 flex-1 flex flex-col">
+										{/* Header: Title and Building Icon */}
+										<div className="flex justify-between items-start gap-3">
+											<h3 className="font-semibold text-base truncate group-hover:text-primary transition-colors">
+												{tower}
+											</h3>
+											<Building2 className={`h-5 w-5 shrink-0 ${isFullyBooked || hasBookings ? "text-primary" : "text-muted-foreground"}`} />
+										</div>
+
+										{/* Progress Bar Section */}
+										<div className="space-y-1.5 mt-auto pt-2">
+											<div className="flex justify-between items-center text-xs sm:text-sm">
+												<span className="text-muted-foreground font-medium">Booked</span>
+												<span className="font-medium">
+													<span className={isFullyBooked ? "text-primary font-bold" : "text-foreground"}>{bookedFlats}</span>
+													<span className="text-muted-foreground"> / {totalFlats} Flats</span>
+												</span>
+											</div>
+											<div className="w-full bg-secondary h-2 sm:h-2.5 rounded-full overflow-hidden">
+												<div
+													className={`h-full transition-all duration-500 ${isFullyBooked ? 'bg-primary' : 'bg-primary/70'}`}
+													style={{ width: `${bookingPercentage}%` }}
+												/>
+											</div>
+										</div>
+									</CardContent>
+								</Card>
+							);
+						})}
 					</div>
 				</>
 			)}
@@ -544,18 +636,63 @@ export function FinanceDashboard() {
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Floor</h3>
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-						{floors.map((floor) => (
-							<Card
-								key={floor}
-								className="cursor-pointer hover:bg-muted/40 transition-colors"
-								onClick={() => goToFlats(floor)}
-							>
-								<CardContent className="p-4 flex items-center gap-3">
-									<Layers className="h-5 w-5 text-muted-foreground" />
-									<span className="font-medium">{floor}</span>
-								</CardContent>
-							</Card>
-						))}
+						{floors.map((floor) => {
+							const floorFlats = selectedProject.flats.filter(
+								(f) => f.tower === selectedTower && f.floor === floor
+							);
+							const totalFlats = floorFlats.length;
+							const bookedFlats = floorFlats.filter((f) => {
+								const eff = getEffectiveFlatStatus(f);
+								return eff === "sold" || eff === "pending";
+							}).length;
+
+							// Calculate percentage for progress bar
+							const bookingPercentage = totalFlats > 0 ? (bookedFlats / totalFlats) * 100 : 0;
+
+							// Determine styling states
+							const isFullyBooked = totalFlats > 0 && bookedFlats === totalFlats;
+							const hasBookings = bookedFlats > 0 && !isFullyBooked;
+
+							return (
+								<Card
+									key={floor}
+									className={`group flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-md ${isFullyBooked
+										? "bg-primary/5 border-primary/40 dark:bg-primary/10 hover:border-primary"
+										: hasBookings
+											? "border-primary/30 hover:border-primary/70"
+											: "hover:border-foreground/30"
+										}`}
+									onClick={() => goToFlats(floor)}
+								>
+									<CardContent className="p-4 space-y-4 flex-1 flex flex-col">
+										{/* Header: Title and Layers Icon */}
+										<div className="flex justify-between items-start gap-3">
+											<h3 className="font-semibold text-base truncate group-hover:text-primary transition-colors">
+												{floor}
+											</h3>
+											<Layers className={`h-5 w-5 shrink-0 ${isFullyBooked || hasBookings ? "text-primary" : "text-muted-foreground"}`} />
+										</div>
+
+										{/* Progress Bar Section */}
+										<div className="space-y-1.5 mt-auto pt-2">
+											<div className="flex justify-between items-center text-xs sm:text-sm">
+												<span className="text-muted-foreground font-medium">Booked</span>
+												<span className="font-medium">
+													<span className={isFullyBooked ? "text-primary font-bold" : "text-foreground"}>{bookedFlats}</span>
+													<span className="text-muted-foreground"> / {totalFlats} Flats</span>
+												</span>
+											</div>
+											<div className="w-full bg-secondary h-2 sm:h-2.5 rounded-full overflow-hidden">
+												<div
+													className={`h-full transition-all duration-500 ${isFullyBooked ? 'bg-primary' : 'bg-primary/70'}`}
+													style={{ width: `${bookingPercentage}%` }}
+												/>
+											</div>
+										</div>
+									</CardContent>
+								</Card>
+							);
+						})}
 					</div>
 				</>
 			)}
@@ -591,56 +728,92 @@ export function FinanceDashboard() {
 							const isSold = status === "sold";
 							const isPending = status === "pending";
 
+							// Calculate payment progress for sold/pending flats
+							const totalAmount = (flat.totalPaid || 0) + (flat.remainingAmount || 0);
+							const paidPercentage = totalAmount > 0 ? ((flat.totalPaid || 0) / totalAmount) * 100 : 0;
+
 							return (
 								<div
 									key={uniqueKey}
-									className={`border rounded-lg p-3 text-sm transition-all shadow-sm ${isSold
-										? "bg-primary/10 border-primary dark:bg-primary/20"
-										: isPending
-											? "bg-amber-500/10 border-amber-500 dark:bg-amber-500/20"
-											: "bg-background hover:border-primary"
+									// Added h-full and flex-col to force uniform stretching across the grid
+									className={`group h-full flex flex-col justify-between overflow-hidden rounded-xl border p-4 transition-all duration-300 hover:shadow-md bg-card ${isSold
+											? "border-primary/40 hover:border-primary"
+											: isPending
+												? "border-amber-500/40 hover:border-amber-500"
+												: "hover:border-foreground/30"
 										}`}
 								>
-									<div className="flex justify-between items-start mb-2">
-										<span className="font-semibold text-base">
-											{flat.flatNumber}
-										</span>
-										<Badge variant={variant} className="capitalize text-[10px] text-center max-w-[80px] leading-tight">
-											{label}
-										</Badge>
-									</div>
-									<p className="text-muted-foreground text-xs font-medium">
-										{flat.tower} • Floor {flat.floor}
-									</p>
+									{/* 1. Header: Flat Number and Status Badge */}
+									<div>
+										<div className="flex justify-between items-start mb-1 gap-2">
+											<span className={`font-bold text-lg truncate transition-colors ${isSold ? "text-primary group-hover:text-primary/80" :
+													isPending ? "text-amber-600 dark:text-amber-500" : ""
+												}`}>
+												{flat.flatNumber}
+											</span>
+											<Badge variant={variant} className="capitalize text-[10px] sm:text-xs whitespace-nowrap shrink-0 shadow-sm">
+												{label}
+											</Badge>
+										</div>
 
-									{(isSold || isPending) && (
-										<>
-											{flat.buyerName && (
-												<p
-													className="text-xs mt-2 font-medium truncate"
-													title={flat.buyerName}
-												>
-													👤 {flat.buyerName}
-												</p>
-											)}
-											<div className="mt-2 space-y-1">
-												{/* 🔥 Added (Incl. GST) tag explicitly for transparency */}
-												{flat.totalPaid > 0 && (
-													<p className="text-[11px] text-success font-medium flex justify-between">
-														<span>Paid: {formatINR(flat.totalPaid)}</span>
-														<span className="text-[9px] text-muted-foreground opacity-80">(Incl. GST)</span>
+										<p className="text-muted-foreground text-xs font-medium">
+											{flat.tower} • Floor {flat.floor}
+										</p>
+									</div>
+
+									{/* 2. Bottom Section (Dynamically fills space) */}
+									<div className="mt-4 pt-3 border-t border-foreground/10 flex-1 flex flex-col">
+										{(isSold || isPending) ? (
+											<div className="space-y-3 flex-1 flex flex-col justify-end">
+												{/* Buyer Name */}
+												{flat.buyerName && (
+													<p
+														className="text-xs sm:text-sm font-semibold truncate flex items-center gap-1.5"
+														title={flat.buyerName}
+													>
+														<span className="text-muted-foreground">👤</span> {flat.buyerName}
 													</p>
 												)}
-												{/* 🔥 Added (Incl. GST) tag explicitly for transparency */}
-												{flat.remainingAmount > 0 && (
-													<p className="text-[11px] text-destructive font-medium flex justify-between">
-														<span>Due: {formatINR(flat.remainingAmount)}</span>
-														<span className="text-[9px] text-muted-foreground opacity-80">(Incl. GST)</span>
-													</p>
-												)}
+
+												{/* Payment Progress Bar */}
+												<div className="space-y-1.5">
+													<div className="flex justify-between items-center text-[10px] sm:text-xs">
+														<span className="text-muted-foreground font-medium">Payment</span>
+														<span className="font-medium">{Math.round(paidPercentage)}%</span>
+													</div>
+													<div className="w-full bg-secondary h-1.5 sm:h-2 rounded-full overflow-hidden">
+														<div
+															className={`h-full transition-all duration-500 ${isSold ? 'bg-primary' : 'bg-amber-500'}`}
+															style={{ width: `${paidPercentage}%` }}
+														/>
+													</div>
+												</div>
+
+												{/* Paid vs Due Breakdown */}
+												<div className="grid grid-cols-2 gap-2 text-center pt-1 mt-auto">
+													<div className="bg-success/10 rounded py-1.5 px-1">
+														<p className="text-[9px] sm:text-[10px] text-success/80 uppercase font-bold">Paid</p>
+														<p className="text-success font-semibold text-[11px] sm:text-xs truncate" title={formatINR(flat.totalPaid || 0)}>
+															{formatINR(flat.totalPaid || 0)}
+														</p>
+													</div>
+													<div className="bg-destructive/10 rounded py-1.5 px-1">
+														<p className="text-[9px] sm:text-[10px] text-destructive/80 uppercase font-bold">Due</p>
+														<p className="text-destructive font-semibold text-[11px] sm:text-xs truncate" title={formatINR(flat.remainingAmount || 0)}>
+															{formatINR(flat.remainingAmount || 0)}
+														</p>
+													</div>
+												</div>
 											</div>
-										</>
-									)}
+										) : (
+											/* Placeholder state for Available Flats */
+											<div className="flex-1 flex flex-col items-center justify-center min-h-[115px] bg-muted/20 border border-dashed border-muted-foreground/30 rounded-lg p-3 transition-colors group-hover:bg-muted/40">
+												<p className="text-[10px] text-muted-foreground/60 text-center mt-1">
+													No active buyer or payments assigned.
+												</p>
+											</div>
+										)}
+									</div>
 								</div>
 							);
 						})}
