@@ -2470,6 +2470,1126 @@
 
 
 
+// import React, { useEffect, useState, useMemo } from "react";
+// import * as LucideIcons from "lucide-react"; 
+// import { 
+//   CheckCircle, XCircle, Search, FileText, Eye, Hash, User, Tag, 
+//   Settings, Plus 
+// } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+// import { Badge } from "@/components/ui/badge";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Textarea } from "@/components/ui/textarea";
+// import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+// import { Separator } from "@/components/ui/separator";
+// import { toast } from "sonner";
+// import { useHR } from "@/hooks/useHR"; 
+
+// // ==================== PREDEFINED UX DATA ====================
+// const PREDEFINED_COLORS = [
+//   "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16", "#22c55e", "#10b981", "#14b8a6", 
+//   "#06b6d4", "#0ea5e9", "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", 
+//   "#f43f5e", "#dc2626", "#ea580c", "#d97706", "#ca8a04", "#65a30d", "#16a34a", "#059669", 
+//   "#0d9488", "#0891b2", "#0284c7", "#2563eb", "#4f46e5", "#7c3aed", "#9333ea", "#c026d3", 
+//   "#db2777", "#e11d48", "#94a3b8", "#64748b", "#475569", "#334155", "#1e293b", "#0f172a"
+// ];
+
+// // Pure Lucide Icons for Categories
+// const PREDEFINED_ICONS = [
+//   "Car", "Bus", "Train", "Plane", "Bike", "Truck", "Ship", "Fuel", "Compass", "MapPin", "Navigation", "Route", "Ticket",
+//   "Utensils", "Coffee", "Pizza", "Soup", "CupSoda", "Wine", "Beer", "Cake", "Apple", "Cookie",
+//   "Building", "Hotel", "Home", "Warehouse", "Factory", "Store", "Tent", "Bed", "DoorOpen",
+//   "Laptop", "Smartphone", "Tablet", "Monitor", "Printer", "Server", "Cpu", "HardDrive", "Wifi", "Bluetooth", "Plug", "BatteryCharging", "Zap",
+//   "Wrench", "Hammer", "Screwdriver", "Tool", "Lightbulb", "Headset", "Camera", "Video", "Mic", "Speaker", "Tv",
+//   "Banknote", "Coins", "CreditCard", "Receipt", "Wallet", "PiggyBank", "Calculator", "ShoppingCart", "ShoppingBag", "Percent", "TrendingUp",
+//   "Stethoscope", "Pill", "Syringe", "Activity", "HeartPulse", "FirstAidKit", "Cross",
+//   "Tag", "Tags", "Box", "Boxes", "Package", "Gift", "Bookmark", "Calendar", "Clock", "Hourglass", "AlarmClock",
+//   "Briefcase", "Folder", "FolderOpen", "FileText", "Clipboard", "Mail", "Send", "Inbox", "Archive",
+//   "Star", "Shield", "Key", "Lock", "Unlock", "Search", "Bell", "Flag", "BookmarkCheck",
+//   "Users", "User", "UserCheck", "UserPlus", "GraduationCap", "BookOpen", "Award", "Trophy", "Crown", "Medal",
+//   "Sun", "Moon", "Cloud", "CloudRain", "Snowflake", "Wind", "Flame", "Droplets", "Leaf", "TreePine"
+// ];
+
+// export function HRExpenseTab() {
+//   const {
+//     loading,
+//     allExpenses,
+//     fetchAllExpenses,
+//     approveExpense,
+//     rejectExpense,
+//     expenseCategories,
+//     fetchExpenseCategories,
+//     createExpenseCategory,
+//     updateExpenseCategory,
+//     deleteExpenseCategory
+//   } = useHR();
+
+//   // ==================== TICKET STATE ====================
+//   const [ticketTab, setTicketTab] = useState("Pending");
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [selectedExpense, setSelectedExpense] = useState(null);
+//   const [isApproveOpen, setIsApproveOpen] = useState(false);
+//   const [isRejectOpen, setIsRejectOpen] = useState(false);
+//   const [isViewOpen, setIsViewOpen] = useState(false);
+//   const [approveRemarks, setApproveRemarks] = useState("");
+//   const [rejectReason, setRejectReason] = useState("");
+
+//   // ==================== CATEGORY STATE ====================
+//   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+//   const [editingCategory, setEditingCategory] = useState(null);
+//   const [iconSearch, setIconSearch] = useState(""); 
+//   const [categoryForm, setCategoryForm] = useState({
+//     name: "", code: "", description: "", color: "#3b82f6", icon: "Tag", sortOrder: 0
+//   });
+
+//   // Filter Lucide icons based on search
+//   const filteredIcons = useMemo(() => {
+//     if (!iconSearch.trim()) return PREDEFINED_ICONS;
+//     return PREDEFINED_ICONS.filter(iconName => 
+//       iconName.toLowerCase().includes(iconSearch.toLowerCase())
+//     );
+//   }, [iconSearch]);
+
+//   // ==================== EFFECTS ====================
+  
+//   // Fetch Categories once on mount
+//   useEffect(() => {
+//     fetchExpenseCategories();
+//   }, [fetchExpenseCategories]);
+
+//   // Debounced Ticket Search
+//   useEffect(() => {
+//     const debounce = setTimeout(() => {
+//       fetchAllExpenses({ status: ticketTab, search: searchTerm, page: 1, limit: 10 });
+//     }, 500);
+//     return () => clearTimeout(debounce);
+//   }, [ticketTab, searchTerm, fetchAllExpenses]);
+
+//   // ==================== TICKET HANDLERS ====================
+//   const handleApprove = async () => {
+//     if (!selectedExpense?._id) return; 
+//     const success = await approveExpense(selectedExpense._id, { remarks: approveRemarks });
+//     if (success) setIsApproveOpen(false);
+//   };
+
+//   const handleReject = async () => {
+//     if (!selectedExpense?._id) return; 
+//     if (!rejectReason.trim()) return toast.error("Reason is required!");
+//     const success = await rejectExpense(selectedExpense._id, { reason: rejectReason });
+//     if (success) setIsRejectOpen(false);
+//   };
+
+//   const openTicketModal = (expense, type) => {
+//     setSelectedExpense(expense);
+//     if (type === 'view') setIsViewOpen(true);
+//     if (type === 'approve') { setApproveRemarks(""); setIsApproveOpen(true); }
+//     if (type === 'reject') { setRejectReason(""); setIsRejectOpen(true); }
+//   };
+
+//   // ==================== CATEGORY HANDLERS ====================
+//   const openCategoryModal = (category = null) => {
+//     setIconSearch(""); 
+//     if (category) {
+//       setEditingCategory(category);
+//       setCategoryForm({ 
+//         name: category.name || "", 
+//         code: category.code || "", 
+//         description: category.description || "", 
+//         color: category.color || "#3b82f6", 
+//         icon: category.icon || "Tag", 
+//         sortOrder: category.sortOrder || 0 
+//       });
+//     } else {
+//       setEditingCategory(null);
+//       setCategoryForm({ name: "", code: "", description: "", color: "#3b82f6", icon: "Tag", sortOrder: 0 });
+//     }
+//     setIsCategoryOpen(true);
+//   };
+
+//   const handleCategorySubmit = async () => {
+//     if (!categoryForm.name || !categoryForm.code) return toast.error("Name and Code are required");
+    
+//     let success = false;
+//     if (editingCategory?._id) { 
+//       success = await updateExpenseCategory(editingCategory._id, categoryForm);
+//     } else {
+//       success = await createExpenseCategory(categoryForm);
+//     }
+
+//     if (success) setIsCategoryOpen(false);
+//   };
+
+//   const handleDeleteCategory = async (id) => {
+//     if (!id) return;
+//     if (window.confirm("Are you sure you want to deactivate this category?")) {
+//       await deleteExpenseCategory(id);
+//     }
+//   };
+
+//   const handleActivateCategory = async (category) => {
+//     if (window.confirm("Are you sure you want to activate this category?")) {
+//       await updateExpenseCategory(category._id, { ...category, isActive: true });
+//     }
+//   };
+
+//   // ==================== HELPERS ====================
+//   const formatDate = (isoString) => {
+//     if (!isoString) return "N/A";
+//     return new Date(isoString).toLocaleString("en-IN", {
+//       day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+//     });
+//   };
+
+//   const getStatusBadgeVariant = (status) => {
+//     switch (status) {
+//       case "Approved": return "default";
+//       case "Paid": return "outline"; 
+//       case "Rejected": return "destructive";
+//       default: return "secondary"; 
+//     }
+//   };
+
+//   const renderDynamicIcon = (iconName, className) => {
+//     const DynamicIcon = LucideIcons[iconName];
+//     if (!DynamicIcon) return <LucideIcons.Tag className={className} />;
+//     return <DynamicIcon className={className} />;
+//   };
+
+//   return (
+//     <div className="space-y-6">
+//       <Tabs defaultValue="tickets" className="w-full">
+//         <TabsList className="mb-4">
+//           <TabsTrigger value="tickets" className="flex gap-2"><FileText className="h-4 w-4"/> Tickets</TabsTrigger>
+//           <TabsTrigger value="categories" className="flex gap-2"><Settings className="h-4 w-4"/> Categories</TabsTrigger>
+//         </TabsList>
+
+//         {/* ==================== 1. TICKETS SECTION ==================== */}
+//         <TabsContent value="tickets" className="space-y-4 m-0">
+//           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+//             <div className="w-full sm:w-auto overflow-auto scrollbar-none">
+//               <Tabs value={ticketTab} onValueChange={setTicketTab}>
+//                 <TabsList>
+//                   <TabsTrigger value="Pending">Pending Approvals</TabsTrigger>
+//                   <TabsTrigger value="Approved">Approved</TabsTrigger>
+//                   <TabsTrigger value="Paid">Paid History</TabsTrigger> 
+//                   <TabsTrigger value="Rejected">Rejected</TabsTrigger>
+//                 </TabsList>
+//               </Tabs>
+//             </div>
+//             <div className="relative w-full sm:w-64 shrink-0">
+//               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+//               <Input placeholder="Search tickets..." className="pl-9" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+//             </div>
+//           </div>
+
+//           <div className="border rounded-md">
+//             <Table>
+//               <TableHeader>
+//                 <TableRow>
+//                   <TableHead>Date</TableHead>
+//                   <TableHead>Employee</TableHead>
+//                   <TableHead>Title</TableHead>
+//                   <TableHead>Amount</TableHead>
+//                   <TableHead>Status</TableHead>
+//                   <TableHead className="text-right">Actions</TableHead>
+//                 </TableRow>
+//               </TableHeader>
+//               <TableBody>
+//                 {loading ? (
+//                   <TableRow><TableCell colSpan={6} className="text-center py-8">Loading...</TableCell></TableRow>
+//                 ) : allExpenses?.length === 0 ? (
+//                   <TableRow><TableCell colSpan={6} className="text-center py-8">No tickets found.</TableCell></TableRow>
+//                 ) : (
+//                   allExpenses?.map((expense) => (
+//                     <TableRow key={expense?._id}>
+//                       <TableCell>{new Date(expense?.createdAt).toLocaleDateString()}</TableCell>
+//                       <TableCell>
+//                         <div className="font-medium">{expense?.employeeId?.name}</div>
+//                         <div className="text-xs text-muted-foreground">{expense?.employeeId?.email}</div>
+//                       </TableCell>
+//                       <TableCell>
+//                         <div className="font-medium">{expense?.title}</div>
+//                         <Badge variant="outline" className="mt-1 font-normal text-[10px] flex items-center w-fit gap-1">
+//                           {expense?.categoryId?.icon && renderDynamicIcon(expense.categoryId.icon, "h-3 w-3")}
+//                           {expense?.categoryId?.name || "N/A"}
+//                         </Badge>
+//                       </TableCell>
+//                       <TableCell className="font-bold">₹{expense?.amount}</TableCell>
+//                       <TableCell>
+//                         <Badge variant={getStatusBadgeVariant(expense?.status)}>{expense?.status}</Badge>
+//                       </TableCell>
+//                       <TableCell className="text-right">
+//                         <div className="flex justify-end gap-2">
+//                           <Button variant="ghost" size="sm" onClick={() => openTicketModal(expense, 'view')}><Eye className="h-4 w-4" /></Button>
+//                           {ticketTab === "Pending" && (
+//                             <>
+//                               <Button size="sm" variant="outline" className="border-success/50 text-success hover:bg-success/10" onClick={() => openTicketModal(expense, 'approve')}>
+//                                 <CheckCircle className="mr-1 h-3.5 w-3.5" /> Approve
+//                               </Button>
+//                               <Button size="sm" variant="outline" className="border-destructive/50 text-destructive hover:bg-destructive/10" onClick={() => openTicketModal(expense, 'reject')}>
+//                                 <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
+//                               </Button>
+//                             </>
+//                           )}
+//                         </div>
+//                       </TableCell>
+//                     </TableRow>
+//                   ))
+//                 )}
+//               </TableBody>
+//             </Table>
+//           </div>
+//         </TabsContent>
+
+//         {/* ==================== 2. CATEGORIES SECTION ==================== */}
+//         <TabsContent value="categories" className="space-y-4 m-0">
+//           <div className="flex justify-between items-center bg-muted/30 p-4 rounded-lg border">
+//             <div>
+//               <h3 className="text-lg font-semibold">Expense Categories</h3>
+//               <p className="text-sm text-muted-foreground">Manage allowed expense types and their limits.</p>
+//             </div>
+//             <Button onClick={() => openCategoryModal()} className="gap-2">
+//               <Plus className="h-4 w-4"/> Add Category
+//             </Button>
+//           </div>
+
+//           <div className="border rounded-md">
+//             <Table>
+//               <TableHeader>
+//                 <TableRow>
+//                   <TableHead>Color/Icon</TableHead>
+//                   <TableHead>Category Name</TableHead>
+//                   <TableHead>Code</TableHead>
+//                   <TableHead>Description</TableHead>
+//                   <TableHead>Status</TableHead>
+//                   <TableHead className="text-right">Actions</TableHead>
+//                 </TableRow>
+//               </TableHeader>
+//               <TableBody>
+//                 {expenseCategories?.map((cat) => (
+//                   <TableRow key={cat?._id} className={!cat?.isActive ? "opacity-50 bg-muted/20" : ""}>
+//                     <TableCell>
+//                       <div className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm text-white" style={{ backgroundColor: cat?.color || '#3b82f6' }}>
+//                         {renderDynamicIcon(cat?.icon, "h-4 w-4")}
+//                       </div>
+//                     </TableCell>
+//                     <TableCell className="font-semibold">{cat?.name}</TableCell>
+//                     <TableCell><Badge variant="outline">{cat?.code}</Badge></TableCell>
+//                     <TableCell className="text-sm text-muted-foreground">{cat?.description || "—"}</TableCell>
+//                     <TableCell>
+//                       <Badge variant={cat?.isActive ? "default" : "secondary"}>{cat?.isActive ? "Active" : "Inactive"}</Badge>
+//                     </TableCell>
+//                     <TableCell className="text-right">
+//                       <Button variant="ghost" size="sm" onClick={() => openCategoryModal(cat)}>Edit</Button>
+                      
+//                       {cat?.isActive ? (
+//                         <Button 
+//                           variant="ghost" 
+//                           size="sm" 
+//                           className="text-destructive hover:text-destructive" 
+//                           onClick={() => handleDeleteCategory(cat?._id)}
+//                         >
+//                           Disable
+//                         </Button>
+//                       ) : (
+//                         <Button 
+//                           variant="ghost" 
+//                           size="sm" 
+//                           className="text-emerald-600 hover:text-emerald-700" 
+//                           onClick={() => handleActivateCategory(cat)}
+//                         >
+//                           Activate
+//                         </Button>
+//                       )}
+                      
+//                     </TableCell>
+//                   </TableRow>
+//                 ))}
+//               </TableBody>
+//             </Table>
+//           </div>
+//         </TabsContent>
+//       </Tabs>
+
+//       {/* ==================== MODALS ==================== */}
+      
+//       <Dialog open={isApproveOpen} onOpenChange={setIsApproveOpen}>
+//         <DialogContent>
+//           <DialogHeader><DialogTitle>Approve Expense</DialogTitle></DialogHeader>
+//           {selectedExpense && (
+//              <div className="py-4 space-y-4">
+//                <p className="text-sm text-muted-foreground">
+//                  Approve <b className="text-foreground">₹{selectedExpense.amount}</b> for <b className="text-foreground">{selectedExpense.employeeId?.name}</b>?
+//                </p>
+//                <div>
+//                  <Label>Remarks (Optional)</Label>
+//                  <Input placeholder="Looks good" value={approveRemarks} onChange={(e) => setApproveRemarks(e.target.value)} />
+//                </div>
+//              </div>
+//           )}
+//           <DialogFooter>
+//             <Button variant="outline" onClick={() => setIsApproveOpen(false)}>Cancel</Button>
+//             <Button onClick={handleApprove} className="bg-emerald-600 hover:bg-emerald-700 text-white">Approve & Adjust Wallet</Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//       <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
+//         <DialogContent>
+//           <DialogHeader><DialogTitle className="text-destructive">Reject Expense</DialogTitle></DialogHeader>
+//           {selectedExpense && (
+//             <div className="py-4">
+//               <Label>Reason <span className="text-destructive">*</span></Label>
+//               <Textarea placeholder="Missing clear proof..." value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+//             </div>
+//           )}
+//           <DialogFooter>
+//             <Button variant="outline" onClick={() => setIsRejectOpen(false)}>Cancel</Button>
+//             <Button variant="destructive" onClick={handleReject}>Reject Ticket</Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+//         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+//           <DialogHeader><DialogTitle className="flex items-center gap-2 text-xl"><FileText className="h-5 w-5 text-primary" /> Expense Details</DialogTitle></DialogHeader>
+//           {selectedExpense && (
+//             <div className="space-y-6 py-4">
+//               <div className="flex justify-between items-start">
+//                 <div>
+//                   <div className="flex items-center gap-2"><Hash className="h-4 w-4 text-muted-foreground" /><span className="font-mono text-sm font-medium">{selectedExpense.ticketNumber}</span></div>
+//                   <div className="mt-2"><Badge variant={getStatusBadgeVariant(selectedExpense.status)}>{selectedExpense.status}</Badge></div>
+//                 </div>
+//                 <div className="text-right">
+//                   <div className="text-3xl font-bold text-primary">₹{selectedExpense.amount}</div>
+//                   <div className="text-xs text-muted-foreground mt-1">Requested: {formatDate(selectedExpense.createdAt)}</div>
+//                 </div>
+//               </div>
+//               <Separator />
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                 <div>
+//                   <Label className="text-muted-foreground flex items-center gap-2 mb-1"><User className="h-4 w-4" /> Employee Info</Label>
+//                   <div className="font-medium text-base">{selectedExpense.employeeId?.name}</div>
+//                   <div className="text-sm text-muted-foreground">{selectedExpense.employeeId?.email}</div>
+//                 </div>
+//                 <div>
+//                   <Label className="text-muted-foreground flex items-center gap-2 mb-1"><Tag className="h-4 w-4" /> Category</Label>
+//                   <div className="font-medium text-base flex items-center gap-2 mt-1">
+//                     <Badge variant="outline" style={{ borderColor: selectedExpense.categoryId?.color, color: selectedExpense.categoryId?.color }}>
+//                       {selectedExpense.categoryId?.icon && renderDynamicIcon(selectedExpense.categoryId.icon, "h-3 w-3 mr-1")}
+//                       {selectedExpense.categoryId?.name || "N/A"}
+//                     </Badge>
+//                   </div>
+//                 </div>
+//               </div>
+//               <Separator />
+//               <div className="space-y-4">
+//                 <div><Label className="text-muted-foreground">Title</Label><div className="font-medium text-lg">{selectedExpense.title}</div></div>
+//                 <div><Label className="text-muted-foreground">Description</Label><div className="p-3 bg-muted/50 rounded-md text-sm whitespace-pre-wrap mt-1">{selectedExpense.description}</div></div>
+//               </div>
+//               {selectedExpense.proofUrl && (
+//                 <>
+//                   <Separator />
+//                   <div>
+//                     <Label className="text-muted-foreground block mb-2">Attached Proof</Label>
+//                     <a href={selectedExpense.proofUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-muted transition-colors text-sm font-medium text-primary">
+//                       <FileText className="h-4 w-4" /> View Document
+//                     </a>
+//                   </div>
+//                 </>
+//               )}
+//             </div>
+//           )}
+//           <DialogFooter><Button variant="outline" onClick={() => setIsViewOpen(false)}>Close</Button></DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//       {/* Lucide Category Modal with Search */}
+//       <Dialog open={isCategoryOpen} onOpenChange={setIsCategoryOpen}>
+//         <DialogContent className="max-w-2xl">
+//           <DialogHeader><DialogTitle>{editingCategory ? "Edit Category" : "Add New Category"}</DialogTitle></DialogHeader>
+//           <div className="grid grid-cols-2 gap-4 py-2 max-h-[75vh] overflow-y-auto px-2">
+            
+//             <div className="col-span-2 md:col-span-1">
+//               <Label>Category Name <span className="text-destructive">*</span></Label>
+//               <Input placeholder="e.g. Travel" value={categoryForm.name} onChange={(e) => setCategoryForm({...categoryForm, name: e.target.value})} />
+//             </div>
+//             <div className="col-span-2 md:col-span-1">
+//               <Label>Category Code <span className="text-destructive">*</span></Label>
+//               <Input placeholder="e.g. TRV" value={categoryForm.code} onChange={(e) => setCategoryForm({...categoryForm, code: e.target.value.toUpperCase()})} />
+//             </div>
+            
+//             <div className="col-span-2">
+//               <Label>Description</Label>
+//               <Input placeholder="Short description of this expense type..." value={categoryForm.description} onChange={(e) => setCategoryForm({...categoryForm, description: e.target.value})} />
+//             </div>
+
+//             {/* COLOR PALETTE */}
+//             <div className="col-span-2">
+//               <div className="flex items-center justify-between mb-2">
+//                 <Label>Select Theme Color</Label>
+//                 <div className="flex items-center gap-2">
+//                   <span className="text-xs text-muted-foreground">Custom:</span>
+//                   <input type="color" className="h-6 w-8 cursor-pointer rounded-sm" value={categoryForm.color} onChange={(e) => setCategoryForm({...categoryForm, color: e.target.value})} />
+//                 </div>
+//               </div>
+//               <div className="flex flex-wrap gap-2 p-3 bg-muted/30 border rounded-md">
+//                 {PREDEFINED_COLORS.map(color => {
+//                   const isSelected = categoryForm.color?.toLowerCase() === color.toLowerCase();
+//                   return (
+//                     <div 
+//                       key={color}
+//                       onClick={() => setCategoryForm({...categoryForm, color})}
+//                       className={`h-7 w-7 rounded-full cursor-pointer transition-transform hover:scale-110 flex items-center justify-center ${isSelected ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''}`}
+//                       style={{ backgroundColor: color }}
+//                     >
+//                       {isSelected && <CheckCircle className="h-4 w-4 text-white opacity-80" />}
+//                     </div>
+//                   );
+//                 })}
+//               </div>
+//             </div>
+
+//             {/* SEARCHABLE LUCIDE ICON GRID */}
+//             <div className="col-span-2 space-y-2">
+//               <div className="flex items-center justify-between">
+//                 <Label>Select Icon ({filteredIcons.length} available)</Label>
+//                 <div className="relative w-48">
+//                   <Search className="absolute left-2 top-2 h-3.5 w-3.5 text-muted-foreground" />
+//                   <Input 
+//                     placeholder="Search icon..." 
+//                     className="h-8 pl-8 text-xs" 
+//                     value={iconSearch} 
+//                     onChange={(e) => setIconSearch(e.target.value)} 
+//                   />
+//                 </div>
+//               </div>
+
+//               <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 p-3 bg-muted/30 border rounded-md max-h-48 overflow-y-auto">
+//                 {filteredIcons.length === 0 ? (
+//                   <div className="col-span-full text-center py-6 text-sm text-muted-foreground">
+//                     No icons found matching "{iconSearch}"
+//                   </div>
+//                 ) : (
+//                   filteredIcons.map(iconName => {
+//                     const IconComponent = LucideIcons[iconName];
+//                     if (!IconComponent) return null;
+
+//                     const isSelected = categoryForm.icon === iconName;
+//                     return (
+//                       <div
+//                         key={iconName}
+//                         onClick={() => setCategoryForm({...categoryForm, icon: iconName})}
+//                         className={`aspect-square flex items-center justify-center rounded-md cursor-pointer border transition-all hover:bg-muted ${isSelected ? 'bg-primary/10 border-primary text-primary shadow-sm ring-2 ring-primary/20' : 'bg-background border-transparent text-muted-foreground'}`}
+//                         title={iconName}
+//                       >
+//                         <IconComponent className="h-5 w-5" />
+//                       </div>
+//                     );
+//                   })
+//                 )}
+//               </div>
+//             </div>
+
+//           </div>
+//           <DialogFooter className="mt-4">
+//             <Button variant="outline" onClick={() => setIsCategoryOpen(false)}>Cancel</Button>
+//             <Button onClick={handleCategorySubmit}>{editingCategory ? "Update" : "Create"} Category</Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useEffect, useState, useMemo } from "react";
+// import * as LucideIcons from "lucide-react"; 
+// import { 
+//   CheckCircle, XCircle, Search, FileText, Eye, Hash, User, Tag, 
+//   Settings, Plus 
+// } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+// import { Badge } from "@/components/ui/badge";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Textarea } from "@/components/ui/textarea";
+// import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+// import { Separator } from "@/components/ui/separator";
+// import { toast } from "sonner";
+// import { useHR } from "@/hooks/useHR"; 
+
+// // ==================== PREDEFINED UX DATA ====================
+// const PREDEFINED_COLORS = [
+//   "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16", "#22c55e", "#10b981", "#14b8a6", 
+//   "#06b6d4", "#0ea5e9", "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", 
+//   "#f43f5e", "#dc2626", "#ea580c", "#d97706", "#ca8a04", "#65a30d", "#16a34a", "#059669", 
+//   "#0d9488", "#0891b2", "#0284c7", "#2563eb", "#4f46e5", "#7c3aed", "#9333ea", "#c026d3", 
+//   "#db2777", "#e11d48", "#94a3b8", "#64748b", "#475569", "#334155", "#1e293b", "#0f172a"
+// ];
+
+// // Pure Lucide Icons for Categories
+// const PREDEFINED_ICONS = [
+//   "Car", "Bus", "Train", "Plane", "Bike", "Truck", "Ship", "Fuel", "Compass", "MapPin", "Navigation", "Route", "Ticket",
+//   "Utensils", "Coffee", "Pizza", "Soup", "CupSoda", "Wine", "Beer", "Cake", "Apple", "Cookie",
+//   "Building", "Hotel", "Home", "Warehouse", "Factory", "Store", "Tent", "Bed", "DoorOpen",
+//   "Laptop", "Smartphone", "Tablet", "Monitor", "Printer", "Server", "Cpu", "HardDrive", "Wifi", "Bluetooth", "Plug", "BatteryCharging", "Zap",
+//   "Wrench", "Hammer", "Screwdriver", "Tool", "Lightbulb", "Headset", "Camera", "Video", "Mic", "Speaker", "Tv",
+//   "Banknote", "Coins", "CreditCard", "Receipt", "Wallet", "PiggyBank", "Calculator", "ShoppingCart", "ShoppingBag", "Percent", "TrendingUp",
+//   "Stethoscope", "Pill", "Syringe", "Activity", "HeartPulse", "FirstAidKit", "Cross",
+//   "Tag", "Tags", "Box", "Boxes", "Package", "Gift", "Bookmark", "Calendar", "Clock", "Hourglass", "AlarmClock",
+//   "Briefcase", "Folder", "FolderOpen", "FileText", "Clipboard", "Mail", "Send", "Inbox", "Archive",
+//   "Star", "Shield", "Key", "Lock", "Unlock", "Search", "Bell", "Flag", "BookmarkCheck",
+//   "Users", "User", "UserCheck", "UserPlus", "GraduationCap", "BookOpen", "Award", "Trophy", "Crown", "Medal",
+//   "Sun", "Moon", "Cloud", "CloudRain", "Snowflake", "Wind", "Flame", "Droplets", "Leaf", "TreePine"
+// ];
+
+// export function HRExpenseTab() {
+//   const {
+//     loading,
+//     allExpenses,
+//     fetchAllExpenses,
+//     approveExpense,
+//     rejectExpense,
+//     expenseCategories,
+//     fetchExpenseCategories,
+//     createExpenseCategory,
+//     updateExpenseCategory,
+//     deleteExpenseCategory
+//   } = useHR();
+
+//   // ==================== TICKET STATE ====================
+//   const [ticketTab, setTicketTab] = useState("Pending");
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [selectedExpense, setSelectedExpense] = useState(null);
+//   const [isApproveOpen, setIsApproveOpen] = useState(false);
+//   const [isRejectOpen, setIsRejectOpen] = useState(false);
+//   const [isViewOpen, setIsViewOpen] = useState(false);
+//   const [approveRemarks, setApproveRemarks] = useState("");
+//   const [rejectReason, setRejectReason] = useState("");
+
+//   // ==================== CATEGORY STATE ====================
+//   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+//   const [editingCategory, setEditingCategory] = useState(null);
+//   const [iconSearch, setIconSearch] = useState(""); 
+//   const [categoryForm, setCategoryForm] = useState({
+//     name: "", code: "", description: "", color: "#3b82f6", icon: "Tag", sortOrder: 0
+//   });
+
+//   // Filter Lucide icons based on search
+//   const filteredIcons = useMemo(() => {
+//     if (!iconSearch.trim()) return PREDEFINED_ICONS;
+//     return PREDEFINED_ICONS.filter(iconName => 
+//       iconName.toLowerCase().includes(iconSearch.toLowerCase())
+//     );
+//   }, [iconSearch]);
+
+//   // ==================== EFFECTS ====================
+  
+//   // Fetch Categories once on mount
+//   useEffect(() => {
+//     fetchExpenseCategories();
+//   }, [fetchExpenseCategories]);
+
+//   // Debounced Ticket Search
+//   useEffect(() => {
+//     const debounce = setTimeout(() => {
+//       fetchAllExpenses({ status: ticketTab, search: searchTerm, page: 1, limit: 10 });
+//     }, 500);
+//     return () => clearTimeout(debounce);
+//   }, [ticketTab, searchTerm, fetchAllExpenses]);
+
+//   // ==================== TICKET HANDLERS ====================
+//   const handleApprove = async () => {
+//     if (!selectedExpense?._id) return; 
+//     const success = await approveExpense(selectedExpense._id, { remarks: approveRemarks });
+//     if (success) setIsApproveOpen(false);
+//   };
+
+//   const handleReject = async () => {
+//     if (!selectedExpense?._id) return; 
+//     if (!rejectReason.trim()) return toast.error("Reason is required!");
+//     const success = await rejectExpense(selectedExpense._id, { reason: rejectReason });
+//     if (success) setIsRejectOpen(false);
+//   };
+
+//   const openTicketModal = (expense, type) => {
+//     setSelectedExpense(expense);
+//     if (type === 'view') setIsViewOpen(true);
+//     if (type === 'approve') { setApproveRemarks(""); setIsApproveOpen(true); }
+//     if (type === 'reject') { setRejectReason(""); setIsRejectOpen(true); }
+//   };
+
+//   // ==================== CATEGORY HANDLERS ====================
+//   const openCategoryModal = (category = null) => {
+//     setIconSearch(""); 
+//     if (category) {
+//       setEditingCategory(category);
+//       setCategoryForm({ 
+//         name: category.name || "", 
+//         code: category.code || "", 
+//         description: category.description || "", 
+//         color: category.color || "#3b82f6", 
+//         icon: category.icon || "Tag", 
+//         sortOrder: category.sortOrder || 0 
+//       });
+//     } else {
+//       setEditingCategory(null);
+//       setCategoryForm({ name: "", code: "", description: "", color: "#3b82f6", icon: "Tag", sortOrder: 0 });
+//     }
+//     setIsCategoryOpen(true);
+//   };
+
+//   const handleCategorySubmit = async () => {
+//     if (!categoryForm.name || !categoryForm.code) return toast.error("Name and Code are required");
+    
+//     let success = false;
+//     if (editingCategory?._id) { 
+//       success = await updateExpenseCategory(editingCategory._id, categoryForm);
+//     } else {
+//       success = await createExpenseCategory(categoryForm);
+//     }
+
+//     if (success) setIsCategoryOpen(false);
+//   };
+
+//   const handleDeleteCategory = async (id) => {
+//     if (!id) return;
+//     if (window.confirm("Are you sure you want to deactivate this category?")) {
+//       await deleteExpenseCategory(id);
+//     }
+//   };
+
+//   const handleActivateCategory = async (category) => {
+//     if (window.confirm("Are you sure you want to activate this category?")) {
+//       await updateExpenseCategory(category._id, { ...category, isActive: true });
+//     }
+//   };
+
+//   // ==================== HELPERS ====================
+//   const formatDate = (isoString) => {
+//     if (!isoString) return "N/A";
+//     return new Date(isoString).toLocaleString("en-IN", {
+//       day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+//     });
+//   };
+
+//   const getStatusBadgeVariant = (status) => {
+//     switch (status) {
+//       case "Approved": return "default";
+//       case "Paid": return "outline"; 
+//       case "Rejected": return "destructive";
+//       default: return "secondary"; 
+//     }
+//   };
+
+//   const renderDynamicIcon = (iconName, className) => {
+//     const DynamicIcon = LucideIcons[iconName];
+//     if (!DynamicIcon) return <LucideIcons.Tag className={className} />;
+//     return <DynamicIcon className={className} />;
+//   };
+
+//   return (
+//     <div className="space-y-6">
+//       <Tabs defaultValue="tickets" className="w-full">
+//         <TabsList className="mb-4">
+//           <TabsTrigger value="tickets" className="flex gap-2"><FileText className="h-4 w-4"/> Tickets</TabsTrigger>
+//           <TabsTrigger value="categories" className="flex gap-2"><Settings className="h-4 w-4"/> Categories</TabsTrigger>
+//         </TabsList>
+
+//         {/* ==================== 1. TICKETS SECTION ==================== */}
+//         <TabsContent value="tickets" className="space-y-4 m-0">
+//           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+//             <div className="w-full sm:w-auto overflow-auto scrollbar-none">
+//               <Tabs value={ticketTab} onValueChange={setTicketTab}>
+//                 <TabsList>
+//                   <TabsTrigger value="Pending">Pending Approvals</TabsTrigger>
+//                   <TabsTrigger value="Approved">Approved</TabsTrigger>
+//                   <TabsTrigger value="Paid">Paid History</TabsTrigger> 
+//                   <TabsTrigger value="Rejected">Rejected</TabsTrigger>
+//                 </TabsList>
+//               </Tabs>
+//             </div>
+//             <div className="relative w-full sm:w-64 shrink-0">
+//               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+//               <Input placeholder="Search tickets..." className="pl-9" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+//             </div>
+//           </div>
+
+//           <div className="border rounded-md">
+//             <Table>
+//               <TableHeader>
+//                 <TableRow>
+//                   <TableHead>Date</TableHead>
+//                   <TableHead>Employee</TableHead>
+//                   <TableHead>Title</TableHead>
+//                   <TableHead>Amount</TableHead>
+//                   <TableHead>Status</TableHead>
+//                   <TableHead className="text-right">Actions</TableHead>
+//                 </TableRow>
+//               </TableHeader>
+//               <TableBody>
+//                 {loading ? (
+//                   <TableRow><TableCell colSpan={6} className="text-center py-8">Loading...</TableCell></TableRow>
+//                 ) : allExpenses?.length === 0 ? (
+//                   <TableRow><TableCell colSpan={6} className="text-center py-8">No tickets found.</TableCell></TableRow>
+//                 ) : (
+//                   allExpenses?.map((expense) => (
+//                     <TableRow key={expense?._id}>
+//                       <TableCell>{new Date(expense?.createdAt).toLocaleDateString()}</TableCell>
+//                       <TableCell>
+//                         <div className="font-medium">{expense?.employeeId?.name}</div>
+//                         <div className="text-xs text-muted-foreground">{expense?.employeeId?.email}</div>
+//                       </TableCell>
+//                       <TableCell>
+//                         <div className="font-medium">{expense?.title}</div>
+//                         {/* UPDATE 1: Category aur Project dono dikhane ke liye yahan flex wrap add kiya hai */}
+//                         <div className="flex flex-wrap items-center gap-2 mt-1">
+//                           <Badge variant="outline" className="font-normal text-[10px] flex items-center w-fit gap-1">
+//                             {expense?.categoryId?.icon && renderDynamicIcon(expense.categoryId.icon, "h-3 w-3")}
+//                             {expense?.categoryId?.name || "N/A"}
+//                           </Badge>
+                          
+//                           {/* Yahan se Project Name render hoga */}
+//                           {expense?.projectId?.name && (
+//                             <Badge variant="secondary" className="font-normal text-[10px] bg-blue-100 text-blue-800 hover:bg-blue-200 border-none">
+//                               Project: {expense.projectId.name}
+//                             </Badge>
+//                           )}
+//                         </div>
+//                       </TableCell>
+//                       <TableCell className="font-bold">₹{expense?.amount}</TableCell>
+//                       <TableCell>
+//                         <Badge variant={getStatusBadgeVariant(expense?.status)}>{expense?.status}</Badge>
+//                       </TableCell>
+//                       <TableCell className="text-right">
+//                         <div className="flex justify-end gap-2">
+//                           <Button variant="ghost" size="sm" onClick={() => openTicketModal(expense, 'view')}><Eye className="h-4 w-4" /></Button>
+//                           {ticketTab === "Pending" && (
+//                             <>
+//                               <Button size="sm" variant="outline" className="border-success/50 text-success hover:bg-success/10" onClick={() => openTicketModal(expense, 'approve')}>
+//                                 <CheckCircle className="mr-1 h-3.5 w-3.5" /> Approve
+//                               </Button>
+//                               <Button size="sm" variant="outline" className="border-destructive/50 text-destructive hover:bg-destructive/10" onClick={() => openTicketModal(expense, 'reject')}>
+//                                 <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
+//                               </Button>
+//                             </>
+//                           )}
+//                         </div>
+//                       </TableCell>
+//                     </TableRow>
+//                   ))
+//                 )}
+//               </TableBody>
+//             </Table>
+//           </div>
+//         </TabsContent>
+
+//         {/* ==================== 2. CATEGORIES SECTION ==================== */}
+//         <TabsContent value="categories" className="space-y-4 m-0">
+//           <div className="flex justify-between items-center bg-muted/30 p-4 rounded-lg border">
+//             <div>
+//               <h3 className="text-lg font-semibold">Expense Categories</h3>
+//               <p className="text-sm text-muted-foreground">Manage allowed expense types and their limits.</p>
+//             </div>
+//             <Button onClick={() => openCategoryModal()} className="gap-2">
+//               <Plus className="h-4 w-4"/> Add Category
+//             </Button>
+//           </div>
+
+//           <div className="border rounded-md">
+//             <Table>
+//               <TableHeader>
+//                 <TableRow>
+//                   <TableHead>Color/Icon</TableHead>
+//                   <TableHead>Category Name</TableHead>
+//                   <TableHead>Code</TableHead>
+//                   <TableHead>Description</TableHead>
+//                   <TableHead>Status</TableHead>
+//                   <TableHead className="text-right">Actions</TableHead>
+//                 </TableRow>
+//               </TableHeader>
+//               <TableBody>
+//                 {expenseCategories?.map((cat) => (
+//                   <TableRow key={cat?._id} className={!cat?.isActive ? "opacity-50 bg-muted/20" : ""}>
+//                     <TableCell>
+//                       <div className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm text-white" style={{ backgroundColor: cat?.color || '#3b82f6' }}>
+//                         {renderDynamicIcon(cat?.icon, "h-4 w-4")}
+//                       </div>
+//                     </TableCell>
+//                     <TableCell className="font-semibold">{cat?.name}</TableCell>
+//                     <TableCell><Badge variant="outline">{cat?.code}</Badge></TableCell>
+//                     <TableCell className="text-sm text-muted-foreground">{cat?.description || "—"}</TableCell>
+//                     <TableCell>
+//                       <Badge variant={cat?.isActive ? "default" : "secondary"}>{cat?.isActive ? "Active" : "Inactive"}</Badge>
+//                     </TableCell>
+//                     <TableCell className="text-right">
+//                       <Button variant="ghost" size="sm" onClick={() => openCategoryModal(cat)}>Edit</Button>
+                      
+//                       {cat?.isActive ? (
+//                         <Button 
+//                           variant="ghost" 
+//                           size="sm" 
+//                           className="text-destructive hover:text-destructive" 
+//                           onClick={() => handleDeleteCategory(cat?._id)}
+//                         >
+//                           Disable
+//                         </Button>
+//                       ) : (
+//                         <Button 
+//                           variant="ghost" 
+//                           size="sm" 
+//                           className="text-emerald-600 hover:text-emerald-700" 
+//                           onClick={() => handleActivateCategory(cat)}
+//                         >
+//                           Activate
+//                         </Button>
+//                       )}
+                      
+//                     </TableCell>
+//                   </TableRow>
+//                 ))}
+//               </TableBody>
+//             </Table>
+//           </div>
+//         </TabsContent>
+//       </Tabs>
+
+//       {/* ==================== MODALS ==================== */}
+      
+//       <Dialog open={isApproveOpen} onOpenChange={setIsApproveOpen}>
+//         <DialogContent>
+//           <DialogHeader><DialogTitle>Approve Expense</DialogTitle></DialogHeader>
+//           {selectedExpense && (
+//              <div className="py-4 space-y-4">
+//                <p className="text-sm text-muted-foreground">
+//                  Approve <b className="text-foreground">₹{selectedExpense.amount}</b> for <b className="text-foreground">{selectedExpense.employeeId?.name}</b>?
+//                </p>
+//                <div>
+//                  <Label>Remarks (Optional)</Label>
+//                  <Input placeholder="Looks good" value={approveRemarks} onChange={(e) => setApproveRemarks(e.target.value)} />
+//                </div>
+//              </div>
+//           )}
+//           <DialogFooter>
+//             <Button variant="outline" onClick={() => setIsApproveOpen(false)}>Cancel</Button>
+//             <Button onClick={handleApprove} className="bg-emerald-600 hover:bg-emerald-700 text-white">Approve & Adjust Wallet</Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//       <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
+//         <DialogContent>
+//           <DialogHeader><DialogTitle className="text-destructive">Reject Expense</DialogTitle></DialogHeader>
+//           {selectedExpense && (
+//             <div className="py-4">
+//               <Label>Reason <span className="text-destructive">*</span></Label>
+//               <Textarea placeholder="Missing clear proof..." value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+//             </div>
+//           )}
+//           <DialogFooter>
+//             <Button variant="outline" onClick={() => setIsRejectOpen(false)}>Cancel</Button>
+//             <Button variant="destructive" onClick={handleReject}>Reject Ticket</Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+//         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+//           <DialogHeader><DialogTitle className="flex items-center gap-2 text-xl"><FileText className="h-5 w-5 text-primary" /> Expense Details</DialogTitle></DialogHeader>
+//           {selectedExpense && (
+//             <div className="space-y-6 py-4">
+//               <div className="flex justify-between items-start">
+//                 <div>
+//                   <div className="flex items-center gap-2"><Hash className="h-4 w-4 text-muted-foreground" /><span className="font-mono text-sm font-medium">{selectedExpense.ticketNumber}</span></div>
+//                   <div className="mt-2"><Badge variant={getStatusBadgeVariant(selectedExpense.status)}>{selectedExpense.status}</Badge></div>
+//                 </div>
+//                 <div className="text-right">
+//                   <div className="text-3xl font-bold text-primary">₹{selectedExpense.amount}</div>
+//                   <div className="text-xs text-muted-foreground mt-1">Requested: {formatDate(selectedExpense.createdAt)}</div>
+//                 </div>
+//               </div>
+//               <Separator />
+              
+//               {/* UPDATE 2: md:grid-cols-2 ko md:grid-cols-3 kiya gaya hai aur Project ka block add kiya hai */}
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                 <div>
+//                   <Label className="text-muted-foreground flex items-center gap-2 mb-1"><User className="h-4 w-4" /> Employee Info</Label>
+//                   <div className="font-medium text-base">{selectedExpense.employeeId?.name}</div>
+//                   <div className="text-sm text-muted-foreground">{selectedExpense.employeeId?.email}</div>
+//                 </div>
+                
+//                 <div>
+//                   <Label className="text-muted-foreground flex items-center gap-2 mb-1"><Tag className="h-4 w-4" /> Category</Label>
+//                   <div className="font-medium text-base flex items-center gap-2 mt-1">
+//                     <Badge variant="outline" style={{ borderColor: selectedExpense.categoryId?.color, color: selectedExpense.categoryId?.color }}>
+//                       {selectedExpense.categoryId?.icon && renderDynamicIcon(selectedExpense.categoryId.icon, "h-3 w-3 mr-1")}
+//                       {selectedExpense.categoryId?.name || "N/A"}
+//                     </Badge>
+//                   </div>
+//                 </div>
+
+//                 {/* Yahan se Modal ke andar Project block render hoga */}
+//                 <div>
+//                   <Label className="text-muted-foreground flex items-center gap-2 mb-1"><Hash className="h-4 w-4" /> Project</Label>
+//                   <div className="font-medium text-base mt-1">
+//                     {selectedExpense?.projectId?.name ? (
+//                       <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md border border-blue-200 text-sm">
+//                         {selectedExpense.projectId.name}
+//                       </span>
+//                     ) : (
+//                       <span className="text-muted-foreground text-sm">N/A</span>
+//                     )}
+//                   </div>
+//                 </div>
+//               </div>
+
+//               <Separator />
+//               <div className="space-y-4">
+//                 <div><Label className="text-muted-foreground">Title</Label><div className="font-medium text-lg">{selectedExpense.title}</div></div>
+//                 <div><Label className="text-muted-foreground">Description</Label><div className="p-3 bg-muted/50 rounded-md text-sm whitespace-pre-wrap mt-1">{selectedExpense.description}</div></div>
+//               </div>
+//               {selectedExpense.proofUrl && (
+//                 <>
+//                   <Separator />
+//                   <div>
+//                     <Label className="text-muted-foreground block mb-2">Attached Proof</Label>
+//                     <a href={selectedExpense.proofUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-muted transition-colors text-sm font-medium text-primary">
+//                       <FileText className="h-4 w-4" /> View Document
+//                     </a>
+//                   </div>
+//                 </>
+//               )}
+//             </div>
+//           )}
+//           <DialogFooter><Button variant="outline" onClick={() => setIsViewOpen(false)}>Close</Button></DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//       {/* Lucide Category Modal with Search */}
+//       <Dialog open={isCategoryOpen} onOpenChange={setIsCategoryOpen}>
+//         <DialogContent className="max-w-2xl">
+//           <DialogHeader><DialogTitle>{editingCategory ? "Edit Category" : "Add New Category"}</DialogTitle></DialogHeader>
+//           <div className="grid grid-cols-2 gap-4 py-2 max-h-[75vh] overflow-y-auto px-2">
+            
+//             <div className="col-span-2 md:col-span-1">
+//               <Label>Category Name <span className="text-destructive">*</span></Label>
+//               <Input placeholder="e.g. Travel" value={categoryForm.name} onChange={(e) => setCategoryForm({...categoryForm, name: e.target.value})} />
+//             </div>
+//             <div className="col-span-2 md:col-span-1">
+//               <Label>Category Code <span className="text-destructive">*</span></Label>
+//               <Input placeholder="e.g. TRV" value={categoryForm.code} onChange={(e) => setCategoryForm({...categoryForm, code: e.target.value.toUpperCase()})} />
+//             </div>
+            
+//             <div className="col-span-2">
+//               <Label>Description</Label>
+//               <Input placeholder="Short description of this expense type..." value={categoryForm.description} onChange={(e) => setCategoryForm({...categoryForm, description: e.target.value})} />
+//             </div>
+
+//             {/* COLOR PALETTE */}
+//             <div className="col-span-2">
+//               <div className="flex items-center justify-between mb-2">
+//                 <Label>Select Theme Color</Label>
+//                 <div className="flex items-center gap-2">
+//                   <span className="text-xs text-muted-foreground">Custom:</span>
+//                   <input type="color" className="h-6 w-8 cursor-pointer rounded-sm" value={categoryForm.color} onChange={(e) => setCategoryForm({...categoryForm, color: e.target.value})} />
+//                 </div>
+//               </div>
+//               <div className="flex flex-wrap gap-2 p-3 bg-muted/30 border rounded-md">
+//                 {PREDEFINED_COLORS.map(color => {
+//                   const isSelected = categoryForm.color?.toLowerCase() === color.toLowerCase();
+//                   return (
+//                     <div 
+//                       key={color}
+//                       onClick={() => setCategoryForm({...categoryForm, color})}
+//                       className={`h-7 w-7 rounded-full cursor-pointer transition-transform hover:scale-110 flex items-center justify-center ${isSelected ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''}`}
+//                       style={{ backgroundColor: color }}
+//                     >
+//                       {isSelected && <CheckCircle className="h-4 w-4 text-white opacity-80" />}
+//                     </div>
+//                   );
+//                 })}
+//               </div>
+//             </div>
+
+//             {/* SEARCHABLE LUCIDE ICON GRID */}
+//             <div className="col-span-2 space-y-2">
+//               <div className="flex items-center justify-between">
+//                 <Label>Select Icon ({filteredIcons.length} available)</Label>
+//                 <div className="relative w-48">
+//                   <Search className="absolute left-2 top-2 h-3.5 w-3.5 text-muted-foreground" />
+//                   <Input 
+//                     placeholder="Search icon..." 
+//                     className="h-8 pl-8 text-xs" 
+//                     value={iconSearch} 
+//                     onChange={(e) => setIconSearch(e.target.value)} 
+//                   />
+//                 </div>
+//               </div>
+
+//               <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 p-3 bg-muted/30 border rounded-md max-h-48 overflow-y-auto">
+//                 {filteredIcons.length === 0 ? (
+//                   <div className="col-span-full text-center py-6 text-sm text-muted-foreground">
+//                     No icons found matching "{iconSearch}"
+//                   </div>
+//                 ) : (
+//                   filteredIcons.map(iconName => {
+//                     const IconComponent = LucideIcons[iconName];
+//                     if (!IconComponent) return null;
+
+//                     const isSelected = categoryForm.icon === iconName;
+//                     return (
+//                       <div
+//                         key={iconName}
+//                         onClick={() => setCategoryForm({...categoryForm, icon: iconName})}
+//                         className={`aspect-square flex items-center justify-center rounded-md cursor-pointer border transition-all hover:bg-muted ${isSelected ? 'bg-primary/10 border-primary text-primary shadow-sm ring-2 ring-primary/20' : 'bg-background border-transparent text-muted-foreground'}`}
+//                         title={iconName}
+//                       >
+//                         <IconComponent className="h-5 w-5" />
+//                       </div>
+//                     );
+//                   })
+//                 )}
+//               </div>
+//             </div>
+
+//           </div>
+//           <DialogFooter className="mt-4">
+//             <Button variant="outline" onClick={() => setIsCategoryOpen(false)}>Cancel</Button>
+//             <Button onClick={handleCategorySubmit}>{editingCategory ? "Update" : "Create"} Category</Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
 import React, { useEffect, useState, useMemo } from "react";
 import * as LucideIcons from "lucide-react"; 
 import { 
@@ -2691,6 +3811,7 @@ export function HRExpenseTab() {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Employee</TableHead>
+                  <TableHead>Project</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
@@ -2699,9 +3820,9 @@ export function HRExpenseTab() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={6} className="text-center py-8">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="text-center py-8">Loading...</TableCell></TableRow>
                 ) : allExpenses?.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="text-center py-8">No tickets found.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="text-center py-8">No tickets found.</TableCell></TableRow>
                 ) : (
                   allExpenses?.map((expense) => (
                     <TableRow key={expense?._id}>
@@ -2710,6 +3831,19 @@ export function HRExpenseTab() {
                         <div className="font-medium">{expense?.employeeId?.name}</div>
                         <div className="text-xs text-muted-foreground">{expense?.employeeId?.email}</div>
                       </TableCell>
+                      
+                      {/* Project Name ka Naya Column */}
+                      <TableCell>
+                        {expense?.projectId?.name ? (
+                          <Badge variant="secondary" className="font-normal text-xs bg-muted">
+                            {expense.projectId.name}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">N/A</span>
+                        )}
+                      </TableCell>
+
+                      {/* Purana Title & Category Column */}
                       <TableCell>
                         <div className="font-medium">{expense?.title}</div>
                         <Badge variant="outline" className="mt-1 font-normal text-[10px] flex items-center w-fit gap-1">
@@ -2717,6 +3851,7 @@ export function HRExpenseTab() {
                           {expense?.categoryId?.name || "N/A"}
                         </Badge>
                       </TableCell>
+
                       <TableCell className="font-bold">₹{expense?.amount}</TableCell>
                       <TableCell>
                         <Badge variant={getStatusBadgeVariant(expense?.status)}>{expense?.status}</Badge>
@@ -2869,12 +4004,14 @@ export function HRExpenseTab() {
                 </div>
               </div>
               <Separator />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <Label className="text-muted-foreground flex items-center gap-2 mb-1"><User className="h-4 w-4" /> Employee Info</Label>
                   <div className="font-medium text-base">{selectedExpense.employeeId?.name}</div>
                   <div className="text-sm text-muted-foreground">{selectedExpense.employeeId?.email}</div>
                 </div>
+                
                 <div>
                   <Label className="text-muted-foreground flex items-center gap-2 mb-1"><Tag className="h-4 w-4" /> Category</Label>
                   <div className="font-medium text-base flex items-center gap-2 mt-1">
@@ -2884,7 +4021,21 @@ export function HRExpenseTab() {
                     </Badge>
                   </div>
                 </div>
+
+                <div>
+                  <Label className="text-muted-foreground flex items-center gap-2 mb-1"><Hash className="h-4 w-4" /> Project</Label>
+                  <div className="font-medium text-base mt-1">
+                    {selectedExpense?.projectId?.name ? (
+                      <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md border border-blue-200 text-sm">
+                        {selectedExpense.projectId.name}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">N/A</span>
+                    )}
+                  </div>
+                </div>
               </div>
+
               <Separator />
               <div className="space-y-4">
                 <div><Label className="text-muted-foreground">Title</Label><div className="font-medium text-lg">{selectedExpense.title}</div></div>
