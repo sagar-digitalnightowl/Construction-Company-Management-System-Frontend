@@ -19,7 +19,10 @@ import {
 	CheckCircle2,
 	Hourglass,
 	Landmark,
-	Download
+	Download,
+	User,
+	Mail,
+	Phone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -783,15 +786,38 @@ export function FinanceDashboard() {
 									<div className="mt-4 pt-3 border-t border-foreground/10 flex-1 flex flex-col">
 										{(isSold || isPending) ? (
 											<div className="space-y-3 flex-1 flex flex-col justify-end">
-												{/* Buyer Name */}
-												{flat.buyerName && (
-													<p
-														className="text-xs sm:text-sm font-semibold truncate flex items-center gap-1.5"
-														title={flat.buyerName}
-													>
-														<span className="text-muted-foreground">👤</span> {flat.buyerName}
-													</p>
-												)}
+												{/* Buyer Details */}
+												<div className="space-y-1.5">
+													{flat.buyerName && (
+														<p
+															className="text-xs sm:text-sm font-semibold truncate flex items-center gap-1.5"
+															title={flat.buyerName}
+														>
+															<User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+															<span className="truncate">{flat.buyerName}</span>
+														</p>
+													)}
+
+													{flat.buyerEmail && (
+														<p
+															className="text-[10px] sm:text-xs text-muted-foreground truncate flex items-center gap-1.5"
+															title={flat.buyerEmail}
+														>
+															<Mail className="h-3.5 w-3.5 shrink-0" />
+															<span className="truncate">{flat.buyerEmail}</span>
+														</p>
+													)}
+
+													{flat.buyerPhone && (
+														<p
+															className="text-[10px] sm:text-xs text-muted-foreground truncate flex items-center gap-1.5"
+															title={flat.buyerPhone}
+														>
+															<Phone className="h-3.5 w-3.5 shrink-0" />
+															<span className="truncate">{flat.buyerPhone}</span>
+														</p>
+													)}
+												</div>
 
 												{/* Payment Progress Bar */}
 												<div className="space-y-1.5">
