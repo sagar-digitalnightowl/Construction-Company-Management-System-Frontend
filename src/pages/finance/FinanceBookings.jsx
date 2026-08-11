@@ -162,7 +162,7 @@ export default function FinanceBookings() {
 	}, [currentPage]);
 
 	// Navigate to Details Page
-	const handleView = (id) => navigate(`/finance/bookings/${id}`);
+	const handleView = (id) => navigate(`/finance-bookings/${id}`);
 
 	return (
 		<div className="space-y-6">
