@@ -55,7 +55,7 @@ export default function FinanceBookingDetail() {
 				<Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
 				<h3 className="text-lg font-medium">Financial Record Not Found</h3>
 				<p className="text-muted-foreground mt-1">The booking details you are looking for do not exist.</p>
-				<Button variant="outline" className="mt-4" onClick={() => navigate("/finance/bookings")}>
+				<Button variant="outline" className="mt-4" onClick={() => navigate("/finance-bookings")}>
 					Return to Accounts Receivable
 				</Button>
 			</div>
@@ -70,7 +70,7 @@ export default function FinanceBookingDetail() {
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={() => navigate("/finance/bookings")}
+					onClick={() => navigate("/finance-bookings")}
 					className="-ml-2 hover:bg-accent/50 text-muted-foreground hover:text-foreground"
 				>
 					<ArrowLeft className="h-4 w-4 mr-1.5" /> Back
