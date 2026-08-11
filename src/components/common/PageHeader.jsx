@@ -23,7 +23,7 @@ export function PageHeader({ title, eyebrow, description, actions, className }) 
 	);
 }
 
-export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Icon, accent = "primary", valueClassName, size = "default", }) {
+export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Icon, accent = "primary", valueClassName,  className, size = "default", }) {
 	const toneCls = {
 		up: "text-[color:var(--color-success)]",
 		down: "text-destructive",
@@ -35,7 +35,8 @@ export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Ico
 	return (
 		<div data-testid={`stat-${label?.replace(/s+/g, '-').toLowerCase()}`} className={cn(
 			"group relative overflow-hidden rounded-xl border border-border transition-shadow hover:shadow-md",
-			compact ? "p-3" : "p-5"
+			compact ? "p-3" : "p-5",
+			className,
 		)}>
 			<div className="flex items-start justify-between">
 				<div>
