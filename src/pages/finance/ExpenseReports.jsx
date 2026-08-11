@@ -330,6 +330,7 @@ export default function ExpenseReports() {
 											<TableRow className="hover:bg-transparent">
 												<TableHead className="font-semibold text-muted-foreground">Date</TableHead>
 												<TableHead className="font-semibold text-muted-foreground">Category</TableHead>
+												<TableHead className="font-semibold text-muted-foreground">Project</TableHead>
 												<TableHead className="font-semibold text-muted-foreground">Description</TableHead>
 												<TableHead className="text-right font-semibold text-muted-foreground">Amount</TableHead>
 												<TableHead className="text-right font-semibold text-muted-foreground">Status</TableHead>
@@ -344,6 +345,9 @@ export default function ExpenseReports() {
 														</TableCell>
 														<TableCell className="text-muted-foreground font-medium">
 															{ticket.categoryId?.name || "—"}
+														</TableCell>
+														<TableCell className="text-muted-foreground font-medium">
+															{ticket.projectId?.name || "—"}
 														</TableCell>
 														<TableCell className="text-muted-foreground text-xs max-w-[200px] truncate" title={ticket.description}>
 															{ticket.title || "—"}
