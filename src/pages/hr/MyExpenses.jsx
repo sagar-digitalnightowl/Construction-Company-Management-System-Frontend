@@ -315,13 +315,14 @@ export default function MyExpenses() {
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead>Ticket #</TableHead>
+							{/* <TableHead>Ticket #</TableHead> */}
 							<TableHead>Date</TableHead>
 							<TableHead>Title</TableHead>
 							<TableHead>Project</TableHead>
 							<TableHead>Category</TableHead>
 							<TableHead>Amount</TableHead>
 							<TableHead>Status</TableHead>
+							<TableHead>Payment Status</TableHead>
 							<TableHead className="text-center">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -354,17 +355,17 @@ export default function MyExpenses() {
 
 								return (
 									<TableRow key={expense._id}>
-										<TableCell className="font-medium text-xs">
+										{/* <TableCell className="font-medium text-xs">
 											<Badge variant="outline" className="font-mono">{expense.ticketNumber || 'N/A'}</Badge>
-										</TableCell>
+										</TableCell> */}
 										<TableCell className="font-medium text-sm">
 											{expense.createdAt ? new Date(expense.createdAt).toLocaleDateString() : 'N/A'}
 										</TableCell>
 										<TableCell className="max-w-[180px] truncate">{expense.title}</TableCell>
-										<TableCell className="text-xs text-muted-foreground">{projectName}</TableCell>
+										<TableCell className="text-xs whitespace-nowrap text-muted-foreground">{projectName}</TableCell>
 										<TableCell>
 											{categoryName ? (
-												<Badge variant="outline" className="text-[10px] font-normal flex items-center w-fit gap-1.5 pl-1 pr-2 py-1">
+												<Badge variant="outline" className="text-[10px] whitespace-nowrap font-normal flex items-center w-fit gap-1.5 pl-1 pr-2 py-1">
 													<div
 														className="h-4 w-4 rounded-full flex items-center justify-center shrink-0 text-white"
 														style={{ backgroundColor: categoryColor }}
@@ -379,6 +380,18 @@ export default function MyExpenses() {
 										</TableCell>
 										<TableCell className="font-medium">₹{Number(expense.amount).toFixed(2)}</TableCell>
 										<TableCell>{getStatusBadge(expense.status)}</TableCell>
+										<TableCell>
+											{expense.paymentStatus ? (
+												<Badge
+													variant="secondary"
+													className="bg-purple-100 whitespace-nowrap text-purple-800 border-transparent"
+												>
+													{expense.paymentStatus}
+												</Badge>
+											) : (
+												<span className="text-xs text-muted-foreground">N/A</span>
+											)}
+										</TableCell>
 										<TableCell className="text-center">
 											<Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleViewExpense(expense)} title="View Details">
 												<Eye className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
@@ -710,8 +723,13 @@ export default function MyExpenses() {
 										<Hash className="h-4 w-4 text-muted-foreground" />
 										<span className="font-mono text-sm font-medium">{selectedExpense.ticketNumber || "N/A"}</span>
 									</div>
-									<div className="mt-2">
+									<div className="mt-2 flex gap-2">
 										{getStatusBadge(selectedExpense.status)}
+										{selectedExpense.paymentStatus && (
+											<Badge variant={selectedExpense.paymentStatus === "Paid" ? "default" : "secondary"}>
+												Payment: {selectedExpense.paymentStatus}
+											</Badge>
+										)}
 									</div>
 								</div>
 								<div className="text-right">
@@ -724,23 +742,35 @@ export default function MyExpenses() {
 
 							<Separator />
 
-							{/* Basic Details */}
+							{/* Basic Details with Project & Category */}
 							<div className="space-y-4">
-								<div className="grid grid-cols-2 gap-4">
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/30 p-3 rounded-lg border">
 									<div>
-										<Label className="text-muted-foreground flex items-center gap-2 mb-1">
-											<FolderOpen className="h-4 w-4" /> Project
+										<Label className="text-muted-foreground text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5">
+											<FolderOpen className="h-3.5 w-3.5" /> Project
 										</Label>
-										<div className="font-medium text-base">
+										<div className="font-medium text-sm mt-1">
 											{selectedExpense.projectId?.name || "N/A"}
 										</div>
 									</div>
 									<div>
-										<Label className="text-muted-foreground flex items-center gap-2 mb-1">
-											<Tag className="h-4 w-4" /> Category
+										<Label className="text-muted-foreground text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5">
+											<Tag className="h-3.5 w-3.5" /> Category
 										</Label>
-										<div className="font-medium text-base">
-											{selectedExpense.categoryId?.name || selectedExpense.category || "N/A"}
+										<div className="font-medium text-sm mt-1 flex items-center gap-2">
+											{selectedExpense.categoryId?.name ? (
+												<Badge variant="outline" className="text-xs font-normal flex items-center gap-1.5 px-2 py-0.5">
+													<div
+														className="h-3 w-3 rounded-full flex items-center justify-center shrink-0 text-white"
+														style={{ backgroundColor: selectedExpense.categoryId?.color || "#3b82f6" }}
+													>
+														{selectedExpense.categoryId?.icon && renderDynamicIcon(selectedExpense.categoryId.icon, "h-2 w-2")}
+													</div>
+													{selectedExpense.categoryId.name}
+												</Badge>
+											) : (
+												<span>{selectedExpense.category || "N/A"}</span>
+											)}
 										</div>
 									</div>
 								</div>
@@ -756,8 +786,31 @@ export default function MyExpenses() {
 								</div>
 							</div>
 
+							<Separator />
+
+							{/* Wallet & Payment Distribution Summary */}
+							<div>
+								<Label className="text-muted-foreground flex items-center gap-2 mb-3 text-primary">
+									<DollarSign className="h-4 w-4" /> Payment Distribution
+								</Label>
+								<div className="grid grid-cols-3 gap-4 p-3 bg-muted/30 rounded-lg border text-center">
+									<div>
+										<span className="text-xs text-muted-foreground block mb-1">Wallet Adjusted</span>
+										<span className="font-semibold text-emerald-600">₹{selectedExpense.walletUsed || 0}</span>
+									</div>
+									<div className="border-l border-r border-border">
+										<span className="text-xs text-muted-foreground block mb-1">Cash Paid</span>
+										<span className="font-semibold text-blue-600">₹{selectedExpense.cashAmount || 0}</span>
+									</div>
+									<div>
+										<span className="text-xs text-muted-foreground block mb-1">Pending</span>
+										<span className="font-semibold text-rose-600">₹{selectedExpense.paymentPendingAmount || 0}</span>
+									</div>
+								</div>
+							</div>
+
 							{/* Approval Info Section */}
-							{(selectedExpense.status === "Approved" || selectedExpense.status === "Paid") && selectedExpense.approvedAt && (
+							{selectedExpense.approvalHistory && selectedExpense.approvalHistory.length > 0 && (
 								<>
 									<Separator />
 									<div>
@@ -766,13 +819,17 @@ export default function MyExpenses() {
 										</Label>
 										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 											<div>
+												<span className="text-xs text-muted-foreground">Approved By</span>
+												<div className="font-medium text-sm">{selectedExpense.approvalHistory[0]?.by?.name || "N/A"}</div>
+											</div>
+											<div>
 												<span className="text-xs text-muted-foreground">Approved On</span>
-												<div className="font-medium text-sm">{formatDate(selectedExpense.approvedAt)}</div>
+												<div className="font-medium text-sm">{formatDate(selectedExpense.approvalHistory[0]?.date || selectedExpense.approvedAt)}</div>
 											</div>
 											{selectedExpense.approverRemarks && (
 												<div className="md:col-span-2">
 													<span className="text-xs text-muted-foreground">Approver Remarks</span>
-													<div className="text-sm p-2 bg-emerald-50 dark:bg-emerald-950/30 rounded-md mt-1">
+													<div className="text-sm p-2 bg-emerald-50 dark:bg-emerald-950/30 rounded-md mt-1 border border-emerald-100 dark:border-emerald-900/50">
 														{selectedExpense.approverRemarks}
 													</div>
 												</div>
@@ -782,35 +839,24 @@ export default function MyExpenses() {
 								</>
 							)}
 
-							{/* Payment Info Section */}
-							{selectedExpense.status === "Paid" && selectedExpense.paidAt && (
+							{/* Cash Payment History Section */}
+							{selectedExpense.paymentHistory && selectedExpense.paymentHistory.length > 0 && (
 								<>
 									<Separator />
 									<div>
 										<Label className="text-muted-foreground flex items-center gap-2 mb-3 text-blue-600 dark:text-blue-400">
-											<DollarSign className="h-4 w-4" /> Payment Details
+											<Receipt className="h-4 w-4" /> Cash Payment History
 										</Label>
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-											<div>
-												<span className="text-xs text-muted-foreground">Payment Method</span>
-												<div className="font-medium text-sm">{selectedExpense.paymentMethod || "N/A"}</div>
-											</div>
-											<div>
-												<span className="text-xs text-muted-foreground">Reference / Txn No</span>
-												<div className="font-medium text-sm font-mono">{selectedExpense.paymentReference || "N/A"}</div>
-											</div>
-											<div>
-												<span className="text-xs text-muted-foreground">Paid On</span>
-												<div className="font-medium text-sm">{formatDate(selectedExpense.paidAt)}</div>
-											</div>
-											{selectedExpense.paymentRemarks && (
-												<div className="md:col-span-2">
-													<span className="text-xs text-muted-foreground">Payment Remarks</span>
-													<div className="text-sm p-2 bg-blue-50 dark:bg-blue-950/30 rounded-md mt-1">
-														{selectedExpense.paymentRemarks}
-													</div>
+										<div className="space-y-3">
+											{selectedExpense.paymentHistory.map((pay, idx) => (
+												<div key={idx} className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-md border border-blue-100 dark:border-blue-900/50 text-sm">
+													<div><span className="text-xs text-muted-foreground block mb-0.5">Amount</span><span className="font-bold text-blue-600">₹{pay.amount}</span></div>
+													<div><span className="text-xs text-muted-foreground block mb-0.5">Method</span><span className="font-medium">{pay.method}</span></div>
+													<div><span className="text-xs text-muted-foreground block mb-0.5">Reference</span><span className="font-mono text-xs">{pay.reference || "N/A"}</span></div>
+													<div><span className="text-xs text-muted-foreground block mb-0.5">Date</span><span className="font-medium">{formatDate(pay.paidAt)}</span></div>
+													{pay.remarks && <div className="col-span-full text-muted-foreground italic mt-1 text-xs">Note: {pay.remarks}</div>}
 												</div>
-											)}
+											))}
 										</div>
 									</div>
 								</>
