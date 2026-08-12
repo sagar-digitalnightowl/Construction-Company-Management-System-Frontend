@@ -67,7 +67,10 @@ export const financeApi = {
 	// EXPENSE REPORTING
 	// =========================
 
-	getExpenseSummary: () => api.get("/finance/expenses/summary"),
+	getExpenseSummary: (params = {}) =>
+		api.get("/finance/expenses/summary", {
+			params,
+		}),
 
 	getProjectExpenseReport: (projectId) =>
 		api.get(`/finance/expenses/project/${projectId}`),

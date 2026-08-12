@@ -23,7 +23,7 @@ export function PageHeader({ title, eyebrow, description, actions, className }) 
 	);
 }
 
-export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Icon, accent = "primary", valueClassName,  className, size = "default", }) {
+export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Icon, accent = "primary", valueClassName, className, size = "default", }) {
 	const toneCls = {
 		up: "text-[color:var(--color-success)]",
 		down: "text-destructive",
@@ -71,6 +71,11 @@ export function StatCard({ label, value, delta, deltaTone = "neutral", icon: Ico
 							"bg-[color-mix(in_oklab,var(--color-warning)_18%,transparent)] text-[color:color-mix(in_oklab,var(--color-warning)_60%,black)]",
 							accent === "success" &&
 							"bg-[color-mix(in_oklab,var(--color-success)_18%,transparent)] text-[color:var(--color-success)]",
+							accent === "destructive" &&
+							"bg-destructive/10 text-destructive",
+
+							accent === "info" &&
+							"bg-[color-mix(in_oklab,var(--color-info)_18%,transparent)] text-[color:var(--color-info)]",
 						)}
 					>
 						<Icon className={cn(compact ? "h-4 w-4" : "h-5 w-5")} />

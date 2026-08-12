@@ -77,10 +77,14 @@ export function FinanceExpenses() {
 	};
 
 	useEffect(() => {
-		if (mainTab === "expenses") {
+		if (mainTab !== "expenses") return;
+
+		const timer = setTimeout(() => {
 			fetchExpensesData(activeTab, 1, 10, searchTerm);
-		}
-	}, [activeTab, mainTab]);
+		}, 500);
+
+		return () => clearTimeout(timer);
+	}, [searchTerm, activeTab, mainTab]);
 
 	// ==================== EFFECTS: WALLETS ====================
 	useEffect(() => {
@@ -215,8 +219,8 @@ export function FinanceExpenses() {
 							<TableHeader>
 								<TableRow>
 									<TableHead>Date</TableHead>
-									<TableHead>Employee</TableHead>
 									<TableHead>Title</TableHead>
+									<TableHead>Employee</TableHead>
 									<TableHead>Project</TableHead>
 									<TableHead>Category</TableHead>
 									<TableHead>Total Amount</TableHead>
@@ -239,11 +243,11 @@ export function FinanceExpenses() {
 										return (
 											<TableRow key={expense._id}>
 												<TableCell>{new Date(expense.createdAt).toLocaleDateString()}</TableCell>
+												<TableCell>{expense.title}</TableCell>
 												<TableCell>
 													<div className="font-medium">{expense.employeeId?.name}</div>
 													<div className="text-xs text-muted-foreground">{expense.ticketNumber}</div>
 												</TableCell>
-												<TableCell>{expense.title}</TableCell>
 												<TableCell>
 													<div className="font-medium">
 														{expense.projectId?.name || "N/A"}
@@ -251,13 +255,22 @@ export function FinanceExpenses() {
 												</TableCell>
 												<TableCell>
 													{categoryName ? (
-														<Badge variant="outline" className="text-[10px] font-normal flex items-center w-fit gap-1.5 pl-1 pr-2 py-1">
-															<div
-																className="h-4 w-4 rounded-full flex items-center justify-center shrink-0 text-white"
-																style={{ backgroundColor: categoryColor }}
-															>
-																{categoryIcon && renderDynamicIcon(categoryIcon, "h-2.5 w-2.5")}
-															</div>
+														<Badge
+															variant="outline"
+															className={`text-[10px] font-normal flex items-center w-fit py-1 ${categoryIcon
+																? "gap-1.5 pl-1 pr-2"
+																: "justify-center px-2"
+																}`}
+														>
+															{categoryIcon && (
+																<div
+																	className="h-4 w-4 rounded-full flex items-center justify-center shrink-0 text-white"
+																	style={{ backgroundColor: categoryColor }}
+																>
+																	{renderDynamicIcon(categoryIcon, "h-2.5 w-2.5")}
+																</div>
+															)}
+
 															{categoryName}
 														</Badge>
 													) : (
