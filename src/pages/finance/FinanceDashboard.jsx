@@ -1,5 +1,3 @@
-
-// src/pages/finance/FinanceDashboard.jsx
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useFinance } from "@/hooks/useFinance";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,23 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/common/PageHeader";
 import { formatINR } from "@/lib/helpers";
 import {
-	Home,
-	UserCheck,
-	TrendingDown,
-	TrendingUp,
 	ChevronLeft,
 	Building2,
 	Layers,
-	Receipt,
-	CheckCircle2,
-	Hourglass,
-	Landmark,
 	Download,
 	User,
 	Mail,
 	Phone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CountUp from 'react-countup';
 
 // Helper: returns effective status and display label based on all 3 keys
 const getEffectiveFlatStatus = (flat) => {
@@ -101,6 +92,11 @@ export function FinanceDashboard() {
 				totalGst: towerSummary.totalGst || 0,
 				gstCollected: towerSummary.gstCollected || 0,
 				gstRemaining: towerSummary.gstRemaining || 0,
+
+				totalExpenses: towerSummary.totalExpenses || 0,
+				totalExpensesPaid: towerSummary.totalExpensesPaid || 0,
+				totalExpensesPending: towerSummary.totalExpensesPending || 0,
+				totalExpenseTickets: towerSummary.totalExpenseTickets || 0,
 			};
 		}
 
@@ -113,6 +109,11 @@ export function FinanceDashboard() {
 				totalGst: selectedProject.totalGst || 0,
 				gstCollected: selectedProject.gstCollected || 0,
 				gstRemaining: selectedProject.gstRemaining || 0,
+
+				totalExpenses: selectedProject.totalExpenses || 0,
+				totalExpensesPaid: selectedProject.totalExpensesPaid || 0,
+				totalExpensesPending: selectedProject.totalExpensesPending || 0,
+				totalExpenseTickets: selectedProject.totalExpenseTickets || 0,
 			};
 		}
 
@@ -125,6 +126,10 @@ export function FinanceDashboard() {
 				totalGst: dashboardSummary.totalGst || 0,
 				gstCollected: dashboardSummary.gstCollected || 0,
 				gstRemaining: dashboardSummary.gstRemaining || 0,
+				totalExpenses: dashboardSummary.totalExpenses || 0,
+				totalExpensesPaid: dashboardSummary.totalExpensesPaid || 0,
+				totalExpensesPending: dashboardSummary.totalExpensesPending || 0,
+				totalExpenseTickets: dashboardSummary.totalExpenseTickets || 0,
 			};
 		}
 
@@ -134,12 +139,20 @@ export function FinanceDashboard() {
 			totalPaid = 0,
 			totalGst = 0,
 			gstCollected = 0,
-			gstRemaining = 0;
+			gstRemaining = 0,
+			totalExpenses = 0,
+			totalExpensesPaid = 0,
+			totalExpensesPending = 0,
+			totalExpenseTickets = 0;
 
 		projects.forEach((project) => {
 			totalGst += project.totalGst || 0;
 			gstCollected += project.gstCollected || 0;
 			gstRemaining += project.gstRemaining || 0;
+			totalExpenses += project.totalExpenses || 0;
+			totalExpensesPaid += project.totalExpensesPaid || 0;
+			totalExpensesPending += project.totalExpensesPending || 0;
+			totalExpenseTickets += project.totalExpenseTickets || 0;
 
 			const flats = project.flats || [];
 			totalFlats += flats.length;
@@ -153,7 +166,13 @@ export function FinanceDashboard() {
 			});
 		});
 
-		return { totalFlats, bookedFlats, totalRemaining, totalPaid, totalGst, gstCollected, gstRemaining };
+		return {
+			totalFlats, bookedFlats, totalRemaining, totalPaid, totalGst, gstCollected, gstRemaining,
+			totalExpenses,
+			totalExpensesPaid,
+			totalExpensesPending,
+			totalExpenseTickets,
+		};
 	}, [
 		projects,
 		dashboardSummary,
@@ -250,97 +269,91 @@ export function FinanceDashboard() {
 
 	return (
 		<div className="space-y-6">
-			{/* Overview Stats */}
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+			{/* Consolidated Finance & Expense Overview */}
+			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
+				{/* Property Stats */}
 				<StatCard
 					size="compact"
 					label="Total Flats"
 					value={stats.totalFlats}
-					icon={Home}
-					accent="info"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
 				<StatCard
 					size="compact"
 					label="Booked / Sold"
 					value={stats.bookedFlats}
-					icon={UserCheck}
-					accent="info"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
-				{/* 🔥 Updated Label: Included GST explicitly */}
 				<StatCard
 					size="compact"
-					label="Total Received (Incl. GST)"
+					label="Received (Incl. GST)"
 					value={formatINR(stats.totalPaid)}
-					icon={TrendingUp}
-					accent="info"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
-				{/* 🔥 Updated Label: Included GST explicitly */}
 				<StatCard
 					size="compact"
-					label="Outstanding Due (Incl. GST)"
+					label="Due (Incl. GST)"
 					value={formatINR(stats.totalRemaining)}
-					icon={TrendingDown}
-					accent="destructive"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
-			</div>
-
-			{/* Finance Breakdown Stats (Pure Base vs GST) */}
-			<h3 className="text-sm font-semibold text-muted-foreground mt-6 mb-3">Finance Breakdown</h3>
-			{/* Changed grid layout to handle the 2 active cards elegantly without looking empty */}
-			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 				<StatCard
 					size="compact"
-					label="Pure Revenue (No GST)"
+					label="Pure Revenue"
 					value={formatINR(pureBaseReceived > 0 ? pureBaseReceived : 0)}
-					icon={Landmark}
-					accent="info"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
-				{/* <StatCard
-						size="compact"
-						label="Pure Due (No GST)"
-						value={formatINR(pureBaseOutstanding > 0 ? pureBaseOutstanding : 0)}
-						icon={Landmark}
-						accent="warning"
-						className="bg-white dark:bg-card rounded-xl shadow-sm"
-						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-					/> */}
-				{/* <StatCard
-						size="compact"
-						label="Total GST"
-						value={formatINR(stats.totalGst)}
-						icon={Receipt}
-						accent="info"
-						className="bg-white dark:bg-card rounded-xl shadow-sm"
-						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-					/> */}
+
+				{/* Tax & Expense Stats */}
 				<StatCard
 					size="compact"
 					label="GST Collected"
 					value={formatINR(stats.gstCollected)}
-					icon={CheckCircle2}
-					accent="info"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
-					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
-				{/* <StatCard
-						size="compact"
-						label="GST Remaining"
-						value={formatINR(stats.gstRemaining)}
-						icon={Hourglass}
-						accent="destructive"
-						className="bg-white dark:bg-card rounded-xl shadow-sm"
-						valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
-					/> */}
+				<StatCard
+					size="compact"
+					label="Total Expenses"
+					value={formatINR(stats.totalExpenses)}
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
+				/>
+				<StatCard
+					size="compact"
+					label="Expenses Paid"
+					value={formatINR(stats.totalExpensesPaid)}
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
+				/>
+				<StatCard
+					size="compact"
+					label="Expenses Pending"
+					value={formatINR(stats.totalExpensesPending)}
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
+				/>
+				<StatCard
+					size="compact"
+					label="Expense Tickets"
+					value={stats.totalExpenseTickets}
+					accent="neutral"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
+				/>
 			</div>
 
 			{/* Projects View */}
@@ -357,15 +370,8 @@ export function FinanceDashboard() {
 							</span>
 						</div>
 
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => exportFinanceDashboard()}
-							disabled={loading}
-							className="cursor-pointer bg-white dark:bg-card hover:bg-muted/50"
-						>
-							<Download className="h-4 w-4 mr-2" />
-							Export
+						<Button onClick={() => exportFinanceDashboard()} disabled={loading}>
+							<Download className="h-4 w-4 mr-1" /> Export
 						</Button>
 					</div>
 					{projects.length === 0 ? (
@@ -519,19 +525,12 @@ export function FinanceDashboard() {
 							</div>
 						</div>
 
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() =>
-								exportFinanceDashboard({
-									projectId: selectedProject.projectId,
-								})
-							}
-							disabled={loading}
-							className="cursor-pointer bg-white dark:bg-card hover:bg-muted/50"
-						>
-							<Download className="h-4 w-4 mr-2" />
-							Export
+						<Button onClick={() =>
+							exportFinanceDashboard({
+								projectId: selectedProject.projectId,
+							})
+						} disabled={loading}>
+							<Download className="h-4 w-4 mr-1" /> Export
 						</Button>
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Tower</h3>
@@ -630,20 +629,13 @@ export function FinanceDashboard() {
 							</div>
 						</div>
 
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() =>
-								exportFinanceDashboard({
-									projectId: selectedProject.projectId,
-									tower: selectedTower,
-								})
-							}
-							disabled={loading}
-							className="cursor-pointer bg-white dark:bg-card hover:bg-muted/50"
-						>
-							<Download className="h-4 w-4 mr-2" />
-							Export
+						<Button onClick={() =>
+							exportFinanceDashboard({
+								projectId: selectedProject.projectId,
+								tower: selectedTower,
+							})
+						} disabled={loading}>
+							<Download className="h-4 w-4 mr-1" /> Export
 						</Button>
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Floor</h3>

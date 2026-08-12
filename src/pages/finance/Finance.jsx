@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, {useState} from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinanceDashboard } from "./FinanceDashboard";
@@ -13,8 +13,12 @@ import { FinanceExpenses } from "./FinanceExpenses";
 import { FinanceDueInstallments } from "./FinanceDueInstallments";
 import FinanceBookings from "./FinanceBookings";
 import ExpenseReports from "./ExpenseReports";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export default function Finance() {
+	const [dashboardExport, setDashboardExport] = useState(null);
+
 	return (
 		<div className="space-y-6">
 			<PageHeader

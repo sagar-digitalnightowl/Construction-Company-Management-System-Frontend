@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useFinance } from "@/hooks/useFinance";
 import { projectApi } from "@/api/projectApi";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,8 +14,10 @@ import { StatCard } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 
 export default function ExpenseReports() {
+	const topRef = useRef(null);
 	const {
 		expenseSummary,
+		expenseSummaryPagination,
 		projectExpenseReport,
 		employeeExpenseReport,
 		fetchExpenseSummary,
@@ -29,12 +31,22 @@ export default function ExpenseReports() {
 	const [selectedProject, setSelectedProject] = useState("");
 	const [selectedEmployee, setSelectedEmployee] = useState("");
 	const [empProjectFilter, setEmpProjectFilter] = useState("");
+	const [currentPage, setCurrentPage] = useState(1);
 
-	// Initial Load: Fetch summary and projects
 	useEffect(() => {
-		fetchExpenseSummary();
+		// Scroll the ref into view instead of the window
+		topRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [currentPage]);
 
-		// Fetch projects dropdown data
+	useEffect(() => {
+		fetchExpenseSummary({
+			page: currentPage,
+			limit: 10,
+		});
+	}, [currentPage, fetchExpenseSummary]);
+
+	// Initial Load: Fetch projects
+	useEffect(() => {
 		const loadProjects = async () => {
 			try {
 				const projRes = await projectApi.getAll({ limit: 100 });
@@ -44,7 +56,6 @@ export default function ExpenseReports() {
 			}
 		};
 		loadProjects();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// Navigation Handler
@@ -73,7 +84,7 @@ export default function ExpenseReports() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6" ref={topRef}>
 			{/* Top Bar with Tabs and Dynamic Back Button */}
 			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-card p-4 rounded-xl border shadow-sm gap-4">
 				<div className="flex items-center gap-2">
@@ -142,18 +153,17 @@ export default function ExpenseReports() {
 										<TableBody>
 											{expenseSummary.tickets?.length > 0 ? (
 												expenseSummary.tickets.map((ticket) => (
-													<TableRow key={ticket._id} className="group hover:bg-muted/40 transition-colors">
+													<TableRow key={ticket.id} className="group hover:bg-muted/40 transition-colors">
 														<TableCell className="font-medium text-foreground tabular-nums text-nowrap">{formatDate(ticket.createdAt)}</TableCell>
 														<TableCell>
-															<div className="font-medium text-foreground">{ticket.employeeId?.name || "—"}</div>
-															<div className="text-[11px] text-muted-foreground">{ticket.employeeId?.email}</div>
+															<div className="font-medium text-foreground">{ticket.employeeName || "—"}</div>
 														</TableCell>
 														<TableCell>
-															<div className="font-medium text-foreground">{ticket.projectId?.name || "—"}</div>
-															<div className="text-[11px] text-muted-foreground">{ticket.categoryId?.name || ticket.category || "—"}</div>
+															<div className="font-medium text-foreground">{ticket.projectName || "—"}</div>
+															<div className="text-[11px] text-muted-foreground">{ticket.categoryName || "—"}</div>
 														</TableCell>
 														<TableCell className="text-right font-bold tabular-nums text-foreground">{formatINR(ticket.amount)}</TableCell>
-														<TableCell className="text-right">{renderStatus(ticket.paymentStatus || ticket.status)}</TableCell>
+														<TableCell className="text-right">{renderStatus(ticket.paymentStatus)}</TableCell>
 													</TableRow>
 												))
 											) : (
@@ -164,6 +174,33 @@ export default function ExpenseReports() {
 										</TableBody>
 									</Table>
 								</CardContent>
+
+								{/* Pagination Controls */}
+								{expenseSummaryPagination && expenseSummaryPagination.pages > 1 && (
+									<div className="flex justify-between items-center px-4 py-3 border-t bg-muted/10">
+										<span className="text-sm text-muted-foreground">
+											Page {expenseSummaryPagination.page} of {expenseSummaryPagination.pages}
+										</span>
+										<div className="flex gap-2">
+											<Button
+												variant="outline"
+												size="sm"
+												disabled={expenseSummaryPagination.page <= 1}
+												onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+											>
+												Previous
+											</Button>
+											<Button
+												variant="outline"
+												size="sm"
+												disabled={expenseSummaryPagination.page >= expenseSummaryPagination.pages}
+												onClick={() => setCurrentPage((prev) => prev + 1)}
+											>
+												Next
+											</Button>
+										</div>
+									</div>
+								)}
 							</Card>
 						</>
 					) : (

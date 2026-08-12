@@ -12,6 +12,12 @@ export const useFinance = () => {
 	const [reminders, setReminders] = useState([]);
 
 	const [expenseSummary, setExpenseSummary] = useState(null);
+	const [expenseSummaryPagination, setExpenseSummaryPagination] = useState({
+		page: 1,
+		limit: 10,
+		total: 0,
+		pages: 0,
+	});
 	const [projectExpenseReport, setProjectExpenseReport] = useState(null);
 	const [employeeExpenseReport, setEmployeeExpenseReport] = useState(null);
 
@@ -399,19 +405,27 @@ export const useFinance = () => {
 		}
 	};
 
-	const fetchExpenseSummary = async () => {
+	const fetchExpenseSummary = useCallback(async (params = {}) => {
 		try {
 			setLoading(true);
-			const response = await financeApi.getExpenseSummary();
+
+			const response = await financeApi.getExpenseSummary(params);
+
 			setExpenseSummary(response.data?.data || null);
-			return response.data?.data;
+
+			if (response.data?.pagination) {
+				setExpenseSummaryPagination(response.data.pagination);
+			}
+
+			return response.data;
 		} catch (error) {
 			console.error("Failed to fetch expense summary:", error);
 			toast.error("Failed to fetch expense summary");
+			return null;
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, []);
 
 	const fetchProjectExpenseReport = async (projectId) => {
 		if (!projectId) return;
@@ -465,6 +479,7 @@ export const useFinance = () => {
 		currentPayrollBatch,
 		approvedExpenses,
 		expenseSummary,
+		expenseSummaryPagination,
 		projectExpenseReport,
 		employeeExpenseReport,
 
