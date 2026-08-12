@@ -1,16 +1,5 @@
-
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import {
 	Table,
@@ -20,75 +9,29 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-} from "@/components/ui/dialog";
 import { PageHeader, StatCard } from "@/components/common/PageHeader";
 import { usePropertyInventory } from "@/hooks/usePropertyInventory";
-import { useAuthStore } from "@/store/authStore";
-import { canMutate } from "@/data/permissions";
 import {
 	Building2,
 	Home,
-	BarChart3,
 	Download,
-	Search,
-	Eye,
 	TrendingUp,
 	AlertCircle,
+	ChevronRight
 } from "lucide-react";
-import ProjectDetailModal from "@/components/propertyInventory/ProjectDetailModal";
-import BookingPaymentModal from "@/components/propertyInventory/BookingPaymentModal";
-
-const getHealthColor = (health) => {
-	switch (health) {
-		case "green":
-			return "success";
-		case "yellow":
-			return "warning";
-		case "red":
-			return "destructive";
-		default:
-			return "outline";
-	}
-};
+import { useNavigate } from "react-router-dom";
 
 export default function PropertyInventory() {
+	const navigate = useNavigate();
+
 	const {
 		dashboardData,
-		selectedProject,
-		projectBookings,
-		bookingsPagination,
-		projectAgreements,
-		siteEngineers,
-		bookingPayment,
 		loading,
 		fetchDashboard,
-		fetchProjectDetails,
-		fetchProjectBookings,
-		fetchProjectAgreements,
-		fetchSiteEngineers,
-		fetchBookingPaymentDetails,
 		exportInventory,
 	} = usePropertyInventory();
 
-	const { current } = useAuthStore();
-	const canEdit = canMutate(current.role, "property");
-
 	const [filters, setFilters] = useState({ status: "", search: "" });
-	const [selectedProjectId, setSelectedProjectId] = useState(null);
-	const [detailOpen, setDetailOpen] = useState(false);
-	const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-	const [selectedBookingId, setSelectedBookingId] = useState(null);
-
-	// Booking search state
-	const [bookingSearch, setBookingSearch] = useState("");
-
 	const { projectStats, projects, leads, pagination } = dashboardData;
 
 	useEffect(() => {
@@ -104,36 +47,10 @@ export default function PropertyInventory() {
 		fetchDashboard({ ...filters, page });
 	};
 
-	const handleViewProject = async (id) => {
-		const project = await fetchProjectDetails(id);
-		if (project) {
-			setSelectedProjectId(id);
-			setDetailOpen(true);
-			fetchProjectBookings(id, { page: 1, limit: 10 });
-			fetchProjectAgreements(id);
-			fetchSiteEngineers(id);
-			setBookingSearch("");
-		}
+	const handleViewProject = (id) => {
+		navigate(`/property-inventory/${id}`);
 	};
 
-	const handleBookingPageChange = (page) => {
-		if (!selectedProjectId) return;
-		fetchProjectBookings(selectedProjectId, {
-			page,
-			limit: 10,
-			search: bookingSearch,
-		});
-	};
-
-	const handleBookingSearch = (value = bookingSearch) => {
-		if (!selectedProjectId) return;
-
-		fetchProjectBookings(selectedProjectId, {
-			page: 1,
-			limit: 10,
-			search: value.trim(),
-		});
-	};
 
 	const getBookingProgress = (project) => {
 		const totalFlats =
@@ -159,11 +76,6 @@ export default function PropertyInventory() {
 			total: totalFlats,
 			percentage: Math.min((bookedFlats / totalFlats) * 100, 100),
 		};
-	};
-
-	const handleViewPayments = async (bookingId) => {
-		await fetchBookingPaymentDetails(bookingId);
-		setPaymentModalOpen(true);
 	};
 
 	return (
@@ -274,7 +186,11 @@ export default function PropertyInventory() {
 						</TableHeader>
 						<TableBody>
 							{projects.map((project) => (
-								<TableRow key={project.id}>
+								<TableRow
+									key={project.id}
+									className="cursor-pointer hover:bg-muted/50"
+									onClick={() => handleViewProject(project.id)}
+								>
 									<TableCell className="font-medium whitespace-nowrap">{project.name}</TableCell>
 									<TableCell>{project.location}</TableCell>
 									<TableCell className="capitalize">{project.status}</TableCell>
@@ -309,13 +225,16 @@ export default function PropertyInventory() {
 										})()}
 									</TableCell>
 									<TableCell className="text-right">
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => handleViewProject(project.id)}
+										<button
+											type="button"
+											onClick={(e) => {
+												e.stopPropagation();
+												handleViewProject(project.id);
+											}}
+											className="inline-flex items-center justify-center size-8 rounded-lg transition-colors hover:bg-muted cursor-pointer"
 										>
-											<Eye className="h-4 w-4" />
-										</Button>
+											<ChevronRight className="h-5 w-5 text-muted-foreground" />
+										</button>
 									</TableCell>
 								</TableRow>
 							))}
@@ -358,28 +277,6 @@ export default function PropertyInventory() {
 					)}
 				</CardContent>
 			</Card>
-
-			<ProjectDetailModal
-				open={detailOpen}
-				onOpenChange={setDetailOpen}
-				project={selectedProject}
-				bookings={projectBookings}
-				bookingsPagination={bookingsPagination}
-				onBookingPageChange={handleBookingPageChange}
-				agreements={projectAgreements}
-				siteEngineers={siteEngineers}
-				loading={loading}
-				onViewPayments={handleViewPayments}
-				bookingSearch={bookingSearch}
-				setBookingSearch={setBookingSearch}
-				onBookingSearch={handleBookingSearch}
-			/>
-
-			<BookingPaymentModal
-				open={paymentModalOpen}
-				onOpenChange={setPaymentModalOpen}
-				bookingPayment={bookingPayment}
-			/>
 		</div>
 	);
 }
