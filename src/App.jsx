@@ -70,6 +70,7 @@ import EmployeeLayout from "./pages/hr/EmployeeLayout";
 import FinanceBookings from "./pages/finance/FinanceBookings";
 import FinanceBookingDetail from "./pages/finance/FinanceBookingDetail";
 import ExpenseReports from "./pages/finance/ExpenseReports";
+import ProjectDetailPage from "./components/propertyInventory/ProjectDetailPage";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -107,6 +108,7 @@ export default function App() {
 					<Route path="/project-templates" element={<ProjectTemplate />} />
 					<Route path="/projects/:id" element={<ProjectDetail />} />
 					<Route path="/property-inventory" element={<PropertyInventory />} />
+					<Route path="/property-inventory/:projectId" element={<ProjectDetailPage />} />
 
 					<Route path="/tasks/my-tasks" element={<MyTasks />} />
 					<Route path="/tasks/requests" element={<TaskRequests />} />
