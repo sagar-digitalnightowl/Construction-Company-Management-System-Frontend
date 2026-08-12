@@ -30,7 +30,6 @@ const STATUS_OPTIONS = [
 	{ value: "Pending", label: "Pending" },
 	{ value: "Approved", label: "Approved" },
 	{ value: "Rejected", label: "Rejected" },
-	{ value: "Paid", label: "Paid" },
 ];
 
 const TXN_TYPES = [
