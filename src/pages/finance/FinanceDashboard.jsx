@@ -322,38 +322,46 @@ export function FinanceDashboard() {
 					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
-				<StatCard
-					size="compact"
-					label="Total Expenses"
-					value={formatINR(stats.totalExpenses)}
-					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
-					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
-				/>
-				<StatCard
-					size="compact"
-					label="Expenses Paid"
-					value={formatINR(stats.totalExpensesPaid)}
-					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
-					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
-				/>
-				<StatCard
-					size="compact"
-					label="Expenses Pending"
-					value={formatINR(stats.totalExpensesPending)}
-					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
-					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
-				/>
-				<StatCard
-					size="compact"
-					label="Expense Tickets"
-					value={stats.totalExpenseTickets}
-					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
-					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
-				/>
+
+				{currentView !== "floors" && currentView !== "flats" && (
+					<>
+						<StatCard
+							size="compact"
+							label="Total Expenses"
+							value={formatINR(stats.totalExpenses)}
+							accent="neutral"
+							className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+							valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
+						/>
+
+						<StatCard
+							size="compact"
+							label="Expenses Paid"
+							value={formatINR(stats.totalExpensesPaid)}
+							accent="neutral"
+							className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+							valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
+						/>
+
+						<StatCard
+							size="compact"
+							label="Expenses Pending"
+							value={formatINR(stats.totalExpensesPending)}
+							accent="neutral"
+							className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+							valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
+						/>
+
+						<StatCard
+							size="compact"
+							label="Expense Tickets"
+							value={stats.totalExpenseTickets}
+							accent="neutral"
+							className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
+							valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
+						/>
+					</>
+				)}
 			</div>
 
 			{/* Projects View */}
