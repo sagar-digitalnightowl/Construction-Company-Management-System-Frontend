@@ -85,7 +85,7 @@ export default function App() {
 		<>
 			{createPortal(
 				<Toaster
-					position="top-right"
+					position="bottom-right"
 					richColors
 					expand={true}
 					portalProps={{

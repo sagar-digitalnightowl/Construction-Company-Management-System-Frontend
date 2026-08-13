@@ -55,106 +55,125 @@
 
 /* ============================================================
    BuildHive — Construction Operations Platform
-   Sophisticated palette: Bone parchment + Graphite + Terracotta
+   "Blueprint & Site" palette: Concrete + Blueprint Navy + Safety Orange
    ============================================================ */
 
 :root {
-	--background: oklch(0.975 0.007 85);
-	--foreground: oklch(0.2 0.012 270);
+	--background: oklch(0.975 0.004 200);
+	--foreground: oklch(0.2 0.02 205);
 
 	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.2 0.012 270);
+	--card-foreground: oklch(0.2 0.02 205);
 
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.2 0.012 270);
+	--popover-foreground: oklch(0.2 0.02 205);
 
-	/* Terracotta — primary accent */
-	--primary: oklch(0.55 0.145 40);
-	--primary-foreground: oklch(0.985 0.005 85);
+	/* Deep teal (#045157) — the logo's anchor color, used twice
+	   (buildings + "ENGICON GROUP" wordmark). This is the brand. */
+	--primary: oklch(0.397 0.066 203.6);
+	--primary-foreground: oklch(0.98 0.004 200);
 
-	/* Slate olive — secondary */
-	--secondary: oklch(0.94 0.012 95);
-	--secondary-foreground: oklch(0.25 0.015 100);
+	/* Gray (#6E6E6E) — the angular "A" mark */
+	--secondary: oklch(0.93 0.003 220);
+	--secondary-foreground: oklch(0.26 0.005 220);
 
-	--muted: oklch(0.945 0.008 90);
-	--muted-foreground: oklch(0.46 0.012 100);
+	--muted: oklch(0.945 0.004 210);
+	--muted-foreground: oklch(0.47 0.006 220);
 
-	--accent: oklch(0.93 0.025 60);
-	--accent-foreground: oklch(0.25 0.015 100);
+	/* Mid teal (#147878) tint — the logo's lighter building stripe */
+	--accent: oklch(0.91 0.025 195);
+	--accent-foreground: oklch(0.3 0.05 200);
 
-	--destructive: oklch(0.52 0.18 25);
-	--destructive-foreground: oklch(0.985 0.005 85);
+	/* Red (#DC0000) — "ASHIRWAD" wordmark */
+	--destructive: oklch(0.562 0.23 29.2);
+	--destructive-foreground: oklch(0.98 0.004 85);
 
-	--success: oklch(0.55 0.1 145);
-	--warning: oklch(0.7 0.13 75);
-	--info: oklch(0.55 0.06 220);
+	/* Success synthesized in-family (logo has no green): same
+	   lightness/chroma register as the mid-teal, hue pulled to 155 */
+	--success: oklch(0.55 0.1 155);
+	/* Rust orange (#C33C0F) — the logo's building accent, doubles as warning */
+	--warning: oklch(0.55 0.179 36.4);
+	/* Mid teal (#147878) direct from logo */
+	--info: oklch(0.521 0.084 194.9);
 
-	--border: oklch(0.89 0.012 85);
-	--input: oklch(0.91 0.01 85);
-	--ring: oklch(0.55 0.145 40);
+	--border: oklch(0.89 0.004 210);
+	--input: oklch(0.9 0.004 210);
+	--ring: oklch(0.397 0.066 203.6);
 
-	--chart-1: oklch(0.55 0.145 40);
-	--chart-2: oklch(0.55 0.1 145);
-	--chart-3: oklch(0.7 0.13 75);
-	--chart-4: oklch(0.45 0.04 250);
-	--chart-5: oklch(0.55 0.08 320);
+	/* Equipment/asset tag color — rust orange, kept in the logo's own
+	   palette rather than an unrelated CAT-yellow */
+	--equipment: oklch(0.55 0.179 36.4);
+	--equipment-foreground: oklch(0.98 0.004 85);
 
-	--sidebar: oklch(0.2 0.012 270);
-	--sidebar-foreground: oklch(0.92 0.008 85);
-	--sidebar-primary: oklch(0.55 0.145 40);
-	--sidebar-primary-foreground: oklch(0.985 0.005 85);
-	--sidebar-accent: oklch(0.27 0.013 270);
-	--sidebar-accent-foreground: oklch(0.96 0.005 85);
-	--sidebar-border: oklch(0.3 0.012 270);
-	--sidebar-ring: oklch(0.55 0.145 40);
+	--chart-1: oklch(0.397 0.066 203.6);
+	--chart-2: oklch(0.55 0.179 36.4);
+	--chart-3: oklch(0.562 0.23 29.2);
+	--chart-4: oklch(0.521 0.084 194.9);
+	--chart-5: oklch(0.538 0 0);
 
-	--radius: 0.625rem;
+	/* Sidebar in the logo's own deep teal, not a generic blueprint navy */
+	--sidebar: oklch(0.28 0.05 203);
+	--sidebar-foreground: oklch(0.94 0.008 200);
+	--sidebar-primary: oklch(0.75 0.12 198);
+	--sidebar-primary-foreground: oklch(0.15 0.03 205);
+	--sidebar-ring: oklch(0.75 0.12 198);
+	--sidebar-accent: oklch(0.34 0.045 200);
+	--sidebar-accent-foreground: oklch(0.96 0.006 200);
+	--sidebar-border: oklch(0.38 0.04 200);
 
-	--font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-	--font-serif: "Fraunces", ui-serif, Georgia, serif;
+	--radius: 0.5rem;
+
+	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+	--font-serif: "Oswald", ui-sans-serif, system-ui, sans-serif;
 	--font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 .dark {
-	--background: oklch(0.16 0.012 270);
-	--foreground: oklch(0.94 0.008 85);
+	--background: oklch(0.17 0.015 205);
+	--foreground: oklch(0.94 0.006 200);
 
-	--card: oklch(0.21 0.013 270);
-	--card-foreground: oklch(0.94 0.008 85);
+	--card: oklch(0.22 0.018 205);
+	--card-foreground: oklch(0.94 0.006 200);
 
-	--popover: oklch(0.21 0.013 270);
-	--popover-foreground: oklch(0.94 0.008 85);
+	--popover: oklch(0.22 0.018 205);
+	--popover-foreground: oklch(0.94 0.006 200);
 
-	--primary: oklch(0.65 0.155 40);
-	--primary-foreground: oklch(0.16 0.012 270);
+	/* Deep teal lightened for dark-surface contrast */
+	--primary: oklch(0.58 0.09 200);
+	--primary-foreground: oklch(0.14 0.02 205);
 
-	--secondary: oklch(0.26 0.014 270);
-	--secondary-foreground: oklch(0.94 0.008 85);
+	--secondary: oklch(0.28 0.005 220);
+	--secondary-foreground: oklch(0.94 0.006 200);
 
-	--muted: oklch(0.26 0.014 270);
-	--muted-foreground: oklch(0.7 0.012 90);
+	--muted: oklch(0.27 0.008 210);
+	--muted-foreground: oklch(0.7 0.008 210);
 
-	--accent: oklch(0.3 0.02 60);
-	--accent-foreground: oklch(0.94 0.008 85);
+	--accent: oklch(0.32 0.05 197);
+	--accent-foreground: oklch(0.94 0.006 200);
 
-	--destructive: oklch(0.62 0.2 25);
-	--destructive-foreground: oklch(0.985 0.005 85);
+	--destructive: oklch(0.63 0.22 27);
+	--destructive-foreground: oklch(0.98 0.004 85);
 
-	--success: oklch(0.62 0.11 145);
-	--warning: oklch(0.75 0.14 75);
+	--success: oklch(0.62 0.11 155);
+	--warning: oklch(0.65 0.19 38);
+	--info: oklch(0.62 0.09 195);
 
-	--border: oklch(0.3 0.013 270);
-	--input: oklch(0.3 0.013 270);
-	--ring: oklch(0.65 0.155 40);
+	--border: oklch(0.32 0.01 205);
+	--input: oklch(0.32 0.01 205);
+	--ring: oklch(0.58 0.09 200);
 
-	--sidebar: oklch(0.13 0.011 270);
-	--sidebar-foreground: oklch(0.92 0.008 85);
-	--sidebar-primary: oklch(0.65 0.155 40);
-	--sidebar-primary-foreground: oklch(0.16 0.012 270);
-	--sidebar-accent: oklch(0.2 0.013 270);
-	--sidebar-accent-foreground: oklch(0.96 0.005 85);
-	--sidebar-border: oklch(0.24 0.012 270);
-	--sidebar-ring: oklch(0.65 0.155 40);
+	--equipment: oklch(0.65 0.19 38);
+	--equipment-foreground: oklch(0.98 0.004 85);
+
+	/* Sidebar darker still — the logo's deep teal pushed toward black */
+	--sidebar: oklch(0.14 0.02 205);
+	--sidebar-foreground: oklch(0.92 0.008 200);
+	--sidebar-primary: oklch(0.80 0.14 198); 
+    --sidebar-primary-foreground: oklch(0.12 0.02 205); 
+    --sidebar-ring: oklch(0.80 0.14 198);
+	--sidebar-accent: oklch(0.21 0.03 200);
+	--sidebar-accent-foreground: oklch(0.96 0.006 200);
+	--sidebar-border: oklch(0.26 0.025 200);
 }
 
 @theme inline {
@@ -177,6 +196,8 @@
 	--color-success: var(--success);
 	--color-warning: var(--warning);
 	--color-info: var(--info);
+	--color-equipment: var(--equipment);
+	--color-equipment-foreground: var(--equipment-foreground);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -223,29 +244,50 @@ body {
 	text-rendering: optimizeLegibility;
 }
 
-/* Subtle paper grain on the bone background */
+/* Topographic contour backdrop — the actual visual language of civil
+   site plans, grading, and survey drawings. Two off-center rings of
+   concentric lines, faint enough to sit under content unnoticed. */
 body::before {
 	content: "";
 	position: fixed;
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
-	opacity: 0.35;
-	background-image: radial-gradient(
-		circle at 1px 1px,
-		oklch(0.55 0.04 60 / 0.05) 1px,
-		transparent 0
-	);
-	background-size: 18px 18px;
+	opacity: 0.6;
+	background-image:
+		repeating-radial-gradient(
+			circle at 12% 18%,
+			transparent 0px,
+			transparent 37px,
+			oklch(0.397 0.066 203.6 / 0.055) 38px,
+			oklch(0.397 0.066 203.6 / 0.055) 39px
+		),
+		repeating-radial-gradient(
+			circle at 88% 82%,
+			transparent 0px,
+			transparent 51px,
+			oklch(0.397 0.066 203.6 / 0.045) 52px,
+			oklch(0.397 0.066 203.6 / 0.045) 53px
+		);
 }
 
 .dark body::before {
-	opacity: 0.18;
-	background-image: radial-gradient(
-		circle at 1px 1px,
-		oklch(0.85 0.02 60 / 0.06) 1px,
-		transparent 0
-	);
+	opacity: 0.5;
+	background-image:
+		repeating-radial-gradient(
+			circle at 12% 18%,
+			transparent 0px,
+			transparent 37px,
+			oklch(0.6 0.08 200 / 0.06) 38px,
+			oklch(0.6 0.08 200 / 0.06) 39px
+		),
+		repeating-radial-gradient(
+			circle at 88% 82%,
+			transparent 0px,
+			transparent 51px,
+			oklch(0.6 0.08 200 / 0.05) 52px,
+			oklch(0.6 0.08 200 / 0.05) 53px
+		);
 }
 
 #root {
@@ -277,11 +319,35 @@ body::before {
 	background: color-mix(in oklab, var(--color-foreground) 28%, transparent);
 }
 
-/* Heading display utility */
+/* Heading display utility — condensed industrial face for headings */
 .font-display {
 	font-family: var(--font-serif);
 	font-feature-settings: "ss01", "ss02";
-	letter-spacing: -0.01em;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+}
+
+/* Hazard stripe — for critical banners, overdue alerts, blocked states.
+   Diagonal safety-tape pattern in primary + foreground. */
+.hazard-stripe {
+	background-image: repeating-linear-gradient(
+		135deg,
+		var(--color-destructive) 0px,
+		var(--color-destructive) 14px,
+		var(--color-foreground) 14px,
+		var(--color-foreground) 28px
+	);
+	background-size: 40px 40px;
+}
+
+.hazard-stripe-subtle {
+	background-image: repeating-linear-gradient(
+		135deg,
+		color-mix(in oklab, var(--color-warning) 22%, transparent) 0px,
+		color-mix(in oklab, var(--color-warning) 22%, transparent) 10px,
+		transparent 10px,
+		transparent 20px
+	);
 }
 
 /* Subtle entrance */

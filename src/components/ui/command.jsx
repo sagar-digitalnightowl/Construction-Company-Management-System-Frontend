@@ -6,102 +6,110 @@ import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const Command = React.forwardRef(({ className, ...props }, ref) => (
-    <CommandPrimitive
-        ref={ref}
-        className={cn(
-            'flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
-            className
-        )}
-        {...props}
-    />
+	<CommandPrimitive
+		ref={ref}
+		className={cn(
+			'flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
+			className
+		)}
+		{...props}
+	/>
 ));
 Command.displayName = CommandPrimitive.displayName;
 
 const CommandDialog = ({ children, ...props }) => (
-    <Dialog {...props}>
-        <DialogContent className="overflow-hidden p-0 shadow-lg">
-            <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
-                {children}
-            </Command>
-        </DialogContent>
-    </Dialog>
+	<Dialog {...props}>
+		{/* BuildHive: Grounded shadow and sharp radius */}
+		<DialogContent className="overflow-hidden p-0 shadow-lg sm:rounded-md border-border/80">
+			<Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-display [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+				{children}
+			</Command>
+		</DialogContent>
+	</Dialog>
 );
 
 const CommandInput = React.forwardRef(({ className, ...props }, ref) => (
-    <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-        <CommandPrimitive.Input
-            ref={ref}
-            className={cn(
-                'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
-                className
-            )}
-            {...props}
-        />
-    </div>
+	// BuildHive: Softer border-b to reduce visual noise
+	<div className="flex items-center border-b border-border/80 px-3" cmdk-input-wrapper="">
+		<Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+		<CommandPrimitive.Input
+			ref={ref}
+			className={cn(
+				'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+				className
+			)}
+			{...props}
+		/>
+	</div>
 ));
 CommandInput.displayName = CommandPrimitive.Input.displayName;
 
 const CommandList = React.forwardRef(({ className, ...props }, ref) => (
-    <CommandPrimitive.List
-        ref={ref}
-        className={cn('max-h-[300px] overflow-y-auto overflow-x-hidden', className)}
-        {...props}
-    />
+	<CommandPrimitive.List
+		ref={ref}
+		className={cn('max-h-[300px] overflow-y-auto overflow-x-hidden', className)}
+		{...props}
+	/>
 ));
 CommandList.displayName = CommandPrimitive.List.displayName;
 
 const CommandEmpty = React.forwardRef((props, ref) => (
-    <CommandPrimitive.Empty ref={ref} className="py-6 text-center text-sm" {...props} />
+	<CommandPrimitive.Empty ref={ref} className="py-6 text-center text-sm text-muted-foreground" {...props} />
 ));
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 
 const CommandGroup = React.forwardRef(({ className, ...props }, ref) => (
-    <CommandPrimitive.Group
-        ref={ref}
-        className={cn(
-            'overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground',
-            className
-        )}
-        {...props}
-    />
+	<CommandPrimitive.Group
+		ref={ref}
+		className={cn(
+			'overflow-hidden p-1 text-foreground',
+			// BuildHive: Blueprint-style typography for search category groupings
+			'[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-display [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-muted-foreground',
+			className
+		)}
+		{...props}
+	/>
 ));
 CommandGroup.displayName = CommandPrimitive.Group.displayName;
 
 const CommandSeparator = React.forwardRef(({ className, ...props }, ref) => (
-    <CommandPrimitive.Separator
-        ref={ref}
-        className={cn('-mx-1 h-px bg-border', className)}
-        {...props}
-    />
+	<CommandPrimitive.Separator
+		ref={ref}
+		// BuildHive: Softer divider line
+		className={cn('-mx-1 h-px bg-border/60', className)}
+		{...props}
+	/>
 ));
 CommandSeparator.displayName = CommandPrimitive.Separator.displayName;
 
 const CommandItem = React.forwardRef(({ className, ...props }, ref) => (
-    <CommandPrimitive.Item
-        ref={ref}
-        className={cn(
-            'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-            className
-        )}
-        {...props}
-    />
+	<CommandPrimitive.Item
+		ref={ref}
+		className={cn(
+			// BuildHive: Interactive cursor, rounded-sm interior geometry, and brand accent wash on selection
+			'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors',
+			'aria-selected:bg-accent/15 aria-selected:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+			className
+		)}
+		{...props}
+	/>
 ));
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
 const CommandShortcut = ({ className, ...props }) => (
-    <span className={cn('ml-auto text-xs tracking-widest text-muted-foreground', className)} {...props} />
+	// BuildHive: Using font-mono for keyboard shortcuts so they look like terminal inputs
+	<span className={cn('ml-auto font-mono text-[10px] uppercase tracking-widest text-muted-foreground', className)} {...props} />
 );
 CommandShortcut.displayName = 'CommandShortcut';
 
 export {
-    Command,
-    CommandDialog,
-    CommandInput,
-    CommandList,
-    CommandEmpty,
-    CommandGroup,
-    CommandItem,
-    CommandShortcut,
-    CommandSeparator,
+	Command,
+	CommandDialog,
+	CommandInput,
+	CommandList,
+	CommandEmpty,
+	CommandGroup,
+	CommandItem,
+	CommandShortcut,
+	CommandSeparator,
 };
