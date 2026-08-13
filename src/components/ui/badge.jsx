@@ -3,27 +3,34 @@ import { cva } from "class-variance-authority";
 import { cn } from "../../lib/helpers";
 
 const badgeVariants = cva(
-    "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-    {
-        variants: {
-            variant: {
-                default: "border-transparent bg-primary/10 text-primary",
-                secondary: "border-transparent bg-secondary text-secondary-foreground",
-                destructive: "border-transparent bg-destructive/10 text-destructive",
-                success: "border-transparent bg-[color-mix(in_oklab,var(--color-success)_15%,transparent)] text-[color:var(--color-success)]",
-                warning: "border-transparent bg-[color-mix(in_oklab,var(--color-warning)_18%,transparent)] text-[color:color-mix(in_oklab,var(--color-warning)_60%,black)]",
-                outline: "text-foreground border-border",
-                muted: "border-transparent bg-muted text-muted-foreground",
-            },
-        },
-        defaultVariants: {
-            variant: "default"
-        },
-    }
+	// BuildHive: Industrial rounded-sm geometry, blueprint typography, and crisp focus rings
+	"inline-flex items-center rounded-sm border px-2.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background",
+	{
+		variants: {
+			variant: {
+				default: "border-transparent bg-primary/15 text-primary",
+				secondary: "border-transparent bg-secondary text-secondary-foreground",
+				destructive: "border-transparent bg-destructive/15 text-destructive",
+
+				// BuildHive: Native TW4 variables based on your theme block
+				success: "border-transparent bg-success/15 text-success",
+				warning: "border-transparent bg-warning/15 text-warning",
+				outline: "text-foreground border-border/80",
+				muted: "border-transparent bg-muted/60 text-muted-foreground",
+
+				// BuildHive Specific: Added info and equipment tags for asset/site management
+				info: "border-transparent bg-info/15 text-info",
+				equipment: "border-transparent bg-equipment/15 text-equipment",
+			},
+		},
+		defaultVariants: {
+			variant: "default"
+		},
+	}
 );
 
 function Badge({ className, variant, ...props }) {
-    return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+	return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
 export { Badge, badgeVariants };

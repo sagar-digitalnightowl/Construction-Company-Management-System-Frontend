@@ -277,7 +277,6 @@ export function FinanceDashboard() {
 					label="Total Flats"
 					value={stats.totalFlats}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -285,7 +284,6 @@ export function FinanceDashboard() {
 					label="Booked / Sold"
 					value={stats.bookedFlats}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -293,7 +291,6 @@ export function FinanceDashboard() {
 					label="Received (Incl. GST)"
 					value={formatINR(stats.totalPaid)}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -301,7 +298,6 @@ export function FinanceDashboard() {
 					label="Due (Incl. GST)"
 					value={formatINR(stats.totalRemaining)}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -309,7 +305,6 @@ export function FinanceDashboard() {
 					label="Pure Revenue"
 					value={formatINR(pureBaseReceived > 0 ? pureBaseReceived : 0)}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
 
@@ -319,7 +314,6 @@ export function FinanceDashboard() {
 					label="GST Collected"
 					value={formatINR(stats.gstCollected)}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 					valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 				/>
 
@@ -330,7 +324,6 @@ export function FinanceDashboard() {
 							label="Total Expenses"
 							value={formatINR(stats.totalExpenses)}
 							accent="neutral"
-							className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 							valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 						/>
 
@@ -339,7 +332,6 @@ export function FinanceDashboard() {
 							label="Expenses Paid"
 							value={formatINR(stats.totalExpensesPaid)}
 							accent="neutral"
-							className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 							valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 						/>
 
@@ -348,7 +340,6 @@ export function FinanceDashboard() {
 							label="Expenses Pending"
 							value={formatINR(stats.totalExpensesPending)}
 							accent="neutral"
-							className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 							valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 						/>
 
@@ -357,7 +348,6 @@ export function FinanceDashboard() {
 							label="Expense Tickets"
 							value={stats.totalExpenseTickets}
 							accent="neutral"
-							className="bg-white dark:bg-card rounded-lg sm:rounded-xl shadow-sm"
 							valueClassName="text-sm sm:text-lg lg:text-2xl truncate"
 						/>
 					</>

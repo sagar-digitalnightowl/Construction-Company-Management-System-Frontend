@@ -97,7 +97,6 @@ export default function PropertyInventory() {
 					value={projectStats.total || 0}
 					icon={Building2}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -106,7 +105,6 @@ export default function PropertyInventory() {
 					value={projectStats.active || 0}
 					icon={TrendingUp}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -115,7 +113,6 @@ export default function PropertyInventory() {
 					value={projectStats.completed || 0}
 					icon={Home}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -124,7 +121,6 @@ export default function PropertyInventory() {
 					value={projectStats.delayed || 0}
 					icon={AlertCircle}
 					accent="neutral"
-					className="bg-white dark:bg-card rounded-xl shadow-sm"
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 			</div>
