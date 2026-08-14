@@ -5,8 +5,10 @@ const Card = React.forwardRef(({ className, ...props }, ref) => (
 	<div
 		ref={ref}
 		className={cn(
-			// Kept your original shadow and border, only updated rounded-xl to rounded-md to match Button
-			"rounded-md border border-border bg-card text-card-foreground shadow-[0_1px_0_rgba(15,15,15,0.04),0_1px_2px_rgba(15,15,15,0.04)]",
+			"group relative overflow-hidden rounded-md border border-border bg-card text-card-foreground shadow-[0_1px_0_rgba(15,15,15,0.04),0_1px_2px_rgba(15,15,15,0.04)]",
+			"before:absolute before:inset-0 before:pointer-events-none before:opacity-50",
+			"before:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_3%,transparent)_1px,transparent_1px),linear-gradient(0deg,color-mix(in_oklab,var(--primary)_3%,transparent)_1px,transparent_1px)]",
+			"before:bg-[size:18px_18px]",
 			className
 		)}
 		{...props}
