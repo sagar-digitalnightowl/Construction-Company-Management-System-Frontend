@@ -74,13 +74,28 @@ export default function ExpenseReports() {
 	// Helper to render Status Badges consistently
 	const renderStatus = (status) => {
 		const s = (status || "").toLowerCase();
+
 		if (s === "paid" || s === "approved" || s === "wallet adjusted") {
-			return <Badge variant="secondary" className="bg-success/10 text-success border-none capitalize">{status}</Badge>;
+			return (
+				<span className="font-medium text-success capitalize">
+					{status}
+				</span>
+			);
 		}
+
 		if (s === "rejected") {
-			return <Badge variant="secondary" className="bg-destructive/10 text-destructive border-none capitalize">{status}</Badge>;
+			return (
+				<span className="font-medium text-destructive capitalize">
+					{status}
+				</span>
+			);
 		}
-		return <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-none capitalize">{status || "Pending"}</Badge>;
+
+		return (
+			<span className="font-medium text-amber-600 capitalize">
+				{status || "Pending"}
+			</span>
+		);
 	};
 
 	return (
@@ -184,17 +199,17 @@ export default function ExpenseReports() {
 														</TableCell>
 
 														<TableCell className="whitespace-nowrap">
-															<div className="font-medium text-foreground">
+															<div className="font-medium text-muted-foreground">
 																{ticket.employeeName || "—"}
 															</div>
 														</TableCell>
 
-														<TableCell className="whitespace-nowrap font-medium text-foreground">
+														<TableCell className="whitespace-nowrap font-medium text-muted-foreground">
 															{ticket.categoryName || "—"}
 														</TableCell>
 
 														<TableCell className="min-w-[160px] max-w-[200px]">
-															<div className="truncate font-medium text-foreground">
+															<div className="truncate font-medium text-muted-foreground">
 																{ticket.projectName || "—"}
 															</div>
 														</TableCell>

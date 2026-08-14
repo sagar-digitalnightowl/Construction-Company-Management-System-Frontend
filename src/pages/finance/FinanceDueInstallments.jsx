@@ -112,10 +112,11 @@ export function FinanceDueInstallments() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-wrap items-end gap-4 justify-between">
-				<div className="flex items-center gap-4">
-					<div className="space-y-1">
+			<div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-end sm:justify-between">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+					<div className="space-y-1.5">
 						<Label>Filter by Due Date</Label>
+
 						<Input
 							type="date"
 							value={dueDateFilter}
@@ -123,10 +124,11 @@ export function FinanceDueInstallments() {
 								setDueDateFilter(e.target.value);
 								setCurrentPage(1);
 							}}
-							className="w-auto"
+							className="w-full sm:w-auto"
 						/>
 					</div>
-					<div className="flex items-center gap-2 mb-2 mt-auto">
+
+					<div className="flex items-center gap-2 sm:mb-2">
 						<Checkbox
 							id="overdue"
 							checked={overdueOnly}
@@ -135,7 +137,11 @@ export function FinanceDueInstallments() {
 								setCurrentPage(1);
 							}}
 						/>
-						<Label htmlFor="overdue" className="cursor-pointer">
+
+						<Label
+							htmlFor="overdue"
+							className="cursor-pointer whitespace-nowrap"
+						>
 							Show Overdue Only
 						</Label>
 					</div>
@@ -144,10 +150,14 @@ export function FinanceDueInstallments() {
 				<Button
 					onClick={handleOpenDialog}
 					disabled={selectedIds.length === 0 || loading}
-					className="bg-green-600 hover:bg-green-700 text-white"
+					className="w-full bg-green-600 text-white hover:bg-green-700 sm:w-auto"
 				>
-					{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+					{loading && (
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					)}
+
 					<MessageCircle className="mr-2 h-4 w-4" />
+
 					Send WhatsApp to Selected ({selectedIds.length})
 				</Button>
 			</div>
@@ -155,9 +165,9 @@ export function FinanceDueInstallments() {
 			<Card>
 				<CardContent className="p-0">
 					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead className="w-12 text-center">
+						<TableHeader className="bg-muted/10">
+							<TableRow className="hover:bg-transparent">
+								<TableHead className="w-12 min-w-12 text-center">
 									<Checkbox
 										checked={
 											dueInstallments.length > 0 &&
@@ -166,11 +176,26 @@ export function FinanceDueInstallments() {
 										onCheckedChange={handleSelectAll}
 									/>
 								</TableHead>
-								<TableHead>Client Details</TableHead>
-								<TableHead>Project / Flat</TableHead>
-								<TableHead className="text-right">Amount Due</TableHead>
-								<TableHead>Due Date</TableHead>
-								<TableHead>Status</TableHead>
+
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Client Details
+								</TableHead>
+
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Project / Flat
+								</TableHead>
+
+								<TableHead className="whitespace-nowrap text-right font-semibold text-muted-foreground">
+									Amount Due
+								</TableHead>
+
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Due Date
+								</TableHead>
+
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Status
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -192,36 +217,62 @@ export function FinanceDueInstallments() {
 									const id = item.installment.id;
 									const isOverdue = new Date(item.installment.dueDate) < new Date();
 									return (
-										<TableRow key={id}>
-											<TableCell className="text-center">
+										<TableRow key={id} className="hover:bg-muted/40">
+											<TableCell className="w-12 min-w-12 text-center">
 												<Checkbox
 													checked={selectedIds.includes(id)}
 													onCheckedChange={(checked) => handleSelectOne(checked, id)}
 												/>
 											</TableCell>
-											<TableCell>
-												<div className="font-medium">{item.client?.name}</div>
-												<div className="text-xs text-muted-foreground">
-													{item.client?.phone}
+
+											<TableCell className="min-w-[180px]">
+												<div className="whitespace-nowrap font-medium">
+													{item.client?.name || "—"}
+												</div>
+
+												<div className="whitespace-nowrap text-xs text-muted-foreground">
+													{item.client?.phone || "—"}
 												</div>
 											</TableCell>
-											<TableCell>
-												<div>{item.booking?.projectName}</div>
-												<div className="text-xs text-muted-foreground">
-													Flat: {item.booking?.flatNumber} | {item.booking?.tower}
+
+											<TableCell className="min-w-[180px]">
+												<div className="whitespace-nowrap">
+													{item.booking?.projectName || "—"}
+												</div>
+
+												<div className="whitespace-nowrap text-xs text-muted-foreground">
+													Flat: {item.booking?.flatNumber || "—"}{" "}
+													<span className="mx-1">|</span>{" "}
+													{item.booking?.tower || "—"}
 												</div>
 											</TableCell>
-											<TableCell className="text-right font-medium text-destructive">
+
+											<TableCell className="whitespace-nowrap text-right font-medium text-destructive tabular-nums">
 												{formatINR(item.installment.dueAmount)}
 											</TableCell>
-											<TableCell>
-												<span className={isOverdue ? "text-destructive font-medium" : ""}>
+
+											<TableCell className="whitespace-nowrap">
+												<span
+													className={
+														isOverdue
+															? "font-medium text-destructive"
+															: "text-foreground"
+													}
+												>
 													{formatDate(item.installment.dueDate)}
 												</span>
 											</TableCell>
-											<TableCell>
-												<span className="capitalize text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full font-medium">
-													{item.installment.status}
+
+											<TableCell className="whitespace-nowrap">
+												<span
+													className={`text-xs font-medium capitalize ${item.installment.status?.toLowerCase() === "paid"
+														? "text-success"
+														: item.installment.status?.toLowerCase() === "overdue"
+															? "text-destructive"
+															: "text-amber-600"
+														}`}
+												>
+													{item.installment.status || "Pending"}
 												</span>
 											</TableCell>
 										</TableRow>

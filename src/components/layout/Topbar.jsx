@@ -91,26 +91,40 @@ export function Topbar({ onMenuClick }) {
 						</button>
 					</DropdownMenuTrigger>
 
-					<DropdownMenuContent align="end" className="w-60">
-						<DropdownMenuLabel>Signed in as</DropdownMenuLabel>
-						<div className="px-2.5 pb-2">
-							<div className="text-sm font-medium">{current?.name}</div>
-							<div className="text-xs text-muted-foreground">{current?.email}</div>
-							<Badge variant="outline" className="mt-2 font-display text-[10px] tracking-wider uppercase rounded-sm border-border/80 text-muted-foreground bg-muted/30">
-								{ROLES[current?.role]}
-							</Badge>
+					<DropdownMenuContent align="end" className="w-64 p-1.5">
+						<DropdownMenuLabel className="font-display text-[10px] uppercase tracking-wider text-muted-foreground pb-0">
+							Signed in as
+						</DropdownMenuLabel>
+						<div className="px-2 pt-1 pb-2.5 flex flex-col gap-0.5">
+							<div className="text-sm font-medium text-foreground truncate">{current?.name}</div>
+							<div className="text-[11px] font-mono text-muted-foreground truncate">{current?.email}</div>
+							<div className="mt-2">
+								<Badge variant="secondary" className="font-mono text-[10px] uppercase tracking-wider rounded-sm border-border/40 bg-muted/30">
+									{ROLES[current?.role]}
+								</Badge>
+							</div>
 						</div>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={() => navigate("/settings")} data-testid="menu-settings">
-							<UserCog className="h-4 w-4" /> Account & Settings
+
+						<DropdownMenuSeparator className="border-border/40" />
+
+						<DropdownMenuItem
+							onClick={() => navigate("/settings")}
+							data-testid="menu-settings"
+							className="cursor-pointer gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors focus:bg-accent/15"
+						>
+							<UserCog className="h-4 w-4 text-muted-foreground" />
+							<span>Account Configuration</span>
 						</DropdownMenuItem>
-						<DropdownMenuSeparator />
+
+						<DropdownMenuSeparator className="border-border/40" />
+
 						<DropdownMenuItem
 							data-testid="menu-logout"
-							className="text-destructive focus:text-destructive-foreground focus:bg-destructive"
+							className="cursor-pointer gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive focus:bg-destructive/10 focus:text-destructive transition-colors"
 							onClick={handleLogout}
 						>
-							<LogOut className="h-4 w-4" /> {loading ? "Signing out..." : "Sign out"}
+							<LogOut className="h-4 w-4" />
+							<span>{loading ? "Terminating session..." : "Sign out"}</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

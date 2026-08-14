@@ -126,12 +126,29 @@ export function FinanceReminders() {
 					<Table>
 						<TableHeader className="bg-muted/30">
 							<TableRow className="hover:bg-transparent">
-								<TableHead className="font-semibold text-muted-foreground">Type</TableHead>
-								<TableHead className="font-semibold text-muted-foreground">Recipient</TableHead>
-								<TableHead className="font-semibold text-muted-foreground min-w-[250px]">Subject</TableHead>
-								<TableHead className="font-semibold text-muted-foreground">Milestone</TableHead>
-								<TableHead className="font-semibold text-muted-foreground">Project Details</TableHead>
-								<TableHead className="font-semibold text-muted-foreground">Sent At</TableHead>
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Type
+								</TableHead>
+
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Recipient
+								</TableHead>
+
+								<TableHead className="min-w-[250px] whitespace-nowrap font-semibold text-muted-foreground">
+									Subject
+								</TableHead>
+
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Milestone
+								</TableHead>
+
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Project Details
+								</TableHead>
+
+								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+									Sent At
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -159,36 +176,47 @@ export function FinanceReminders() {
 								</TableRow>
 							) : (
 								reminders.map((log) => (
-									<TableRow key={log._id} className="group hover:bg-muted/40 transition-colors cursor-default">
-										<TableCell>
+									<TableRow
+										key={log._id}
+										className="group cursor-default transition-colors hover:bg-muted/40"
+									>
+										<TableCell className="whitespace-nowrap">
 											{log.reminderType === "penalty" ? (
-												<Badge variant="destructive" className="gap-1.5 shadow-sm bg-destructive/10 text-destructive hover:bg-destructive/20 border-none">
-													<AlertTriangle className="h-3.5 w-3.5" /> Penalty
-												</Badge>
+												<span className="flex items-center gap-1.5 text-sm font-medium text-destructive">
+													<AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+													Penalty
+												</span>
 											) : (
-												<Badge variant="secondary" className="gap-1.5 shadow-sm bg-primary/10 text-primary hover:bg-primary/20 border-none">
-													<Mail className="h-3.5 w-3.5" /> Normal
-												</Badge>
+												<span className="flex items-center gap-1.5 text-sm font-medium text-primary">
+													<Mail className="h-3.5 w-3.5 shrink-0" />
+													Normal
+												</span>
 											)}
 										</TableCell>
-										<TableCell className="font-medium text-foreground">
+
+										<TableCell className="whitespace-nowrap font-medium text-foreground">
 											{log.recipient}
 										</TableCell>
-										<TableCell className="text-sm leading-relaxed text-muted-foreground min-w-[250px]">
+
+										<TableCell className="min-w-[250px] whitespace-nowrap text-sm text-muted-foreground">
 											{log.subject}
 										</TableCell>
-										<TableCell className="font-medium text-sm text-foreground">
+
+										<TableCell className="whitespace-nowrap text-sm font-medium text-foreground">
 											{log.milestone || "—"}
 										</TableCell>
-										<TableCell>
-											<div className="font-medium text-foreground text-nowrap">
+
+										<TableCell className="whitespace-nowrap">
+											<div className="font-medium text-foreground">
 												{log.projectId?.name || "—"}
 											</div>
-											<div className="text-[11px] text-muted-foreground mt-0.5 text-nowrap">
+
+											{/* <div className="mt-0.5 text-[11px] text-muted-foreground">
 												Ref: {log.bookingId?.bookingReferenceNumber || "—"}
-											</div>
+											</div> */}
 										</TableCell>
-										<TableCell className="font-medium text-foreground tabular-nums text-nowrap">
+
+										<TableCell className="whitespace-nowrap font-medium tabular-nums text-foreground">
 											{formatDate(log.sentAt || log.createdAt)}
 										</TableCell>
 									</TableRow>
@@ -201,29 +229,41 @@ export function FinanceReminders() {
 
 			{/* Modern Pagination Footer */}
 			{!loading && reminders.length > 0 && pagination?.pages > 1 && (
-				<div className="flex flex-col sm:flex-row items-center justify-between bg-card p-4 rounded-xl border shadow-sm gap-4 mt-2">
-					<div className="text-sm text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-lg border border-border/30">
-						Showing page <span className="font-semibold text-foreground">{pagination.page}</span> of{" "}
-						<span className="font-semibold text-foreground">{pagination.pages}</span>
+				<div className="flex flex-col gap-3 border-t pt-4 mt-2 sm:flex-row sm:items-center sm:justify-between">
+					<div className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
+						Showing page{" "}
+						<span className="font-semibold text-foreground">
+							{pagination.page}
+						</span>{" "}
+						of{" "}
+						<span className="font-semibold text-foreground">
+							{pagination.pages}
+						</span>
 						<span className="mx-1.5 text-border">•</span>
-						Total <span className="font-semibold text-foreground">{pagination.total}</span> reminders
+						Total{" "}
+						<span className="font-semibold text-foreground">
+							{pagination.total}
+						</span>{" "}
+						reminders
 					</div>
-					<div className="flex gap-2">
+
+					<div className="flex w-full gap-2 sm:w-auto">
 						<Button
 							variant="outline"
 							size="sm"
 							onClick={() => setPage((p) => p - 1)}
 							disabled={page === 1}
-							className="shadow-sm hover:bg-muted/60 transition-colors"
+							className="flex-1 sm:flex-none"
 						>
 							Previous
 						</Button>
+
 						<Button
 							variant="outline"
 							size="sm"
 							onClick={() => setPage((p) => p + 1)}
 							disabled={page >= pagination.pages}
-							className="shadow-sm hover:bg-muted/60 transition-colors"
+							className="flex-1 sm:flex-none"
 						>
 							Next
 						</Button>

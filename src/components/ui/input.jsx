@@ -13,7 +13,7 @@ const Input = React.forwardRef(({ className, type, ...props }, ref) => (
 			// BuildHive: Architectural focus ring mapping to the deep teal (--ring) with a sharp offset
 			"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background focus-visible:border-primary",
 			// BuildHive: Distinct locked state for read-only/disabled operational data
-			"disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-muted/50",
+			"disabled:cursor-default disabled:opacity-50 disabled:bg-muted/50",
 			className
 		)}
 		{...props}

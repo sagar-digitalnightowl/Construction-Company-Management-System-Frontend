@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as LucideIcons from "lucide-react";
 import {
 	CreditCard, Search, FileText, Eye, DollarSign, Hash, User, Tag, Calendar,
-	CheckCircle, RotateCcw, Wallet, ArrowDownCircle, ArrowUpCircle
+	CheckCircle, Wallet, ArrowDownCircle, ArrowUpCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,6 +18,8 @@ import { useHR } from "@/hooks/useHR";
 import { toast } from "sonner";
 
 export function FinanceExpenses() {
+	const topRef = useRef(null);
+
 	// ==================== MAIN TABS STATE ====================
 	const [mainTab, setMainTab] = useState("expenses");
 
@@ -76,6 +78,16 @@ export function FinanceExpenses() {
 		}
 	};
 
+	// Tab switch (Approved <-> Paid) => fetch immediately, no debounce, and clear stale rows
+	useEffect(() => {
+		if (mainTab !== "expenses") return;
+
+		setExpenses([]);
+		setLoading(true);
+		fetchExpensesData(activeTab, 1, 10, searchTerm);
+	}, [activeTab, mainTab]);
+
+	// Search typing => debounce only, don't refetch on every keystroke
 	useEffect(() => {
 		if (mainTab !== "expenses") return;
 
@@ -84,7 +96,7 @@ export function FinanceExpenses() {
 		}, 500);
 
 		return () => clearTimeout(timer);
-	}, [searchTerm, activeTab, mainTab]);
+	}, [searchTerm]);
 
 	// ==================== EFFECTS: WALLETS ====================
 	useEffect(() => {
@@ -189,8 +201,14 @@ export function FinanceExpenses() {
 		return <DynamicIcon className={className} />;
 	};
 
+	useEffect(() => {
+		topRef.current?.scrollIntoView({
+			behavior: "smooth",
+		});
+	}, [empPage]);
+
 	return (
-		<div className="space-y-4 mt-5">
+		<div ref={topRef} className="space-y-4 mt-5">
 
 			{/* ==================== MASTER TABS ==================== */}
 			<Tabs value={mainTab} onValueChange={setMainTab} className="w-full">
@@ -217,16 +235,16 @@ export function FinanceExpenses() {
 					<div className="border rounded-md">
 						<Table>
 							<TableHeader>
-								<TableRow>
-									<TableHead>Date</TableHead>
-									<TableHead>Title</TableHead>
-									<TableHead>Employee</TableHead>
-									<TableHead>Project</TableHead>
-									<TableHead>Category</TableHead>
-									<TableHead>Total Amount</TableHead>
-									<TableHead>Cash Pending</TableHead>
-									<TableHead>Payment Status</TableHead>
-									<TableHead className="text-right">Actions</TableHead>
+								<TableRow className="hover:bg-transparent">
+									<TableHead className="whitespace-nowrap">Date</TableHead>
+									<TableHead className="whitespace-nowrap">Title</TableHead>
+									<TableHead className="whitespace-nowrap">Employee</TableHead>
+									<TableHead className="whitespace-nowrap">Project</TableHead>
+									<TableHead className="whitespace-nowrap">Category</TableHead>
+									<TableHead className="whitespace-nowrap">Total Amount</TableHead>
+									<TableHead className="whitespace-nowrap">Cash Pending</TableHead>
+									<TableHead className="whitespace-nowrap">Payment Status</TableHead>
+									<TableHead className="whitespace-nowrap text-right">Actions</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -241,79 +259,110 @@ export function FinanceExpenses() {
 										const categoryColor = expense?.categoryId?.color || "#3b82f6";
 
 										return (
-											<TableRow key={expense._id}>
-												<TableCell>{new Date(expense.createdAt).toLocaleDateString()}</TableCell>
-												<TableCell>{expense.title}</TableCell>
-												<TableCell>
-													<div className="font-medium">{expense.employeeId?.name}</div>
-													<div className="text-xs text-muted-foreground">{expense.ticketNumber}</div>
+											<TableRow
+												key={expense._id}
+												className="hover:bg-muted/40 transition-colors"
+											>
+												<TableCell className="whitespace-nowrap">
+													{new Date(expense.createdAt).toLocaleDateString()}
 												</TableCell>
-												<TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													{expense.title}
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													<div className="font-medium">{expense.employeeId?.name}</div>
+													{/* <div className="text-xs text-muted-foreground">
+														{expense.ticketNumber}
+													</div> */}
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
 													<div className="font-medium">
 														{expense.projectId?.name || "N/A"}
 													</div>
 												</TableCell>
-												<TableCell>
+
+												<TableCell className="whitespace-nowrap">
 													{categoryName ? (
-														<Badge
-															variant="outline"
-															className={`text-[10px] font-normal flex items-center w-fit py-1 ${categoryIcon
-																? "gap-1.5 pl-1 pr-2"
-																: "justify-center px-2"
+														<div
+															className={`text-xs font-medium flex items-center w-fit ${categoryIcon ? "gap-1.5" : ""
 																}`}
 														>
 															{categoryIcon && (
 																<div
-																	className="h-4 w-4 rounded-full flex items-center justify-center shrink-0 text-white"
+																	className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-white"
 																	style={{ backgroundColor: categoryColor }}
 																>
 																	{renderDynamicIcon(categoryIcon, "h-2.5 w-2.5")}
 																</div>
 															)}
 
-															{categoryName}
-														</Badge>
+															<span className="text-foreground">
+																{categoryName}
+															</span>
+														</div>
 													) : (
-														<span className="text-xs text-muted-foreground">None</span>
+														<span className="text-xs text-muted-foreground">
+															None
+														</span>
 													)}
 												</TableCell>
-												<TableCell className="font-bold">₹{expense.amount}</TableCell>
-												<TableCell>
-													<Badge variant={expense.paymentPendingAmount > 0 ? "destructive" : "success"}>
-														₹{expense.paymentPendingAmount}
-													</Badge>
+
+												<TableCell className="whitespace-nowrap font-bold tabular-nums">
+													₹{expense.amount}
 												</TableCell>
-												<TableCell>
-													<Badge
-														variant={
-															expense.paymentStatus === "Paid"
-																? "success"
-																: expense.paymentStatus === "Wallet Adjusted"
-																	? "secondary"
-																	: "outline"
-														}
+
+												<TableCell className="whitespace-nowrap">
+													<span
+														className={`text-sm font-medium ${expense.paymentPendingAmount > 0
+															? "text-destructive"
+															: expense.paymentPendingAmount === 0
+																? "text-muted-foreground"
+																: "text-muted-foreground"
+															}`}
+													>
+														₹{expense.paymentPendingAmount || 0}
+													</span>
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													<span
+														className={`text-sm font-medium ${expense.paymentStatus === "Paid"
+															? "text-success"
+															: expense.paymentStatus === "Wallet Adjusted"
+																? "text-blue-600"
+																: expense.paymentStatus === "Partially Paid"
+																	? "text-orange-600"
+																	: expense.paymentStatus === "Pending" || !expense.paymentStatus
+																		? "text-amber-600"
+																		: "text-muted-foreground"
+															}`}
 													>
 														{expense.paymentStatus || "Pending"}
-													</Badge>
+													</span>
 												</TableCell>
-												<TableCell className="text-right">
+
+												<TableCell className="whitespace-nowrap text-right">
 													<div className="flex justify-end gap-2">
-														<Button variant="ghost" size="sm" onClick={() => openModal(expense, 'view')}>
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => openModal(expense, "view")}
+														>
 															<Eye className="h-4 w-4" />
 														</Button>
+
 														{activeTab === "Approved" && (
-															<Button size="sm" onClick={() => openModal(expense, 'pay')}>
-																<CreditCard className="mr-1 h-3.5 w-3.5" /> Pay
+															<Button
+																size="sm"
+																onClick={() => openModal(expense, "pay")}
+															>
+																<CreditCard className="mr-1 h-3.5 w-3.5" />
+																Pay
 															</Button>
 														)}
-
-														{/* COMMMENTED OUT REFUND BUTTON */}
-														{/* activeTab === "Paid" && (
-                            <Button size="sm" variant="outline" className="text-rose-600 hover:text-rose-700 hover:bg-rose-50" onClick={() => openModal(expense, 'refund')}>
-                              <RotateCcw className="mr-1 h-3.5 w-3.5" /> Refund
-                            </Button>
-                          ) */}
-
 													</div>
 												</TableCell>
 											</TableRow>
@@ -352,12 +401,12 @@ export function FinanceExpenses() {
 							<div className="border rounded-md">
 								<Table>
 									<TableHeader>
-										<TableRow>
-											<TableHead>Employee</TableHead>
-											<TableHead>Emp ID</TableHead>
-											<TableHead>Role</TableHead>
-											<TableHead>Status</TableHead>
-											<TableHead className="text-right">Action</TableHead>
+										<TableRow className="hover:bg-transparent">
+											<TableHead className="whitespace-nowrap">Employee</TableHead>
+											<TableHead className="whitespace-nowrap">Emp ID</TableHead>
+											<TableHead className="whitespace-nowrap">Role</TableHead>
+											<TableHead className="whitespace-nowrap">Status</TableHead>
+											<TableHead className="whitespace-nowrap text-right">Action</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -367,56 +416,73 @@ export function FinanceExpenses() {
 											<TableRow><TableCell colSpan={5} className="text-center py-6">No employees found.</TableCell></TableRow>
 										) : (
 											employees?.employees?.map((emp) => (
-												<TableRow key={emp?._id} className={!emp?.isActive ? "opacity-60 bg-muted/20" : ""}>
-
+												<TableRow
+													key={emp?._id}
+													className={`${!emp?.isActive ? "opacity-60 bg-muted/20" : ""
+														}`}
+												>
 													{/* Profile, Name & Email */}
-													<TableCell>
+													<TableCell className="whitespace-nowrap">
 														<div className="flex items-center gap-3">
-															<div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center overflow-hidden border">
+															<div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center overflow-hidden border shrink-0">
 																{emp?.profileImage ? (
-																	<img src={emp.profileImage} alt={emp.name} className="h-full w-full object-cover" />
+																	<img
+																		src={emp.profileImage}
+																		alt={emp.name}
+																		className="h-full w-full object-cover"
+																	/>
 																) : (
 																	<User className="h-5 w-5 text-muted-foreground" />
 																)}
 															</div>
-															<div>
-																<div className="font-medium text-sm leading-none">{emp?.name}</div>
-																<div className="text-xs text-muted-foreground mt-1">{emp?.email}</div>
+
+															<div className="min-w-0">
+																<div className="font-medium text-sm leading-none">
+																	{emp?.name}
+																</div>
+																<div className="text-xs text-muted-foreground mt-1">
+																	{emp?.email}
+																</div>
 															</div>
 														</div>
 													</TableCell>
 
 													{/* Employee ID */}
-													<TableCell className="font-mono text-xs text-muted-foreground">
+													<TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
 														{emp?.employeeId || "N/A"}
 													</TableCell>
 
-													{/* Designation & Department */}
-													<TableCell>
+													{/* Role */}
+													<TableCell className="whitespace-nowrap">
 														<div className="font-medium text-sm capitalize">
-															{emp?.role || emp?.role?.replace('_', ' ')}
+															{emp?.role?.replace("_", " ") || "N/A"}
 														</div>
 													</TableCell>
 
-													{/* Status Badge */}
-													<TableCell>
-														<Badge variant={emp?.isActive ? "success" : "secondary"} className="text-[10px]">
+													{/* Status */}
+													<TableCell className="whitespace-nowrap">
+														<span
+															className={`text-sm font-medium ${emp?.isActive
+																? "text-success"
+																: "text-destructive"
+																}`}
+														>
 															{emp?.status || (emp?.isActive ? "Active" : "Inactive")}
-														</Badge>
+														</span>
 													</TableCell>
 
-													{/* Action Button */}
-													<TableCell className="text-right">
+													{/* Action */}
+													<TableCell className="whitespace-nowrap text-right">
 														<Button
 															variant="outline"
 															size="sm"
 															onClick={() => setSelectedEmpId(emp?._id)}
 															disabled={!emp?.isActive}
 														>
-															<Wallet className="h-4 w-4 mr-2" /> View Wallet
+															<Wallet className="h-4 w-4 mr-2" />
+															View Wallet
 														</Button>
 													</TableCell>
-
 												</TableRow>
 											))
 										)}
