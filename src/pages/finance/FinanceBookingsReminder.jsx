@@ -433,22 +433,28 @@ export function FinanceBookingsReminder() {
 			</Card>
 
 			{!loading && pagination && pagination.total > 0 && (
-				<div className="flex items-center justify-between pt-2">
-					<div className="text-sm text-muted-foreground">
-						Showing page {pagination.page} of {pagination.pages} (Total: {pagination.total} bookings)
+				<div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+					<div className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
+						Showing page {pagination.page} of {pagination.pages}{" "}
+						<span className="hidden xs:inline">(Total: {pagination.total} bookings)</span>
+						<span className="xs:hidden">({pagination.total} total)</span>
 					</div>
-					<div className="flex gap-2">
+
+					<div className="flex w-full gap-2 sm:w-auto">
 						<Button
 							variant="outline"
 							size="sm"
+							className="flex-1 sm:flex-none"
 							onClick={() => setCurrentPage((prev) => prev - 1)}
 							disabled={pagination.page <= 1}
 						>
 							Previous
 						</Button>
+
 						<Button
 							variant="outline"
 							size="sm"
+							className="flex-1 sm:flex-none"
 							onClick={() => setCurrentPage((prev) => prev + 1)}
 							disabled={pagination.page >= pagination.pages}
 						>
