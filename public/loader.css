@@ -1,0 +1,140 @@
+:root {
+	/* Injecting your specific logo-matched teal tokens */
+	--sidebar: oklch(0.28 0.05 203);
+	--sidebar-foreground: oklch(0.94 0.008 200);
+	--sidebar-primary: oklch(0.75 0.12 198);
+	--sidebar-accent: oklch(0.34 0.045 200);
+}
+
+body {
+	margin: 0;
+	/* Base fallback */
+	background-color: var(--sidebar);
+}
+
+.bh-loader-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	width: 100vw;
+	font-family:
+		system-ui,
+		-apple-system,
+		sans-serif;
+	background:
+		radial-gradient(
+			circle at 10% 10%,
+			color-mix(in oklch, var(--sidebar-primary) 20%, transparent),
+			transparent 32%
+		),
+		radial-gradient(
+			circle at 90% 90%,
+			color-mix(in oklch, var(--sidebar-primary) 14%, transparent),
+			transparent 35%
+		),
+		linear-gradient(135deg, var(--sidebar) 0%, var(--sidebar-accent) 100%);
+}
+
+.bh-brand-stack {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1.25rem;
+}
+
+.bh-logo {
+	box-sizing: border-box;
+	height: 72px;
+	width: auto;
+	background-color: #ffffff;
+	padding: 6px;
+	border-radius: 8px;
+	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.bh-text-stack {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+}
+
+.bh-title {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: #dc2626;
+	line-height: 1;
+	letter-spacing: 0.05em;
+}
+
+.bh-subtitle {
+	font-size: 0.875rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	color: var(--sidebar-foreground);
+	margin-top: 0.25rem;
+}
+
+.bh-iso {
+	font-size: 11px;
+	letter-spacing: 0.05em;
+	color: color-mix(in oklch, var(--sidebar-foreground) 80%, transparent);
+	font-weight: 500;
+	margin-left: auto;
+	margin-right: auto;
+	width: max-content;
+}
+
+.bh-system-status {
+	margin-top: 0.4rem;
+	margin-bottom: 0.4rem;
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
+
+.bh-progress-track {
+	width: 100%;
+	max-width: 220px;
+	height: 1px;
+	background-color: color-mix(
+		in oklch,
+		var(--sidebar-foreground) 20%,
+		transparent
+	);
+	position: relative;
+	overflow: hidden;
+}
+
+.bh-progress-indicator {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 30%;
+	background-color: var(--sidebar-primary);
+	box-shadow: 0 0 8px
+		color-mix(in oklch, var(--sidebar-primary) 80%, transparent);
+	animation: bh-scan 0.45s ease-in-out infinite;
+}
+
+@keyframes bh-scan {
+	0% {
+		left: -30%;
+	}
+	100% {
+		left: 100%;
+	}
+}
+
+.bh-separator {
+	width: 100%;
+	max-width: 220px;
+	height: 1px;
+	background-color: color-mix(
+		in oklch,
+		var(--sidebar-foreground) 20%,
+		transparent
+	);
+}

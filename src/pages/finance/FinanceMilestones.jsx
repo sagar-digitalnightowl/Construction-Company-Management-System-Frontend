@@ -127,9 +127,11 @@ export function FinanceMilestones() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+			<div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-end sm:justify-between">
 				<div className="space-y-1.5 w-full sm:w-auto">
-					<Label>Select Project</Label>
+					<Label className="text-sm font-medium">
+						Select Project
+					</Label>
 
 					<Select
 						value={selectedProject}
@@ -148,7 +150,7 @@ export function FinanceMilestones() {
 
 							{hasMoreProjects && (
 								<div
-									className="w-full cursor-pointer border-t mt-1 px-2 py-2 text-left text-xs font-medium text-blue-600 hover:bg-muted"
+									className="mt-1 w-full cursor-pointer border-t px-2 py-2 text-left text-xs font-medium text-primary hover:bg-muted/60"
 									onClick={handleLoadMoreProjects}
 								>
 									+ Load More Projects

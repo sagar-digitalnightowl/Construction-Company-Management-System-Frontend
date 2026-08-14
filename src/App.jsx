@@ -71,6 +71,7 @@ import FinanceBookings from "./pages/finance/FinanceBookings";
 import FinanceBookingDetail from "./pages/finance/FinanceBookingDetail";
 import ExpenseReports from "./pages/finance/ExpenseReports";
 import ProjectDetailPage from "./components/propertyInventory/ProjectDetailPage";
+import { AppLoader } from "./AppLoader";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -79,7 +80,7 @@ export default function App() {
 		initAuth();
 	}, [initAuth]);
 
-	if (loading) return null;
+	if (loading) return <AppLoader />;
 
 	return (
 		<>
