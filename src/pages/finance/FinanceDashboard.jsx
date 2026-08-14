@@ -12,10 +12,10 @@ import {
 	Download,
 	User,
 	Mail,
-	Phone
+	Phone,
+	ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CountUp from 'react-countup';
 
 // Helper: returns effective status and display label based on all 3 keys
 const getEffectiveFlatStatus = (flat) => {
@@ -270,7 +270,7 @@ export function FinanceDashboard() {
 	return (
 		<div className="space-y-6">
 			{/* Consolidated Finance & Expense Overview */}
-			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
+			<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4">
 				{/* Property Stats */}
 				<StatCard
 					size="compact"
@@ -357,19 +357,25 @@ export function FinanceDashboard() {
 			{/* Projects View */}
 			{currentView === "projects" && (
 				<>
-					<div className="flex items-center justify-between mt-6 gap-3">
-						<div>
-							<h2 className="text-lg font-semibold">Projects</h2>
-
-							<span className="text-sm text-muted-foreground">
+					<div className="flex items-center justify-between mt-4 md:mt-6 gap-3">
+						<div className="flex flex-col gap-0.5 md:gap-1">
+							<h2 className="text-base md:text-lg font-semibold leading-none md:leading-normal">
+								Projects
+							</h2>
+							<span className="text-[11px] md:text-sm text-muted-foreground">
 								{pagination
 									? `Page ${page} of ${pagination.pages}`
 									: ""}
 							</span>
 						</div>
 
-						<Button onClick={() => exportFinanceDashboard()} disabled={loading}>
-							<Download className="h-4 w-4 mr-1" /> Export
+						<Button
+							onClick={() => exportFinanceDashboard()}
+							disabled={loading}
+							className="h-8 px-3 text-xs md:h-9 md:px-4 md:text-sm"
+						>
+							<Download className="h-3.5 w-3.5 mr-1.5 md:h-4 md:w-4 md:mr-2" />
+							Export
 						</Button>
 					</div>
 					{projects.length === 0 ? (
@@ -377,7 +383,7 @@ export function FinanceDashboard() {
 							No projects available.
 						</div>
 					) : (
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
 							{projects.map((project) => {
 								// Calculate stats for the project
 								const bookedFlats = project.bookedSold || 0;
@@ -502,33 +508,41 @@ export function FinanceDashboard() {
 			{/* Towers View */}
 			{currentView === "towers" && selectedProject && (
 				<>
-					<div className="flex items-center justify-between gap-3 mb-4">
-						<div className="flex items-center gap-3">
+					<div className="flex items-center justify-between gap-2 md:gap-3 mb-3 md:mb-4">
+						{/* Left Side Container - min-w-0 is required for child truncation to work in flexbox */}
+						<div className="flex items-center gap-1.5 md:gap-3 min-w-0">
 							<Button
 								variant="ghost"
 								size="icon"
 								onClick={goToProjects}
+								// Scale down the back button on mobile, flex-shrink-0 prevents it from squishing
+								className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
 							>
-								<ChevronLeft className="h-5 w-5" />
+								<ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
 							</Button>
 
-							<div>
-								<h2 className="text-lg font-semibold">
+							<div className="min-w-0">
+								<h2 className="text-base md:text-lg font-semibold truncate leading-tight">
 									{selectedProject.projectName}
 								</h2>
-
-								<p className="text-sm text-muted-foreground">
+								<p className="text-[11px] md:text-sm text-muted-foreground truncate mt-0.5">
 									{selectedProject.location}
 								</p>
 							</div>
 						</div>
 
-						<Button onClick={() =>
-							exportFinanceDashboard({
-								projectId: selectedProject.projectId,
-							})
-						} disabled={loading}>
-							<Download className="h-4 w-4 mr-1" /> Export
+						{/* Export Button - flex-shrink-0 ensures the button never shrinks when the title is long */}
+						<Button
+							onClick={() =>
+								exportFinanceDashboard({
+									projectId: selectedProject.projectId,
+								})
+							}
+							disabled={loading}
+							className="h-8 px-3 text-xs md:h-9 md:px-4 md:text-sm flex-shrink-0"
+						>
+							<Download className="h-3.5 w-3.5 mr-1.5 md:h-4 md:w-4 md:mr-2" />
+							Export
 						</Button>
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Tower</h3>
@@ -595,45 +609,51 @@ export function FinanceDashboard() {
 			{/* Floors View */}
 			{currentView === "floors" && selectedProject && selectedTower && (
 				<>
-					<div className="flex items-center justify-between gap-3 mb-4">
-						<div className="flex items-center gap-3">
+					<div className="flex items-start justify-between gap-3 mb-3 md:mb-4">
+						{/* flex-1 tells this left section to stretch and fill all available space */}
+						<div className="flex items-start gap-2 md:gap-3 flex-1 min-w-0">
 							<Button
 								variant="ghost"
 								size="icon"
 								onClick={async () => {
-									const fullProject =
-										await fetchProjectDetails(
-											selectedProject.projectId
-										);
-
+									const fullProject = await fetchProjectDetails(selectedProject.projectId);
 									setSelectedProject(fullProject);
-
 									setSelectedTower("");
 									setSelectedFloor("");
 									setCurrentView("towers");
 								}}
+								// mt-0.5 slightly pushes the button down to perfectly align with the text
+								className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0 mt-0.5"
 							>
-								<ChevronLeft className="h-5 w-5" />
+								<ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
 							</Button>
 
-							<div>
-								<h2 className="text-lg font-semibold">
-									{selectedProject.projectName} — {selectedTower}
+							<div className="flex-1 min-w-0">
+								{/* flex-wrap ensures long names drop to the next line instead of truncating */}
+								<h2 className="flex flex-wrap items-center text-base md:text-lg font-semibold leading-tight gap-x-1 gap-y-0.5">
+									<span>{selectedProject.projectName}</span>
+									<ChevronRight className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 text-muted-foreground/70" />
+									<span>{selectedTower}</span>
 								</h2>
 
-								<p className="text-sm text-muted-foreground">
+								<p className="text-[11px] md:text-sm text-muted-foreground mt-1 truncate">
 									{selectedProject.location}
 								</p>
 							</div>
 						</div>
 
-						<Button onClick={() =>
-							exportFinanceDashboard({
-								projectId: selectedProject.projectId,
-								tower: selectedTower,
-							})
-						} disabled={loading}>
-							<Download className="h-4 w-4 mr-1" /> Export
+						{/* Export Button remains unchanged */}
+						<Button
+							onClick={() =>
+								exportFinanceDashboard({
+									projectId: selectedProject.projectId,
+									tower: selectedTower,
+								})
+							}
+							disabled={loading}
+							className="h-8 px-3 text-xs md:h-9 md:px-4 md:text-sm flex-shrink-0"
+						>
+							<Download className="h-3.5 w-3.5 mr-1.5 md:h-4 md:w-4 md:mr-2" /> Export
 						</Button>
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Floor</h3>
@@ -702,7 +722,7 @@ export function FinanceDashboard() {
 			{/* Flats View */}
 			{currentView === "flats" && selectedProject && selectedTower && selectedFloor && (
 				<>
-					<div className="flex items-center gap-3 mb-4">
+					<div className="flex items-start gap-2 md:gap-3 mb-3 md:mb-4 min-w-0">
 						<Button
 							variant="ghost"
 							size="icon"
@@ -710,19 +730,32 @@ export function FinanceDashboard() {
 								setCurrentView("floors");
 								setSelectedFloor("");
 							}}
+							// Scale down on mobile, mt-0.5 aligns it with the text
+							className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0 mt-0.5"
 						>
-							<ChevronLeft className="h-5 w-5" />
+							<ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
 						</Button>
-						<div>
-							<h2 className="text-lg font-semibold">
-								{selectedProject.projectName} — {selectedTower} — Floor {selectedFloor}
+
+						<div className="flex-1 min-w-0">
+							{/* flex-wrap ensures long paths drop to the next line instead of truncating */}
+							<h2 className="flex flex-wrap items-center text-base md:text-lg font-semibold leading-tight gap-x-1 gap-y-0.5">
+								<span>{selectedProject.projectName}</span>
+
+								<ChevronRight className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 text-muted-foreground/70" />
+
+								<span>{selectedTower}</span>
+
+								<ChevronRight className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 text-muted-foreground/70" />
+
+								<span>Floor {selectedFloor}</span>
 							</h2>
-							<p className="text-sm text-muted-foreground">
+
+							<p className="text-[11px] md:text-sm text-muted-foreground mt-1 truncate">
 								{selectedProject.location}
 							</p>
 						</div>
 					</div>
-					<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 						{filteredFlats.map((flat) => {
 							const uniqueKey = `${selectedProject.projectId}-${flat.tower}-${flat.floor}-${flat.flatNumber}`;
 							const { status, label, variant } = getFlatDisplay(flat);

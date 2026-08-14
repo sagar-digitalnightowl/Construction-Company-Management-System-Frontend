@@ -112,7 +112,7 @@ export default function ExpenseReports() {
 					}}
 					className="w-full sm:w-auto"
 				>
-					<TabsList className="bg-muted/60 p-1 w-full sm:w-auto">
+					<TabsList className="bg-muted/60 p-1 w-auto">
 						<TabsTrigger value="overall" className="rounded-md">Overall</TabsTrigger>
 						<TabsTrigger value="project" className="rounded-md">Project-wise</TabsTrigger>
 					</TabsList>
@@ -130,10 +130,10 @@ export default function ExpenseReports() {
 					) : expenseSummary ? (
 						<>
 							<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Tickets" value={expenseSummary.totalTickets || 0} icon={Receipt} accent="info" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Expense" value={formatINR(expenseSummary.totalAmount || 0)} icon={FileText} accent="info" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Paid" value={formatINR(expenseSummary.totalPaid || 0)} icon={CheckCircle2} accent="success" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Pending Amount" value={formatINR(expenseSummary.pendingAmount || 0)} icon={Hourglass} accent="warning" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Tickets" value={expenseSummary.totalTickets || 0} accent="info" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Expense" value={formatINR(expenseSummary.totalAmount || 0)} accent="info" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Paid" value={formatINR(expenseSummary.totalPaid || 0)} accent="success" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Pending Amount" value={formatINR(expenseSummary.pendingAmount || 0)} accent="warning" /></div>
 							</div>
 
 							{/* Full Width All Expense Tickets Table */}
@@ -143,27 +143,76 @@ export default function ExpenseReports() {
 									<Table>
 										<TableHeader className="bg-muted/10">
 											<TableRow className="hover:bg-transparent">
-												<TableHead className="font-semibold text-muted-foreground">Date</TableHead>
-												<TableHead className="font-semibold text-muted-foreground">Employee</TableHead>
-												<TableHead className="font-semibold text-muted-foreground">Project / Category</TableHead>
-												<TableHead className="text-right font-semibold text-muted-foreground">Amount</TableHead>
-												<TableHead className="text-right font-semibold text-muted-foreground">Status</TableHead>
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Date
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Employee
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Category
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Project
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Description
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap text-right font-semibold text-muted-foreground">
+													Amount
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap text-right font-semibold text-muted-foreground">
+													Status
+												</TableHead>
 											</TableRow>
 										</TableHeader>
 										<TableBody>
 											{expenseSummary.tickets?.length > 0 ? (
 												expenseSummary.tickets.map((ticket) => (
-													<TableRow key={ticket.id} className="group hover:bg-muted/40 transition-colors">
-														<TableCell className="font-medium text-foreground tabular-nums text-nowrap">{formatDate(ticket.createdAt)}</TableCell>
-														<TableCell>
-															<div className="font-medium text-foreground">{ticket.employeeName || "—"}</div>
+													<TableRow
+														key={ticket.id}
+														className="group transition-colors hover:bg-muted/40"
+													>
+														<TableCell className="whitespace-nowrap font-medium tabular-nums text-foreground">
+															{formatDate(ticket.createdAt)}
 														</TableCell>
-														<TableCell>
-															<div className="font-medium text-foreground">{ticket.projectName || "—"}</div>
-															<div className="text-[11px] text-muted-foreground">{ticket.categoryName || "—"}</div>
+
+														<TableCell className="whitespace-nowrap">
+															<div className="font-medium text-foreground">
+																{ticket.employeeName || "—"}
+															</div>
 														</TableCell>
-														<TableCell className="text-right font-bold tabular-nums text-foreground">{formatINR(ticket.amount)}</TableCell>
-														<TableCell className="text-right">{renderStatus(ticket.paymentStatus)}</TableCell>
+
+														<TableCell className="whitespace-nowrap font-medium text-foreground">
+															{ticket.categoryName || "—"}
+														</TableCell>
+
+														<TableCell className="min-w-[160px] max-w-[200px]">
+															<div className="truncate font-medium text-foreground">
+																{ticket.projectName || "—"}
+															</div>
+														</TableCell>
+
+														<TableCell
+															className="min-w-[200px] max-w-[280px] truncate text-xs text-muted-foreground"
+															title={ticket.description}
+														>
+															{ticket.description || "—"}
+														</TableCell>
+
+														<TableCell className="whitespace-nowrap text-right font-bold tabular-nums text-foreground">
+															{formatINR(ticket.amount)}
+														</TableCell>
+
+														<TableCell className="whitespace-nowrap text-right">
+															{renderStatus(ticket.paymentStatus)}
+														</TableCell>
 													</TableRow>
 												))
 											) : (
@@ -240,10 +289,10 @@ export default function ExpenseReports() {
 					) : projectExpenseReport ? (
 						<>
 							<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Tickets" value={projectExpenseReport.totalTickets || 0} icon={Receipt} accent="info" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Expense" value={formatINR(projectExpenseReport.totalAmount || 0)} icon={FileText} accent="info" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Paid" value={formatINR(projectExpenseReport.totalPaid || 0)} icon={CheckCircle2} accent="success" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Pending" value={formatINR(projectExpenseReport.pendingAmount || 0)} icon={Hourglass} accent="warning" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Tickets" value={projectExpenseReport.totalTickets || 0} accent="info" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Expense" value={formatINR(projectExpenseReport.totalAmount || 0)} accent="info" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Paid" value={formatINR(projectExpenseReport.totalPaid || 0)} accent="success" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Pending" value={formatINR(projectExpenseReport.pendingAmount || 0)} accent="warning" /></div>
 							</div>
 
 							<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -352,10 +401,10 @@ export default function ExpenseReports() {
 							</div>
 
 							<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Tickets" value={employeeExpenseReport.totalTickets || 0} icon={Receipt} accent="info" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Expense" value={formatINR(employeeExpenseReport.totalAmount || 0)} icon={FileText} accent="info" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Paid" value={formatINR(employeeExpenseReport.totalPaid || 0)} icon={CheckCircle2} accent="success" /></div>
-								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Pending" value={formatINR(employeeExpenseReport.pendingAmount || 0)} icon={Hourglass} accent="warning" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Tickets" value={employeeExpenseReport.totalTickets || 0} accent="info" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Total Expense" value={formatINR(employeeExpenseReport.totalAmount || 0)} accent="info" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Paid" value={formatINR(employeeExpenseReport.totalPaid || 0)} accent="success" /></div>
+								<div className="bg-white dark:bg-card rounded-xl shadow-sm"><StatCard size="compact" label="Pending" value={formatINR(employeeExpenseReport.pendingAmount || 0)} accent="warning" /></div>
 							</div>
 
 							{/* Tickets Table */}
@@ -363,36 +412,66 @@ export default function ExpenseReports() {
 								<div className="bg-muted/30 px-4 py-3 border-b"><h3 className="font-semibold text-sm text-foreground">Expense Tickets</h3></div>
 								<CardContent className="p-0">
 									<Table>
-										<TableHeader>
+										<TableHeader className="bg-muted/10">
 											<TableRow className="hover:bg-transparent">
-												<TableHead className="font-semibold text-muted-foreground">Date</TableHead>
-												<TableHead className="font-semibold text-muted-foreground">Category</TableHead>
-												<TableHead className="font-semibold text-muted-foreground">Project</TableHead>
-												<TableHead className="font-semibold text-muted-foreground">Description</TableHead>
-												<TableHead className="text-right font-semibold text-muted-foreground">Amount</TableHead>
-												<TableHead className="text-right font-semibold text-muted-foreground">Status</TableHead>
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Date
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Category
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Project
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+													Description
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap text-right font-semibold text-muted-foreground">
+													Amount
+												</TableHead>
+
+												<TableHead className="whitespace-nowrap text-right font-semibold text-muted-foreground">
+													Status
+												</TableHead>
 											</TableRow>
 										</TableHeader>
 										<TableBody>
 											{employeeExpenseReport.tickets?.length > 0 ? (
 												employeeExpenseReport.tickets.map((ticket) => (
-													<TableRow key={ticket._id} className="group hover:bg-muted/40 transition-colors">
-														<TableCell className="font-medium text-foreground tabular-nums text-nowrap">
+													<TableRow
+														key={ticket._id}
+														className="group transition-colors hover:bg-muted/40"
+													>
+														<TableCell className="whitespace-nowrap font-medium tabular-nums text-foreground">
 															{formatDate(ticket.createdAt)}
 														</TableCell>
-														<TableCell className="text-muted-foreground font-medium">
+
+														<TableCell className="whitespace-nowrap font-medium text-muted-foreground">
 															{ticket.categoryId?.name || "—"}
 														</TableCell>
-														<TableCell className="text-muted-foreground font-medium">
-															{ticket.projectId?.name || "—"}
+
+														<TableCell className="min-w-[160px] max-w-[200px]">
+															<div className="truncate font-medium text-muted-foreground">
+																{ticket.projectId?.name || "—"}
+															</div>
 														</TableCell>
-														<TableCell className="text-muted-foreground text-xs max-w-[200px] truncate" title={ticket.description}>
+
+														<TableCell
+															className="min-w-[200px] max-w-[280px] truncate text-xs text-muted-foreground"
+															title={ticket.description}
+														>
 															{ticket.title || "—"}
 														</TableCell>
-														<TableCell className="text-right font-bold tabular-nums text-foreground">
+
+														<TableCell className="whitespace-nowrap text-right font-bold tabular-nums text-foreground">
 															{formatINR(ticket.amount)}
 														</TableCell>
-														<TableCell className="text-right">
+
+														<TableCell className="whitespace-nowrap text-right">
 															{renderStatus(ticket.paymentStatus || ticket.status)}
 														</TableCell>
 													</TableRow>
