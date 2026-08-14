@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ConstructionIcon, Eye, EyeOff, FileText, MapPin, Receipt, Users } from "lucide-react";
+import { Eye, EyeOff, FileText, MapPin, Receipt, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/authStore";
-import { Toaster } from "@/components/ui/sonner";
 import { authApi } from "@/api";
 
 // IMPORTANT: Place logo-removebg.png in your assets folder (e.g., src/assets/)
@@ -153,7 +152,7 @@ export default function Login() {
 								<button
 									type="button"
 									onClick={() => navigate("/forgot-password")}
-									className="text-xs font-medium text-primary hover:underline underline-offset-4"
+									className="cursor-pointer text-xs font-medium text-primary hover:underline underline-offset-4"
 								>
 									Forgot password?
 								</button>
@@ -175,8 +174,6 @@ export default function Login() {
 					</form>
 				</div>
 			</div>
-
-			<Toaster position="top-right" richColors />
 		</div>
 	);
 }
