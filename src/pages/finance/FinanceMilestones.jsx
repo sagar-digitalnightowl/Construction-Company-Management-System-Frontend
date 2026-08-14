@@ -7,26 +7,26 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@/components/ui/select";
 import { formatDate } from "@/lib/helpers";
 import { CheckCircle, Clock, Loader2 } from "lucide-react";
@@ -34,223 +34,247 @@ import { projectApi } from "@/api";
 import { toast } from "sonner"; // Added toast import
 
 const ALL_MILESTONES = [
-  "Within 30 days of Booking",
-  "On Completion of Plinth Work",
-  "At the time of Ground Roof Casting",
-  "2nd Slab Casting",
-  "3rd Slab Casting",
-  "4th Slab Casting",
-  "5th Slab Casting",
-  "6th Slab Casting",
-  "7th Slab Casting",
-  "8th Slab Casting",
-  "At the completion of Internal Wall of Flat",
-  "At the time of Flooring",
-  "At the time of Possession",
+	"Within 30 days of Booking",
+	"On Completion of Plinth Work",
+	"At the time of Ground Roof Casting",
+	"2nd Slab Casting",
+	"3rd Slab Casting",
+	"4th Slab Casting",
+	"5th Slab Casting",
+	"6th Slab Casting",
+	"7th Slab Casting",
+	"8th Slab Casting",
+	"At the completion of Internal Wall of Flat",
+	"At the time of Flooring",
+	"At the time of Possession",
 ];
 
 export function FinanceMilestones() {
-  const { milestones, fetchProjectMilestones, markMilestone, loading } = useFinance();
-  
-  // Projects Dropdown States
-  const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState("");
-  const [projectPage, setProjectPage] = useState(1);
-  const [hasMoreProjects, setHasMoreProjects] = useState(true);
+	const { milestones, fetchProjectMilestones, markMilestone, loading } = useFinance();
 
-  // Dialog States
-  const [markOpen, setMarkOpen] = useState(false);
-  const [markMilestoneName, setMarkMilestoneName] = useState("");
-  const [markCompletedAt, setMarkCompletedAt] = useState(
-    new Date().toISOString().slice(0, 16),
-  );
+	// Projects Dropdown States
+	const [projects, setProjects] = useState([]);
+	const [selectedProject, setSelectedProject] = useState("");
+	const [projectPage, setProjectPage] = useState(1);
+	const [hasMoreProjects, setHasMoreProjects] = useState(true);
 
-  // Fetch Projects with Pagination support for dropdown
-  const fetchProjects = async (pageNo = 1) => {
-    try {
-      const res = await projectApi.getAll({ page: pageNo, limit: 10 });
-      if (res.data.success) {
-        const fetchedProjects = res.data.data?.projects || res.data.data?.docs || res.data.data || [];
-        const projectPagination = res.data.data?.pagination;
+	// Dialog States
+	const [markOpen, setMarkOpen] = useState(false);
+	const [markMilestoneName, setMarkMilestoneName] = useState("");
+	const [markCompletedAt, setMarkCompletedAt] = useState(
+		new Date().toISOString().slice(0, 16),
+	);
 
-        if (pageNo === 1) {
-          setProjects(fetchedProjects);
-          // Auto select first project if nothing is selected
-          if (!selectedProject && fetchedProjects.length > 0) {
-            setSelectedProject(fetchedProjects[0]._id);
-          }
-        } else {
-          setProjects((prev) => [...prev, ...fetchedProjects]);
-        }
+	// Fetch Projects with Pagination support for dropdown
+	const fetchProjects = async (pageNo = 1) => {
+		try {
+			const res = await projectApi.getAll({ page: pageNo, limit: 10 });
+			if (res.data.success) {
+				const fetchedProjects = res.data.data?.projects || res.data.data?.docs || res.data.data || [];
+				const projectPagination = res.data.data?.pagination;
 
-        // Check if more projects exist
-        if (projectPagination && pageNo >= projectPagination.pages) {
-          setHasMoreProjects(false);
-        } else {
-          setHasMoreProjects(true);
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load projects");
-    }
-  };
+				if (pageNo === 1) {
+					setProjects(fetchedProjects);
+					// Auto select first project if nothing is selected
+					if (!selectedProject && fetchedProjects.length > 0) {
+						setSelectedProject(fetchedProjects[0]._id);
+					}
+				} else {
+					setProjects((prev) => [...prev, ...fetchedProjects]);
+				}
 
-  useEffect(() => {
-    fetchProjects(1);
-  }, []); // Remove selectedProject from dependency array to prevent loop
+				// Check if more projects exist
+				if (projectPagination && pageNo >= projectPagination.pages) {
+					setHasMoreProjects(false);
+				} else {
+					setHasMoreProjects(true);
+				}
+			}
+		} catch (err) {
+			console.error(err);
+			toast.error("Failed to load projects");
+		}
+	};
 
-  useEffect(() => {
-    if (projects.length && selectedProject) {
-      fetchProjectMilestones(selectedProject);
-    }
-  }, [selectedProject, fetchProjectMilestones]);
+	useEffect(() => {
+		fetchProjects(1);
+	}, []); // Remove selectedProject from dependency array to prevent loop
 
-  // Handle "Load More" for project dropdown
-  const handleLoadMoreProjects = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const nextPage = projectPage + 1;
-    setProjectPage(nextPage);
-    fetchProjects(nextPage);
-  };
+	useEffect(() => {
+		if (projects.length && selectedProject) {
+			fetchProjectMilestones(selectedProject);
+		}
+	}, [selectedProject, fetchProjectMilestones]);
 
-  const handleMark = async () => {
-    if (!markMilestoneName) return;
-    await markMilestone(selectedProject, {
-      milestone: markMilestoneName,
-      completedAt: new Date(markCompletedAt).toISOString(),
-    });
-    setMarkOpen(false);
-    setMarkMilestoneName("");
-  };
+	// Handle "Load More" for project dropdown
+	const handleLoadMoreProjects = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		const nextPage = projectPage + 1;
+		setProjectPage(nextPage);
+		fetchProjects(nextPage);
+	};
 
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-end">
-        <div className="space-y-1.5">
-          <Label>Select Project</Label>
-          <Select value={selectedProject} onValueChange={setSelectedProject}>
-            <SelectTrigger className="w-[300px]">
-              <SelectValue placeholder="Choose a project" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((p) => (
-                <SelectItem key={p._id} value={p._id}>
-                  {p.name}
-                </SelectItem>
-              ))}
-              
-              {/* Load More Button for Projects */}
-              {hasMoreProjects && (
-                <div 
-                  className="w-full text-left px-2 py-1.5 text-xs text-blue-600 font-medium hover:bg-muted border-t mt-1 cursor-pointer"
-                  onClick={handleLoadMoreProjects}
-                >
-                  + Load More Projects
-                </div>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
-        {selectedProject && (
-          <Button onClick={() => setMarkOpen(true)}>
-            Mark Milestone Completed
-          </Button>
-        )}
-      </div>
+	const handleMark = async () => {
+		if (!markMilestoneName) return;
+		await markMilestone(selectedProject, {
+			milestone: markMilestoneName,
+			completedAt: new Date(markCompletedAt).toISOString(),
+		});
+		setMarkOpen(false);
+		setMarkMilestoneName("");
+	};
 
-      {selectedProject && (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Milestone</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Completed At</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ALL_MILESTONES.map((name) => {
-                  const found = milestones.find((m) => m.milestone === name);
-                  const completed = found?.completed;
-                  return (
-                    <TableRow key={name}>
-                      <TableCell className="font-medium">{name}</TableCell>
-                      <TableCell>
-                        {completed ? (
-                          <Badge variant="success" className="gap-1">
-                            <CheckCircle className="h-3 w-3" /> Completed
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="gap-1">
-                            <Clock className="h-3 w-3" /> Pending
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {completed ? formatDate(found.completedAt) : "—"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+	return (
+		<div className="space-y-4">
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+				<div className="space-y-1.5 w-full sm:w-auto">
+					<Label>Select Project</Label>
 
-      {/* Mark Milestone Dialog */}
-      <Dialog open={markOpen} onOpenChange={setMarkOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mark Milestone as Completed</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-3">
-            <div className="space-y-1.5">
-              <Label>Milestone</Label>
-              <Select
-                value={markMilestoneName}
-                onValueChange={setMarkMilestoneName}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select milestone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ALL_MILESTONES.map((name) => (
-                    <SelectItem key={name} value={name}>
-                      {name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Completed At</Label>
-              <Input
-                type="datetime-local"
-                value={markCompletedAt}
-                onChange={(e) => setMarkCompletedAt(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setMarkOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleMark}
-              disabled={!markMilestoneName || loading}
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              Mark Completed
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+					<Select
+						value={selectedProject}
+						onValueChange={setSelectedProject}
+					>
+						<SelectTrigger className="w-full sm:w-[300px]">
+							<SelectValue placeholder="Choose a project" />
+						</SelectTrigger>
+
+						<SelectContent>
+							{projects.map((p) => (
+								<SelectItem key={p._id} value={p._id}>
+									{p.name}
+								</SelectItem>
+							))}
+
+							{hasMoreProjects && (
+								<div
+									className="w-full cursor-pointer border-t mt-1 px-2 py-2 text-left text-xs font-medium text-blue-600 hover:bg-muted"
+									onClick={handleLoadMoreProjects}
+								>
+									+ Load More Projects
+								</div>
+							)}
+						</SelectContent>
+					</Select>
+				</div>
+
+				{selectedProject && (
+					<Button
+						onClick={() => setMarkOpen(true)}
+						className="w-full sm:w-auto"
+					>
+						Mark Milestone Completed
+					</Button>
+				)}
+			</div>
+
+			{selectedProject && (
+				<Card>
+					<CardContent className="p-0">
+						<Table>
+							<TableHeader className="bg-muted/10">
+								<TableRow className="hover:bg-transparent">
+									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+										Milestone
+									</TableHead>
+
+									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+										Status
+									</TableHead>
+
+									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+										Completed At
+									</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{ALL_MILESTONES.map((name) => {
+									const found = milestones.find((m) => m.milestone === name);
+									const completed = found?.completed;
+									return (
+										<TableRow key={name} className="hover:bg-muted/40">
+											<TableCell className="min-w-[220px]">
+												<div className="truncate font-medium">
+													{name}
+												</div>
+											</TableCell>
+
+											<TableCell className="whitespace-nowrap">
+												{completed ? (
+													<span className="flex items-center gap-1.5 text-sm font-medium text-success">
+														<CheckCircle className="h-4 w-4" />
+														Completed
+													</span>
+												) : (
+													<span className="flex items-center gap-1.5 text-sm font-medium text-amber-600">
+														<Clock className="h-4 w-4" />
+														Pending
+													</span>
+												)}
+											</TableCell>
+
+											<TableCell className="whitespace-nowrap">
+												{completed ? formatDate(found.completedAt) : "—"}
+											</TableCell>
+										</TableRow>
+									);
+								})}
+							</TableBody>
+						</Table>
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Mark Milestone Dialog */}
+			<Dialog open={markOpen} onOpenChange={setMarkOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Mark Milestone as Completed</DialogTitle>
+					</DialogHeader>
+					<div className="grid gap-3">
+						<div className="space-y-1.5">
+							<Label>Milestone</Label>
+							<Select
+								value={markMilestoneName}
+								onValueChange={setMarkMilestoneName}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Select milestone" />
+								</SelectTrigger>
+								<SelectContent>
+									{ALL_MILESTONES.map((name) => (
+										<SelectItem key={name} value={name}>
+											{name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="space-y-1.5">
+							<Label>Completed At</Label>
+							<Input
+								type="datetime-local"
+								value={markCompletedAt}
+								onChange={(e) => setMarkCompletedAt(e.target.value)}
+							/>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setMarkOpen(false)}>
+							Cancel
+						</Button>
+						<Button
+							onClick={handleMark}
+							disabled={!markMilestoneName || loading}
+						>
+							{loading ? (
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							) : null}
+							Mark Completed
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</div>
+	);
 }

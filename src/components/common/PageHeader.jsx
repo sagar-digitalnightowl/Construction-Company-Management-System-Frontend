@@ -10,7 +10,7 @@ export function PageHeader({ title, eyebrow, description, actions, className }) 
 						{eyebrow}
 					</div>
 				)}
-				<h1 className="font-display text-3xl sm:text-[2.1rem] font-semibold tracking-tight leading-[1.1] text-foreground">
+				<h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] font-semibold tracking-tight leading-[1.1] text-foreground">
 					{title}
 				</h1>
 				{description && (

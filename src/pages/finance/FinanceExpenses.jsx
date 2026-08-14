@@ -5,6 +5,11 @@ import * as LucideIcons from "lucide-react";
 import {
     CreditCard, Search, FileText, Eye, DollarSign, Hash, User, Tag, Calendar,
     CheckCircle, RotateCcw, Wallet, ArrowDownCircle, ArrowUpCircle, Plus, FolderOpen, XCircle
+import React, { useEffect, useRef, useState } from "react";
+import * as LucideIcons from "lucide-react";
+import {
+	CreditCard, Search, FileText, Eye, DollarSign, Hash, User, Tag, Calendar,
+	CheckCircle, Wallet, ArrowDownCircle, ArrowUpCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,7 +28,14 @@ import { toast } from "sonner";
 import { formatINR } from "@/lib/helpers";
 
 export function FinanceExpenses() {
+<<<<<<< HEAD
     const topRef = useRef(null);
+=======
+	const topRef = useRef(null);
+
+	// ==================== MAIN TABS STATE ====================
+	const [mainTab, setMainTab] = useState("expenses");
+>>>>>>> 961b5227981497a3d3847709375b079642756be3
 
     // ==================== MAIN TABS STATE ====================
     const [mainTab, setMainTab] = useState("expenses");
@@ -99,12 +111,27 @@ export function FinanceExpenses() {
         fetchEmployees({ limit: 100 });
     }, []);
 
+<<<<<<< HEAD
     // ==================== EFFECTS: EXPENSE TICKETS ====================
     const fetchExpensesData = async (tab, page = 1, limit = 10, search = "") => {
         setLoading(true);
         try {
             const params = { page, limit };
             if (search.trim()) params.search = search.trim();
+=======
+	// Tab switch (Approved <-> Paid) => fetch immediately, no debounce, and clear stale rows
+	useEffect(() => {
+		if (mainTab !== "expenses") return;
+
+		setExpenses([]);
+		setLoading(true);
+		fetchExpensesData(activeTab, 1, 10, searchTerm);
+	}, [activeTab, mainTab]);
+
+	// Search typing => debounce only, don't refetch on every keystroke
+	useEffect(() => {
+		if (mainTab !== "expenses") return;
+>>>>>>> 961b5227981497a3d3847709375b079642756be3
 
             if (tab === "MyRaised") {
                 await fetchFinanceDashboard(params);
@@ -131,6 +158,7 @@ export function FinanceExpenses() {
         }
     };
 
+<<<<<<< HEAD
     // Tab switch => fetch immediately, no debounce, and clear stale rows
     useEffect(() => {
         if (mainTab !== "expenses") return;
@@ -138,6 +166,10 @@ export function FinanceExpenses() {
         setLoading(true);
         fetchExpensesData(activeTab, 1, 10, searchTerm);
     }, [activeTab, mainTab]);
+=======
+		return () => clearTimeout(timer);
+	}, [searchTerm]);
+>>>>>>> 961b5227981497a3d3847709375b079642756be3
 
     // Search typing => debounce only, don't refetch on every keystroke
     useEffect(() => {
@@ -243,11 +275,22 @@ export function FinanceExpenses() {
         }
     };
 
+<<<<<<< HEAD
     // ==================== HANDLERS: RAISE FINANCE EXPENSE ====================
     const handleFinanceFormChange = (e) => {
         const { name, value } = e.target;
         setFinanceForm((prev) => ({ ...prev, [name]: value }));
     };
+=======
+	useEffect(() => {
+		topRef.current?.scrollIntoView({
+			behavior: "smooth",
+		});
+	}, [empPage]);
+
+	return (
+		<div ref={topRef} className="space-y-4 mt-5">
+>>>>>>> 961b5227981497a3d3847709375b079642756be3
 
     const handleFinanceFileChange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -268,6 +311,7 @@ export function FinanceExpenses() {
             if (!financeForm.paidToUserId || financeForm.paidToUserId === "none") return toast.error("Please select whom you are paying.");
         }
 
+<<<<<<< HEAD
         const payload = new FormData();
         Object.keys(financeForm).forEach(key => {
             if (isManualRecipient && key === "paidToUserId") return;
@@ -395,6 +439,149 @@ export function FinanceExpenses() {
                                         const categoryIcon = expense?.categoryId?.icon;
                                         const categoryColor = expense?.categoryId?.color || "#3b82f6";
                                         const recipientName = expense.paidToName || expense.paidToUserId?.name || "N/A";
+=======
+					<div className="border rounded-md">
+						<Table>
+							<TableHeader>
+								<TableRow className="hover:bg-transparent">
+									<TableHead className="whitespace-nowrap">Date</TableHead>
+									<TableHead className="whitespace-nowrap">Title</TableHead>
+									<TableHead className="whitespace-nowrap">Employee</TableHead>
+									<TableHead className="whitespace-nowrap">Project</TableHead>
+									<TableHead className="whitespace-nowrap">Category</TableHead>
+									<TableHead className="whitespace-nowrap">Total Amount</TableHead>
+									<TableHead className="whitespace-nowrap">Cash Pending</TableHead>
+									<TableHead className="whitespace-nowrap">Payment Status</TableHead>
+									<TableHead className="whitespace-nowrap text-right">Actions</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{loading && mainTab === "expenses" ? (
+									<TableRow><TableCell colSpan={7} className="text-center py-8">Loading...</TableCell></TableRow>
+								) : expenses.length === 0 ? (
+									<TableRow><TableCell colSpan={7} className="text-center py-8">No tickets found.</TableCell></TableRow>
+								) : (
+									expenses.map((expense) => {
+										const categoryName = expense?.categoryId?.name || expense?.category;
+										const categoryIcon = expense?.categoryId?.icon;
+										const categoryColor = expense?.categoryId?.color || "#3b82f6";
+
+										return (
+											<TableRow
+												key={expense._id}
+												className="hover:bg-muted/40 transition-colors"
+											>
+												<TableCell className="whitespace-nowrap">
+													{new Date(expense.createdAt).toLocaleDateString()}
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													{expense.title}
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													<div className="font-medium">{expense.employeeId?.name}</div>
+													{/* <div className="text-xs text-muted-foreground">
+														{expense.ticketNumber}
+													</div> */}
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													<div className="font-medium">
+														{expense.projectId?.name || "N/A"}
+													</div>
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													{categoryName ? (
+														<div
+															className={`text-xs font-medium flex items-center w-fit ${categoryIcon ? "gap-1.5" : ""
+																}`}
+														>
+															{categoryIcon && (
+																<div
+																	className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-white"
+																	style={{ backgroundColor: categoryColor }}
+																>
+																	{renderDynamicIcon(categoryIcon, "h-2.5 w-2.5")}
+																</div>
+															)}
+
+															<span className="text-foreground">
+																{categoryName}
+															</span>
+														</div>
+													) : (
+														<span className="text-xs text-muted-foreground">
+															None
+														</span>
+													)}
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap font-bold tabular-nums">
+													₹{expense.amount}
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													<span
+														className={`text-sm font-medium ${expense.paymentPendingAmount > 0
+															? "text-destructive"
+															: expense.paymentPendingAmount === 0
+																? "text-muted-foreground"
+																: "text-muted-foreground"
+															}`}
+													>
+														₹{expense.paymentPendingAmount || 0}
+													</span>
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap">
+													<span
+														className={`text-sm font-medium ${expense.paymentStatus === "Paid"
+															? "text-success"
+															: expense.paymentStatus === "Wallet Adjusted"
+																? "text-blue-600"
+																: expense.paymentStatus === "Partially Paid"
+																	? "text-orange-600"
+																	: expense.paymentStatus === "Pending" || !expense.paymentStatus
+																		? "text-amber-600"
+																		: "text-muted-foreground"
+															}`}
+													>
+														{expense.paymentStatus || "Pending"}
+													</span>
+												</TableCell>
+
+												<TableCell className="whitespace-nowrap text-right">
+													<div className="flex justify-end gap-2">
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => openModal(expense, "view")}
+														>
+															<Eye className="h-4 w-4" />
+														</Button>
+
+														{activeTab === "Approved" && (
+															<Button
+																size="sm"
+																onClick={() => openModal(expense, "pay")}
+															>
+																<CreditCard className="mr-1 h-3.5 w-3.5" />
+																Pay
+															</Button>
+														)}
+													</div>
+												</TableCell>
+											</TableRow>
+										)
+									})
+								)}
+							</TableBody>
+						</Table>
+					</div>
+				</TabsContent>
+>>>>>>> 961b5227981497a3d3847709375b079642756be3
 
                                         return (
                                             <TableRow key={expense._id} className="hover:bg-muted/40 transition-colors">
@@ -406,6 +593,7 @@ export function FinanceExpenses() {
                                                     {expense.title}
                                                 </TableCell>
 
+<<<<<<< HEAD
                                                 <TableCell className="whitespace-nowrap">
                                                     {activeTab === "MyRaised" ? (
                                                         <div className="font-medium text-blue-700">{recipientName}</div>
@@ -494,6 +682,100 @@ export function FinanceExpenses() {
                                                                 </Button>
                                                             </>
                                                         )}
+=======
+							{/* 🟢 NEW CLEAN EMPLOYEE TABLE 🟢 */}
+							<div className="border rounded-md">
+								<Table>
+									<TableHeader>
+										<TableRow className="hover:bg-transparent">
+											<TableHead className="whitespace-nowrap">Employee</TableHead>
+											<TableHead className="whitespace-nowrap">Emp ID</TableHead>
+											<TableHead className="whitespace-nowrap">Role</TableHead>
+											<TableHead className="whitespace-nowrap">Status</TableHead>
+											<TableHead className="whitespace-nowrap text-right">Action</TableHead>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{loading && mainTab === "wallets" && !employees?.employees?.length ? (
+											<TableRow><TableCell colSpan={5} className="text-center py-6">Loading...</TableCell></TableRow>
+										) : employees?.employees?.length === 0 ? (
+											<TableRow><TableCell colSpan={5} className="text-center py-6">No employees found.</TableCell></TableRow>
+										) : (
+											employees?.employees?.map((emp) => (
+												<TableRow
+													key={emp?._id}
+													className={`${!emp?.isActive ? "opacity-60 bg-muted/20" : ""
+														}`}
+												>
+													{/* Profile, Name & Email */}
+													<TableCell className="whitespace-nowrap">
+														<div className="flex items-center gap-3">
+															<div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center overflow-hidden border shrink-0">
+																{emp?.profileImage ? (
+																	<img
+																		src={emp.profileImage}
+																		alt={emp.name}
+																		className="h-full w-full object-cover"
+																	/>
+																) : (
+																	<User className="h-5 w-5 text-muted-foreground" />
+																)}
+															</div>
+
+															<div className="min-w-0">
+																<div className="font-medium text-sm leading-none">
+																	{emp?.name}
+																</div>
+																<div className="text-xs text-muted-foreground mt-1">
+																	{emp?.email}
+																</div>
+															</div>
+														</div>
+													</TableCell>
+
+													{/* Employee ID */}
+													<TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
+														{emp?.employeeId || "N/A"}
+													</TableCell>
+
+													{/* Role */}
+													<TableCell className="whitespace-nowrap">
+														<div className="font-medium text-sm capitalize">
+															{emp?.role?.replace("_", " ") || "N/A"}
+														</div>
+													</TableCell>
+
+													{/* Status */}
+													<TableCell className="whitespace-nowrap">
+														<span
+															className={`text-sm font-medium ${emp?.isActive
+																? "text-success"
+																: "text-destructive"
+																}`}
+														>
+															{emp?.status || (emp?.isActive ? "Active" : "Inactive")}
+														</span>
+													</TableCell>
+
+													{/* Action */}
+													<TableCell className="whitespace-nowrap text-right">
+														<Button
+															variant="outline"
+															size="sm"
+															onClick={() => setSelectedEmpId(emp?._id)}
+															disabled={!emp?.isActive}
+														>
+															<Wallet className="h-4 w-4 mr-2" />
+															View Wallet
+														</Button>
+													</TableCell>
+												</TableRow>
+											))
+										)}
+									</TableBody>
+								</Table>
+							</div>
+>>>>>>> 961b5227981497a3d3847709375b079642756be3
 
                                                         {activeTab === "Approved" && (
                                                             <Button size="sm" onClick={() => openModal(expense, 'pay')}>
