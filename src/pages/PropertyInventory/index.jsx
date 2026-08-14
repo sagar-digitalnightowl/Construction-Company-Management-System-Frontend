@@ -96,7 +96,7 @@ export default function PropertyInventory() {
 					label="Total Projects"
 					value={projectStats.total || 0}
 					icon={Building2}
-					accent="neutral"
+					accent="primary"
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -104,7 +104,7 @@ export default function PropertyInventory() {
 					label="Active"
 					value={projectStats.active || 0}
 					icon={TrendingUp}
-					accent="neutral"
+					accent="info"
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -112,7 +112,7 @@ export default function PropertyInventory() {
 					label="Completed"
 					value={projectStats.completed || 0}
 					icon={Home}
-					accent="neutral"
+					accent="success"
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 				<StatCard
@@ -120,7 +120,7 @@ export default function PropertyInventory() {
 					label="Delayed"
 					value={projectStats.delayed || 0}
 					icon={AlertCircle}
-					accent="neutral"
+					accent="destructive"
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 			</div>

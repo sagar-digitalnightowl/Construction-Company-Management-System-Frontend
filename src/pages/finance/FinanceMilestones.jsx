@@ -172,11 +172,19 @@ export function FinanceMilestones() {
 				<Card>
 					<CardContent className="p-0">
 						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Milestone</TableHead>
-									<TableHead>Status</TableHead>
-									<TableHead>Completed At</TableHead>
+							<TableHeader className="bg-muted/10">
+								<TableRow className="hover:bg-transparent">
+									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+										Milestone
+									</TableHead>
+
+									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+										Status
+									</TableHead>
+
+									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+										Completed At
+									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -184,20 +192,28 @@ export function FinanceMilestones() {
 									const found = milestones.find((m) => m.milestone === name);
 									const completed = found?.completed;
 									return (
-										<TableRow key={name}>
-											<TableCell className="font-medium">{name}</TableCell>
-											<TableCell>
+										<TableRow key={name} className="hover:bg-muted/40">
+											<TableCell className="min-w-[220px]">
+												<div className="truncate font-medium">
+													{name}
+												</div>
+											</TableCell>
+
+											<TableCell className="whitespace-nowrap">
 												{completed ? (
-													<Badge variant="success" className="gap-1">
-														<CheckCircle className="h-3 w-3" /> Completed
-													</Badge>
+													<span className="flex items-center gap-1.5 text-sm font-medium text-success">
+														<CheckCircle className="h-4 w-4" />
+														Completed
+													</span>
 												) : (
-													<Badge variant="secondary" className="gap-1">
-														<Clock className="h-3 w-3" /> Pending
-													</Badge>
+													<span className="flex items-center gap-1.5 text-sm font-medium text-amber-600">
+														<Clock className="h-4 w-4" />
+														Pending
+													</span>
 												)}
 											</TableCell>
-											<TableCell>
+
+											<TableCell className="whitespace-nowrap">
 												{completed ? formatDate(found.completedAt) : "—"}
 											</TableCell>
 										</TableRow>

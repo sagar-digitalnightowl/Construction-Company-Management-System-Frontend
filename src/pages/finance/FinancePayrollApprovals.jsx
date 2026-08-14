@@ -88,12 +88,30 @@ export function FinancePayrollApprovals() {
 	};
 
 	const handleDownloadExcel = async (id) => {
-		const batchDetail = await fetchPayrollBatchById(id);
-		// Updated to use fileUrl instead of excelUrl
-		if (batchDetail && batchDetail.fileUrl) {
-			window.open(batchDetail.fileUrl, "_blank");
-		} else {
-			toast.error("Excel file not found for this batch.");
+		try {
+			const batchDetail = await fetchPayrollBatchById(id);
+
+			if (batchDetail && batchDetail.fileUrl) {
+				// Create a hidden anchor element
+				const link = document.createElement("a");
+				link.href = batchDetail.fileUrl;
+
+				// Adding the download attribute tells the browser to download it 
+				// instead of navigating to it. Leaving it empty lets the server 
+				// dictate the filename.
+				link.setAttribute("download", "");
+				link.style.display = "none";
+
+				// Append, click to trigger download, and instantly clean up
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			} else {
+				toast.error("Excel file not found for this batch.");
+			}
+		} catch (error) {
+			console.error("Error fetching batch details:", error);
+			toast.error("An error occurred while trying to download.");
 		}
 	};
 
@@ -107,25 +125,25 @@ export function FinancePayrollApprovals() {
 		if (success) refreshData();
 	};
 
-	const getStatusVariant = (status) => {
-		switch (status) {
-			case 'Pending Finance Approval': return "outline";
-			case 'Approved': return "secondary";
-			case 'Sent to Bank': return "default";
-			case 'Bank Processed': return "success";
-			case 'Rejected': return "destructive";
-			default: return "default";
-		}
-	};
-
 	const renderTable = (batches) => (
 		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead>Month/Year</TableHead>
-					<TableHead>Total Amount</TableHead>
-					<TableHead>Status</TableHead>
-					<TableHead className="text-right">Actions</TableHead>
+			<TableHeader className="bg-muted/10">
+				<TableRow className="hover:bg-transparent">
+					<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+						Month/Year
+					</TableHead>
+
+					<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+						Total Amount
+					</TableHead>
+
+					<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
+						Status
+					</TableHead>
+
+					<TableHead className="whitespace-nowrap text-right font-semibold text-muted-foreground">
+						Actions
+					</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
@@ -133,51 +151,123 @@ export function FinancePayrollApprovals() {
 					<TableRow><TableCell colSpan={4} className="text-center py-6">No batches found</TableCell></TableRow>
 				) : (
 					batches.map((batch) => (
-						<TableRow key={batch._id}>
-							<TableCell className="font-medium">{batch.month} {batch.year}</TableCell>
-							<TableCell>₹{batch.totalAmount?.toLocaleString('en-IN')}</TableCell>
-							<TableCell>
-								<Badge variant={getStatusVariant(batch.status)}>{batch.status}</Badge>
+						<TableRow key={batch._id} className="hover:bg-muted/40">
+							<TableCell className="whitespace-nowrap font-medium">
+								{batch.month} {batch.year}
 							</TableCell>
-							<TableCell className="text-right space-x-2">
-								{/* Download/View Excel Button */}
-								<Button
-									size="sm"
-									variant="outline"
-									onClick={() => handleDownloadExcel(batch._id)}
-									title="View Excel Details"
+
+							<TableCell className="whitespace-nowrap tabular-nums">
+								₹{batch.totalAmount?.toLocaleString("en-IN")}
+							</TableCell>
+
+							<TableCell className="whitespace-nowrap">
+								<span
+									className={`text-sm font-medium ${batch.status === "Bank Processed"
+										? "text-success"
+										: batch.status === "Rejected"
+											? "text-destructive"
+											: batch.status === "Approved"
+												? "text-blue-600"
+												: batch.status === "Sent to Bank"
+													? "text-primary"
+													: "text-amber-600"
+										}`}
 								>
-									<Download className="h-4 w-4" />
-								</Button>
+									{batch.status}
+								</span>
+							</TableCell>
 
-								{/* Acknowledge & Approve/Reject */}
-								{batch.status === 'Pending Finance Approval' && (
-									<>
-										<Button size="sm" variant="outline" onClick={() => handleAcknowledge(batch._id)}>
-											<CheckSquare className="mr-2 h-4 w-4" />Acknowledge
-										</Button>
-										<Button size="sm" onClick={() => handleApprove(batch._id)}>
-											<CheckCircle className="mr-2 h-4 w-4" />Approve
-										</Button>
-										<Button size="sm" variant="destructive" onClick={() => { setSelectedBatch(batch); setAction('reject'); }}>
-											<XCircle className="mr-2 h-4 w-4" />Reject
-										</Button>
-									</>
-								)}
-
-								{/* Send to Bank */}
-								{batch.status === 'Approved' && (
-									<Button size="sm" onClick={() => { setSelectedBatch(batch); setAction('sendToBank'); }}>
-										<Send className="mr-2 h-4 w-4" />Send to Bank
+							<TableCell className="whitespace-nowrap text-right">
+								<div className="flex justify-end gap-2">
+									{/* Download/View Excel */}
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() => handleDownloadExcel(batch._id)}
+										title="View Excel Details"
+									>
+										<Download className="h-4 w-4" />
+										<span className="ml-2">Excel</span>
 									</Button>
-								)}
 
-								{/* Confirm Bank Payment */}
-								{batch.status === 'Sent to Bank' && (
-									<Button size="sm" variant="secondary" onClick={() => { setSelectedBatch(batch); setAction('confirmPayment'); }}>
-										<Banknote className="mr-2 h-4 w-4" />Confirm Payment
-									</Button>
-								)}
+									{/* Pending Finance Approval */}
+									{batch.status === "Pending Finance Approval" && (
+										<>
+											<Button
+												size="sm"
+												variant="outline"
+												onClick={() => handleAcknowledge(batch._id)}
+												title="Acknowledge"
+											>
+												<CheckSquare className="h-4 w-4" />
+												<span className="ml-2">
+													Acknowledge
+												</span>
+											</Button>
+
+											<Button
+												size="sm"
+												onClick={() => handleApprove(batch._id)}
+												title="Approve"
+											>
+												<CheckCircle className="h-4 w-4" />
+												<span className="ml-2">
+													Approve
+												</span>
+											</Button>
+
+											<Button
+												size="sm"
+												variant="destructive"
+												onClick={() => {
+													setSelectedBatch(batch);
+													setAction("reject");
+												}}
+												title="Reject"
+											>
+												<XCircle className="h-4 w-4" />
+												<span className="ml-2">
+													Reject
+												</span>
+											</Button>
+										</>
+									)}
+
+									{/* Approved */}
+									{batch.status === "Approved" && (
+										<Button
+											size="sm"
+											onClick={() => {
+												setSelectedBatch(batch);
+												setAction("sendToBank");
+											}}
+											title="Send to Bank"
+										>
+											<Send className="h-4 w-4" />
+											<span className="ml-2">
+												Send to Bank
+											</span>
+										</Button>
+									)}
+
+									{/* Sent to Bank */}
+									{batch.status === "Sent to Bank" && (
+										<Button
+											size="sm"
+											variant="secondary"
+											onClick={() => {
+												setSelectedBatch(batch);
+												setAction("confirmPayment");
+											}}
+											title="Confirm Payment"
+										>
+											<Banknote className="h-4 w-4" />
+											<span className="ml-2">
+												Confirm Payment
+											</span>
+										</Button>
+									)}
+								</div>
 							</TableCell>
 						</TableRow>
 					))
@@ -191,22 +281,27 @@ export function FinancePayrollApprovals() {
 		if (loading || !pagination || pagination.total === 0) return null;
 
 		return (
-			<div className="flex items-center justify-between pt-4 mt-2 border-t">
-				<div className="text-sm text-muted-foreground">
-					Showing page {pagination.page} of {pagination.pages} (Total: {pagination.total} batches)
+			<div className="flex flex-col gap-3 border-t pt-4 mt-2 sm:flex-row sm:items-center sm:justify-between">
+				<div className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
+					Showing page {pagination.page} of {pagination.pages}{" "}
+					(Total: {pagination.total} batches)
 				</div>
-				<div className="flex gap-2">
+
+				<div className="flex w-full gap-2 sm:w-auto">
 					<Button
 						variant="outline"
 						size="sm"
+						className="flex-1 sm:flex-none"
 						onClick={() => setCurrentPage((prev) => prev - 1)}
 						disabled={pagination.page <= 1}
 					>
 						Previous
 					</Button>
+
 					<Button
 						variant="outline"
 						size="sm"
+						className="flex-1 sm:flex-none"
 						onClick={() => setCurrentPage((prev) => prev + 1)}
 						disabled={pagination.page >= pagination.pages}
 					>
