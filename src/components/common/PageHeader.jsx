@@ -46,13 +46,15 @@ export function StatCard({
 		<div
 			data-testid={`stat-${label?.replace(/\s+/g, "-").toLowerCase()}`}
 			className={cn(
-				// BuildHive: Updated to rounded-md to match Button and Card borders
 				"group relative overflow-hidden rounded-md border border-border/80 bg-card transition-all hover:shadow-md hover:border-border",
+				"before:absolute before:inset-0 before:pointer-events-none before:opacity-50",
+				"before:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_3%,transparent)_1px,transparent_1px),linear-gradient(0deg,color-mix(in_oklab,var(--primary)_3%,transparent)_1px,transparent_1px)]",
+				"before:bg-[size:18px_18px]",
 				compact ? "p-3" : "p-5",
 				className,
 			)}
 		>
-			<div className="flex items-start justify-between">
+			<div className="relative z-10 flex items-start justify-between">
 				<div>
 					<div
 						className={cn(

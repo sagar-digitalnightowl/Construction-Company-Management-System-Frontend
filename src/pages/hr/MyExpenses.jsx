@@ -20,6 +20,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useHR } from "@/hooks/useHR";
 import { projectApi } from "@/api/projectApi";
 import { toast } from "sonner";
@@ -659,21 +660,39 @@ export default function MyExpenses() {
 									<Select value={formData.categoryId} onValueChange={handleCategoryChange}>
 										<SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
 										<SelectContent>
-											{expenseCategories
-												.filter((cat) => cat.isActive)
-												.map((cat) => (
-													<SelectItem key={cat._id} value={cat._id}>
-														<div className="flex items-center gap-2">
-															<div
-																className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-white"
-																style={{ backgroundColor: cat?.color || "#3b82f6" }}
-															>
-																{renderDynamicIcon(cat?.icon, "h-3 w-3")}
-															</div>
-															{cat.name}
-														</div>
-													</SelectItem>
-												))}
+											<TooltipProvider delayDuration={200}>
+												{expenseCategories
+													.filter((cat) => cat.isActive)
+													.map((cat) => (
+														<Tooltip key={cat._id}>
+															<TooltipTrigger asChild>
+																<SelectItem value={cat._id}>
+																	<div className="flex items-center gap-2">
+																		<div
+																			className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-white"
+																			style={{ backgroundColor: cat?.color || "#3b82f6" }}
+																		>
+																			{renderDynamicIcon(cat?.icon, "h-3 w-3")}
+																		</div>
+																		<div className="flex flex-col min-w-0">
+																			<span>{cat.name}</span>
+																		</div>
+																	</div>
+																</SelectItem>
+															</TooltipTrigger>
+															{cat.description && (
+																<TooltipContent
+																	side="right"
+																	align="start"
+																	sideOffset={10}
+																	className="hidden max-w-[220px] whitespace-normal lg:block"
+																>
+																	{cat.description}
+																</TooltipContent>
+															)}
+														</Tooltip>
+													))}
+											</TooltipProvider>
 										</SelectContent>
 									</Select>
 								</div>
