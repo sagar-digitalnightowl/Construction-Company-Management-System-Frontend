@@ -28,7 +28,12 @@ export function AppShell() {
 		return <Navigate to="/login" replace state={{ from: location }} />;
 	}
 
-	console.log("Seg : ", seg)
+	const role = current.role?.toLowerCase();
+
+	if (role === "employee" && seg === "dashboard") {
+		return <Navigate to="/employee-overview" replace />;
+	}
+
 	if (!canView(current.role, seg)) {
 		return <Navigate to="/dashboard" replace />;
 	}
