@@ -35,20 +35,11 @@ export default function Login() {
 			const res = await authApi.login({ identifier, password });
 
 			if (res?.data?.success) {
-				const user = res.data.data?.user;
-
-				login(user);
-
+				login(res.data.data?.user);
 				localStorage.setItem("accessToken", res.data.data?.accessToken);
 				localStorage.setItem("refreshToken", res.data.data?.refreshToken);
-
-				toast.success(`Welcome back, ${user.name.split(" ")[0]}`);
-
-				if (user.role?.toLowerCase() === "employee") {
-					navigate("/employee-overview");
-				} else {
-					navigate("/dashboard");
-				}
+				toast.success(`Welcome back, ${res.data.data?.user.name.split(" ")[0]}`);
+				navigate("/dashboard");
 			}
 
 		} catch (error) {
