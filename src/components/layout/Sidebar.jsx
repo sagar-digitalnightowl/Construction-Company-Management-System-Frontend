@@ -170,7 +170,7 @@ export function Sidebar({ role, onClickLink }) {
 					? [
 						{
 							to: "/employee-overview",
-							label: "Employee Overview",
+							label: "Dashboard",
 							icon: LayoutDashboard,
 							key: "employee-overview",
 						},
