@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,14 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import { formatINR, formatDate } from "@/lib/helpers";
 import { Building2, BookOpen, FileText, Search, Eye, CreditCard, User, IndianRupee, Calendar, BarChart2, ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -67,6 +75,7 @@ const StatusBadge = ({ status }) => {
 };
 
 export default function ProjectDetailPage() {
+	const topRef = useRef(null);
 	const { projectId } = useParams();
 	const navigate = useNavigate();
 
@@ -91,6 +100,13 @@ export default function ProjectDetailPage() {
 	const [selectedBookingDetails, setSelectedBookingDetails] = useState(null);
 	const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 	const [bookingSearch, setBookingSearch] = useState("");
+
+	useEffect(() => {
+		topRef.current?.scrollIntoView({
+			behavior: "smooth",
+			block: "start",
+		});
+	}, [bookingsPagination?.page]);
 
 	useEffect(() => {
 		fetchProjectDetails(projectId);
@@ -123,7 +139,7 @@ export default function ProjectDetailPage() {
 
 	return (
 
-		<div className="space-y-6">
+		<div ref={topRef} className="space-y-6">
 			<div className="flex items-center gap-3">
 				<Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
 					<ArrowLeft className="h-4 w-4" />
@@ -287,32 +303,33 @@ export default function ProjectDetailPage() {
 
 						{bookings.length ? (
 							<div className="border rounded-lg overflow-hidden">
-								<table className="w-full text-sm">
-									<thead className="bg-muted/50">
-										<tr>
-											<th className="text-left py-3 px-4 font-medium text-muted-foreground">Buyer Details</th>
-											<th className="text-left py-3 px-4 font-medium text-muted-foreground">Flat</th>
-											<th className="text-left py-3 px-4 font-medium text-muted-foreground">Booking Amount</th>
-											<th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-											<th className="text-right py-3 px-4 font-medium text-muted-foreground">Actions</th>
-										</tr>
-									</thead>
-									<tbody>
+								<Table>
+									<TableHeader className="bg-muted/50">
+										<TableRow>
+											<TableHead className="py-3 px-4 font-medium text-muted-foreground">Buyer Details</TableHead>
+											<TableHead className="py-3 px-4 font-medium text-muted-foreground">Flat</TableHead>
+											<TableHead className="py-3 px-4 font-medium text-muted-foreground">Booking Amount</TableHead>
+											<TableHead className="py-3 px-4 font-medium text-muted-foreground">Payment Status</TableHead>
+											<TableHead className="py-3 px-4 font-medium text-muted-foreground">Approval Status</TableHead>
+											<TableHead className="text-right py-3 px-4 font-medium text-muted-foreground">Actions</TableHead>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
 										{bookings.map((b) => (
-											<tr key={b.id} className="border-b last:border-0 hover:bg-muted/10 transition-colors">
-												<td className="py-3 px-4">
+											<TableRow key={b.id} className="hover:bg-muted/10 transition-colors">
+												<TableCell className="py-3 px-4">
 													<div className="font-medium text-foreground">{b.clientName}</div>
 													<div className="text-xs text-muted-foreground">{b.clientEmail || b.clientDetails?.phone || "N/A"}</div>
-												</td>
-												<td className="py-3 px-4 font-medium">#{b.flatNumber}</td>
-												<td className="py-3 px-4 font-semibold text-primary">{formatINR(b.bookingAmount)}</td>
-												<td className="py-3 px-4">
-													<div className="flex flex-col gap-1 items-start">
-														<Badge variant="outline" className="text-[10px]">{b.approvalStatus}</Badge>
-														<Badge variant="secondary" className="text-[10px]">{b.paymentStatus}</Badge>
-													</div>
-												</td>
-												<td className="py-3 px-4 text-right">
+												</TableCell>
+												<TableCell className="py-3 px-4 font-medium">#{b.flatNumber}</TableCell>
+												<TableCell className="py-3 px-4 font-semibold text-primary">{formatINR(b.bookingAmount)}</TableCell>
+												<TableCell className="py-3 px-4">
+													<Badge variant="secondary" className="text-[10px] capitalize">{b.paymentStatus}</Badge>
+												</TableCell>
+												<TableCell className="py-3 px-4">
+													<Badge variant="outline" className="text-[10px] capitalize">{b.approvalStatus}</Badge>
+												</TableCell>
+												<TableCell className="py-3 px-4 text-right">
 													<div className="flex justify-end gap-2">
 														{b.agreementDocumentUrl && (
 															<Button
@@ -342,11 +359,11 @@ export default function ProjectDetailPage() {
 															<CreditCard className="h-3.5 w-3.5 mr-1.5" /> Payments
 														</Button>
 													</div>
-												</td>
-											</tr>
+												</TableCell>
+											</TableRow>
 										))}
-									</tbody>
-								</table>
+									</TableBody>
+								</Table>
 							</div>
 						) : (
 							<div className="text-center py-12 bg-muted/20 rounded-lg border border-dashed">

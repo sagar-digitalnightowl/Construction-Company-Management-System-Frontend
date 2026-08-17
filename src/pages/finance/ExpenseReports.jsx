@@ -6,10 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatINR, formatDate } from "@/lib/helpers";
-import { Receipt, FileText, CheckCircle2, Hourglass, BarChart3, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { BarChart3, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { StatCard } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 

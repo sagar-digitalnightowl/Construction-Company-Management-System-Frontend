@@ -72,6 +72,7 @@ import FinanceBookingDetail from "./pages/finance/FinanceBookingDetail";
 import ExpenseReports from "./pages/finance/ExpenseReports";
 import ProjectDetailPage from "./components/propertyInventory/ProjectDetailPage";
 import { AppLoader } from "./AppLoader";
+import EmployeeOverview from "./pages/hr/EmployeeOverview";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -159,6 +160,15 @@ export default function App() {
 					<Route path="/hr/labors/:id" element={<LaborDetail />} />
 
 					<Route path="/leaves" element={<EmployeeDashboard />} />
+
+					<Route
+						path="/employee-overview"
+						element={
+							<EmployeeLayout>
+								<EmployeeOverview />
+							</EmployeeLayout>
+						}
+					/>
 
 					<Route
 						path="/employee-attendance"
