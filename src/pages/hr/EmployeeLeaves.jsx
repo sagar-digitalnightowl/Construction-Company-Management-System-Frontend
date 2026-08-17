@@ -9,11 +9,28 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus } from "lucide-react";
+// Added specific icons for the StatCards
+import { Plus, Activity, Coffee, CalendarDays, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useHR } from "@/hooks/useHR";
 import { useAuthStore } from "@/store/authStore";
 import { formatDate } from "@/lib/helpers";
+import { StatCard } from "@/components/common/PageHeader"; // Ensure this path matches your project structure
+
+// Helper to calculate days between two dates
+const calculateDays = (start, end) => {
+	if (!start || !end) return "-";
+	const startDate = new Date(start);
+	const endDate = new Date(end);
+
+	// Reset times to midnight to ensure accurate day calculation
+	startDate.setHours(0, 0, 0, 0);
+	endDate.setHours(0, 0, 0, 0);
+
+	const diffTime = endDate - startDate;
+	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both days
+	return diffDays > 0 ? diffDays : 0;
+};
 
 export const EmployeeLeaves = () => {
 	const { current } = useAuthStore();
@@ -78,24 +95,33 @@ export const EmployeeLeaves = () => {
 				</Button>
 			</div>
 
+			{/* Updated StatCards section */}
 			{leaveBalance && (
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-muted p-4 rounded-md">
-					<div>
-						<p className="text-sm text-muted-foreground">Sick Leave</p>
-						<p className="text-xl font-bold">{leaveBalance.sickLeaveRemaining ?? 0}</p>
-					</div>
-					<div>
-						<p className="text-sm text-muted-foreground">Casual Leave</p>
-						<p className="text-xl font-bold">{leaveBalance.casualLeaveRemaining ?? 0}</p>
-					</div>
-					<div>
-						<p className="text-sm text-muted-foreground">Annual Leave</p>
-						<p className="text-xl font-bold">{leaveBalance.annualLeaveRemaining ?? 0}</p>
-					</div>
-					<div>
-						<p className="text-sm text-muted-foreground">Emergency Leave</p>
-						<p className="text-xl font-bold">{leaveBalance.emergencyLeaveRemaining ?? 0}</p>
-					</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+					<StatCard
+						label="Sick Leave"
+						value={leaveBalance.sickLeaveRemaining ?? 0}
+						icon={Activity}
+						accent="warning"
+					/>
+					<StatCard
+						label="Casual Leave"
+						value={leaveBalance.casualLeaveRemaining ?? 0}
+						icon={Coffee}
+						accent="primary"
+					/>
+					<StatCard
+						label="Annual Leave"
+						value={leaveBalance.annualLeaveRemaining ?? 0}
+						icon={CalendarDays}
+						accent="success"
+					/>
+					<StatCard
+						label="Emergency Leave"
+						value={leaveBalance.emergencyLeaveRemaining ?? 0}
+						icon={AlertCircle}
+						accent="destructive"
+					/>
 				</div>
 			)}
 
@@ -125,7 +151,7 @@ export const EmployeeLeaves = () => {
 										<TableCell>{leave.leaveType}</TableCell>
 										<TableCell>{formatDate(leave.startDate)}</TableCell>
 										<TableCell>{formatDate(leave.endDate)}</TableCell>
-										<TableCell>{leave.days}</TableCell>
+										<TableCell>{calculateDays(leave.startDate, leave.endDate)}</TableCell>
 										<TableCell>
 											<Badge
 												variant={

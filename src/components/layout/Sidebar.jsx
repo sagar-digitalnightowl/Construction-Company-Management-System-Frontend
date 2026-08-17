@@ -166,14 +166,14 @@ export function Sidebar({ role, onClickLink }) {
 					: []
 				),
 
-				{
-					to: "/my-expenses",
-					label: "My Expenses",
-					icon: Receipt,
-					key: "my-expenses",
-				},
 				...(isEmployee
 					? [
+						{
+							to: "/employee-overview",
+							label: "Employee Overview",
+							icon: LayoutDashboard,
+							key: "employee-overview",
+						},
 						{
 							to: "/employee-attendance",
 							label: "My Attendance",
@@ -207,6 +207,12 @@ export function Sidebar({ role, onClickLink }) {
 							key: "leaves",
 						},
 					]),
+				{
+					to: "/my-expenses",
+					label: "My Expenses",
+					icon: Receipt,
+					key: "my-expenses",
+				},
 				{
 					to: "/crm",
 					label: "CRM & Buyers",
