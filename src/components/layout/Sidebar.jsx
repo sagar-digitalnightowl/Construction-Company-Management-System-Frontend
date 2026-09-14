@@ -232,6 +232,12 @@ export function Sidebar({ role, onClickLink }) {
 			label: "HR Operations",
 			items: [
 				{ to: "/hr/employees", label: "Employees", icon: Users2, key: "hr" },
+				{
+					to: "/hr/offices",
+					label: "Offices",
+					icon: Building2,
+					key: "hr",
+				},
 				{ to: "/hr/departments", label: "Departments", icon: Building2, key: "hr" },
 				{ to: "/hr/salary", label: "Salary", icon: FileText, key: "hr" },
 				{ to: "/hr/expense-approvals", label: "Expense Approvals", icon: Receipt, key: "hr" },
