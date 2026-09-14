@@ -19,6 +19,47 @@ export const useHR = () => {
 	const [currentEmployeeLeaveBalance, setCurrentEmployeeLeaveBalance] =
 		useState(null);
 
+	// ==================== Offices ====================
+
+	const [offices, setOffices] = useState({
+		offices: [],
+		pagination: {
+			page: 1,
+			limit: 20,
+			total: 0,
+			pages: 0,
+		},
+	});
+
+	const [employeesLoading, setEmployeesLoading] = useState(false);
+	const [officeEmployees, setOfficeEmployees] = useState({
+		office: null,
+		employees: [],
+		pagination: {
+			page: 1,
+			limit: 10,
+			total: 0,
+			pages: 0,
+		},
+	});
+
+	const [unassignedEmployees, setUnassignedEmployees] = useState({
+		employees: [],
+		pagination: {
+			page: 1,
+			limit: 20,
+			total: 0,
+			pages: 0,
+		},
+	});
+
+	const [unassignedEmployeesLoading, setUnassignedEmployeesLoading] =
+		useState(false);
+
+	const [assigningEmployees, setAssigningEmployees] = useState(false);
+
+	const [activeOffices, setActiveOffices] = useState([]);
+
 	const [departments, setDepartments] = useState([]);
 	const [departmentEmployees, setDepartmentEmployees] = useState([]);
 
@@ -391,6 +432,243 @@ export const useHR = () => {
 			return false;
 		} finally {
 			setLoading(false);
+		}
+	}, []);
+
+	// ==================== Offices ====================
+
+	const createOffice = async (data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.createOffice(data);
+
+			toast.success(res.data?.message || "Office created successfully");
+
+			await fetchOffices({
+				page: offices.pagination.page,
+				limit: offices.pagination.limit,
+			});
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message || "Failed to create office",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const fetchOffices = useCallback(async (params = {}) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.getAllOffices(params);
+			const data = res.data?.data || {};
+
+			setOffices({
+				offices: data.offices || [],
+				pagination: data.pagination || {
+					page: 1,
+					limit: 20,
+					total: 0,
+					pages: 0,
+				},
+			});
+
+			return data;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message || "Failed to load offices",
+			);
+
+			setOffices({
+				offices: [],
+				pagination: {
+					page: 1,
+					limit: 20,
+					total: 0,
+					pages: 0,
+				},
+			});
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const fetchActiveOffices = useCallback(async () => {
+		try {
+			const res = await hrApi.getActiveOffices();
+			setActiveOffices(res.data?.data || []);
+			return res.data?.data;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message || "Failed to load active offices",
+			);
+			setActiveOffices([]);
+			return null;
+		}
+	}, []);
+
+	const fetchOfficeById = useCallback(async (id) => {
+		setLoading(true);
+		try {
+			const res = await hrApi.getOfficeById(id);
+			return res.data?.data;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message || "Failed to load office details",
+			);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const updateOffice = async (id, data) => {
+		setLoading(true);
+		try {
+			await hrApi.updateOffice(id, data);
+			toast.success("Office updated successfully");
+			return true;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message || "Failed to update office",
+			);
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const updateOfficeStatus = async (id, data) => {
+		setLoading(true);
+
+		try {
+			await hrApi.updateOfficeStatus(id, data);
+
+			toast.success(
+				`Office ${data.status === "Active" ? "activated" : "deactivated"} successfully`,
+			);
+
+			return true;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message ||
+					"Failed to update office status",
+			);
+
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const fetchOfficeEmployees = useCallback(async (officeId, params = {}) => {
+		setEmployeesLoading(true);
+
+		try {
+			const res = await hrApi.getOfficeEmployees(officeId, params);
+
+			const data = res.data?.data || {};
+
+			const result = {
+				office: data.office || null,
+				employees: data.employees || [],
+				pagination: data.pagination || {
+					page: 1,
+					limit: 10,
+					total: 0,
+					pages: 0,
+				},
+			};
+
+			setOfficeEmployees(result);
+
+			return result;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message ||
+					"Failed to load office employees",
+			);
+
+			const emptyResult = {
+				office: null,
+				employees: [],
+				pagination: {
+					page: 1,
+					limit: 10,
+					total: 0,
+					pages: 0,
+				},
+			};
+
+			setOfficeEmployees(emptyResult);
+
+			return null;
+		} finally {
+			setEmployeesLoading(false);
+		}
+	}, []);
+
+	const fetchUnassignedEmployees = useCallback(async (params = {}) => {
+		setUnassignedEmployeesLoading(true);
+
+		try {
+			const res = await hrApi.getUnassignedEmployees(params);
+
+			const data = res.data?.data || {};
+
+			const result = {
+				employees: data.employees || [],
+				pagination: data.pagination || {
+					page: 1,
+					limit: 20,
+					total: 0,
+					pages: 0,
+				},
+			};
+
+			setUnassignedEmployees(result);
+
+			return result;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message ||
+					"Failed to load unassigned employees",
+			);
+
+			return null;
+		} finally {
+			setUnassignedEmployeesLoading(false);
+		}
+	}, []);
+
+	const assignEmployeesToOffice = useCallback(async (data) => {
+		setAssigningEmployees(true);
+
+		try {
+			const res = await hrApi.assignEmployeesToOffice(data);
+
+			toast.success(
+				res.data?.message ||
+					"Employees assigned to office successfully",
+			);
+
+			return res.data;
+		} catch (err) {
+			toast.error(
+				err?.response?.data?.message || "Failed to assign employees",
+			);
+
+			return null;
+		} finally {
+			setAssigningEmployees(false);
 		}
 	}, []);
 
@@ -1723,6 +2001,15 @@ export const useHR = () => {
 		employee,
 		employeeDashboard,
 		employeeStats,
+		offices,
+		activeOffices,
+		officeEmployees,
+		unassignedEmployees,
+		unassignedEmployeesLoading,
+
+		assigningEmployees,
+		employeesLoading,
+
 		departments,
 		departmentEmployees,
 		attendanceRecords,
@@ -1793,6 +2080,17 @@ export const useHR = () => {
 		fetchCurrentEmployeeLeaves,
 		fetchCurrentEmployeeLeaveBalance,
 		fetchCurrentEmployeeSalarySlips,
+
+		// Offices
+		fetchOffices,
+		fetchActiveOffices,
+		createOffice,
+		fetchOfficeById,
+		updateOffice,
+		updateOfficeStatus,
+		fetchOfficeEmployees,
+		fetchUnassignedEmployees,
+		assignEmployeesToOffice,
 
 		// Departments
 		fetchDepartments,

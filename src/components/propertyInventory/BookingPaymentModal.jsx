@@ -94,7 +94,7 @@ export default function BookingPaymentModal({
           <div className="grid grid-cols-2 gap-2 mt-4">
             {bookingPayment.businessCode && (
               <div>
-                <span className="font-medium">Business Code:</span>{" "}
+                <span className="font-medium">TM:</span>{" "}
                 {bookingPayment.businessCode}
               </div>
             )}

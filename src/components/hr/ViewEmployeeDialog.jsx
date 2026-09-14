@@ -104,6 +104,14 @@ export function ViewEmployeeDialog({ open, onOpenChange, employeeId }) {
 										label="Assigned Department"
 										value={employee.department ? `${employee.department.name} (${employee.department.code})` : "Unassigned"}
 									/>
+									<DataField
+										label="Assigned Office"
+										value={
+											employee.office
+												? `${employee.office.name} (${employee.office.code})`
+												: "Unassigned"
+										}
+									/>
 								</div>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 									<DataField label="Account Status" value={employee.status} />

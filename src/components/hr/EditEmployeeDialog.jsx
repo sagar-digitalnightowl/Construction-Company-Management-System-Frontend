@@ -26,11 +26,14 @@ export function EditEmployeeDialog({
 	employee,
 	onSuccess,
 }) {
-	const { updateEmployee, departments, fetchDepartments, loading } = useHR();
+	const { updateEmployee, departments, fetchDepartments,
+		activeOffices,
+		fetchActiveOffices, loading } = useHR();
 	const [form, setForm] = useState({
 		name: "",
 		phone: "",
 		department: "",
+		office: "",
 		personalDetails: {
 			dateOfBirth: "",
 			gender: "",
@@ -73,6 +76,7 @@ export function EditEmployeeDialog({
 				name: employee.name || "",
 				phone: employee.phone || "",
 				department: employee.department?._id || "",
+				office: employee.office?._id || "",
 				personalDetails: {
 					dateOfBirth:
 						employee.personalDetails?.dateOfBirth?.split("T")[0] || "",
@@ -122,6 +126,7 @@ export function EditEmployeeDialog({
 			name: form.name,
 			phone: form.phone,
 			department: form.department || undefined,
+			office: form.office || undefined,
 			personalDetails: {
 				dateOfBirth: form.personalDetails.dateOfBirth || undefined,
 				gender: form.personalDetails.gender || undefined,
@@ -237,6 +242,24 @@ export function EditEmployeeDialog({
 										{departments.map((d) => (
 											<SelectItem key={d._id} value={d._id}>
 												{d.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+							<div>
+								<Label>Office</Label>
+								<Select
+									value={form.office}
+									onValueChange={(v) => setForm({ ...form, office: v })}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Select office" />
+									</SelectTrigger>
+									<SelectContent>
+										{activeOffices.map((o) => (
+											<SelectItem key={o._id} value={o._id}>
+												{o.name} ({o.code})
 											</SelectItem>
 										))}
 									</SelectContent>

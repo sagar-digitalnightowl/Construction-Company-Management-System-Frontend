@@ -26,6 +26,26 @@ export const hrApi = {
 
 	getEmployeeStats: () => api.get("/hr/employees/stats"),
 
+	// ==================== OFFICES ====================
+
+	createOffice: (data) => api.post("/hr/offices", data),
+	getAllOffices: (params) => api.get("/hr/offices", { params }),
+	getActiveOffices: () => api.get("/hr/offices/active"),
+	getOfficeById: (id) => api.get(`/hr/offices/${id}`),
+	getOfficeEmployees: (officeId, params) =>
+		api.get(`/hr/offices/${officeId}/employees`, { params }),
+	updateOffice: (id, data) => api.put(`/hr/offices/${id}`, data),
+	updateOfficeStatus: (id, data) =>
+		api.patch(`/hr/offices/${id}/status`, data),
+
+	// ==================== OFFICE EMPLOYEE MIGRATION ====================
+
+	getUnassignedEmployees: (params) =>
+		api.get("/hr/offices/unassigned-employees", { params }),
+
+	assignEmployeesToOffice: (data) =>
+		api.post("/hr/offices/assign-employees", data),
+
 	// ==================== DEPARTMENTS ====================
 	createDepartment: (data) => api.post("/hr/departments", data),
 	getAllDepartments: () => api.get("/hr/departments"),

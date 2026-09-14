@@ -83,7 +83,7 @@ export default function Login() {
 							<div className="font-display text-2xl font-bold text-red-600 leading-none tracking-wider">ASHIRWAD</div>
 							<div className="text-sm font-bold tracking-widest text-sidebar-foreground mt-1">ENGICON GROUP</div>
 							<div className="text-[11px] mt-1.5 tracking-[0.05em] text-sidebar-foreground/80 font-medium border-t border-sidebar-foreground/20 pt-1 w-max">
-								An ISO 9001:2008 Certified Company
+								An ISO 9001:2015 Certified Company
 							</div>
 						</div>
 					</div>

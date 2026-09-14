@@ -73,6 +73,7 @@ import ExpenseReports from "./pages/finance/ExpenseReports";
 import ProjectDetailPage from "./components/propertyInventory/ProjectDetailPage";
 import { AppLoader } from "./AppLoader";
 import EmployeeOverview from "./pages/hr/EmployeeOverview";
+import { OfficeViewPage } from "./pages/hr/OfficeViewPage";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -155,6 +156,8 @@ export default function App() {
 
 					{/* Dynamic tab route */}
 					<Route path="/hr/:tab" element={<HR />} />
+
+					<Route path="/hr/offices/:id" element={<OfficeViewPage />} />
 
 					<Route path="/hr/employees/:id" element={<EmployeeDetail />} />
 					<Route path="/hr/labors/:id" element={<LaborDetail />} />

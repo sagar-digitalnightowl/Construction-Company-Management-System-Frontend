@@ -21,7 +21,7 @@ export function AppLoader() {
 					</div>
 
 					<div className="bh-iso">
-						An ISO 9001:2008 Certified Company
+						An ISO 9001:2015 Certified Company
 					</div>
 				</div>
 			</div>
