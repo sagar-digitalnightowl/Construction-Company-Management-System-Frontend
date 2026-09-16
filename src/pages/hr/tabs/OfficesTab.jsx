@@ -175,7 +175,10 @@ export function OfficesTab({
 							) : offices.length > 0 ? (
 								offices.map((office) => {
 									return (
-										<TableRow key={office._id}>
+										<TableRow key={office._id}
+											className="cursor-pointer hover:bg-muted/40"
+											onClick={() => handleViewOffice(office._id)}
+										>
 											<TableCell>
 												<div className="flex items-center gap-2">
 													<div className="h-8 w-8 rounded-md bg-muted flex items-center justify-center">
@@ -238,7 +241,10 @@ export function OfficesTab({
 														<Button
 															variant="ghost"
 															size="icon"
-															onClick={() => handleEditOffice(office._id)}
+															onClick={(e) => {
+																e.stopPropagation();
+																handleEditOffice(office._id);
+															}}
 															disabled={editLoadingId === office._id}
 														>
 															{editLoadingId === office._id ? (

@@ -110,6 +110,17 @@ const initialFormState = {
 	totalExperienceYears: "",
 	probationPeriodMonths: "",
 	reportingManager: "",
+
+	// ─── STATUTORY (NEW) ───
+	pfNumber: "",
+	uanNumber: "",
+	esiNumber: "",
+	isPfApplicable: false,
+	isEsiApplicable: false,
+	pfEmployeeContributionPercent: "",
+	esiEmployeeContributionPercent: "",
+	pfJoiningDate: "",
+	esiJoiningDate: "",
 };
 
 const emptyWorkExperience = {
@@ -309,6 +320,17 @@ export function EmployeeFormDialog({
 					totalExperienceYears: emp.totalExperienceYears || "",
 					probationPeriodMonths: job.probationPeriodMonths || "",
 					reportingManager: job.manager ? job.manager : "",
+
+					// ─── STATUTORY (NEW) ───
+					pfNumber: job.pfNumber || "",
+					uanNumber: job.uanNumber || "",
+					esiNumber: job.esiNumber || "",
+					isPfApplicable: job.isPfApplicable || false,
+					isEsiApplicable: job.isEsiApplicable || false,
+					pfEmployeeContributionPercent: job.pfEmployeeContributionPercent ?? "",
+					esiEmployeeContributionPercent: job.esiEmployeeContributionPercent ?? "",
+					pfJoiningDate: job.pfJoiningDate?.slice(0, 10) || "",
+					esiJoiningDate: job.esiJoiningDate?.slice(0, 10) || "",
 				});
 
 				setWorkExperiences(
@@ -392,10 +414,8 @@ export function EmployeeFormDialog({
 		if (step === 1 && !validateStep1()) return;
 		if (step === 2 && !validateStep2()) return;
 		if (step === 3 && !validateStep3()) return;
-		if (isEditMode && step === 3) {
-			handleUpdate();
-			return;
-		}
+		// Edit mode: Step 3 → Step 4 (Statutory), then Save from there.
+		// Create mode: Step 3 → Step 4 (Statutory) → Step 5 (Documents).
 		setStep((prev) => prev + 1);
 	};
 
@@ -460,6 +480,21 @@ export function EmployeeFormDialog({
 				? Number(form.probationPeriodMonths)
 				: undefined,
 			reportingManager: form.reportingManager || undefined,
+
+			// ─── STATUTORY (NEW) ───
+			pfNumber: form.pfNumber || undefined,
+			uanNumber: form.uanNumber || undefined,
+			esiNumber: form.esiNumber || undefined,
+			isPfApplicable: form.isPfApplicable,
+			isEsiApplicable: form.isEsiApplicable,
+			pfEmployeeContributionPercent: form.pfEmployeeContributionPercent
+				? Number(form.pfEmployeeContributionPercent)
+				: undefined,
+			esiEmployeeContributionPercent: form.esiEmployeeContributionPercent
+				? Number(form.esiEmployeeContributionPercent)
+				: undefined,
+			pfJoiningDate: form.pfJoiningDate || undefined,
+			esiJoiningDate: form.esiJoiningDate || undefined,
 		};
 
 		const workExpForApi = workExperiences.map((exp) => ({
@@ -535,7 +570,7 @@ export function EmployeeFormDialog({
 
 		if (!selectedFiles.tenthMarksheet) {
 			toast.error("10th Marksheet is required. Please attach the file.");
-			setStep(4);
+			setStep(5);
 			return;
 		}
 
@@ -586,7 +621,7 @@ export function EmployeeFormDialog({
 				emailOtp: response.data.emailOtp,
 				phoneOtp: response.data.phoneOtp,
 			});
-			setStep(5);
+			setStep(6);
 		}
 	};
 
@@ -598,7 +633,7 @@ export function EmployeeFormDialog({
 		});
 		if (res) {
 			toast.success("Email verified");
-			setStep(6);
+			setStep(7);
 		}
 	};
 
@@ -620,8 +655,8 @@ export function EmployeeFormDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-xl max-h-[90vh] flex flex-col">
-				{step <= 4 && (
+			<DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+				{step <= 5 && (
 					<DialogHeader>
 						<DialogTitle>
 							{isEditMode ? "Edit Employee" : "Add New Employee"}
@@ -638,11 +673,15 @@ export function EmployeeFormDialog({
 							<span className={step === 3 ? "font-bold text-primary" : ""}>
 								3. Job & Payroll
 							</span>
+							<span>&rarr;</span>
+							<span className={step === 4 ? "font-bold text-primary" : ""}>
+								4. Statutory
+							</span>
 							{!isEditMode && (
 								<>
 									<span>&rarr;</span>
-									<span className={step === 4 ? "font-bold text-primary" : ""}>
-										4. Documents
+									<span className={step === 5 ? "font-bold text-primary" : ""}>
+										5. Documents
 									</span>
 								</>
 							)}
@@ -1412,8 +1451,157 @@ export function EmployeeFormDialog({
 						</div>
 					)}
 
-					{/* ─── STEP 4: Documents (Select Mode) ─── */}
-					{!isEditMode && step === 4 && (
+					{/* ─── STEP 4: Statutory & Compliance (Optional) ─── */}
+					{step === 4 && (
+						<div className="space-y-6">
+							<div>
+								<h3 className="text-sm font-semibold mb-3 border-b pb-1 text-muted-foreground">
+									PAN Details
+								</h3>
+								<div className="space-y-2">
+									<Label htmlFor="panNumber">PAN Number</Label>
+									<Input
+										id="panNumber"
+										placeholder="ABCDE1234F"
+										value={form.panNumber}
+										onChange={(e) => handleChange("panNumber", e.target.value)}
+									/>
+								</div>
+							</div>
+
+							<div>
+								<div className="flex items-center justify-between border-b pb-1 mb-3">
+									<h3 className="text-sm font-semibold text-muted-foreground">
+										Provident Fund (PF)
+									</h3>
+									<div className="flex items-center space-x-2">
+										<Switch
+											id="isPfApplicable"
+											checked={form.isPfApplicable}
+											onCheckedChange={(checked) =>
+												handleChange("isPfApplicable", checked)
+											}
+										/>
+										<Label htmlFor="isPfApplicable">Applicable</Label>
+									</div>
+								</div>
+								{form.isPfApplicable && (
+									<div className="grid grid-cols-2 gap-4">
+										<div className="space-y-2">
+											<Label htmlFor="pfNumber">PF Number</Label>
+											<Input
+												id="pfNumber"
+												placeholder="BR/PAT/0012345/000/0000123"
+												value={form.pfNumber}
+												onChange={(e) => handleChange("pfNumber", e.target.value)}
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="uanNumber">UAN Number</Label>
+											<Input
+												id="uanNumber"
+												placeholder="100767027731"
+												value={form.uanNumber}
+												onChange={(e) => handleChange("uanNumber", e.target.value)}
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="pfEmployeeContributionPercent">
+												Employee Contribution (%)
+											</Label>
+											<Input
+												id="pfEmployeeContributionPercent"
+												type="number"
+												step="0.01"
+												placeholder="12"
+												value={form.pfEmployeeContributionPercent}
+												onChange={(e) =>
+													handleChange(
+														"pfEmployeeContributionPercent",
+														e.target.value
+													)
+												}
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="pfJoiningDate">PF Joining Date</Label>
+											<Input
+												id="pfJoiningDate"
+												type="date"
+												value={form.pfJoiningDate}
+												onChange={(e) =>
+													handleChange("pfJoiningDate", e.target.value)
+												}
+											/>
+										</div>
+									</div>
+								)}
+							</div>
+
+							<div>
+								<div className="flex items-center justify-between border-b pb-1 mb-3">
+									<h3 className="text-sm font-semibold text-muted-foreground">
+										ESI
+									</h3>
+									<div className="flex items-center space-x-2">
+										<Switch
+											id="isEsiApplicable"
+											checked={form.isEsiApplicable}
+											onCheckedChange={(checked) =>
+												handleChange("isEsiApplicable", checked)
+											}
+										/>
+										<Label htmlFor="isEsiApplicable">Applicable</Label>
+									</div>
+								</div>
+								{form.isEsiApplicable && (
+									<div className="grid grid-cols-2 gap-4">
+										<div className="space-y-2">
+											<Label htmlFor="esiNumber">ESI Number</Label>
+											<Input
+												id="esiNumber"
+												placeholder="31001234560000123"
+												value={form.esiNumber}
+												onChange={(e) => handleChange("esiNumber", e.target.value)}
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="esiEmployeeContributionPercent">
+												Employee Contribution (%)
+											</Label>
+											<Input
+												id="esiEmployeeContributionPercent"
+												type="number"
+												step="0.01"
+												placeholder="0.75"
+												value={form.esiEmployeeContributionPercent}
+												onChange={(e) =>
+													handleChange(
+														"esiEmployeeContributionPercent",
+														e.target.value
+													)
+												}
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="esiJoiningDate">ESI Joining Date</Label>
+											<Input
+												id="esiJoiningDate"
+												type="date"
+												value={form.esiJoiningDate}
+												onChange={(e) =>
+													handleChange("esiJoiningDate", e.target.value)
+												}
+											/>
+										</div>
+									</div>
+								)}
+							</div>
+						</div>
+					)}
+
+					{/* ─── STEP 5: Documents (Select Mode) ─── */}
+					{!isEditMode && step === 5 && (
 						<div className="space-y-4">
 							<h3 className="text-sm font-semibold mb-3 border-b pb-1 text-muted-foreground">
 								Required Documents
@@ -1485,8 +1673,8 @@ export function EmployeeFormDialog({
 						</div>
 					)}
 
-					{/* ─── STEP 5: Email OTP ─── */}
-					{step === 5 && (
+					{/* ─── STEP 6: Email OTP ─── */}
+					{step === 6 && (
 						<div className="space-y-6">
 							<div className="rounded-lg border bg-muted/40 p-4">
 								<h3 className="font-semibold text-green-600">
@@ -1513,8 +1701,8 @@ export function EmployeeFormDialog({
 						</div>
 					)}
 
-					{/* ─── STEP 6: Phone OTP ─── */}
-					{step === 6 && (
+					{/* ─── STEP 7: Phone OTP ─── */}
+					{step === 7 && (
 						<div className="space-y-6">
 							<div className="rounded-lg border bg-muted/40 p-4">
 								<p className="text-sm text-muted-foreground">
@@ -1546,7 +1734,7 @@ export function EmployeeFormDialog({
 								Cancel
 							</Button>
 						)}
-						{step >= 2 && step <= 4 && (
+						{step >= 2 && step <= 5 && (
 							<Button type="button" variant="outline" onClick={handleBack} disabled={isWorking}>
 								Back
 							</Button>
@@ -1554,15 +1742,18 @@ export function EmployeeFormDialog({
 					</div>
 
 					{step < 3 && <Button onClick={handleNext}>Next Step</Button>}
-					{step === 3 && !isEditMode && (
+					{step === 3 && <Button onClick={handleNext}>Next Step</Button>}
+
+					{step === 4 && !isEditMode && (
 						<Button onClick={handleNext}>Next Step</Button>
 					)}
-					{step === 3 && isEditMode && (
+					{step === 4 && isEditMode && (
 						<Button onClick={handleUpdate} disabled={isWorking}>
 							Save Changes
 						</Button>
 					)}
-					{step === 4 && !isEditMode && (
+
+					{step === 5 && !isEditMode && (
 						<Button
 							onClick={handleSubmit}
 							disabled={isWorking || !selectedFiles.tenthMarksheet}
@@ -1577,12 +1768,12 @@ export function EmployeeFormDialog({
 							)}
 						</Button>
 					)}
-					{step === 5 && (
+					{step === 6 && (
 						<Button onClick={verifyEmailOtp} disabled={isWorking}>
 							Verify Email OTP
 						</Button>
 					)}
-					{step === 6 && (
+					{step === 7 && (
 						<Button onClick={verifyPhoneOtp} disabled={isWorking}>
 							Verify Phone OTP
 						</Button>
