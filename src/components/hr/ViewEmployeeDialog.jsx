@@ -73,7 +73,7 @@ export function ViewEmployeeDialog({ open, onOpenChange, employeeId }) {
 					<Tabs defaultValue="core" className="flex-1 flex flex-col overflow-hidden">
 
 						{/* Responsive Navigation Bar: switches structure fluidly across screen width profiles */}
-						<TabsList className="flex sm:grid w-full h-auto sm:h-10 grid-cols-3 p-1 bg-muted rounded-lg overflow-x-auto sm:overflow-visible no-scrollbar gap-1 sm:gap-0">
+						<TabsList className="flex sm:grid w-full h-auto sm:h-10 grid-cols-4 p-1 bg-muted rounded-lg overflow-x-auto sm:overflow-visible no-scrollbar gap-1 sm:gap-0">
 							<TabsTrigger value="core" className="flex-1 sm:flex-initial py-1.5 px-2.5 text-[11px] sm:text-sm min-w-[85px] sm:min-w-0 shrink-0">
 								Core Info
 							</TabsTrigger>
@@ -82,6 +82,9 @@ export function ViewEmployeeDialog({ open, onOpenChange, employeeId }) {
 							</TabsTrigger>
 							<TabsTrigger value="job" className="flex-1 sm:flex-initial py-1.5 px-2.5 text-[11px] sm:text-sm min-w-[95px] sm:min-w-0 shrink-0">
 								Job & Payroll
+							</TabsTrigger>
+							<TabsTrigger value="statutory" className="flex-1 sm:flex-initial py-1.5 px-2.5 text-[11px] sm:text-sm min-w-[95px] sm:min-w-0 shrink-0">
+								Statutory
 							</TabsTrigger>
 						</TabsList>
 
@@ -212,6 +215,77 @@ export function ViewEmployeeDialog({ open, onOpenChange, employeeId }) {
 											value={employee.jobDetails?.salary?.totalCTC ? `₹${employee.jobDetails.salary.totalCTC.toLocaleString("en-IN")}` : "₹0"}
 										/>
 									</div>
+								</div>
+							</TabsContent>
+
+							{/* TAB 4: STATUTORY & COMPLIANCE */}
+							<TabsContent value="statutory" className="space-y-4 mt-0">
+								<div className="space-y-3 sm:space-y-4">
+									<h3 className="text-[11px] sm:text-xs font-bold uppercase tracking-wide text-primary/80 border-b pb-1">
+										PAN Details
+									</h3>
+									<DataField label="PAN Number" value={employee.personalDetails?.panNumber} />
+								</div>
+
+								<div className="space-y-3 sm:space-y-4 pt-2">
+									<h3 className="text-[11px] sm:text-xs font-bold uppercase tracking-wide text-primary/80 border-b pb-1">
+										Provident Fund (PF)
+									</h3>
+									<DataField
+										label="PF Applicable"
+										value={employee.jobDetails?.isPfApplicable ? "Yes" : "No"}
+									/>
+									{employee.jobDetails?.isPfApplicable && (
+										<>
+											<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+												<DataField label="PF Number" value={employee.jobDetails?.pfNumber} />
+												<DataField label="UAN Number" value={employee.jobDetails?.uanNumber} />
+											</div>
+											<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+												<DataField
+													label="Employee Contribution"
+													value={
+														employee.jobDetails?.pfEmployeeContributionPercent != null
+															? `${employee.jobDetails.pfEmployeeContributionPercent}%`
+															: null
+													}
+												/>
+												<DataField
+													label="PF Joining Date"
+													value={formatDate(employee.jobDetails?.pfJoiningDate)}
+												/>
+											</div>
+										</>
+									)}
+								</div>
+
+								<div className="space-y-3 sm:space-y-4 pt-2">
+									<h3 className="text-[11px] sm:text-xs font-bold uppercase tracking-wide text-primary/80 border-b pb-1">
+										ESI
+									</h3>
+									<DataField
+										label="ESI Applicable"
+										value={employee.jobDetails?.isEsiApplicable ? "Yes" : "No"}
+									/>
+									{employee.jobDetails?.isEsiApplicable && (
+										<>
+											<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+												<DataField label="ESI Number" value={employee.jobDetails?.esiNumber} />
+												<DataField
+													label="Employee Contribution"
+													value={
+														employee.jobDetails?.esiEmployeeContributionPercent != null
+															? `${employee.jobDetails.esiEmployeeContributionPercent}%`
+															: null
+													}
+												/>
+											</div>
+											<DataField
+												label="ESI Joining Date"
+												value={formatDate(employee.jobDetails?.esiJoiningDate)}
+											/>
+										</>
+									)}
 								</div>
 							</TabsContent>
 						</div>

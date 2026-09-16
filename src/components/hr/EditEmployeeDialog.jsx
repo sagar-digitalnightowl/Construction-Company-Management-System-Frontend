@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
 	Select,
 	SelectContent,
@@ -66,6 +67,17 @@ export function EditEmployeeDialog({
 			},
 			weeklyOff: ["Sunday"],
 			probationPeriodMonths: 3,
+
+			// ─── STATUTORY (NEW) ───
+			pfNumber: "",
+			uanNumber: "",
+			esiNumber: "",
+			isPfApplicable: false,
+			isEsiApplicable: false,
+			pfEmployeeContributionPercent: "",
+			esiEmployeeContributionPercent: "",
+			pfJoiningDate: "",
+			esiJoiningDate: "",
 		},
 	});
 
@@ -112,6 +124,21 @@ export function EditEmployeeDialog({
 					weeklyOff: employee.jobDetails?.weeklyOff || ["Sunday"],
 					probationPeriodMonths:
 						employee.jobDetails?.probationPeriodMonths || 3,
+
+					// ─── STATUTORY (NEW) ───
+					pfNumber: employee.jobDetails?.pfNumber || "",
+					uanNumber: employee.jobDetails?.uanNumber || "",
+					esiNumber: employee.jobDetails?.esiNumber || "",
+					isPfApplicable: employee.jobDetails?.isPfApplicable || false,
+					isEsiApplicable: employee.jobDetails?.isEsiApplicable || false,
+					pfEmployeeContributionPercent:
+						employee.jobDetails?.pfEmployeeContributionPercent ?? "",
+					esiEmployeeContributionPercent:
+						employee.jobDetails?.esiEmployeeContributionPercent ?? "",
+					pfJoiningDate:
+						employee.jobDetails?.pfJoiningDate?.split("T")[0] || "",
+					esiJoiningDate:
+						employee.jobDetails?.esiJoiningDate?.split("T")[0] || "",
 				},
 			});
 		}
@@ -171,6 +198,21 @@ export function EditEmployeeDialog({
 						: undefined,
 				probationPeriodMonths:
 					form.jobDetails.probationPeriodMonths || undefined,
+
+				// ─── STATUTORY (NEW) ───
+				pfNumber: form.jobDetails.pfNumber || undefined,
+				uanNumber: form.jobDetails.uanNumber || undefined,
+				esiNumber: form.jobDetails.esiNumber || undefined,
+				isPfApplicable: form.jobDetails.isPfApplicable,
+				isEsiApplicable: form.jobDetails.isEsiApplicable,
+				pfEmployeeContributionPercent: form.jobDetails.pfEmployeeContributionPercent
+					? Number(form.jobDetails.pfEmployeeContributionPercent)
+					: undefined,
+				esiEmployeeContributionPercent: form.jobDetails.esiEmployeeContributionPercent
+					? Number(form.jobDetails.esiEmployeeContributionPercent)
+					: undefined,
+				pfJoiningDate: form.jobDetails.pfJoiningDate || undefined,
+				esiJoiningDate: form.jobDetails.esiJoiningDate || undefined,
 			},
 		};
 		const success = await updateEmployee(employee._id, payload);
@@ -673,6 +715,146 @@ export function EditEmployeeDialog({
 								}
 							/>
 						</div>
+					</div>
+
+					{/* Statutory & Compliance */}
+					<div className="space-y-3">
+						<h3 className="font-medium">Statutory & Compliance</h3>
+
+						<div className="flex items-center justify-between border-b pb-2">
+							<Label>Provident Fund (PF) Applicable</Label>
+							<Switch
+								checked={form.jobDetails.isPfApplicable}
+								onCheckedChange={(checked) =>
+									setForm({
+										...form,
+										jobDetails: {
+											...form.jobDetails,
+											isPfApplicable: checked,
+										},
+									})
+								}
+							/>
+						</div>
+						{form.jobDetails.isPfApplicable && (
+							<div className="grid grid-cols-2 gap-3">
+								<Input
+									placeholder="PF Number"
+									value={form.jobDetails.pfNumber}
+									onChange={(e) =>
+										setForm({
+											...form,
+											jobDetails: {
+												...form.jobDetails,
+												pfNumber: e.target.value,
+											},
+										})
+									}
+								/>
+								<Input
+									placeholder="UAN Number"
+									value={form.jobDetails.uanNumber}
+									onChange={(e) =>
+										setForm({
+											...form,
+											jobDetails: {
+												...form.jobDetails,
+												uanNumber: e.target.value,
+											},
+										})
+									}
+								/>
+								<Input
+									placeholder="Employee Contribution (%)"
+									type="number"
+									step="0.01"
+									value={form.jobDetails.pfEmployeeContributionPercent}
+									onChange={(e) =>
+										setForm({
+											...form,
+											jobDetails: {
+												...form.jobDetails,
+												pfEmployeeContributionPercent: e.target.value,
+											},
+										})
+									}
+								/>
+								<Input
+									type="date"
+									value={form.jobDetails.pfJoiningDate}
+									onChange={(e) =>
+										setForm({
+											...form,
+											jobDetails: {
+												...form.jobDetails,
+												pfJoiningDate: e.target.value,
+											},
+										})
+									}
+								/>
+							</div>
+						)}
+
+						<div className="flex items-center justify-between border-b pb-2 pt-2">
+							<Label>ESI Applicable</Label>
+							<Switch
+								checked={form.jobDetails.isEsiApplicable}
+								onCheckedChange={(checked) =>
+									setForm({
+										...form,
+										jobDetails: {
+											...form.jobDetails,
+											isEsiApplicable: checked,
+										},
+									})
+								}
+							/>
+						</div>
+						{form.jobDetails.isEsiApplicable && (
+							<div className="grid grid-cols-2 gap-3">
+								<Input
+									placeholder="ESI Number"
+									value={form.jobDetails.esiNumber}
+									onChange={(e) =>
+										setForm({
+											...form,
+											jobDetails: {
+												...form.jobDetails,
+												esiNumber: e.target.value,
+											},
+										})
+									}
+								/>
+								<Input
+									placeholder="Employee Contribution (%)"
+									type="number"
+									step="0.01"
+									value={form.jobDetails.esiEmployeeContributionPercent}
+									onChange={(e) =>
+										setForm({
+											...form,
+											jobDetails: {
+												...form.jobDetails,
+												esiEmployeeContributionPercent: e.target.value,
+											},
+										})
+									}
+								/>
+								<Input
+									type="date"
+									value={form.jobDetails.esiJoiningDate}
+									onChange={(e) =>
+										setForm({
+											...form,
+											jobDetails: {
+												...form.jobDetails,
+												esiJoiningDate: e.target.value,
+											},
+										})
+									}
+								/>
+							</div>
+						)}
 					</div>
 				</div>
 				<DialogFooter>

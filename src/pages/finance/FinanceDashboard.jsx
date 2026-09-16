@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/common/PageHeader";
-import { formatINR } from "@/lib/helpers";
+import { formatINR, formatDate } from "@/lib/helpers";
 import {
 	ChevronLeft,
 	Building2,
@@ -861,6 +861,27 @@ export function FinanceDashboard() {
 															{formatINR(flat.remainingAmount || 0)}
 														</p>
 													</div>
+												</div>
+
+												{/* Next Installment Due */}
+												<div className="pt-1 text-[10px] sm:text-xs">
+													{flat.nextInstallmentDue ? (
+														<p className="text-muted-foreground">
+															Next Due:{" "}
+															<span className="font-medium text-foreground">
+																{formatDate(flat.nextInstallmentDue)}
+															</span>
+															{flat.nextInstallmentAmount ? (
+																<span className="text-muted-foreground">
+																	{" "}({formatINR(flat.nextInstallmentAmount)})
+																</span>
+															) : null}
+														</p>
+													) : (
+														<p className="text-muted-foreground/60 italic">
+															Reminder not sent yet
+														</p>
+													)}
 												</div>
 											</div>
 										) : (

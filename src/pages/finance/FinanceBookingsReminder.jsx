@@ -360,20 +360,43 @@ export function FinanceBookingsReminder() {
 									</TableCell>
 									<TableCell className="text-xs">
 										{b.installmentSummary?.pendingInstallments > 0 ? (
-											<div className="flex flex-col gap-0.5">
-												<span className="font-semibold text-foreground tabular-nums">
-													{formatINR(
-														b.installments?.find((i) => !i.paid)?.amount || 0,
-													)}
-												</span>
-												<span className="text-[10px] text-muted-foreground uppercase tracking-wider block text-nowrap">
-													Due: {formatDate(
-														b.installments?.find((i) => !i.paid)?.dueDate,
-													)}
-												</span>
-											</div>
+											(() => {
+												const nextInstallment = b.installments?.find((i) => !i.paid);
+
+												return nextInstallment ? (
+													<div className="flex flex-col gap-0.5">
+														<span className="font-semibold text-foreground tabular-nums">
+															{formatINR(nextInstallment.amount)}
+														</span>
+
+														<span className="text-[11px] text-muted-foreground">
+															Reminder Due:{" "}
+															{nextInstallment.reminderDueDate
+																? formatDate(nextInstallment.reminderDueDate)
+																: "—"}
+														</span>
+
+														<span className="text-[11px] text-muted-foreground">
+															Last Reminder:{" "}
+															{nextInstallment.lastReminderSentAt
+																? formatDate(nextInstallment.lastReminderSentAt)
+																: "—"}
+														</span>
+
+														<span className="text-[11px] text-muted-foreground">
+															Last Reminder Amount:{" "}
+															{formatINR(nextInstallment.lastReminderAmount || 0)}
+														</span>
+													</div>
+												) : (
+													<Badge variant="secondary">No Pending Installment</Badge>
+												);
+											})()
 										) : (
-											<Badge variant="secondary" className="bg-success/10 text-success border-none hover:bg-success/20 pointer-events-none">
+											<Badge
+												variant="secondary"
+												className="bg-success/10 text-success border-none hover:bg-success/20 pointer-events-none"
+											>
 												All Paid
 											</Badge>
 										)}

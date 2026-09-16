@@ -74,7 +74,11 @@ export function OfficeViewPage() {
 		<div className="space-y-6 max-w-6xl mx-auto pb-10 animate-in fade-in duration-300">
 			{/* Header */}
 			<div className="flex items-center gap-4 border-b pb-4">
-				<Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+				<Button
+					variant="outline"
+					size="icon"
+					onClick={() => navigate("/hr/offices")}
+				>
 					<ArrowLeft className="h-4 w-4" />
 				</Button>
 				<div>

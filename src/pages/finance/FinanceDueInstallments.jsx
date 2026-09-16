@@ -31,7 +31,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { formatINR, formatDate } from "@/lib/helpers";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Loader2, MessageCircle, Search } from "lucide-react";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -47,23 +47,34 @@ export function FinanceDueInstallments() {
 
 	const [currentPage, setCurrentPage] = useState(1);
 	const [dueDateFilter, setDueDateFilter] = useState("");
+	const [search, setSearch] = useState("");
+	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [overdueOnly, setOverdueOnly] = useState(false);
 	const [selectedIds, setSelectedIds] = useState([]);
 
-	// ✅ New states for Bulk Sending Dialog
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [selectedLanguage, setSelectedLanguage] = useState("en");
+
+	// Debounce raw search input before it hits the API
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(search.trim());
+			setCurrentPage(1);
+		}, 400);
+		return () => clearTimeout(timer);
+	}, [search]);
 
 	useEffect(() => {
 		fetchDueInstallments({
 			page: currentPage,
-			limit: 20,
+			limit: 10,
 			dueDate: dueDateFilter || undefined,
 			overdue: overdueOnly || undefined,
+			search: debouncedSearch || undefined,
 		});
-		// Selection clear on page change or filter change
+
 		setSelectedIds([]);
-	}, [currentPage, dueDateFilter, overdueOnly, fetchDueInstallments]);
+	}, [currentPage, dueDateFilter, overdueOnly, debouncedSearch, fetchDueInstallments]);
 
 	const handleSelectAll = (checked) => {
 		if (checked) {
@@ -112,20 +123,40 @@ export function FinanceDueInstallments() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-end sm:justify-between">
-				<div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+			<div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm lg:flex-row lg:items-end lg:justify-between">
+				<div className="flex flex-col flex-wrap gap-4 sm:flex-row sm:items-end">
 					<div className="space-y-1.5">
-						<Label>Filter by Due Date</Label>
+						<Label>Search</Label>
 
-						<Input
-							type="date"
-							value={dueDateFilter}
-							onChange={(e) => {
-								setDueDateFilter(e.target.value);
-								setCurrentPage(1);
-							}}
-							className="w-full sm:w-auto"
-						/>
+						<div className="relative">
+							<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+							<Input
+								type="text"
+								placeholder="Search client, phone, project..."
+								value={search}
+								onChange={(e) => setSearch(e.target.value)}
+								className="w-full pl-9 sm:w-[240px]"
+							/>
+						</div>
+					</div>
+
+					<div className="space-y-1.5">
+						<Label>Due Date</Label>
+
+						<div className="relative">
+							<Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+							<Input
+								type="date"
+								value={dueDateFilter}
+								onChange={(e) => {
+									setDueDateFilter(e.target.value);
+									setCurrentPage(1);
+								}}
+								className="w-full pl-9 sm:w-[180px]"
+							/>
+						</div>
 					</div>
 
 					<div className="flex items-center gap-2 sm:mb-2">
@@ -150,7 +181,7 @@ export function FinanceDueInstallments() {
 				<Button
 					onClick={handleOpenDialog}
 					disabled={selectedIds.length === 0 || loading}
-					className="w-full bg-green-600 text-white hover:bg-green-700 sm:w-auto"
+					className="w-full bg-green-600 text-white hover:bg-green-700 lg:w-auto"
 				>
 					{loading && (
 						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -185,12 +216,8 @@ export function FinanceDueInstallments() {
 									Project / Flat
 								</TableHead>
 
-								<TableHead className="whitespace-nowrap text-right font-semibold text-muted-foreground">
-									Amount Due
-								</TableHead>
-
 								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
-									Due Date
+									Installment Details
 								</TableHead>
 
 								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
@@ -247,20 +274,31 @@ export function FinanceDueInstallments() {
 												</div>
 											</TableCell>
 
-											<TableCell className="whitespace-nowrap text-right font-medium text-destructive tabular-nums">
-												{formatINR(item.installment.dueAmount)}
-											</TableCell>
+											<TableCell className="text-xs">
+												<div className="flex flex-col gap-0.5">
+													<span className="font-semibold text-destructive tabular-nums">
+														{formatINR(item.installment.dueAmount)}
+													</span>
 
-											<TableCell className="whitespace-nowrap">
-												<span
-													className={
-														isOverdue
-															? "font-medium text-destructive"
-															: "text-foreground"
-													}
-												>
-													{formatDate(item.installment.dueDate)}
-												</span>
+													<span className="text-[11px] text-muted-foreground">
+														Reminder Due:{" "}
+														{item.installment.reminderDueDate
+															? formatDate(item.installment.reminderDueDate)
+															: "—"}
+													</span>
+
+													<span className="text-[11px] text-muted-foreground">
+														Last Reminder:{" "}
+														{item.installment.lastReminderSentAt
+															? formatDate(item.installment.lastReminderSentAt)
+															: "—"}
+													</span>
+
+													<span className="text-[11px] text-muted-foreground">
+														Last Reminder Amount:{" "}
+														{formatINR(item.installment.lastReminderAmount || 0)}
+													</span>
+												</div>
 											</TableCell>
 
 											<TableCell className="whitespace-nowrap">
@@ -283,6 +321,36 @@ export function FinanceDueInstallments() {
 					</Table>
 				</CardContent>
 			</Card>
+
+			{duePagination.pages > 1 && (
+				<div className="flex flex-col items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm sm:flex-row">
+					<p className="text-sm text-muted-foreground">
+						Page {duePagination.page} of {duePagination.pages} · {duePagination.total} total
+					</p>
+
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+							disabled={currentPage === 1 || loading}
+						>
+							<ChevronLeft className="mr-1 h-4 w-4" />
+							Previous
+						</Button>
+
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setCurrentPage((p) => Math.min(duePagination.pages, p + 1))}
+							disabled={currentPage === duePagination.pages || loading}
+						>
+							Next
+							<ChevronRight className="ml-1 h-4 w-4" />
+						</Button>
+					</div>
+				</div>
+			)}
 
 			{/* ✅ Popup / Dialog for Bulk WhatsApp */}
 			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
