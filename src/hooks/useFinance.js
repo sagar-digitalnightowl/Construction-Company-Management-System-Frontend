@@ -11,6 +11,15 @@ export const useFinance = () => {
 	const [bookings, setBookings] = useState([]);
 	const [reminders, setReminders] = useState([]);
 
+	const [reminderHistory, setReminderHistory] = useState(null);
+	const [reminderHistoryLoading, setReminderHistoryLoading] = useState(false);
+	const [reminderHistoryPagination, setReminderHistoryPagination] = useState({
+		page: 1,
+		limit: 20,
+		total: 0,
+		pages: 0,
+	});
+
 	const [expenseSummary, setExpenseSummary] = useState(null);
 	const [expenseSummaryPagination, setExpenseSummaryPagination] = useState({
 		page: 1,
@@ -206,6 +215,64 @@ export const useFinance = () => {
 			setLoading(false);
 		}
 	}, []);
+
+	// ----- Reminder History (Booking / Installment) -----
+	const fetchBookingReminderHistory = useCallback(
+		async (bookingId, params = {}) => {
+			setReminderHistoryLoading(true);
+			try {
+				const res = await financeApi.getBookingReminderHistory(
+					bookingId,
+					{
+						page: 1,
+						limit: 20,
+						...params,
+					},
+				);
+				setReminderHistory(res.data?.data || null);
+				if (res.data?.data?.pagination) {
+					setReminderHistoryPagination(res.data.data.pagination);
+				}
+				return res.data?.data;
+			} catch (err) {
+				toast.error("Failed to load reminder history");
+				return null;
+			} finally {
+				setReminderHistoryLoading(false);
+			}
+		},
+		[],
+	);
+
+	const fetchInstallmentReminderHistory = useCallback(
+		async (installmentId) => {
+			setReminderHistoryLoading(true);
+			try {
+				const res =
+					await financeApi.getInstallmentReminderHistory(
+						installmentId,
+					);
+				setReminderHistory(res.data?.data || null);
+				return res.data?.data;
+			} catch (err) {
+				toast.error("Failed to load reminder history");
+				return null;
+			} finally {
+				setReminderHistoryLoading(false);
+			}
+		},
+		[],
+	);
+
+	const clearReminderHistory = () => {
+		setReminderHistory(null);
+		setReminderHistoryPagination({
+			page: 1,
+			limit: 20,
+			total: 0,
+			pages: 0,
+		});
+	};
 
 	// ----- Expense Payment -----
 	const fetchApprovedExpenses = useCallback(async (params = {}) => {
@@ -482,7 +549,13 @@ export const useFinance = () => {
 		expenseSummaryPagination,
 		projectExpenseReport,
 		employeeExpenseReport,
+		reminderHistory,
+		reminderHistoryLoading,
+		reminderHistoryPagination,
 
+		fetchBookingReminderHistory,
+		fetchInstallmentReminderHistory,
+		clearReminderHistory,
 		fetchDashboard,
 		exportFinanceDashboard,
 		fetchProjectDetails, // 🔥 Exported

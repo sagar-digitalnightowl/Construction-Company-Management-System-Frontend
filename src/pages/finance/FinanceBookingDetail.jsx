@@ -237,30 +237,67 @@ export default function FinanceBookingDetail() {
 
 							{/* Column 2: Payments & Balance */}
 							<div className="space-y-3 px-0 lg:px-2 flex flex-col justify-center">
+
+								{/* Booking Base Amount */}
 								<div className="flex justify-between items-center gap-2">
-									<span className="text-muted-foreground">Booking Advance (Base):</span>
-									<span className="text-muted-foreground text-right">{formatCurrency(booking.bookingBaseAmount || 0)}</span>
-								</div>
-								<div className="flex justify-between items-center gap-2">
-									<span className="text-muted-foreground">Booking Advance (GST):</span>
-									<span className="text-muted-foreground text-right">+{formatCurrency(booking.gstPaid || 0)}</span>
+									<span className="text-muted-foreground">
+										Booking Base Amount:
+									</span>
+
+									<span className="text-muted-foreground text-right">
+										{formatCurrency(booking.bookingBaseAmount || 0)}
+									</span>
 								</div>
 
-								<div className="border-b border-dashed border-border/60 py-1"></div>
+								{/* Booking GST */}
+								<div className="flex justify-between items-center gap-2">
+									<span className="text-muted-foreground">
+										Booking GST:
+									</span>
 
+									<span className="text-muted-foreground text-right">
+										+{formatCurrency(booking.gstPaid || 0)}
+									</span>
+								</div>
+
+								{/* Total Booking Paid */}
+								<div className="flex justify-between items-center gap-2">
+									<span className="font-semibold text-foreground">
+										Total Booking Paid:
+									</span>
+
+									<span className="font-bold text-foreground text-right">
+										{formatCurrency(
+											(booking.bookingBaseAmount || 0) +
+											(booking.gstPaid || 0)
+										)}
+									</span>
+								</div>
+
+								<div className="border-b border-dashed border-border/60 py-1" />
+
+								{/* Overall Paid */}
 								<div className="flex justify-between items-center pt-1 gap-2">
-									<span className="font-semibold text-foreground">Total Paid / Cleared:</span>
-									<span className="font-bold text-emerald-600 dark:text-emerald-500 text-base bg-emerald-500/10 px-2 py-0.5 rounded text-right whitespace-nowrap">
-										{formatCurrency(booking.totalPaid)}
+									<span className="font-semibold text-foreground">
+										Overall Paid:
+									</span>
+
+									<span className="font-bold text-teal-700 dark:text-teal-400 text-base text-right">
+										{formatCurrency(booking.totalPaid || 0)}
 									</span>
 								</div>
 
+								{/* Balance Due */}
 								<div className="flex justify-between items-center pt-2 mt-1 border-t border-border/60 gap-2">
-									<span className="font-bold text-foreground text-base">Balance Due:</span>
-									<span className="font-bold text-destructive text-xl bg-destructive/10 px-2 py-0.5 rounded text-right whitespace-nowrap">
-										{formatCurrency(booking.remainingAmount)}
+									<span className="font-bold text-foreground text-base">
+										Balance Due:
+									</span>
+
+									<span className="font-bold text-destructive text-xl text-right">
+										{formatCurrency(booking.remainingAmount || 0)}
 									</span>
 								</div>
+
 							</div>
 
 							{/* Column 3: Installment Plan Summary */}

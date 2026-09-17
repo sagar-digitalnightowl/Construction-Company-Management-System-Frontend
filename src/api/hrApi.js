@@ -1,6 +1,7 @@
 import api from "./axios";
 
 export const hrApi = {
+	
 	// ==================== EMPLOYEES ====================
 	createEmployee: (data) => api.post("/hr/employees", data),
 

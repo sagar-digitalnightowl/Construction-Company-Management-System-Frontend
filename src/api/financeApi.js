@@ -1,6 +1,12 @@
 import api from "./axios";
 
 export const financeApi = {
+	// ==================== REMINDER HISTORY ====================
+	getBookingReminderHistory: (bookingId, params) =>
+		api.get(`/finance/booking/${bookingId}/reminder-history`, { params }),
+	getInstallmentReminderHistory: (installmentId) =>
+		api.get(`/finance/installment/${installmentId}/reminder-history`),
+
 	// 1. Finance Dashboard
 	getDashboard: (params) => api.get("/finance/dashboard", { params }),
 

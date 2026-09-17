@@ -42,7 +42,7 @@ export function BookingCard({ booking, onClick, onEdit, onDelete }) {
 				</div>
 
 				{/* ---- Professional Financial Summary Box ---- */}
-				<div className="bg-muted/30 border border-border/50 rounded-lg p-3 space-y-2">
+				<div className="bg-muted/30 border border-border/50 rounded-lg p-3 space-y-3">
 
 					<div className="flex justify-between text-sm">
 						<span className="text-muted-foreground">Client Name</span>
@@ -51,48 +51,59 @@ export function BookingCard({ booking, onClick, onEdit, onDelete }) {
 						</span>
 					</div>
 
-					<div className="flex justify-between text-sm">
-						<span className="text-muted-foreground">Flat Cost</span>
-						<span className="font-medium text-foreground">
-							{formatCurrency(booking.flatSnapshot?.price)}
-						</span>
+					{/* --- Group 1: Property Cost (Flat Price + GST on Flat Price) --- */}
+					<div className="space-y-1.5">
+						<div className="flex justify-between text-sm">
+							<span className="text-muted-foreground">Flat Cost</span>
+							<span className="font-medium text-foreground">
+								{formatCurrency(booking.flatSnapshot?.price)}
+							</span>
+						</div>
+
+						<div className="flex justify-between text-sm">
+							<span className="text-muted-foreground flex items-center gap-1.5">
+								GST on Flat Cost
+								{booking.gstPercentage > 0 && (
+									<span className="inline-flex items-center rounded bg-blue-50 px-1 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/20">
+										{booking.gstPercentage}%
+									</span>
+								)}
+							</span>
+							<span className="text-muted-foreground">
+								+{formatCurrency(booking.totalGstAmount || 0)}
+							</span>
+						</div>
+
+						<div className="flex justify-between text-sm pt-0.5">
+							<span className="font-medium text-foreground">Total Property Cost</span>
+							<span className="font-semibold text-foreground">
+								{formatCurrency((booking.flatSnapshot?.price || 0) + (booking.totalGstAmount || 0))}
+							</span>
+						</div>
 					</div>
 
-					<div className="flex justify-between text-sm">
-						<span className="text-muted-foreground flex items-center gap-1.5">
-							Taxes (GST)
-							{booking.gstPercentage > 0 && (
-								<span className="inline-flex items-center rounded bg-blue-50 px-1 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/20">
-									{booking.gstPercentage}%
-								</span>
-							)}
-						</span>
-						<span className="text-muted-foreground">
-							+{formatCurrency(booking.totalGstAmount || 0)}
-						</span>
-					</div>
+					<div className="border-t border-border/70"></div>
 
-					{/* --- Sirf yahan label change kiya hai --- */}
-					<div className="flex justify-between text-sm">
-						<span className="text-muted-foreground">Booking Amount + GST</span>
-						<span className="text-foreground">{formatCurrency(booking.bookingAmount)}</span>
-					</div>
+					{/* --- Group 2: Booking / Payment Status --- */}
+					<div className="space-y-1.5">
+						<div className="flex justify-between text-sm">
+							<span className="text-muted-foreground">Booking Amount (incl. GST)</span>
+							<span className="text-foreground">{formatCurrency(booking.bookingAmount)}</span>
+						</div>
 
-					<div className="my-2 border-t border-border/70"></div>
+						<div className="flex justify-between text-sm">
+							<span className="font-medium text-muted-foreground">Total Paid</span>
+							<span className="font-semibold text-primary">
+								{formatCurrency(booking.totalPaid)}
+							</span>
+						</div>
 
-					<div className="flex justify-between text-sm">
-						<span className="font-medium text-muted-foreground">Total Paid</span>
-						<span className="font-semibold text-primary">
-							{formatCurrency(booking.totalPaid)}
-						</span>
-					</div>
-
-					{/* Remaining Amount ko as 'Balance Due' dikhaya hai */}
-					<div className="flex justify-between text-sm">
-						<span className="font-medium text-muted-foreground">Balance Due</span>
-						<span className="font-semibold text-destructive">
-							{formatCurrency(booking.remainingAmount)}
-						</span>
+						<div className="flex justify-between text-sm">
+							<span className="font-medium text-muted-foreground">Balance Due</span>
+							<span className="font-semibold text-destructive">
+								{formatCurrency(booking.remainingAmount)}
+							</span>
+						</div>
 					</div>
 				</div>
 

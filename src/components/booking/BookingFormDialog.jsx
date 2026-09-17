@@ -1226,14 +1226,6 @@ export function BookingFormDialog({
 							<Label>Key Number (KYC ID)</Label>
 							<Input placeholder="Optional" value={form.keyNumber} onChange={(e) => updateForm("keyNumber", e.target.value)} />
 						</div>
-						<div>
-							<Label>TM</Label>
-							<Input placeholder="Optional" value={form.businessCode} onChange={(e) => updateForm("businessCode", e.target.value)} />
-						</div>
-						<div>
-							<Label>Business Name</Label>
-							<Input placeholder="Optional" value={form.businessName} onChange={(e) => updateForm("businessName", e.target.value)} />
-						</div>
 
 						{/* ✅ Customer Type Dropdown without 'None' */}
 						<div>
@@ -1253,9 +1245,13 @@ export function BookingFormDialog({
 								</SelectContent>
 							</Select>
 						</div>
+						<div>
+							<Label>Business Name</Label>
+							<Input placeholder="Optional" value={form.businessName} onChange={(e) => updateForm("businessName", e.target.value)} />
+						</div>
 
 						<div>
-							<Label>Team Manager</Label>
+							<Label>Business Manager</Label>
 							<Select value={form.teamManager} onValueChange={(v) => updateForm("teamManager", v)}>
 								<SelectTrigger><SelectValue placeholder="Select manager" /></SelectTrigger>
 								<SelectContent>
@@ -1267,6 +1263,12 @@ export function BookingFormDialog({
 								</SelectContent>
 							</Select>
 						</div>
+
+						<div>
+							<Label>Team Manager</Label>
+							<Input placeholder="Optional" value={form.businessCode} onChange={(e) => updateForm("businessCode", e.target.value)} />
+						</div>
+
 						<div className="md:col-span-2">
 							<Label>Remarks</Label>
 							<Input placeholder="Optional" value={form.remarks} onChange={(e) => updateForm("remarks", e.target.value)} />
