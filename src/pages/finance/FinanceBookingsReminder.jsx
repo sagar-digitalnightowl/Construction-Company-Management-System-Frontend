@@ -30,7 +30,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { formatINR, formatDate } from "@/lib/helpers";
-import { Mail, AlertTriangle, Loader2, Search, X, MessageCircle } from "lucide-react";
+import { Mail, AlertTriangle, Loader2, Search, X, MessageCircle, History } from "lucide-react";
+import { ReminderHistoryModal } from "@/components/finance/ReminderHistoryModal";
 import { toast } from "sonner";
 import { projectApi } from "@/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,6 +44,12 @@ export function FinanceBookingsReminder() {
 		sendNormalReminder,
 		sendPenaltyReminder,
 		sendWhatsAppReminders,
+		reminderHistory,
+		reminderHistoryLoading,
+		reminderHistoryPagination,
+		fetchBookingReminderHistory,
+		fetchInstallmentReminderHistory,
+		clearReminderHistory,
 		loading,
 	} = useFinance();
 
@@ -51,6 +58,9 @@ export function FinanceBookingsReminder() {
 	const [projectFilter, setProjectFilter] = useState("all");
 	const [projectPage, setProjectPage] = useState(1);
 	const [hasMoreProjects, setHasMoreProjects] = useState(true);
+	const [historyOpen, setHistoryOpen] = useState(false);
+	const [historyBookingId, setHistoryBookingId] = useState(null);
+	const [historyType, setHistoryType] = useState("booking");
 
 	// Bookings Table State
 	const [currentPage, setCurrentPage] = useState(1);
@@ -68,6 +78,29 @@ export function FinanceBookingsReminder() {
 		installmentId: null, // ✅ Added to store WhatsApp installment ID
 		language: "en", // ✅ Added language for WhatsApp notification
 	});
+
+	const openBookingHistory = async (bookingId) => {
+		setHistoryOpen(true);
+		setHistoryType("booking");
+		setHistoryBookingId(bookingId);
+		await fetchBookingReminderHistory(bookingId, { page: 1, limit: 20 });
+	};
+
+	const openInstallmentHistory = async (installmentId) => {
+		if (!installmentId) {
+			toast.error("Installment not found.");
+			return;
+		}
+		setHistoryOpen(true);
+		setHistoryType("installment");
+		await fetchInstallmentReminderHistory(installmentId);
+	};
+
+	const handleHistoryPageChange = (newPage) => {
+		if (historyType === "booking" && historyBookingId) {
+			fetchBookingReminderHistory(historyBookingId, { page: newPage, limit: 20 });
+		}
+	};
 
 	const fetchProjects = async (pageNo = 1) => {
 		try {
@@ -269,13 +302,17 @@ export function FinanceBookingsReminder() {
 								<TableHead className="font-semibold text-muted-foreground">Buyer Details</TableHead>
 								<TableHead className="font-semibold text-muted-foreground">Property Details</TableHead>
 								<TableHead className="font-semibold text-muted-foreground">Project</TableHead>
-								<TableHead className="text-right text-nowrap font-semibold text-muted-foreground">
+
+								<TableHead className="text-right w-[180px] min-w-[180px] text-nowrap font-semibold text-muted-foreground">
 									Total Paid
 								</TableHead>
 								<TableHead className="text-right text-nowrap font-semibold text-muted-foreground">
 									Remaining
 								</TableHead>
 								<TableHead className="text-nowrap font-semibold text-muted-foreground">Next Installment</TableHead>
+								<TableHead className="text-center text-nowrap font-semibold text-muted-foreground">
+									History
+								</TableHead>
 								<TableHead className="text-right text-nowrap font-semibold text-muted-foreground">
 									Actions
 								</TableHead>
@@ -352,8 +389,20 @@ export function FinanceBookingsReminder() {
 									<TableCell className="min-w-32 font-medium text-sm text-muted-foreground">
 										{b.projectName}
 									</TableCell>
-									<TableCell className="text-right font-medium text-success tabular-nums">
-										{formatINR(b.totalPaid)}
+									<TableCell className="text-right w-[180px] min-w-[180px] font-medium tabular-nums">
+										<div>
+											Amount Paid: {formatINR(b.totalPaid - (b.gstPaid || 0))}
+										</div>
+
+										{b.gstPaid > 0 && (
+											<div className="text-xs text-muted-foreground">
+												GST Paid: {formatINR(b.gstPaid)}
+											</div>
+										)}
+
+										<div className="font-semibold text-success">
+											Total: {formatINR(b.totalPaid)}
+										</div>
 									</TableCell>
 									<TableCell className="text-right font-bold text-destructive tabular-nums">
 										{formatINR(b.remainingAmount)}
@@ -400,6 +449,37 @@ export function FinanceBookingsReminder() {
 												All Paid
 											</Badge>
 										)}
+									</TableCell>
+									<TableCell>
+										<div className="flex flex-col items-center gap-1">
+											<button
+												type="button"
+												onClick={() => openBookingHistory(b.bookingId)}
+												className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline cursor-pointer whitespace-nowrap"
+											>
+												<History className="h-3.5 w-3.5" />
+												View Reminder History
+											</button>
+
+											<button
+												type="button"
+												onClick={() => {
+													const pendingInstallment = b.installments?.find((i) => !i.paid);
+
+													if (pendingInstallment) {
+														openInstallmentHistory(
+															pendingInstallment._id || pendingInstallment.id
+														);
+													} else {
+														toast.error("No pending installment found.");
+													}
+												}}
+												className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline cursor-pointer whitespace-nowrap"
+											>
+												<History className="h-3.5 w-3.5" />
+												View Installment History
+											</button>
+										</div>
 									</TableCell>
 									<TableCell>
 										<div className="flex gap-1.5 justify-end opacity-80 group-hover:opacity-100 transition-opacity">
@@ -455,37 +535,39 @@ export function FinanceBookingsReminder() {
 				</CardContent>
 			</Card>
 
-			{!loading && pagination && pagination.total > 0 && (
-				<div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-					<div className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
-						Showing page {pagination.page} of {pagination.pages}{" "}
-						<span className="hidden xs:inline">(Total: {pagination.total} bookings)</span>
-						<span className="xs:hidden">({pagination.total} total)</span>
-					</div>
+			{
+				!loading && pagination && pagination.total > 0 && (
+					<div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+						<div className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
+							Showing page {pagination.page} of {pagination.pages}{" "}
+							<span className="hidden xs:inline">(Total: {pagination.total} bookings)</span>
+							<span className="xs:hidden">({pagination.total} total)</span>
+						</div>
 
-					<div className="flex w-full gap-2 sm:w-auto">
-						<Button
-							variant="outline"
-							size="sm"
-							className="flex-1 sm:flex-none"
-							onClick={() => setCurrentPage((prev) => prev - 1)}
-							disabled={pagination.page <= 1}
-						>
-							Previous
-						</Button>
+						<div className="flex w-full gap-2 sm:w-auto">
+							<Button
+								variant="outline"
+								size="sm"
+								className="flex-1 sm:flex-none"
+								onClick={() => setCurrentPage((prev) => prev - 1)}
+								disabled={pagination.page <= 1}
+							>
+								Previous
+							</Button>
 
-						<Button
-							variant="outline"
-							size="sm"
-							className="flex-1 sm:flex-none"
-							onClick={() => setCurrentPage((prev) => prev + 1)}
-							disabled={pagination.page >= pagination.pages}
-						>
-							Next
-						</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="flex-1 sm:flex-none"
+								onClick={() => setCurrentPage((prev) => prev + 1)}
+								disabled={pagination.page >= pagination.pages}
+							>
+								Next
+							</Button>
+						</div>
 					</div>
-				</div>
-			)}
+				)
+			}
 
 			{/* ✅ Popup / Dialog Section */}
 			<Dialog
@@ -576,6 +658,22 @@ export function FinanceBookingsReminder() {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
+
+			<ReminderHistoryModal
+				open={historyOpen}
+				onOpenChange={(v) => {
+					setHistoryOpen(v);
+					if (!v) {
+						clearReminderHistory();
+						setHistoryBookingId(null);
+					}
+				}}
+				loading={reminderHistoryLoading}
+				data={reminderHistory}
+				type={historyType}
+				pagination={historyType === "booking" ? reminderHistoryPagination : undefined}
+				onPageChange={historyType === "booking" ? handleHistoryPageChange : undefined}
+			/>
 		</div>
 	);
 }

@@ -1,6 +1,3 @@
-
-
-// src/pages/finance/FinanceDueInstallments.jsx
 import React, { useEffect, useState } from "react";
 import { useFinance } from "@/hooks/useFinance";
 import { Button } from "@/components/ui/button";
@@ -31,7 +28,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { formatINR, formatDate } from "@/lib/helpers";
-import { Calendar, ChevronLeft, ChevronRight, Loader2, MessageCircle, Search } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Loader2, MessageCircle, Search, History } from "lucide-react";
+import { ReminderHistoryModal } from "@/components/finance/ReminderHistoryModal";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,6 +41,12 @@ export function FinanceDueInstallments() {
 		fetchDueInstallments,
 		sendWhatsAppReminders,
 		loading,
+		reminderHistory,
+		reminderHistoryLoading,
+		reminderHistoryPagination,
+		fetchBookingReminderHistory,
+		fetchInstallmentReminderHistory,
+		clearReminderHistory,
 	} = useFinance();
 
 	const [currentPage, setCurrentPage] = useState(1);
@@ -54,6 +58,36 @@ export function FinanceDueInstallments() {
 
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [selectedLanguage, setSelectedLanguage] = useState("en");
+	const [historyOpen, setHistoryOpen] = useState(false);
+	const [historyBookingId, setHistoryBookingId] = useState(null);
+	const [historyType, setHistoryType] = useState("booking");
+
+	const openBookingHistory = async (bookingId) => {
+		if (!bookingId) {
+			toast.error("Booking reference not found for this installment.");
+			return;
+		}
+		setHistoryOpen(true);
+		setHistoryType("booking");
+		setHistoryBookingId(bookingId);
+		await fetchBookingReminderHistory(bookingId, { page: 1, limit: 20 });
+	};
+
+	const handleHistoryPageChange = (newPage) => {
+		if (historyType === "booking" && historyBookingId) {
+			fetchBookingReminderHistory(historyBookingId, { page: newPage, limit: 20 });
+		}
+	};
+
+	const openInstallmentHistory = async (installmentId) => {
+		if (!installmentId) {
+			toast.error("Installment not found.");
+			return;
+		}
+		setHistoryOpen(true);
+		setHistoryType("installment");
+		await fetchInstallmentReminderHistory(installmentId);
+	};
 
 	// Debounce raw search input before it hits the API
 	useEffect(() => {
@@ -219,7 +253,9 @@ export function FinanceDueInstallments() {
 								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
 									Installment Details
 								</TableHead>
-
+								<TableHead className="whitespace-nowrap text-center font-semibold text-muted-foreground">
+									History
+								</TableHead>
 								<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
 									Status
 								</TableHead>
@@ -263,14 +299,16 @@ export function FinanceDueInstallments() {
 											</TableCell>
 
 											<TableCell className="min-w-[180px]">
-												<div className="whitespace-nowrap">
-													{item.booking?.projectName || "—"}
+												<div className="font-semibold text-foreground">
+													Flat: {item.booking?.flatNumber || "—"}
 												</div>
 
-												<div className="whitespace-nowrap text-xs text-muted-foreground">
-													Flat: {item.booking?.flatNumber || "—"}{" "}
-													<span className="mx-1">|</span>{" "}
+												<div className="text-xs text-muted-foreground">
 													{item.booking?.tower || "—"}
+												</div>
+
+												<div className="text-sm text-muted-foreground">
+													{item.booking?.projectName || "—"}
 												</div>
 											</TableCell>
 
@@ -298,6 +336,28 @@ export function FinanceDueInstallments() {
 														Last Reminder Amount:{" "}
 														{formatINR(item.installment.lastReminderAmount || 0)}
 													</span>
+												</div>
+											</TableCell>
+
+											<TableCell>
+												<div className="flex flex-col items-center gap-1">
+													<button
+														type="button"
+														onClick={() => openBookingHistory(item.booking?.id)}
+														className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline whitespace-nowrap cursor-pointer"
+													>
+														<History className="h-3.5 w-3.5" />
+														View Reminder History
+													</button>
+
+													<button
+														type="button"
+														onClick={() => openInstallmentHistory(id)}
+														className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline whitespace-nowrap cursor-pointer"
+													>
+														<History className="h-3.5 w-3.5" />
+														View Installment History
+													</button>
 												</div>
 											</TableCell>
 
@@ -396,6 +456,21 @@ export function FinanceDueInstallments() {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
+			<ReminderHistoryModal
+				open={historyOpen}
+				onOpenChange={(v) => {
+					setHistoryOpen(v);
+					if (!v) {
+						clearReminderHistory();
+						setHistoryBookingId(null);
+					}
+				}}
+				loading={reminderHistoryLoading}
+				data={reminderHistory}
+				type={historyType}
+				pagination={historyType === "booking" ? reminderHistoryPagination : undefined}
+				onPageChange={historyType === "booking" ? handleHistoryPageChange : undefined}
+			/>
 		</div>
 	);
 }

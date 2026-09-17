@@ -180,11 +180,12 @@ export default function HR() {
 
 	return (
 		<div className="space-y-5 sm:space-y-6">
-			<PageHeader
-				eyebrow={showPageTabs ? "HR Management" : "Human Resources"}
-				title={headerInfo.title}
-				description={headerInfo.desc}
-			/>
+			{!(currentTab === "salary" && !showPageTabs) && (
+				<PageHeader
+					title={headerInfo.title}
+					description={headerInfo.desc}
+				/>
+			)}
 
 			{/* 👇 NEW: Conditionally render Stats and Check-in for Admin/Director or when on 'employees' tab */}
 			{(showPageTabs || currentTab === "employees") && (

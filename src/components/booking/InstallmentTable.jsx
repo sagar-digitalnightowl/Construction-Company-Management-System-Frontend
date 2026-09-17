@@ -40,8 +40,13 @@ export function InstallmentTable({ installments, onPay, canPay }) {
 						<TableHead className="w-12">#</TableHead>
 						<TableHead>description</TableHead>
 						{/* <TableHead>Due Date</TableHead> */}
-						<TableHead>Amount</TableHead>
-						<TableHead>Paid Amount</TableHead>
+						<TableHead className="w-[160px] min-w-[160px] text-right">
+							Amount
+						</TableHead>
+
+						<TableHead className="w-[180px] min-w-[180px] text-right">
+							Paid Amount
+						</TableHead>
 						<TableHead>Status</TableHead>
 						<TableHead>Reminder</TableHead>
 						<TableHead>Payment Mode</TableHead>
@@ -61,13 +66,39 @@ export function InstallmentTable({ installments, onPay, canPay }) {
 									: "Not scheduled"}
 							</TableCell> */}
 							{/* formatCurrency lagaya gaya hai */}
-							<TableCell>{formatCurrency(inst.amount)}</TableCell>
-							<TableCell>
-								<div>{formatCurrency(inst.paidAmount)}</div>
+							<TableCell className="text-right w-[160px] min-w-[160px]">
+								<div className="text-xs font-semibold text-muted-foreground">
+									{formatCurrency(inst.baseAmount)}
+								</div>
+
+								{inst.gstAmount > 0 && (
+									<div className="text-xs text-muted-foreground">
+										GST: {formatCurrency(inst.gstAmount)}
+									</div>
+								)}
+
+								<div className="font-semibold text-red-600 dark:text-red-500">
+									Total: {formatCurrency(inst.amount)}
+								</div>
+							</TableCell>
+							<TableCell className="text-right w-[180px] min-w-[180px] text-foreground">
+								<div className="text-muted-foreground">
+									Amount Paid: {formatCurrency(inst.paidAmount - (inst.gstAmount || 0))}
+								</div>
+
+								{inst.gstAmount > 0 && (
+									<div className="text-xs text-muted-foreground">
+										GST Paid: {formatCurrency(inst.gstAmount)}
+									</div>
+								)}
+
+								<div className="font-semibold text-emerald-600 dark:text-emerald-500 ">
+									Total: {formatCurrency(inst.paidAmount)}
+								</div>
 
 								{inst.paidAt && (
-									<div className="text-xs text-muted-foreground mt-1">
-										Paid on {formatDate(inst.paidAt)}
+									<div className="mt-0.5 text-xs font-normal text-muted-foreground">
+										Paid At: {formatDate(inst.paidAt)}
 									</div>
 								)}
 							</TableCell>

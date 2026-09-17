@@ -40,8 +40,8 @@ export function FinanceInstallmentTable({ installments }) {
 						<TableHead className="w-16 font-semibold tracking-wide text-xs uppercase">#</TableHead>
 						<TableHead className="font-semibold tracking-wide text-xs uppercase">Description</TableHead>
 						{/* <TableHead className="font-semibold tracking-wide text-xs uppercase">Due Date</TableHead> */}
-						<TableHead className="font-semibold tracking-wide text-xs uppercase text-right">Amount</TableHead>
-						<TableHead className="font-semibold tracking-wide text-xs uppercase text-right">Paid Amount</TableHead>
+						<TableHead className="font-semibold w-[160px] min-w-[160px] tracking-wide text-xs uppercase text-right">Amount</TableHead>
+						<TableHead className="font-semibold w-[180px] min-w-[180px]  tracking-wide text-xs uppercase text-right">Paid Amount</TableHead>
 						<TableHead className="font-semibold tracking-wide text-xs uppercase">Status</TableHead>
 						<TableHead className="font-semibold tracking-wide text-xs uppercase">Mode</TableHead>
 						<TableHead className="font-semibold tracking-wide text-xs uppercase">Transaction ID</TableHead>
@@ -65,15 +65,39 @@ export function FinanceInstallmentTable({ installments }) {
 									<span className="text-muted-foreground italic text-xs">Not scheduled</span>
 								)}
 							</TableCell> */}
-							<TableCell className="text-right font-semibold text-foreground">
-								{formatCurrency(inst.amount)}
+							<TableCell className="text-right w-[160px] min-w-[160px]">
+								<div className="text-xs font-semibold text-muted-foreground">
+									{formatCurrency(inst.baseAmount)}
+								</div>
+
+								{inst.gstAmount > 0 && (
+									<div className="text-xs text-muted-foreground">
+										GST: {formatCurrency(inst.gstAmount)}
+									</div>
+								)}
+
+								<div className="font-semibold text-red-600 dark:text-red-500">
+									Total: {formatCurrency(inst.amount)}
+								</div>
 							</TableCell>
-							<TableCell className="text-right font-semibold text-emerald-600 dark:text-emerald-500">
-								<div>{formatCurrency(inst.paidAmount)}</div>
+							<TableCell className="text-right w-[180px] min-w-[180px] text-foreground">
+								<div className="text-muted-foreground">
+									Amount Paid: {formatCurrency(inst.paidAmount - (inst.gstAmount || 0))}
+								</div>
+
+								{inst.gstAmount > 0 && (
+									<div className="text-xs text-muted-foreground">
+										GST Paid: {formatCurrency(inst.gstAmount)}
+									</div>
+								)}
+
+								<div className="font-semibold text-emerald-600 dark:text-emerald-500 ">
+									Total: {formatCurrency(inst.paidAmount)}
+								</div>
 
 								{inst.paidAt && (
-									<div className="text-xs text-muted-foreground font-normal mt-1">
-										Paid on {formatDate(inst.paidAt)}
+									<div className="mt-0.5 text-xs font-normal text-muted-foreground">
+										Paid At: {formatDate(inst.paidAt)}
 									</div>
 								)}
 							</TableCell>
