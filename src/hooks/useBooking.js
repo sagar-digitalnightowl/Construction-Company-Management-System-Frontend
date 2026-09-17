@@ -1,4 +1,3 @@
-// src/hooks/useBooking.js
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { bookingApi } from "@/api";
@@ -385,7 +384,9 @@ export const useBooking = () => {
 			await fetchBookings(params);
 			return true;
 		} catch (err) {
-			toast.error(err.response?.data?.message || "Failed to update booking");
+			toast.error(
+				err.response?.data?.message || "Failed to update booking",
+			);
 			return null;
 		} finally {
 			setLoading(false);
@@ -401,7 +402,121 @@ export const useBooking = () => {
 			await fetchBookings(params);
 			return true;
 		} catch (err) {
-			toast.error(err.response?.data?.message || "Failed to delete booking");
+			toast.error(
+				err.response?.data?.message || "Failed to delete booking",
+			);
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const exportBookings = async (params = {}) => {
+		setLoading(true);
+
+		try {
+			const res = await bookingApi.exportBookings(params);
+
+			const blob = new Blob([res.data], {
+				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			});
+
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement("a");
+
+			link.href = url;
+			link.download = `bookings-export-${new Date()
+				.toISOString()
+				.slice(0, 10)}.xlsx`;
+
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+
+			const totalBookings = res.headers?.["x-total-bookings"];
+
+			toast.success(
+				`${totalBookings || "Bookings"} booking${totalBookings === "1" ? "" : "s"} exported successfully`,
+			);
+
+			return true;
+		} catch (err) {
+			// Backend can return JSON error even though normal response is blob
+			let message = "Failed to export bookings";
+
+			if (err.response?.data instanceof Blob) {
+				try {
+					const text = await err.response.data.text();
+					const errorData = JSON.parse(text);
+					message = errorData?.message || message;
+				} catch {
+					// Keep default message
+				}
+			} else {
+				message = err.response?.data?.message || message;
+			}
+
+			toast.error(message);
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const exportBooking = async (bookingId) => {
+		setLoading(true);
+
+		try {
+			const res = await bookingApi.exportBooking(bookingId);
+
+			const blob = new Blob([res.data], {
+				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			});
+
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement("a");
+
+			link.href = url;
+
+			// Backend Content-Disposition filename use karo if available
+			const contentDisposition = res.headers?.["content-disposition"];
+
+			const filenameMatch = contentDisposition?.match(
+				/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/,
+			);
+
+			const filename = filenameMatch
+				? filenameMatch[1].replace(/['"]/g, "")
+				: `Booking_${bookingId}.xlsx`;
+
+			link.download = filename;
+
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+
+			window.URL.revokeObjectURL(url);
+
+			toast.success("Booking Excel exported successfully");
+
+			return true;
+		} catch (err) {
+			let message = "Failed to export booking";
+
+			if (err.response?.data instanceof Blob) {
+				try {
+					const text = await err.response.data.text();
+					const errorData = JSON.parse(text);
+					message = errorData?.message || message;
+				} catch {
+					// Keep default message
+				}
+			} else {
+				message = err.response?.data?.message || message;
+			}
+
+			toast.error(message);
 			return false;
 		} finally {
 			setLoading(false);
@@ -445,5 +560,8 @@ export const useBooking = () => {
 
 		updateBooking,
 		softDeleteBooking,
+
+		exportBookings,
+		exportBooking,
 	};
 };

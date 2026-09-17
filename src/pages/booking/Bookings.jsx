@@ -1,5 +1,4 @@
 
-// src/pages/Bookings.jsx
 import React, { useState, useEffect } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,8 @@ import {
 	ChevronRight,
 	AlertCircle,
 	Building2,
-	X
+	X,
+	Download,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingCard } from "@/components/booking/BookingCard";
@@ -62,6 +62,7 @@ export default function Bookings() {
 		pagination,
 		softDeleteBooking,
 		updateBooking,
+		exportBookings,
 	} = useBooking();
 
 	const {
@@ -223,6 +224,10 @@ export default function Bookings() {
 		}
 	};
 
+	const handleExport = async () => {
+		await exportBookings(fetchParams);
+	};
+
 	const handleView = (id) => navigate(`/bookings/${id}`);
 
 	const handleEdit = (booking) => {
@@ -255,6 +260,15 @@ export default function Bookings() {
 				description="Manage all flat/unit bookings across projects."
 				actions={
 					<div className="flex gap-2">
+						<Button
+							variant="outline"
+							onClick={handleExport}
+							disabled={loading}
+						>
+							<Download className="h-4 w-4 mr-2" />
+							Export
+						</Button>
+
 						{canCreate && (
 							<>
 								<Button
@@ -265,13 +279,15 @@ export default function Bookings() {
 									<AlertCircle className="h-4 w-4 mr-2" />
 									Cancel All Bookings
 								</Button>
+
 								<Button
 									onClick={() => {
 										setEditBookingData(null);
 										setFormOpen(true);
 									}}
 								>
-									<Plus className="h-4 w-4 mr-2" /> New Booking
+									<Plus className="h-4 w-4 mr-2" />
+									New Booking
 								</Button>
 							</>
 						)}

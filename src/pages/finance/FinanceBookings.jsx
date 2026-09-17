@@ -22,7 +22,8 @@ import {
 	X,
 	Wallet,
 	ArrowRight,
-	Building
+	Building,
+	Download,
 } from "lucide-react";
 import { useBooking } from "@/hooks/useBooking";
 import { projectApi } from "@/api/projectApi";
@@ -98,6 +99,7 @@ export default function FinanceBookings() {
 	const {
 		bookings,
 		fetchBookings,
+		exportBookings,
 		loading,
 		pagination,
 	} = useBooking();
@@ -161,6 +163,10 @@ export default function FinanceBookings() {
 		});
 	}, [currentPage]);
 
+	const handleExport = async () => {
+		await exportBookings(fetchParams);
+	};
+
 	// Navigate to Details Page
 	const handleView = (id) => navigate(`/finance-bookings/${id}`);
 
@@ -213,6 +219,17 @@ export default function FinanceBookings() {
 							</button>
 						)}
 					</div>
+
+					<Button
+						type="button"
+						variant="outline"
+						onClick={handleExport}
+						disabled={loading}
+						className="w-full sm:w-auto shrink-0"
+					>
+						<Download className="h-4 w-4 mr-2" />
+						Export
+					</Button>
 				</div>
 			</div>
 

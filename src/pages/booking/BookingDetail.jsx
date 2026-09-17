@@ -25,6 +25,7 @@ export default function BookingDetail() {
 		installments,
 		installmentSummary,
 		fetchBookingById,
+		exportBooking,
 		payInstallment,
 		updateBookingStatus,
 		cancelBooking,
@@ -43,6 +44,11 @@ export default function BookingDetail() {
 			fetchBookingById(id);
 		}
 	}, [id, fetchBookingById]);
+
+	const handleExport = async () => {
+		if (!id) return;
+		await exportBooking(id);
+	};
 
 	const handlePay = (inst) => {
 		setSelectedInstallment(inst);
@@ -150,6 +156,15 @@ export default function BookingDetail() {
 				</Button>
 
 				<div className="flex gap-2 flex-wrap">
+					<Button
+						variant="outline"
+						onClick={handleExport}
+						disabled={loading}
+					>
+						<Download className="h-4 w-4 mr-1" />
+						Download Excel
+					</Button>
+
 					{canEdit && (
 						<>
 							{booking.approvalStatus === "pending" && (
