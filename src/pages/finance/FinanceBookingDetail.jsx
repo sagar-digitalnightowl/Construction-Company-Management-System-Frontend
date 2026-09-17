@@ -1,7 +1,16 @@
-// src/pages/finance/FinanceBookingDetail.jsx
+
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Download, Wallet, User, Building, Receipt, Calendar, FileText } from "lucide-react";
+import {
+	ArrowLeft,
+	Download,
+	Wallet,
+	User,
+	Building,
+	Receipt,
+	Calendar,
+	FileText
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +28,7 @@ export default function FinanceBookingDetail() {
 		installments,
 		installmentSummary,
 		fetchBookingById,
+		exportBooking,
 		loading,
 	} = useBooking();
 
@@ -35,6 +45,12 @@ export default function FinanceBookingDetail() {
 			currency: 'INR',
 			maximumFractionDigits: 0,
 		}).format(amount || 0);
+	};
+
+	const handleExport = async () => {
+		if (!id) return;
+
+		await exportBooking(id);
 	};
 
 	if (loading && !booking) {
@@ -77,15 +93,30 @@ export default function FinanceBookingDetail() {
 				</Button>
 
 				<div className="flex gap-2 flex-wrap w-full sm:w-auto">
+					<Button
+						variant="outline"
+						onClick={handleExport}
+						disabled={loading}
+						className="bg-background shadow-sm w-full sm:w-auto"
+					>
+						<Download className="h-4 w-4 mr-1.5" />
+						Download Excel
+					</Button>
+
 					{booking.agreementDocument?.documentUrl && (
-						<Button variant="outline" asChild className="bg-background shadow-sm w-full sm:w-auto">
+						<Button
+							variant="outline"
+							asChild
+							className="bg-background shadow-sm w-full sm:w-auto"
+						>
 							<a
 								href={booking.agreementDocument.documentUrl}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex justify-center"
 							>
-								<Download className="h-4 w-4 mr-1.5" /> View Agreement
+								<Download className="h-4 w-4 mr-1.5" />
+								View Agreement
 							</a>
 						</Button>
 					)}
