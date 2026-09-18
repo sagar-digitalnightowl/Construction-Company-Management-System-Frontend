@@ -1,12 +1,8 @@
 import React, { useState } from "react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { SalarySlipPDF } from "./SalarySlipPDF";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-	ChevronDown, ChevronUp, Download, FileText,
-	Wallet, AlertCircle, Clock, Landmark, Info
-} from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Eye, FileText } from "lucide-react";
+import { useHR } from "@/hooks/useHR";
 import {
 	dash,
 	currency,
@@ -14,36 +10,103 @@ import {
 	formatDate,
 	EARNING_LABELS,
 	DEDUCTION_LABELS,
-	ATTENDANCE_LABELS,
-	LEAVE_LABELS,
 } from "./salaryHelpers";
 
-/* ---------------- Reusable Dotted Leader Row ---------------- */
-const DataRow = ({ label, value, colorClass = "" }) => (
-	<div className="flex items-end gap-2 group">
-		<span className="text-xs whitespace-nowrap text-muted-foreground transition-colors duration-200">
-			{label}
-		</span>
-		<div className="flex-1 border-b border-dotted mb-1 border-border/70 transition-colors duration-200" />
-		<span className={`text-sm font-semibold tabular-nums ${colorClass || "text-foreground"}`}>
-			{value}
-		</span>
-	</div>
+/* ---------------- Grid cell helpers — mimic the printed slip's ruled table ---------------- */
+const Cell = ({ children, bold = false, right = false, span = 1, shaded = false, className = "" }) => (
+	<td
+		colSpan={span}
+		className={`py-1 px-2 border border-foreground/30 text-[11px] sm:text-xs align-top ${bold ? "font-bold text-foreground" : "text-foreground"
+			} ${right ? "text-right tabular-nums" : ""} ${shaded ? "bg-muted/40" : ""} ${className}`}
+	>
+		{children}
+	</td>
 );
+
+const LabelCell = ({ children, span = 1, shaded = false }) => (
+	<Cell bold span={span} shaded={shaded}>
+		{children}
+	</Cell>
+);
+
+const ValueCell = ({ children, right = true, className = "text-primary" }) => (
+	<Cell right={right} className={className}>
+		{children}
+	</Cell>
+);
+
+/* Converts a number to Indian-numbering words, e.g. 45200 -> "Rupees Forty Five Thousand Two Hundred Only" */
+const numberToWords = (num) => {
+	if (num == null || isNaN(num)) return "-";
+	const n = Math.round(Number(num));
+	if (n === 0) return "Rupees Zero Only";
+
+	const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+		"Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+	const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+	const twoDigits = (val) => (val < 20 ? ones[val] : `${tens[Math.floor(val / 10)]}${val % 10 ? " " + ones[val % 10] : ""}`);
+	const threeDigits = (val) =>
+		val < 100 ? twoDigits(val) : `${ones[Math.floor(val / 100)]} Hundred${val % 100 ? " " + twoDigits(val % 100) : ""}`;
+
+	let remainder = n;
+	const crore = Math.floor(remainder / 10000000); remainder %= 10000000;
+	const lakh = Math.floor(remainder / 100000); remainder %= 100000;
+	const thousand = Math.floor(remainder / 1000); remainder %= 1000;
+	const hundred = remainder;
+
+	const parts = [];
+	if (crore) parts.push(`${threeDigits(crore)} Crore`);
+	if (lakh) parts.push(`${threeDigits(lakh)} Lakh`);
+	if (thousand) parts.push(`${threeDigits(thousand)} Thousand`);
+	if (hundred) parts.push(threeDigits(hundred));
+
+	return `Rupees ${parts.join(" ")} Only`;
+};
 
 export const SalaryCard = ({ slip }) => {
 	const [isOpen, setIsOpen] = useState(false);
+	const { downloadSalarySlipPdf, loading: downloading } = useHR();
 	const isPaid = slip.paymentStatus === "Paid";
+
+	const handleToggle = () => setIsOpen((prev) => !prev);
+	const handleViewPdf = () => window.open(slip.pdfUrl, "_blank", "noopener,noreferrer");
+	const handleDownload = () => downloadSalarySlipPdf(slip._id);
+
+	const totalLeaveTaken =
+		(slip.leaveSummary?.paidLeaveTaken ?? 0) +
+		(slip.leaveSummary?.unpaidLeaveTaken ?? 0) +
+		(slip.leaveSummary?.sickLeaveTaken ?? 0) +
+		(slip.leaveSummary?.casualLeaveTaken ?? 0) +
+		(slip.leaveSummary?.annualLeaveTaken ?? 0);
+
+	const netWorkingDays = slip.attendanceSummary?.presentDays || slip.attendanceSummary?.totalWorkingDays;
+
+	// Core recurring earnings shown in the SALARY breakup (bonuses are broken out separately below)
+	const bonusKeys = ["bonus", "performanceBonus", "safetyBonus"];
+	const earningEntries = Object.entries(EARNING_LABELS)
+		.filter(([key]) => !bonusKeys.includes(key) && (slip.earnings?.[key] ?? 0) !== 0)
+		.map(([key, label]) => ({ key, label, amount: slip.earnings[key] }));
+
+	let runningBalance = slip.grossEarnings ?? 0;
+	const deductionEntries = Object.entries(DEDUCTION_LABELS)
+		.filter(([key]) => (slip.deductions?.[key] ?? 0) !== 0)
+		.map(([key, label]) => {
+			const amount = slip.deductions[key];
+			runningBalance -= amount;
+			return { key, label, amount, balance: runningBalance };
+		});
+
+	const incentiveAmount = bonusKeys.reduce((sum, key) => sum + (slip.earnings?.[key] ?? 0), 0);
 
 	return (
 		<Card className="relative group rounded-xl border transition-all duration-300 overflow-hidden hover:shadow-md border-border bg-card">
-			{/* Clickable Header */}
+			{/* Clickable summary header */}
 			<div
 				className="p-4 sm:p-6 relative z-10 cursor-pointer transition-colors hover:bg-accent/10"
-				onClick={() => setIsOpen(!isOpen)}
+				onClick={handleToggle}
 			>
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-					{/* Left: Icon & Info */}
 					<div className="flex items-center gap-3 sm:gap-5">
 						<div className="p-3 rounded-lg transition-transform group-hover:scale-110 duration-300 shrink-0 bg-primary/10 text-primary">
 							<FileText className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -53,8 +116,10 @@ export const SalaryCard = ({ slip }) => {
 								{formatMonthDisplay(slip.month)}
 							</h3>
 							<div className="flex items-center gap-2 mt-0.5">
-								<span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-tighter ${isPaid ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
-									}`}>
+								<span
+									className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-tighter ${isPaid ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
+										}`}
+								>
 									{dash(slip.paymentStatus)}
 								</span>
 								<span className="text-[10px] text-muted-foreground font-medium">
@@ -64,7 +129,6 @@ export const SalaryCard = ({ slip }) => {
 						</div>
 					</div>
 
-					{/* Right: Price & Action */}
 					<div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-8 pt-3 sm:pt-0 border-t sm:border-t-0 border-border">
 						<div className="text-left sm:text-right">
 							<p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-0.5">
@@ -82,117 +146,146 @@ export const SalaryCard = ({ slip }) => {
 				</div>
 			</div>
 
-			{/* Collapsible Content */}
+			{/* Expanded panel — replicates the printed salary slip layout */}
 			{isOpen && (
-				<div className="p-6 border-t border-border bg-background/50 animate-in slide-in-from-top-2 duration-300">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+				<div className="p-4 sm:p-6 border-t border-border bg-white animate-in slide-in-from-top-2 duration-300 overflow-x-auto">
+					<div className="min-w-[560px]">
+						{/* Letterhead */}
+						<p className="text-center text-base font-black uppercase tracking-wide text-foreground">
+							{dash(slip.officeName)}
+							{slip.officeCode ? ` (${slip.officeCode})` : ""}
+						</p>
+						<p className="text-center text-sm font-black uppercase tracking-wide mb-3">
+							Salary Slip ({formatMonthDisplay(slip.month).toUpperCase()})
+						</p>
 
-						{/* Earnings */}
-						<div className="space-y-4">
-							<h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
-								<Wallet size={14} /> Earnings
-							</h4>
-							<div className="space-y-2.5">
-								{Object.entries(EARNING_LABELS).map(([key, label]) => {
-									if (slip.earnings?.[key] == null) return null;
-									return <DataRow key={key} label={label} value={currency(slip.earnings[key])} />;
-								})}
-							</div>
-						</div>
+						{/* Employee & attendance grid — only fields present in the API response */}
+						<table className="w-full border-collapse mb-0">
+							<tbody>
+								<tr>
+									<LabelCell>TOTAL WORKING DAYS</LabelCell>
+									<ValueCell>{dash(slip.attendanceSummary?.totalWorkingDays)}</ValueCell>
+								</tr>
+								<tr>
+									<LabelCell>LESS : LEAVE TAKEN</LabelCell>
+									<ValueCell>{dash(totalLeaveTaken)}</ValueCell>
+								</tr>
+								<tr>
+									<LabelCell>NET WORKING DAYS</LabelCell>
+									<ValueCell>{dash(netWorkingDays)}</ValueCell>
+								</tr>
+								<tr>
+									<LabelCell>BASIC SALARY</LabelCell>
+									<ValueCell>{dash(slip.earnings?.basic)}</ValueCell>
+								</tr>
+							</tbody>
+						</table>
 
-						{/* Deductions */}
-						<div className="space-y-4">
-							<h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-destructive">
-								<AlertCircle size={14} /> Deductions
-							</h4>
-							<div className="space-y-2.5">
-								{Object.entries(DEDUCTION_LABELS).map(([key, label]) => {
-									if (slip.deductions?.[key] == null) return null;
-									return <DataRow key={key} label={label} value={currency(slip.deductions[key])} />;
-								})}
-							</div>
-						</div>
+						{/* Salary breakup — 3 columns: Particulars / Amount / Running balance */}
+						<table className="w-full border-collapse">
+							<tbody>
+								<tr>
+									<LabelCell span={3} shaded>
+										SALARY
+									</LabelCell>
+								</tr>
+								<tr>
+									<LabelCell span={2}>GROSS SALARY</LabelCell>
+									<ValueCell className="font-bold text-foreground">{currency(slip.grossEarnings)}</ValueCell>
+								</tr>
+								{earningEntries.map((e) => (
+									<tr key={e.key}>
+										<Cell span={2}>{e.label.toUpperCase()}</Cell>
+										<ValueCell>{dash(e.amount)}</ValueCell>
+									</tr>
+								))}
+								<tr>
+									<Cell span={2}>SALARY (LEAVE DEDUCTION; IF ANY)</Cell>
+									<ValueCell className="text-foreground">{currency(slip.grossEarnings)}</ValueCell>
+								</tr>
+								{deductionEntries.map((d) => (
+									<tr key={d.key}>
+										<Cell span={2}>LESS : {d.label.toUpperCase()}</Cell>
+										<ValueCell className="text-foreground">
+											{dash(d.amount)} &nbsp;&nbsp; {currency(d.balance)}
+										</ValueCell>
+									</tr>
+								))}
+								<tr>
+									<LabelCell span={2}>NET PAYABLE SALARY</LabelCell>
+									<ValueCell className="font-bold text-foreground">{currency(slip.netSalary)}</ValueCell>
+								</tr>
+								<tr>
+									<LabelCell span={3} shaded>
+										INCENTIVE
+									</LabelCell>
+								</tr>
+								<tr>
+									<Cell span={2}>INCENTIVE AMOUNT</Cell>
+									<ValueCell className="text-foreground">{currency(incentiveAmount)}</ValueCell>
+								</tr>
+								<tr>
+									<Cell span={2}>LESS: ADVANCE INCENTIVE</Cell>
+									<ValueCell className="text-foreground">{currency(0)}</ValueCell>
+								</tr>
+								<tr>
+									<LabelCell span={2}>NET PAYABLE INCENTIVE</LabelCell>
+									<ValueCell className="font-bold text-foreground">{currency(incentiveAmount)}</ValueCell>
+								</tr>
+							</tbody>
+						</table>
 
-						{/* Attendance & Leave */}
-						<div className="space-y-4">
-							<h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-info">
-								<Clock size={14} /> Attendance & Leave
-							</h4>
-							<div className="space-y-2.5">
-								{Object.entries(ATTENDANCE_LABELS).map(([key, label]) => {
-									if (slip.attendanceSummary?.[key] == null) return null;
-									return <DataRow key={key} label={label} value={dash(slip.attendanceSummary[key])} />;
-								})}
-								{Object.entries(LEAVE_LABELS).map(([key, label]) => {
-									if (slip.leaveSummary?.[key] == null) return null;
-									return <DataRow key={key} label={label} value={dash(slip.leaveSummary[key])} />;
-								})}
-							</div>
-						</div>
-
-						{/* Payment & Approvals */}
-						<div className="space-y-4">
-							<h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-secondary-foreground">
-								<Landmark size={14} /> Payment & Approvals
-							</h4>
-							<div className="space-y-2.5 p-4 rounded-lg border border-border bg-card shadow-sm">
-								<DataRow label="Method" value={dash(slip.paymentMethod)} />
-								<DataRow label="Pay Date" value={slip.paymentDate ? formatDate(slip.paymentDate) : dash(null)} />
-								<DataRow label="Bank" value={dash(slip.bankAccountDetails?.bankName)} />
-								<DataRow label="A/C No" value={dash(slip.bankAccountDetails?.accountNumber)} />
-								<DataRow
-									label="HR Apprv."
-									value={dash(slip.hrApproval?.status)}
-									colorClass={slip.hrApproval?.status === "Approved" ? "text-success" : ""}
-								/>
-								<DataRow
-									label="Fin Apprv."
-									value={dash(slip.financeApproval?.status)}
-									colorClass={slip.financeApproval?.status === "Approved" ? "text-success" : ""}
-								/>
-							</div>
+						{/* Totals footer, centered like the printed slip */}
+						<div className="text-center mt-4 space-y-0.5">
+							<p className="text-sm font-black text-foreground">
+								TOTAL PAYABLE AMOUNT:- {currency(slip.netSalary)}
+							</p>
+							<p className="text-xs font-bold text-foreground">
+								TOTAL PAYABLE AMOUNT IN WORDS:- {numberToWords(slip.netSalary).toUpperCase()}
+							</p>
 						</div>
 					</div>
 
-					{/* Salary Summary Cards */}
-					<div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-display">
-						<div className="p-4 rounded-lg text-center border border-border bg-card shadow-sm">
-							<p className="text-xs text-muted-foreground uppercase font-bold tracking-wide">Gross Earnings</p>
-							<p className="text-lg font-bold text-success">{currency(slip.grossEarnings)}</p>
-						</div>
-						<div className="p-4 rounded-lg text-center border border-border bg-card shadow-sm">
-							<p className="text-xs text-muted-foreground uppercase font-bold tracking-wide">Total Deductions</p>
-							<p className="text-lg font-bold text-destructive">{currency(slip.totalDeductions)}</p>
-						</div>
-						<div className="p-4 rounded-lg text-center border border-success/30 bg-success/10 shadow-sm">
-							<p className="text-xs text-muted-foreground uppercase font-bold tracking-wide">Net Salary</p>
-							<p className="text-xl font-black text-success">{currency(slip.netSalary)}</p>
-						</div>
-					</div>
-
-					{/* Footer / Actions */}
-					<div className="mt-8 pt-4 border-t border-border flex flex-wrap justify-between items-center gap-4">
+					{/* Status / approvals / download — app-only info, not part of the printed slip */}
+					<div className="mt-6 pt-4 border-t border-border flex flex-wrap justify-between items-center gap-4">
 						<div className="text-xs text-muted-foreground space-y-1">
-							<p><span className="font-semibold text-foreground">Proj/Dept:</span> {dash(slip.projectId)} / {dash(slip.departmentId)}</p>
-							<p><span className="font-semibold text-foreground">Generated:</span> {formatDate(slip.createdAt)}</p>
-							<p className="flex items-center gap-1"><Info size={12} className="text-info" /> {dash(slip.remarks || "No remarks")}</p>
+							<p>
+								<span className="font-semibold text-foreground">HR Apprv.:</span>{" "}
+								<span className={slip.hrApproval?.status === "Approved" ? "text-success font-semibold" : ""}>
+									{dash(slip.hrApproval?.status)}
+								</span>
+								&nbsp;|&nbsp;
+								<span className="font-semibold text-foreground">Fin Apprv.:</span>{" "}
+								<span className={slip.financeApproval?.status === "Approved" ? "text-success font-semibold" : ""}>
+									{dash(slip.financeApproval?.status)}
+								</span>
+							</p>
+							<p>
+								<span className="font-semibold text-foreground">Pay Date:</span>{" "}
+								{slip.paymentDate ? formatDate(slip.paymentDate) : dash(null)} &nbsp;|&nbsp;
+								<span className="font-semibold text-foreground"> Method:</span> {dash(slip.paymentMethod)}
+							</p>
 						</div>
 
-						<PDFDownloadLink
-							document={<SalarySlipPDF slip={slip} />}
-							fileName={`Salary_Slip_${slip.month}.pdf`}
-							className="w-full sm:w-auto"
-						>
-							{({ loading }) => (
-								<Button
-									disabled={loading}
-									className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
-								>
-									{loading ? <FileText className="h-4 w-4 animate-pulse" /> : <Download className="h-4 w-4" />}
-									{loading ? "Generating PDF..." : "Download PDF Slip"}
-								</Button>
-							)}
-						</PDFDownloadLink>
+						<div className="flex gap-2 w-full sm:w-auto">
+							<Button
+								variant="outline"
+								disabled={!slip.pdfUrl}
+								onClick={handleViewPdf}
+								className="flex-1 sm:flex-none gap-2"
+							>
+								<Eye className="h-4 w-4" />
+								View PDF
+							</Button>
+							{/* <Button
+								disabled={downloading}
+								onClick={handleDownload}
+								className="flex-1 sm:flex-none gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+							>
+								{downloading ? <FileText className="h-4 w-4 animate-pulse" /> : <Download className="h-4 w-4" />}
+								{downloading ? "Downloading..." : "Download"}
+							</Button> */}
+						</div>
 					</div>
 				</div>
 			)}
