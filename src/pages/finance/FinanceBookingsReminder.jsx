@@ -300,8 +300,9 @@ export function FinanceBookingsReminder() {
 						<TableHeader className="bg-muted/30">
 							<TableRow className="hover:bg-transparent">
 								<TableHead className="font-semibold text-muted-foreground">Buyer Details</TableHead>
-								<TableHead className="font-semibold text-muted-foreground">Property Details</TableHead>
-								<TableHead className="font-semibold text-muted-foreground">Project</TableHead>
+								<TableHead className="font-semibold text-muted-foreground">
+									Property Details
+								</TableHead>
 
 								<TableHead className="text-right w-[180px] min-w-[180px] text-nowrap font-semibold text-muted-foreground">
 									Total Paid
@@ -375,19 +376,28 @@ export function FinanceBookingsReminder() {
 											</div>
 										)}
 									</TableCell>
-									<TableCell className="min-w-32">
-										<div className="font-semibold text-foreground">
-											Flat: {b.flat?.flatNumber}
+									<TableCell className="min-w-[200px]">
+										<div className="flex flex-col text-xs">
+											{/* Flat */}
+											<div>
+												Flat: {b.flat?.flatNumber || "—"}
+											</div>
+
+											{/* Floor */}
+											<div>
+												Floor: {b.flat?.floor || "—"}
+											</div>
+
+											{/* Tower */}
+											<div>
+												Tower: {b.flat?.tower || "—"}
+											</div>
+
+											{/* Project */}
+											<div className="text-muted-foreground">
+												Project: {b.projectName || "N/A"}
+											</div>
 										</div>
-										<div className="text-[11px] text-muted-foreground mt-0.5 text-nowrap">
-											Tower: {b.flat?.tower}
-										</div>
-										<div className="text-[11px] text-muted-foreground text-nowrap">
-											Floor: {b.flat?.floor}
-										</div>
-									</TableCell>
-									<TableCell className="min-w-32 font-medium text-sm text-muted-foreground">
-										{b.projectName}
 									</TableCell>
 									<TableCell className="text-right w-[180px] min-w-[180px] font-medium tabular-nums">
 										<div>
