@@ -38,7 +38,9 @@ export function ReminderHistoryModal({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Reminder History</DialogTitle>
+					<DialogTitle>
+						{type === "booking" ? "Reminder History" : "Installment History"}
+					</DialogTitle>
 				</DialogHeader>
 
 				{loading && (
@@ -87,10 +89,10 @@ export function ReminderHistoryModal({
 										Status:{" "}
 										<span
 											className={`capitalize font-medium ${header?.status?.toLowerCase() === "paid"
-													? "text-success"
-													: header?.status?.toLowerCase() === "overdue"
-														? "text-destructive"
-														: "text-amber-600"
+												? "text-success"
+												: header?.status?.toLowerCase() === "overdue"
+													? "text-destructive"
+													: "text-amber-600"
 												}`}
 										>
 											{header?.status}
@@ -99,78 +101,82 @@ export function ReminderHistoryModal({
 								</div>
 							)}
 
-							<div className="flex gap-4 text-xs text-muted-foreground">
-								<span>Total: {summary?.totalReminders ?? 0}</span>
-								<span className="text-success">Sent: {summary?.sent ?? 0}</span>
-								<span className="text-destructive">Failed: {summary?.failed ?? 0}</span>
-							</div>
+							{type === "booking" && (
+								<div className="flex gap-4 text-xs text-muted-foreground">
+									<span>Total: {summary?.totalReminders ?? 0}</span>
+									<span className="text-success">Sent: {summary?.sent ?? 0}</span>
+									<span className="text-destructive">Failed: {summary?.failed ?? 0}</span>
+								</div>
+							)}
 
-							<div className="max-h-80 overflow-y-auto space-y-2">
-								{reminders.length === 0 && (
-									<p className="text-center text-sm text-muted-foreground py-6">
-										No reminders sent yet.
-									</p>
-								)}
+							{type === "booking" && (
+								<div className="max-h-80 overflow-y-auto space-y-2">
+									{reminders.length === 0 && (
+										<p className="text-center text-sm text-muted-foreground py-6">
+											No reminders sent yet.
+										</p>
+									)}
 
-								<TooltipProvider>
-									{reminders.map((r) => {
-										const reminderTitle =
-											r.installmentDescription ||
-											(r.installmentNumber ? `Installment #${r.installmentNumber}` : null) ||
-											r.milestone ||
-											(r.reminderType
-												? `${r.reminderType.charAt(0).toUpperCase()}${r.reminderType.slice(1)} Reminder`
-												: "Reminder");
-										const showMilestoneLine = r.milestone && r.milestone !== reminderTitle;
+									<TooltipProvider>
+										{reminders.map((r) => {
+											const reminderTitle =
+												r.installmentDescription ||
+												(r.installmentNumber ? `Installment #${r.installmentNumber}` : null) ||
+												r.milestone ||
+												(r.reminderType
+													? `${r.reminderType.charAt(0).toUpperCase()}${r.reminderType.slice(1)} Reminder`
+													: "Reminder");
+											const showMilestoneLine = r.milestone && r.milestone !== reminderTitle;
 
-										return (
-											<div
-												key={r.id}
-												className="flex items-start justify-between gap-3 rounded-lg border p-3 text-sm"
-											>
-												<div className="flex items-start gap-2">
-													{r.channel === "whatsapp" ? (
-														<MessageCircle className="h-4 w-4 mt-0.5 text-green-600" />
-													) : (
-														<Mail className="h-4 w-4 mt-0.5 text-primary" />
-													)}
-													<div>
-														<div className="font-medium">
-															{reminderTitle}
-														</div>
-														{showMilestoneLine && (
-															<div className="text-xs text-muted-foreground">
-																{r.milestone}
-															</div>
+											return (
+												<div
+													key={r.id}
+													className="flex items-start justify-between gap-3 rounded-lg border p-3 text-sm"
+												>
+													<div className="flex items-start gap-2">
+														{r.channel === "whatsapp" ? (
+															<MessageCircle className="h-4 w-4 mt-0.5 text-green-600" />
+														) : (
+															<Mail className="h-4 w-4 mt-0.5 text-primary" />
 														)}
-														<div className="text-xs text-muted-foreground">
-															To: {r.recipient}
-															{r.amount > 0 ? ` · ${formatINR(r.amount)}` : ""}
-														</div>
-														<div className="text-[11px] text-muted-foreground">
-															{r.sentAt ? formatDate(r.sentAt) : "—"}
-															{r.reminderType && r.reminderType !== "normal" ? ` · ${r.reminderType}` : ""}
+														<div>
+															<div className="font-medium">
+																{reminderTitle}
+															</div>
+															{showMilestoneLine && (
+																<div className="text-xs text-muted-foreground">
+																	{r.milestone}
+																</div>
+															)}
+															<div className="text-xs text-muted-foreground">
+																To: {r.recipient}
+																{r.amount > 0 ? ` · ${formatINR(r.amount)}` : ""}
+															</div>
+															<div className="text-[11px] text-muted-foreground">
+																{r.sentAt ? formatDate(r.sentAt) : "—"}
+																{r.reminderType && r.reminderType !== "normal" ? ` · ${r.reminderType}` : ""}
+															</div>
 														</div>
 													</div>
-												</div>
 
-												{r.sent ? (
-													<Badge className="bg-success/10 text-success border-none">Sent</Badge>
-												) : (
-													<Tooltip>
-														<TooltipTrigger asChild>
-															<Badge variant="destructive" className="cursor-help">
-																Failed
-															</Badge>
-														</TooltipTrigger>
-														<TooltipContent>{r.error || "Unknown error"}</TooltipContent>
-													</Tooltip>
-												)}
-											</div>
-										);
-									})}
-								</TooltipProvider>
-							</div>
+													{r.sent ? (
+														<Badge className="bg-success/10 text-success border-none">Sent</Badge>
+													) : (
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<Badge variant="destructive" className="cursor-help">
+																	Failed
+																</Badge>
+															</TooltipTrigger>
+															<TooltipContent>{r.error || "Unknown error"}</TooltipContent>
+														</Tooltip>
+													)}
+												</div>
+											);
+										})}
+									</TooltipProvider>
+								</div>
+							)}
 						</div>
 
 						{pagination && pagination.pages > 1 && (
