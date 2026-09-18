@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Download, Eye, FileText } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Eye, FileText, PlusCircle, MinusCircle, Wallet, Gift, TrendingUp } from "lucide-react";
 import { useHR } from "@/hooks/useHR";
 import {
 	dash,
@@ -88,14 +88,9 @@ export const SalaryCard = ({ slip }) => {
 		.filter(([key]) => !bonusKeys.includes(key) && (slip.earnings?.[key] ?? 0) !== 0)
 		.map(([key, label]) => ({ key, label, amount: slip.earnings[key] }));
 
-	let runningBalance = slip.grossEarnings ?? 0;
 	const deductionEntries = Object.entries(DEDUCTION_LABELS)
 		.filter(([key]) => (slip.deductions?.[key] ?? 0) !== 0)
-		.map(([key, label]) => {
-			const amount = slip.deductions[key];
-			runningBalance -= amount;
-			return { key, label, amount, balance: runningBalance };
-		});
+		.map(([key, label]) => ({ key, label, amount: slip.deductions[key] }));
 
 	const incentiveAmount = bonusKeys.reduce((sum, key) => sum + (slip.earnings?.[key] ?? 0), 0);
 
@@ -181,69 +176,73 @@ export const SalaryCard = ({ slip }) => {
 							</tbody>
 						</table>
 
-						{/* Salary breakup — 3 columns: Particulars / Amount / Running balance */}
-						<table className="w-full border-collapse">
-							<tbody>
-								<tr>
-									<LabelCell span={3} shaded>
-										SALARY
-									</LabelCell>
-								</tr>
-								<tr>
-									<LabelCell span={2}>GROSS SALARY</LabelCell>
-									<ValueCell className="font-bold text-foreground">{currency(slip.grossEarnings)}</ValueCell>
-								</tr>
-								{earningEntries.map((e) => (
-									<tr key={e.key}>
-										<Cell span={2}>{e.label.toUpperCase()}</Cell>
-										<ValueCell>{dash(e.amount)}</ValueCell>
-									</tr>
-								))}
-								<tr>
-									<Cell span={2}>SALARY (LEAVE DEDUCTION; IF ANY)</Cell>
-									<ValueCell className="text-foreground">{currency(slip.grossEarnings)}</ValueCell>
-								</tr>
-								{deductionEntries.map((d) => (
-									<tr key={d.key}>
-										<Cell span={2}>LESS : {d.label.toUpperCase()}</Cell>
-										<ValueCell className="text-foreground">
-											{dash(d.amount)} &nbsp;&nbsp; {currency(d.balance)}
-										</ValueCell>
-									</tr>
-								))}
-								<tr>
-									<LabelCell span={2}>NET PAYABLE SALARY</LabelCell>
-									<ValueCell className="font-bold text-foreground">{currency(slip.netSalary)}</ValueCell>
-								</tr>
-								<tr>
-									<LabelCell span={3} shaded>
-										INCENTIVE
-									</LabelCell>
-								</tr>
-								<tr>
-									<Cell span={2}>INCENTIVE AMOUNT</Cell>
-									<ValueCell className="text-foreground">{currency(incentiveAmount)}</ValueCell>
-								</tr>
-								<tr>
-									<Cell span={2}>LESS: ADVANCE INCENTIVE</Cell>
-									<ValueCell className="text-foreground">{currency(0)}</ValueCell>
-								</tr>
-								<tr>
-									<LabelCell span={2}>NET PAYABLE INCENTIVE</LabelCell>
-									<ValueCell className="font-bold text-foreground">{currency(incentiveAmount)}</ValueCell>
-								</tr>
-							</tbody>
-						</table>
+						{/* Salary calculation — color-coded, easy to scan at a glance */}
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+							{/* Earnings */}
+							<div className="rounded-lg border border-success/30 bg-success/5 p-4 flex flex-col h-full">
+								<h4 className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-success mb-3">
+									<PlusCircle size={14} /> Earnings
+								</h4>
+								<div className="space-y-2">
+									{earningEntries.map((e) => (
+										<div key={e.key} className="flex items-center justify-between text-xs sm:text-sm">
+											<span className="text-muted-foreground">{e.label}</span>
+											<span className="font-semibold text-success tabular-nums">+ {currency(e.amount)}</span>
+										</div>
+									))}
+								</div>
+								<div className="flex items-center justify-between mt-auto pt-3 border-t border-success/30">
+									<span className="text-xs font-bold uppercase text-foreground">Gross Salary</span>
+									<span className="font-black text-success tabular-nums">{currency(slip.grossEarnings)}</span>
+								</div>
+							</div>
 
-						{/* Totals footer, centered like the printed slip */}
-						<div className="text-center mt-4 space-y-0.5">
-							<p className="text-sm font-black text-foreground">
-								TOTAL PAYABLE AMOUNT:- {currency(slip.netSalary)}
-							</p>
-							<p className="text-xs font-bold text-foreground">
-								TOTAL PAYABLE AMOUNT IN WORDS:- {numberToWords(slip.netSalary).toUpperCase()}
-							</p>
+							{/* Deductions */}
+							<div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 flex flex-col h-full">
+								<h4 className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-destructive mb-3">
+									<MinusCircle size={14} /> Deductions
+								</h4>
+								{deductionEntries.length > 0 ? (
+									<div className="space-y-2">
+										{deductionEntries.map((d) => (
+											<div key={d.key} className="flex items-center justify-between text-xs sm:text-sm">
+												<span className="text-muted-foreground">{d.label}</span>
+												<span className="font-semibold text-destructive tabular-nums">- {currency(d.amount)}</span>
+											</div>
+										))}
+									</div>
+								) : (
+									<p className="text-xs text-muted-foreground italic">No deductions this month</p>
+								)}
+								<div className="flex items-center justify-between mt-auto pt-3 border-t border-destructive/30">
+									<span className="text-xs font-bold uppercase text-foreground">Total Deductions</span>
+									<span className="font-black text-destructive tabular-nums">- {currency(slip.totalDeductions)}</span>
+								</div>
+							</div>
 						</div>
+
+						{/* Incentive — shown only when there's something to report */}
+						{incentiveAmount > 0 && (
+							<div className="rounded-lg border border-warning/30 bg-warning/5 p-4 mt-4 flex items-center justify-between">
+								<h4 className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-warning">
+									<Gift size={14} /> Incentive
+								</h4>
+								<span className="font-black text-warning tabular-nums">{currency(incentiveAmount)}</span>
+							</div>
+						)}
+
+						{/* Net payable — the headline number */}
+						<div className="rounded-lg border border-primary/40 bg-primary/10 p-4 mt-4 flex items-center justify-between">
+							<h4 className="flex items-center gap-2 text-sm font-black uppercase tracking-wide text-primary">
+								<Wallet size={18} /> Net Payable Salary
+							</h4>
+							<span className="font-black text-2xl text-primary tabular-nums">{currency(slip.netSalary)}</span>
+						</div>
+
+						{/* Amount in words */}
+						<p className="text-center text-xs font-semibold text-muted-foreground mt-3">
+							{numberToWords(slip.netSalary)}
+						</p>
 					</div>
 
 					{/* Status / approvals / download — app-only info, not part of the printed slip */}
