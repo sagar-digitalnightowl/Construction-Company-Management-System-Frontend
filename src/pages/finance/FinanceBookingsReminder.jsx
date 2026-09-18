@@ -78,6 +78,7 @@ export function FinanceBookingsReminder() {
 		installmentId: null, // ✅ Added to store WhatsApp installment ID
 		language: "en", // ✅ Added language for WhatsApp notification
 	});
+	const [reminderBooking, setReminderBooking] = useState(null);
 
 	const openBookingHistory = async (bookingId) => {
 		setHistoryOpen(true);
@@ -172,36 +173,132 @@ export function FinanceBookingsReminder() {
 		fetchProjects(nextPage);
 	};
 
+	const fmtReminderAmount = (amount) =>
+		`₹${Number(amount || 0).toLocaleString("en-IN")}`;
+
+	const calculateArrear = (installments, currentInstallmentNumber) => {
+		return (installments || [])
+			.filter(
+				(i) =>
+					Number(i.installmentNumber) < Number(currentInstallmentNumber) &&
+					i.status !== "paid",
+			)
+			.reduce(
+				(sum, i) =>
+					sum +
+					Math.max(
+						0,
+						Number(i.amount || 0) - Number(i.paidAmount || 0),
+					),
+				0,
+			);
+	};
+
 	// ✅ Updated to handle WhatsApp sending with language
 	const handleSendReminder = async (bookingId) => {
-		if (reminderType === "whatsapp") {
-			await sendWhatsAppReminders([reminderData.installmentId], reminderData.language);
-		} else {
+		try {
+			if (reminderType === "whatsapp") {
+				await sendWhatsAppReminders(
+					[reminderData.installmentId],
+					reminderData.language,
+				);
+
+				toast.success("WhatsApp reminder sent");
+
+				setReminderOpen(null);
+				setReminderData({
+					dueDate: "",
+					milestoneName: "",
+					installmentId: null,
+					language: "en",
+				});
+
+				return;
+			}
+
 			const payload = {
 				dueDate: reminderData.dueDate || undefined,
 				milestoneName: reminderData.milestoneName || undefined,
 			};
+
+			let response;
+
 			if (reminderType === "normal") {
-				await sendNormalReminder(bookingId, payload);
+				response = await sendNormalReminder(bookingId, payload);
 			} else if (reminderType === "penalty") {
 				await sendPenaltyReminder(bookingId, payload);
-			}
-		}
 
-		// Close dialog and reset state
-		setReminderOpen(null);
-		setReminderData({ dueDate: "", milestoneName: "", installmentId: null, language: "en" });
+				toast.success("Penalty reminder sent");
+
+				setReminderOpen(null);
+				setReminderData({
+					dueDate: "",
+					milestoneName: "",
+					installmentId: null,
+					language: "en",
+				});
+
+				return;
+			}
+
+			const breakdown = response?.data?.breakdown;
+
+			if (breakdown) {
+				if (Number(breakdown.previousOutstanding) > 0) {
+					toast.success(
+						`Reminder sent: ${fmtReminderAmount(breakdown.totalDue)} `,
+						{
+							description:
+								`Current installment: ${fmtReminderAmount(
+									breakdown.currentInstallment,
+								)
+								} + Previous outstanding: ${fmtReminderAmount(
+									breakdown.previousOutstanding,
+								)
+								} `,
+						},
+					);
+				} else {
+					toast.success(
+						`Reminder sent: ${fmtReminderAmount(breakdown.totalDue)} `,
+					);
+				}
+			} else {
+				toast.success("Normal reminder sent");
+			}
+
+			setReminderOpen(null);
+			setReminderData({
+				dueDate: "",
+				milestoneName: "",
+				installmentId: null,
+				language: "en",
+			});
+		} catch (err) {
+			console.error("Reminder send failed:", err);
+		}
 	};
 
 	// ✅ Updated to accept extra data for WhatsApp and reset language
-	const openReminderDialog = (bookingId, type, extraData = null) => {
+	const openReminderDialog = (bookingId, type, extraData = null, booking = null) => {
 		setReminderOpen(bookingId);
 		setReminderType(type);
+		setReminderBooking(booking);
 
 		if (type === "whatsapp" && extraData) {
-			setReminderData({ dueDate: "", milestoneName: "", installmentId: extraData.installmentId, language: "en" });
+			setReminderData({
+				dueDate: "",
+				milestoneName: "",
+				installmentId: extraData.installmentId,
+				language: "en",
+			});
 		} else {
-			setReminderData({ dueDate: "", milestoneName: "", installmentId: null, language: "en" });
+			setReminderData({
+				dueDate: "",
+				milestoneName: "",
+				installmentId: null,
+				language: "en",
+			});
 		}
 	};
 
@@ -503,7 +600,7 @@ export function FinanceBookingsReminder() {
 												size="icon"
 												className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
 												title="Send Normal Reminder"
-												onClick={() => openReminderDialog(b.bookingId, "normal")}
+												onClick={() => openReminderDialog(b.bookingId, "normal", null, b)}
 												disabled={!b.buyer?.email}
 											>
 												<Mail className="h-4 w-4" />
@@ -515,7 +612,7 @@ export function FinanceBookingsReminder() {
 												size="icon"
 												className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors"
 												title="Send Penalty Reminder"
-												onClick={() => openReminderDialog(b.bookingId, "penalty")}
+												onClick={() => openReminderDialog(b.bookingId, "penalty", null, b)}
 												disabled={!b.buyer?.email}
 											>
 												<AlertTriangle className="h-4 w-4 text-destructive/80" />
@@ -534,7 +631,12 @@ export function FinanceBookingsReminder() {
 
 													if (pendingInstallment) {
 														const id = pendingInstallment._id || pendingInstallment.id;
-														openReminderDialog(b.bookingId, "whatsapp", { installmentId: id });
+														openReminderDialog(
+															b.bookingId,
+															"whatsapp",
+															{ installmentId: id },
+															b,
+														);
 													} else {
 														toast.error("No pending installment found to send reminder.");
 													}
@@ -646,6 +748,74 @@ export function FinanceBookingsReminder() {
 										/>
 									</div>
 								)}
+
+								{reminderType !== "whatsapp" && reminderBooking && (() => {
+									const pendingInstallment = reminderBooking.installments?.find(
+										(i) => i.status === "pending",
+									);
+
+									if (!pendingInstallment) return null;
+
+									const currentAmount = Math.max(
+										0,
+										Number(pendingInstallment.amount || 0) -
+										Number(pendingInstallment.paidAmount || 0),
+									);
+
+									const arrear = calculateArrear(
+										reminderBooking.installments,
+										pendingInstallment.installmentNumber,
+									);
+
+									const totalDue = currentAmount + arrear;
+
+									return (
+										<div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+											<div className="text-sm font-medium">
+												Reminder Amount
+											</div>
+
+											<div className="space-y-1 text-sm">
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">
+														Current installment
+													</span>
+													<span className="tabular-nums">
+														{fmtReminderAmount(currentAmount)}
+													</span>
+												</div>
+
+												{arrear > 0 && (
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">
+															Previous outstanding
+														</span>
+														<span className="text-destructive tabular-nums">
+															{fmtReminderAmount(arrear)}
+														</span>
+													</div>
+												)}
+
+												<div className="border-t pt-2 flex justify-between gap-4">
+													<span className="font-medium">
+														Total reminder amount
+													</span>
+													<span className="font-semibold tabular-nums">
+														{fmtReminderAmount(totalDue)}
+													</span>
+												</div>
+											</div>
+
+											{arrear > 0 && (
+												<p className="text-xs text-amber-600">
+													Previous outstanding amount will be included in this
+													reminder.
+												</p>
+											)}
+										</div>
+									);
+								})()}
+
 								<div className="space-y-1.5">
 									<Label>Due Date (optional)</Label>
 									<Input
