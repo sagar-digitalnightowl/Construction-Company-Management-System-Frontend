@@ -251,6 +251,19 @@ export function FinanceDashboard() {
 		);
 	}, [selectedProject, selectedTower, selectedFloor]);
 
+	const dashboardFlatsMap = useMemo(() => {
+		const map = new Map();
+
+		projects.forEach((project) => {
+			project.flats?.forEach((flat) => {
+				const key = `${project.projectId}-${flat.tower}-${flat.floor}-${flat.flatNumber}`;
+				map.set(key, flat);
+			});
+		});
+
+		return map;
+	}, [projects]);
+
 	const handlePageChange = (newPage) => {
 		if (pagination && newPage >= 1 && newPage <= pagination.pages) {
 			setPage(newPage);
@@ -758,6 +771,8 @@ export function FinanceDashboard() {
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 						{filteredFlats.map((flat) => {
 							const uniqueKey = `${selectedProject.projectId}-${flat.tower}-${flat.floor}-${flat.flatNumber}`;
+							const dashboardFlat = dashboardFlatsMap.get(uniqueKey);
+
 							const { status, label, variant } = getFlatDisplay(flat);
 
 							const isSold = status === "sold";
@@ -863,23 +878,62 @@ export function FinanceDashboard() {
 													</div>
 												</div>
 
-												{/* Next Installment Due */}
-												<div className="pt-1 text-[10px] sm:text-xs">
-													{flat.nextInstallmentDue ? (
-														<p className="text-muted-foreground">
-															Next Due:{" "}
-															<span className="font-medium text-foreground">
-																{formatDate(flat.nextInstallmentDue)}
-															</span>
-															{flat.nextInstallmentAmount ? (
+												{/* Next Installment / Reminder Details */}
+												<div className="pt-2 space-y-1.5 text-[10px] sm:text-xs">
+													{dashboardFlat?.nextInstallmentDue ? (
+														<>
+															<div className="flex items-center justify-between gap-2">
 																<span className="text-muted-foreground">
-																	{" "}({formatINR(flat.nextInstallmentAmount)})
+																	Next Installment
 																</span>
+																<span className="font-semibold text-foreground">
+																	{formatINR(dashboardFlat.nextInstallmentAmount || 0)}
+																</span>
+															</div>
+
+															<div className="flex items-center justify-between gap-2">
+																<span className="text-muted-foreground">
+																	Due Date
+																</span>
+																<span className="font-medium text-foreground">
+																	{formatDate(dashboardFlat.nextInstallmentDue)}
+																</span>
+															</div>
+
+															{dashboardFlat.remindedInstallmentNumber ? (
+																<div className="flex items-center justify-between gap-2">
+																	<span className="text-muted-foreground">
+																		Installment No.
+																	</span>
+																	<span className="font-medium text-foreground">
+																		#{dashboardFlat.remindedInstallmentNumber}
+																	</span>
+																</div>
 															) : null}
-														</p>
+
+															{dashboardFlat.lastReminderSentAt ? (
+																<div className="flex items-center justify-between gap-2">
+																	<span className="text-muted-foreground">
+																		Last Reminder Sent
+																	</span>
+																	<span className="font-medium text-foreground">
+																		{formatDate(dashboardFlat.lastReminderSentAt)}
+																	</span>
+																</div>
+															) : (
+																<div className="flex items-center justify-between gap-2">
+																	<span className="text-muted-foreground">
+																		Reminder
+																	</span>
+																	<span className="italic text-muted-foreground/60">
+																		Not sent yet
+																	</span>
+																</div>
+															)}
+														</>
 													) : (
 														<p className="text-muted-foreground/60 italic">
-															Reminder not sent yet
+															No upcoming installment
 														</p>
 													)}
 												</div>
