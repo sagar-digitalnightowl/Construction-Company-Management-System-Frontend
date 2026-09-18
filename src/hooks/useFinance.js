@@ -160,13 +160,16 @@ export const useFinance = () => {
 	// ----- Reminders (manual) -----
 	const sendNormalReminder = async (bookingId, data) => {
 		setLoading(true);
+
 		try {
-			await financeApi.sendManualReminder(bookingId, data);
-			toast.success("Normal reminder sent");
+			const res = await financeApi.sendManualReminder(bookingId, data);
+
+			return res.data;
 		} catch (err) {
 			toast.error(
 				err.response?.data?.message || "Failed to send reminder",
 			);
+			throw err;
 		} finally {
 			setLoading(false);
 		}
