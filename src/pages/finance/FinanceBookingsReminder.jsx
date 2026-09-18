@@ -410,7 +410,9 @@ export function FinanceBookingsReminder() {
 									<TableCell className="text-xs">
 										{b.installmentSummary?.pendingInstallments > 0 ? (
 											(() => {
-												const nextInstallment = b.installments?.find((i) => !i.paid);
+												const nextInstallment = b.installments?.find(
+													(i) => i.status === "pending"
+												);
 
 												return nextInstallment ? (
 													<div className="flex flex-col gap-0.5">
@@ -464,7 +466,9 @@ export function FinanceBookingsReminder() {
 											<button
 												type="button"
 												onClick={() => {
-													const pendingInstallment = b.installments?.find((i) => !i.paid);
+													const pendingInstallment = b.installments?.find(
+														(i) => i.status === "pending"
+													);
 
 													if (pendingInstallment) {
 														openInstallmentHistory(
@@ -514,7 +518,10 @@ export function FinanceBookingsReminder() {
 												className="h-8 w-8 hover:bg-green-600/10 hover:text-green-600 transition-colors"
 												title="Send WhatsApp Reminder"
 												onClick={() => {
-													const pendingInstallment = b.installments?.find((i) => !i.paid);
+													const pendingInstallment = b.installments?.find(
+														(i) => i.status === "pending"
+													);
+
 													if (pendingInstallment) {
 														const id = pendingInstallment._id || pendingInstallment.id;
 														openReminderDialog(b.bookingId, "whatsapp", { installmentId: id });
