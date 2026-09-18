@@ -14,7 +14,9 @@ import {
 	TooltipProvider,
 } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Mail, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
+import { LuMail } from "react-icons/lu";
 import { formatINR, formatDate } from "@/lib/helpers";
 
 export function ReminderHistoryModal({
@@ -135,9 +137,9 @@ export function ReminderHistoryModal({
 												>
 													<div className="flex items-start gap-2">
 														{r.channel === "whatsapp" ? (
-															<MessageCircle className="h-4 w-4 mt-0.5 text-green-600" />
+															<FaWhatsapp className="h-4 w-4 mt-0.5 text-green-600" />
 														) : (
-															<Mail className="h-4 w-4 mt-0.5 text-primary" />
+															<LuMail className="h-4 w-4 mt-0.5 text-primary" />
 														)}
 														<div>
 															<div className="font-medium">
