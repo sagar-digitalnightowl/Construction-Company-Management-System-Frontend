@@ -116,11 +116,13 @@ export default function ProjectDetailPage() {
 	}, [projectId]);
 
 	const handleBookingPageChange = (page) => {
-		fetchProjectBookings(projectId, { page, limit: 10, search: bookingSearch });
+		fetchProjectBookings(projectId, { page, limit: 10, search: bookingSearch.trim(), });
 	};
 
 	const handleBookingSearch = (value = bookingSearch) => {
-		fetchProjectBookings(projectId, { page: 1, limit: 10, search: value.trim() });
+		const search = value.trim();
+		setBookingSearch(value);
+		fetchProjectBookings(projectId, { page: 1, limit: 10, search, });
 	};
 
 	const handleViewPayments = async (bookingId) => {
@@ -283,10 +285,16 @@ export default function ProjectDetailPage() {
 								value={bookingSearch}
 								onChange={(e) => {
 									const value = e.target.value;
+
 									setBookingSearch(value);
 
+									// Clear search immediately when input becomes empty
 									if (value.trim() === "") {
-										handleBookingSearch("");
+										fetchProjectBookings(projectId, {
+											page: 1,
+											limit: 10,
+											search: "",
+										});
 									}
 								}}
 								onKeyDown={(e) => {
@@ -296,8 +304,10 @@ export default function ProjectDetailPage() {
 								}}
 								className="max-w-md bg-white"
 							/>
-							<Button onClick={handleBookingSearch}>
-								<Search className="h-4 w-4 mr-2" /> Search
+
+							<Button onClick={() => handleBookingSearch()}>
+								<Search className="h-4 w-4 mr-2" />
+								Search
 							</Button>
 						</div>
 
