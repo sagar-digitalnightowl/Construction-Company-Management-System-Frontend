@@ -298,77 +298,72 @@ export function InstallmentTable({ installments, onPay, canPay }) {
 								</div>
 
 								{/* Reminder Information */}
-								{(
-									selectedInstallment.reminderSent ||
-									selectedInstallment.lastReminderSentAt ||
-									selectedInstallment.lastReminderAmount > 0 ||
-									selectedInstallment.reminderDueDate
-								) && (
-										<div className="border-t border-border/60 pt-5">
-											<span className="block text-muted-foreground text-xs uppercase tracking-wider mb-3">
-												Reminder Details
-											</span>
+								{selectedInstallment.status === "pending" && (
+									<div className="border-t border-border/60 pt-5">
+										<span className="block text-muted-foreground text-xs uppercase tracking-wider mb-3">
+											Reminder Details
+										</span>
 
-											<div className="grid grid-cols-2 gap-y-5 gap-x-4">
-												{selectedInstallment.reminderSent !== undefined && (
-													<div>
-														<span className="block text-muted-foreground text-xs mb-1">
-															Reminder Status
-														</span>
-														<span
-															className={`font-semibold ${selectedInstallment.reminderSent
-																? "text-emerald-600 dark:text-emerald-500"
-																: "text-muted-foreground"
-																}`}
-														>
-															{selectedInstallment.reminderSent
-																? "Sent"
-																: "Not Sent"}
-														</span>
-													</div>
-												)}
+										<div className="grid grid-cols-2 gap-y-5 gap-x-4">
+											{selectedInstallment.reminderSent !== undefined && (
+												<div>
+													<span className="block text-muted-foreground text-xs mb-1">
+														Reminder Status
+													</span>
+													<span
+														className={`font-semibold ${selectedInstallment.reminderSent
+															? "text-emerald-600 dark:text-emerald-500"
+															: "text-muted-foreground"
+															}`}
+													>
+														{selectedInstallment.reminderSent
+															? "Sent"
+															: "Not Sent"}
+													</span>
+												</div>
+											)}
 
-												{selectedInstallment.lastReminderSentAt && (
-													<div>
-														<span className="block text-muted-foreground text-xs mb-1">
-															Last Reminder Sent
-														</span>
-														<span className="font-semibold">
-															{formatDate(
-																selectedInstallment.lastReminderSentAt
-															)}
-														</span>
-													</div>
-												)}
+											{selectedInstallment.lastReminderSentAt && (
+												<div>
+													<span className="block text-muted-foreground text-xs mb-1">
+														Last Reminder Sent
+													</span>
+													<span className="font-semibold">
+														{formatDate(
+															selectedInstallment.lastReminderSentAt
+														)}
+													</span>
+												</div>
+											)}
 
-												{selectedInstallment.lastReminderAmount > 0 && (
-													<div>
-														<span className="block text-muted-foreground text-xs mb-1">
-															Reminder Amount
-														</span>
-														<span className="font-semibold text-amber-600 dark:text-amber-500">
-															{formatCurrency(
-																selectedInstallment.lastReminderAmount
-															)}
-														</span>
-													</div>
-												)}
+											{selectedInstallment.lastReminderAmount > 0 && (
+												<div>
+													<span className="block text-muted-foreground text-xs mb-1">
+														Reminder Amount
+													</span>
+													<span className="font-semibold text-amber-600 dark:text-amber-500">
+														{formatCurrency(
+															selectedInstallment.lastReminderAmount
+														)}
+													</span>
+												</div>
+											)}
 
-												{selectedInstallment.reminderDueDate && (
-													<div>
-														<span className="block text-muted-foreground text-xs mb-1">
-															Reminder Due Date
-														</span>
-														<span className="font-semibold">
-															{formatDate(
-																selectedInstallment.reminderDueDate
-															)}
-														</span>
-													</div>
-												)}
-											</div>
+											{selectedInstallment.reminderDueDate && (
+												<div>
+													<span className="block text-muted-foreground text-xs mb-1">
+														Reminder Due Date
+													</span>
+													<span className="font-semibold">
+														{formatDate(
+															selectedInstallment.reminderDueDate
+														)}
+													</span>
+												</div>
+											)}
 										</div>
-									)}
+									</div>
+								)}
 							</div>
 						);
 					})()}
