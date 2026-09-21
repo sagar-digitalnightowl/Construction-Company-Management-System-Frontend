@@ -514,7 +514,7 @@ export function FinanceBookingsReminder() {
 									<TableCell className="text-right font-bold text-destructive tabular-nums">
 										{formatINR(b.remainingAmount)}
 									</TableCell>
-									<TableCell className="text-xs">
+									<TableCell className="text-xs whitespace-nowrap">
 										{b.installmentSummary?.pendingInstallments > 0 ? (
 											(() => {
 												const nextInstallment = b.installments?.find(
@@ -522,38 +522,40 @@ export function FinanceBookingsReminder() {
 												);
 
 												return nextInstallment ? (
-													<div className="flex flex-col gap-0.5">
-														<span className="font-semibold text-foreground tabular-nums">
+													<div className="flex flex-col gap-0.5 whitespace-nowrap">
+														<span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
 															{formatINR(nextInstallment.amount)}
 														</span>
 
-														<span className="text-[11px] text-muted-foreground">
+														<span className="text-[11px] text-muted-foreground whitespace-nowrap">
 															Reminder Due:{" "}
 															{nextInstallment.reminderDueDate
 																? formatDate(nextInstallment.reminderDueDate)
 																: "—"}
 														</span>
 
-														<span className="text-[11px] text-muted-foreground">
+														<span className="text-[11px] text-muted-foreground whitespace-nowrap">
 															Last Reminder:{" "}
 															{nextInstallment.lastReminderSentAt
 																? formatDate(nextInstallment.lastReminderSentAt)
 																: "—"}
 														</span>
 
-														<span className="text-[11px] text-muted-foreground">
+														<span className="text-[11px] text-muted-foreground whitespace-nowrap">
 															Last Reminder Amount:{" "}
 															{formatINR(nextInstallment.lastReminderAmount || 0)}
 														</span>
 													</div>
 												) : (
-													<Badge variant="secondary">No Pending Installment</Badge>
+													<Badge variant="secondary" className="whitespace-nowrap">
+														No Pending Installment
+													</Badge>
 												);
 											})()
 										) : (
 											<Badge
 												variant="secondary"
-												className="bg-success/10 text-success border-none hover:bg-success/20 pointer-events-none"
+												className="bg-success/10 text-success border-none hover:bg-success/20 pointer-events-none whitespace-nowrap"
 											>
 												All Paid
 											</Badge>
