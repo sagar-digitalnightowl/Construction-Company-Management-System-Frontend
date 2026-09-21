@@ -464,8 +464,13 @@ export default function MyExpenses() {
 									<TableCell className="max-w-[200px] truncate" title={txn.remarks}>
 										{txn.remarks || 'No remarks'}
 									</TableCell>
-									<TableCell className={`text-right font-medium ${txn.type === "CREDIT" ? "text-emerald-600" : "text-rose-600"}`}>
-										{txn.type === "CREDIT" ? "+" : "-"}₹{Number(txn.amount).toFixed(2)}
+									<TableCell
+										className={`text-right font-medium whitespace-nowrap ${txn.type === "CREDIT" ? "text-emerald-600" : "text-rose-600"
+											}`}
+									>
+										<span className="inline-flex items-center justify-end whitespace-nowrap">
+											{txn.type === "CREDIT" ? "+" : "-"}₹{Number(txn.amount).toFixed(2)}
+										</span>
 									</TableCell>
 									<TableCell className="text-right font-medium">
 										₹{Number(txn.balanceAfter).toFixed(2)}
