@@ -82,66 +82,123 @@ export function EditEmployeeDialog({
 	});
 
 	useEffect(() => {
-		if (open) fetchDepartments();
-		if (employee) {
-			setForm({
-				name: employee.name || "",
-				phone: employee.phone || "",
-				department: employee.department?._id || "",
-				office: employee.office?._id || "",
-				personalDetails: {
-					dateOfBirth:
-						employee.personalDetails?.dateOfBirth?.split("T")[0] || "",
-					gender: employee.personalDetails?.gender || "",
-					bloodGroup: employee.personalDetails?.bloodGroup || "",
-					address: {
-						line1: employee.personalDetails?.address?.line1 || "",
-						city: employee.personalDetails?.address?.city || "",
-						state: employee.personalDetails?.address?.state || "",
-						pincode: employee.personalDetails?.address?.pincode || "",
-					},
-					emergencyContact: {
-						name: employee.personalDetails?.emergencyContact?.name || "",
-						phone: employee.personalDetails?.emergencyContact?.phone || "",
-						relation:
-							employee.personalDetails?.emergencyContact?.relation || "",
-					},
-				},
-				jobDetails: {
-					designation: employee.jobDetails?.designation || "",
-					joiningDate: employee.jobDetails?.joiningDate?.split("T")[0] || "",
-					employmentType: employee.jobDetails?.employmentType || "Full-Time",
-					salary: {
-						basic: employee.jobDetails?.salary?.basic || "",
-						hra: employee.jobDetails?.salary?.hra || "",
-						allowances: employee.jobDetails?.salary?.allowances || "",
-						totalCTC: employee.jobDetails?.salary?.totalCTC || "",
-					},
-					shiftTiming: {
-						start: employee.jobDetails?.shiftTiming?.start || "09:00",
-						end: employee.jobDetails?.shiftTiming?.end || "18:00",
-					},
-					weeklyOff: employee.jobDetails?.weeklyOff || ["Sunday"],
-					probationPeriodMonths:
-						employee.jobDetails?.probationPeriodMonths || 3,
+		if (!open) return;
 
-					// ─── STATUTORY (NEW) ───
-					pfNumber: employee.jobDetails?.pfNumber || "",
-					uanNumber: employee.jobDetails?.uanNumber || "",
-					esiNumber: employee.jobDetails?.esiNumber || "",
-					isPfApplicable: employee.jobDetails?.isPfApplicable || false,
-					isEsiApplicable: employee.jobDetails?.isEsiApplicable || false,
-					pfEmployeeContributionPercent:
-						employee.jobDetails?.pfEmployeeContributionPercent ?? "",
-					esiEmployeeContributionPercent:
-						employee.jobDetails?.esiEmployeeContributionPercent ?? "",
-					pfJoiningDate:
-						employee.jobDetails?.pfJoiningDate?.split("T")[0] || "",
-					esiJoiningDate:
-						employee.jobDetails?.esiJoiningDate?.split("T")[0] || "",
+		fetchDepartments();
+		fetchActiveOffices();
+
+		if (!employee) return;
+
+		const permanentAddress =
+			employee.personalDetails?.address?.permanentAddress;
+
+		setForm({
+			name: employee.name || "",
+			phone: employee.phone || "",
+
+			department: employee.department?._id || "",
+			office: employee.office?._id || "",
+
+			personalDetails: {
+				dateOfBirth:
+					employee.personalDetails?.dateOfBirth?.split("T")[0] || "",
+
+				gender: employee.personalDetails?.gender || "",
+
+				bloodGroup: employee.personalDetails?.bloodGroup || "",
+
+				address: {
+					line1: permanentAddress?.line1 || "",
+					city: permanentAddress?.city || "",
+					state: permanentAddress?.state || "",
+					pincode: permanentAddress?.pincode || "",
 				},
-			});
-		}
+
+				emergencyContact: {
+					name:
+						employee.personalDetails?.emergencyContact?.name || "",
+
+					phone:
+						employee.personalDetails?.emergencyContact?.phone || "",
+
+					relation:
+						employee.personalDetails?.emergencyContact?.relation || "",
+				},
+			},
+
+			jobDetails: {
+				designation:
+					employee.jobDetails?.designation || "",
+
+				joiningDate:
+					employee.jobDetails?.joiningDate?.split("T")[0] || "",
+
+				employmentType:
+					employee.jobDetails?.employmentType || "Full-Time",
+
+				salary: {
+					basic:
+						employee.jobDetails?.salary?.basic ?? "",
+
+					hra:
+						employee.jobDetails?.salary?.hra ?? "",
+
+					allowances:
+						employee.jobDetails?.salary?.allowances ?? "",
+
+					totalCTC:
+						employee.jobDetails?.salary?.totalCTC ?? "",
+				},
+
+				shiftTiming: {
+					start:
+						employee.jobDetails?.shiftTiming?.start || "09:00",
+
+					end:
+						employee.jobDetails?.shiftTiming?.end || "18:00",
+				},
+
+				weeklyOff:
+					employee.jobDetails?.weeklyOff?.length
+						? employee.jobDetails.weeklyOff
+						: ["Sunday"],
+
+				probationPeriodMonths:
+					employee.jobDetails?.probationPeriodMonths ?? 3,
+
+				// Statutory
+				pfNumber:
+					employee.jobDetails?.pfNumber || "",
+
+				uanNumber:
+					employee.jobDetails?.uanNumber ||
+					employee.personalDetails?.uanNumber ||
+					"",
+
+				esiNumber:
+					employee.jobDetails?.esiNumber ||
+					employee.personalDetails?.esicNumber ||
+					"",
+
+				isPfApplicable:
+					employee.jobDetails?.isPfApplicable ?? false,
+
+				isEsiApplicable:
+					employee.jobDetails?.isEsiApplicable ?? false,
+
+				pfEmployeeContributionPercent:
+					employee.jobDetails?.pfEmployeeContributionPercent ?? "",
+
+				esiEmployeeContributionPercent:
+					employee.jobDetails?.esiEmployeeContributionPercent ?? "",
+
+				pfJoiningDate:
+					employee.jobDetails?.pfJoiningDate?.split("T")[0] || "",
+
+				esiJoiningDate:
+					employee.jobDetails?.esiJoiningDate?.split("T")[0] || "",
+			},
+		});
 	}, [employee, open]);
 
 	const handleSubmit = async () => {

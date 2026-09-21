@@ -360,55 +360,68 @@ export default function EmployeeDetail() {
 			</div>
 
 			{/* Info Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<Card>
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+				<Card className="min-w-0">
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm">Role</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-lg font-medium">{employee.role}</p>
+						<p className="text-lg font-medium break-words">
+							{employee.role}
+						</p>
 					</CardContent>
 				</Card>
-				<Card>
+
+				<Card className="min-w-0">
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm">Department</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p>{employee.department?.name || "-"}</p>
+						<p className="break-words">
+							{employee.department?.name || "-"}
+						</p>
 					</CardContent>
 				</Card>
-				<Card>
+
+				<Card className="min-w-0">
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm">Email</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p>
-							<Mail className="inline h-3 w-3 mr-1" /> {employee.email}
+						<p className="flex items-start gap-1 break-all">
+							<Mail className="h-3 w-3 mt-1 shrink-0" />
+							<span>{employee.email}</span>
 						</p>
 					</CardContent>
 				</Card>
-				<Card>
+
+				<Card className="min-w-0">
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm">Phone</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p>
-							<Phone className="inline h-3 w-3 mr-1" /> {employee.phone}
+						<p className="flex items-center gap-1 break-words">
+							<Phone className="h-3 w-3 shrink-0" />
+							<span>{employee.phone}</span>
 						</p>
 					</CardContent>
 				</Card>
+
 				{employee.employeeId && (
-					<Card>
+					<Card className="min-w-0">
 						<CardHeader className="pb-2">
 							<CardTitle className="text-sm">Employee ID</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<p className="font-mono">{employee.employeeId}</p>
+							<p className="font-mono break-all">
+								{employee.employeeId}
+							</p>
 						</CardContent>
 					</Card>
 				)}
+
 				{employee.dailyRate > 0 && (
-					<Card>
+					<Card className="min-w-0">
 						<CardHeader className="pb-2">
 							<CardTitle className="text-sm">Daily Rate</CardTitle>
 						</CardHeader>
@@ -417,8 +430,9 @@ export default function EmployeeDetail() {
 						</CardContent>
 					</Card>
 				)}
+
 				{employee.hourlyRate > 0 && (
-					<Card>
+					<Card className="min-w-0">
 						<CardHeader className="pb-2">
 							<CardTitle className="text-sm">Hourly Rate</CardTitle>
 						</CardHeader>
@@ -427,14 +441,20 @@ export default function EmployeeDetail() {
 						</CardContent>
 					</Card>
 				)}
+
 				{shift && (
-					<Card>
+					<Card className="min-w-0">
 						<CardHeader className="pb-2">
 							<CardTitle className="text-sm">Current Shift</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<p>
-								{shift.shiftId?.name || shift.name} ({shift.shiftId?.startTime || shift.startTime} - {shift.shiftId?.endTime || shift.endTime})
+							<p className="break-words">
+								{shift.shiftId?.name || shift.name}{" "}
+								(
+								{shift.shiftId?.startTime || shift.startTime}
+								{" - "}
+								{shift.shiftId?.endTime || shift.endTime}
+								)
 							</p>
 						</CardContent>
 					</Card>
