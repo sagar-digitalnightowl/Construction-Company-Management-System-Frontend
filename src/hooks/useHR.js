@@ -1012,12 +1012,15 @@ export const useHR = () => {
 
 	const generateSalarySlip = async (data) => {
 		setLoading(true);
+
 		try {
 			const res = await hrApi.generateSalarySlip(data);
 			toast.success("Salary slip generated");
 			return res.data?.data;
 		} catch (err) {
-			toast.error("Failed to generate salary slip");
+			toast.error(
+				err.response?.data?.message || "Failed to generate salary slip",
+			);
 			return null;
 		} finally {
 			setLoading(false);

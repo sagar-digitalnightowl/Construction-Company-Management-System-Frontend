@@ -285,40 +285,75 @@ export default function EmployeeDetail() {
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-3">
-					<Button variant="ghost" size="sm" onClick={() => navigate("/hr")}>
-						<ArrowLeft className="h-4 w-4 mr-1" /> Back
+			<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+				{/* Employee Info */}
+				<div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => navigate("/hr")}
+						className="shrink-0"
+					>
+						<ArrowLeft className="h-4 w-4 mr-1" />
+						Back
 					</Button>
-					<h1 className="text-2xl font-bold">{employee.name}</h1>
+
+					<h1 className="text-xl sm:text-2xl font-bold truncate max-w-full sm:max-w-[300px] lg:max-w-none">
+						{employee.name}
+					</h1>
+
 					<Badge variant={employee.isActive ? "success" : "destructive"}>
 						{employee.isActive ? "Active" : "Inactive"}
 					</Badge>
+
 					{employee.employeeId && (
-						<Badge variant="outline">ID: {employee.employeeId}</Badge>
+						<Badge variant="outline" className="shrink-0">
+							ID: {employee.employeeId}
+						</Badge>
 					)}
 				</div>
+
+				{/* Actions */}
 				{canEdit && (
-					<div className="flex gap-2 flex-wrap">
-						<Button variant="outline" size="sm" onClick={handleManualCheckIn}>
-							<UserCheck className="h-4 w-4 mr-1" /> Check In
+					<div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full lg:w-auto">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={handleManualCheckIn}
+							className="w-full sm:w-auto"
+						>
+							<UserCheck className="h-4 w-4 mr-1" />
+							Check In
 						</Button>
-						<Button variant="outline" size="sm" onClick={handleManualCheckOut}>
-							<UserX className="h-4 w-4 mr-1" /> Check Out
+
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={handleManualCheckOut}
+							className="w-full sm:w-auto"
+						>
+							<UserX className="h-4 w-4 mr-1" />
+							Check Out
 						</Button>
+
 						<Button
 							variant="outline"
 							size="sm"
 							onClick={() => setAssignShiftDialogOpen(true)}
+							className="w-full sm:w-auto"
 						>
-							<Clock className="h-4 w-4 mr-1" /> Assign Shift
+							<Clock className="h-4 w-4 mr-1" />
+							Assign Shift
 						</Button>
+
 						<Button
 							variant="outline"
 							size="sm"
 							onClick={() => setEditDialogOpen(true)}
+							className="w-full sm:w-auto"
 						>
-							<Edit className="h-4 w-4 mr-1" /> Edit Profile
+							<Edit className="h-4 w-4 mr-1" />
+							Edit Profile
 						</Button>
 					</div>
 				)}
