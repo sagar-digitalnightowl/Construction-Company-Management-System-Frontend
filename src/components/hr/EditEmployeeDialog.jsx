@@ -39,7 +39,7 @@ export function EditEmployeeDialog({
 			dateOfBirth: "",
 			gender: "",
 			bloodGroup: "",
-			address: {
+			permanentAddress: {
 				line1: "",
 				city: "",
 				state: "",
@@ -95,7 +95,6 @@ export function EditEmployeeDialog({
 		setForm({
 			name: employee.name || "",
 			phone: employee.phone || "",
-
 			department: employee.department?._id || "",
 			office: employee.office?._id || "",
 
@@ -107,7 +106,7 @@ export function EditEmployeeDialog({
 
 				bloodGroup: employee.personalDetails?.bloodGroup || "",
 
-				address: {
+				permanentAddress: {
 					line1: permanentAddress?.line1 || "",
 					city: permanentAddress?.city || "",
 					state: permanentAddress?.state || "",
@@ -117,10 +116,8 @@ export function EditEmployeeDialog({
 				emergencyContact: {
 					name:
 						employee.personalDetails?.emergencyContact?.name || "",
-
 					phone:
 						employee.personalDetails?.emergencyContact?.phone || "",
-
 					relation:
 						employee.personalDetails?.emergencyContact?.relation || "",
 				},
@@ -139,13 +136,10 @@ export function EditEmployeeDialog({
 				salary: {
 					basic:
 						employee.jobDetails?.salary?.basic ?? "",
-
 					hra:
 						employee.jobDetails?.salary?.hra ?? "",
-
 					allowances:
 						employee.jobDetails?.salary?.allowances ?? "",
-
 					totalCTC:
 						employee.jobDetails?.salary?.totalCTC ?? "",
 				},
@@ -153,7 +147,6 @@ export function EditEmployeeDialog({
 				shiftTiming: {
 					start:
 						employee.jobDetails?.shiftTiming?.start || "09:00",
-
 					end:
 						employee.jobDetails?.shiftTiming?.end || "18:00",
 				},
@@ -166,7 +159,6 @@ export function EditEmployeeDialog({
 				probationPeriodMonths:
 					employee.jobDetails?.probationPeriodMonths ?? 3,
 
-				// Statutory
 				pfNumber:
 					employee.jobDetails?.pfNumber || "",
 
@@ -215,11 +207,11 @@ export function EditEmployeeDialog({
 				dateOfBirth: form.personalDetails.dateOfBirth || undefined,
 				gender: form.personalDetails.gender || undefined,
 				bloodGroup: form.personalDetails.bloodGroup || undefined,
-				address: {
-					line1: form.personalDetails.address.line1 || undefined,
-					city: form.personalDetails.address.city || undefined,
-					state: form.personalDetails.address.state || undefined,
-					pincode: form.personalDetails.address.pincode || undefined,
+				permanentAddress: {
+					line1: form.personalDetails.permanentAddress.line1 || undefined,
+					city: form.personalDetails.permanentAddress.city || undefined,
+					state: form.personalDetails.permanentAddress.state || undefined,
+					pincode: form.personalDetails.permanentAddress.pincode || undefined,
 				},
 				emergencyContact: {
 					name: form.personalDetails.emergencyContact.name || undefined,
@@ -440,14 +432,14 @@ export function EditEmployeeDialog({
 						<div>
 							<Label>Address Line 1</Label>
 							<Input
-								value={form.personalDetails.address.line1}
+								value={form.personalDetails.permanentAddress.line1}
 								onChange={(e) =>
 									setForm({
 										...form,
 										personalDetails: {
 											...form.personalDetails,
-											address: {
-												...form.personalDetails.address,
+											permanentAddress: {
+												...form.personalDetails.permanentAddress,
 												line1: e.target.value,
 											},
 										},
@@ -459,14 +451,14 @@ export function EditEmployeeDialog({
 							<div>
 								<Label>City</Label>
 								<Input
-									value={form.personalDetails.address.city}
+									value={form.personalDetails.permanentAddress.city}
 									onChange={(e) =>
 										setForm({
 											...form,
 											personalDetails: {
 												...form.personalDetails,
-												address: {
-													...form.personalDetails.address,
+												permanentAddress: {
+													...form.personalDetails.permanentAddress,
 													city: e.target.value,
 												},
 											},
@@ -477,14 +469,14 @@ export function EditEmployeeDialog({
 							<div>
 								<Label>State</Label>
 								<Input
-									value={form.personalDetails.address.state}
+									value={form.personalDetails.permanentAddress.state}
 									onChange={(e) =>
 										setForm({
 											...form,
 											personalDetails: {
 												...form.personalDetails,
-												address: {
-													...form.personalDetails.address,
+												permanentAddress: {
+													...form.personalDetails.permanentAddress,
 													state: e.target.value,
 												},
 											},
@@ -495,14 +487,14 @@ export function EditEmployeeDialog({
 							<div>
 								<Label>Pincode</Label>
 								<Input
-									value={form.personalDetails.address.pincode}
+									value={form.personalDetails.permanentAddress.pincode}
 									onChange={(e) =>
 										setForm({
 											...form,
 											personalDetails: {
 												...form.personalDetails,
-												address: {
-													...form.personalDetails.address,
+												permanentAddress: {
+													...form.personalDetails.permanentAddress,
 													pincode: e.target.value,
 												},
 											},
