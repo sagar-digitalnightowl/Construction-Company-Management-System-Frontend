@@ -113,13 +113,13 @@ export function EmployeesTab({ employeesData, onlyAdmin, canEdit, onRefresh }) {
 									className="cursor-pointer hover:bg-muted/50"
 									onClick={() => navigate(`/hr/employees/${emp._id}`)}
 								>
-									<TableCell className="font-medium">{emp.name}</TableCell>
+									<TableCell className="font-medium whitespace-nowrap">{emp.name}</TableCell>
 									<TableCell>{emp.email}</TableCell>
 									<TableCell>
 										<Badge variant="outline">{emp.role}</Badge>
 									</TableCell>
-									<TableCell>{emp.department?.name || "-"}</TableCell>
-									<TableCell>{emp.office?.name || "-"}</TableCell>
+									<TableCell className="whitespace-nowrap">{emp.department?.name || "-"}</TableCell>
+									<TableCell className="whitespace-nowrap">{emp.office?.name || "-"}</TableCell>
 									<TableCell>
 										<Badge variant={emp.isActive ? "success" : "destructive"}>
 											{emp.isActive ? "Active" : "Inactive"}
