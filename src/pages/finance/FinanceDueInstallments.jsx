@@ -312,27 +312,27 @@ export function FinanceDueInstallments() {
 												</div>
 											</TableCell>
 
-											<TableCell className="text-xs">
-												<div className="flex flex-col gap-0.5">
-													<span className="font-semibold text-destructive tabular-nums">
+											<TableCell className="text-xs whitespace-nowrap">
+												<div className="flex flex-col gap-0.5 whitespace-nowrap">
+													<span className="font-semibold text-destructive tabular-nums whitespace-nowrap">
 														{formatINR(item.installment.dueAmount)}
 													</span>
 
-													<span className="text-[11px] text-muted-foreground">
+													<span className="text-[11px] text-muted-foreground whitespace-nowrap">
 														Reminder Due:{" "}
 														{item.installment.reminderDueDate
 															? formatDate(item.installment.reminderDueDate)
 															: "—"}
 													</span>
 
-													<span className="text-[11px] text-muted-foreground">
+													<span className="text-[11px] text-muted-foreground whitespace-nowrap">
 														Last Reminder:{" "}
 														{item.installment.lastReminderSentAt
 															? formatDate(item.installment.lastReminderSentAt)
 															: "—"}
 													</span>
 
-													<span className="text-[11px] text-muted-foreground">
+													<span className="text-[11px] text-muted-foreground whitespace-nowrap">
 														Last Reminder Amount:{" "}
 														{formatINR(item.installment.lastReminderAmount || 0)}
 													</span>
