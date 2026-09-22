@@ -332,7 +332,7 @@ export default function ProjectDetailPage() {
 													<div className="text-xs text-muted-foreground">{b.clientEmail || b.clientDetails?.phone || "N/A"}</div>
 												</TableCell>
 												<TableCell className="py-3 px-4 font-medium">#{b.flatNumber}</TableCell>
-												<TableCell className="py-3 px-4 font-semibold text-primary">{formatINR(b.bookingAmount)}</TableCell>
+												<TableCell className="py-3 px-4 font-semibold text-primary whitespace-nowrap">{formatINR(b.bookingAmount)}</TableCell>
 												<TableCell className="py-3 px-4">
 													<Badge variant="secondary" className="text-[10px] capitalize">{b.paymentStatus}</Badge>
 												</TableCell>
