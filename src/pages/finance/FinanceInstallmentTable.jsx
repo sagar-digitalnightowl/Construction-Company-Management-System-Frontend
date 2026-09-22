@@ -51,11 +51,14 @@ export function FinanceInstallmentTable({ installments }) {
 							<TableHead className="w-16 font-semibold tracking-wide text-xs uppercase">#</TableHead>
 							<TableHead className="font-semibold tracking-wide text-xs uppercase">Description</TableHead>
 							<TableHead className="font-semibold tracking-wide text-xs uppercase">Due Date</TableHead>
-							<TableHead className="font-semibold w-[160px] min-w-[160px] tracking-wide text-xs uppercase text-right">Amount</TableHead>
-							<TableHead className="font-semibold w-[180px] min-w-[180px] tracking-wide text-xs uppercase text-right">Paid Amount</TableHead>
+							<TableHead className="font-semibold tracking-wide text-xs uppercase text-right">Amount</TableHead>
+							<TableHead className="font-semibold tracking-wide text-xs uppercase text-right">Paid Amount</TableHead>
+							<TableHead className="text-right">
+								Remaining Amount
+							</TableHead>
 							<TableHead className="font-semibold tracking-wide text-xs uppercase">Status</TableHead>
 							<TableHead className="font-semibold tracking-wide text-xs uppercase">Mode</TableHead>
-							<TableHead className="font-semibold tracking-wide text-xs uppercase">Transaction ID</TableHead>
+							{/* <TableHead className="font-semibold tracking-wide text-xs uppercase">Transaction ID</TableHead> */}
 							<TableHead className="font-semibold tracking-wide text-xs uppercase text-center">Action</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -75,7 +78,7 @@ export function FinanceInstallmentTable({ installments }) {
 										<span className="text-muted-foreground italic text-xs">Not scheduled</span>
 									)}
 								</TableCell>
-								<TableCell className="text-right w-[160px] min-w-[160px]">
+								<TableCell className="text-right">
 									{/* <div className="text-xs font-semibold text-muted-foreground">
 										{formatCurrency(inst.baseAmount)}
 									</div>
@@ -96,7 +99,7 @@ export function FinanceInstallmentTable({ installments }) {
 										</div>
 									)}
 								</TableCell>
-								<TableCell className="text-right w-[180px] min-w-[180px] text-foreground">
+								<TableCell className="text-right text-foreground">
 									{/* <div className="text-muted-foreground">
 										Amount Paid: {formatCurrency(inst.paidAmount - (inst.gstAmount || 0))}
 									</div>
@@ -117,6 +120,22 @@ export function FinanceInstallmentTable({ installments }) {
 										</div>
 									)}
 								</TableCell>
+								<TableCell className="text-right">
+									{(() => {
+										const remainingAmount = Math.max(
+											0,
+											Number(inst.amount || 0) - Number(inst.paidAmount || 0)
+										);
+
+										return remainingAmount > 0 ? (
+											<div className="font-semibold text-amber-600 dark:text-amber-500">
+												{formatCurrency(remainingAmount)}
+											</div>
+										) : (
+											<span className="text-muted-foreground">-</span>
+										);
+									})()}
+								</TableCell>
 								<TableCell>
 									<InstallmentStatusBadge status={inst.status} />
 								</TableCell>
@@ -125,9 +144,9 @@ export function FinanceInstallmentTable({ installments }) {
 										? PAYMENT_MODE[inst.paymentMode] || inst.paymentMode
 										: "—"}
 								</TableCell>
-								<TableCell className="font-mono text-xs text-muted-foreground tracking-wider">
+								{/* <TableCell className="font-mono text-xs text-muted-foreground tracking-wider">
 									{inst.transactionId || "—"}
-								</TableCell>
+								</TableCell> */}
 								<TableCell className="text-center">
 									<Button
 										variant="ghost"

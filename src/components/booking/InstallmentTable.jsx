@@ -49,16 +49,19 @@ export function InstallmentTable({ installments, onPay, canPay }) {
 							<TableHead className="w-12">#</TableHead>
 							<TableHead>description</TableHead>
 							{/* <TableHead>Due Date</TableHead> */}
-							<TableHead className="w-[160px] min-w-[160px] text-right">
+							<TableHead className="text-right">
 								Amount
 							</TableHead>
 
-							<TableHead className="w-[180px] min-w-[180px] text-right">
+							<TableHead className="text-right">
 								Paid Amount
+							</TableHead>
+							<TableHead className="text-right">
+								Remaining Amount
 							</TableHead>
 							<TableHead>Status</TableHead>
 							<TableHead>Payment Mode</TableHead>
-							<TableHead>Transaction ID</TableHead>
+							{/* <TableHead>Transaction ID</TableHead> */}
 							<TableHead className="text-center min-w-[100px]">Action</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -73,7 +76,7 @@ export function InstallmentTable({ installments, onPay, canPay }) {
                                         ? formatDate(inst.dueDate)
                                         : "Not scheduled"}
                                 </TableCell> */}
-								<TableCell className="text-right w-[160px] min-w-[160px]">
+								<TableCell className="text-right">
 									{/* <div className="text-xs font-semibold text-muted-foreground">
 										{formatCurrency(inst.baseAmount)}
 									</div>
@@ -94,7 +97,7 @@ export function InstallmentTable({ installments, onPay, canPay }) {
 										</div>
 									)}
 								</TableCell>
-								<TableCell className="text-right w-[180px] min-w-[180px] text-foreground">
+								<TableCell className="text-right text-foreground">
 									{/* <div className="text-muted-foreground">
 										Amount Paid: {formatCurrency(inst.paidAmount - (inst.gstAmount || 0))}
 									</div>
@@ -115,6 +118,22 @@ export function InstallmentTable({ installments, onPay, canPay }) {
 										</div>
 									)}
 								</TableCell>
+								<TableCell className="text-right">
+									{(() => {
+										const remainingAmount = Math.max(
+											0,
+											Number(inst.amount || 0) - Number(inst.paidAmount || 0)
+										);
+
+										return remainingAmount > 0 ? (
+											<div className="font-semibold text-amber-600 dark:text-amber-500">
+												{formatCurrency(remainingAmount)}
+											</div>
+										) : (
+											<span className="text-muted-foreground">-</span>
+										);
+									})()}
+								</TableCell>
 								<TableCell>
 									<InstallmentStatusBadge status={inst.status} />
 								</TableCell>
@@ -124,7 +143,7 @@ export function InstallmentTable({ installments, onPay, canPay }) {
 										? PAYMENT_MODE[inst.paymentMode] || inst.paymentMode
 										: "-"}
 								</TableCell>
-								<TableCell>{inst.transactionId || "-"}</TableCell>
+								{/* <TableCell>{inst.transactionId || "-"}</TableCell> */}
 								<TableCell className="text-center">
 									<div className="flex items-center justify-end gap-2">
 										{canPay && inst.status !== "paid" && (
