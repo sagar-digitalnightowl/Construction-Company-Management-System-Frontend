@@ -559,7 +559,7 @@ export function FinanceDashboard() {
 						</Button>
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Tower</h3>
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
 						{towers.map((tower) => {
 							const towerFlats = selectedProject.flats.filter((f) => f.tower === tower);
 							const totalFlats = towerFlats.length;
@@ -670,7 +670,7 @@ export function FinanceDashboard() {
 						</Button>
 					</div>
 					<h3 className="text-sm font-medium mb-3">Select a Floor</h3>
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
 						{floors.map((floor) => {
 							const floorFlats = selectedProject.flats.filter(
 								(f) => f.tower === selectedTower && f.floor === floor
