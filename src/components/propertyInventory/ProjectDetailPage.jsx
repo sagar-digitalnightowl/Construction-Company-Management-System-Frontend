@@ -643,19 +643,17 @@ export default function ProjectDetailPage() {
 												</span>
 											</div>
 
-											<div>
-												<span className="text-muted-foreground block mb-1">
-													Due Date
-												</span>
+											{selectedBookingDetails.nextInstallmentDue && (
+												<div>
+													<span className="text-muted-foreground block mb-1">
+														Due Date
+													</span>
 
-												<span className="font-semibold text-base text-foreground">
-													{selectedBookingDetails.nextInstallmentDue
-														? formatDate(
-															selectedBookingDetails.nextInstallmentDue
-														)
-														: "Not specified"}
-												</span>
-											</div>
+													<span className="font-semibold text-base text-foreground">
+														{formatDate(selectedBookingDetails.nextInstallmentDue)}
+													</span>
+												</div>
+											)}
 										</div>
 									</div>
 								)}
