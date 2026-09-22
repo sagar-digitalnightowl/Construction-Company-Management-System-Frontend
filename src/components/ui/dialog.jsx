@@ -38,11 +38,13 @@ const DialogContent = React.forwardRef(
 				{...props}
 			>
 				{children}
-				{/* BuildHive: Updated focus ring to match the 1px architectural offset used globally */}
-				<DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background disabled:pointer-events-none">
+
+				{/* Improved Close Button */}
+				<DialogPrimitive.Close className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-sm bg-muted/50 text-muted-foreground opacity-70 transition-all hover:bg-muted hover:text-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background disabled:pointer-events-none cursor-pointer">
 					<X className="h-4 w-4" />
 					<span className="sr-only">Close</span>
 				</DialogPrimitive.Close>
+
 			</DialogPrimitive.Content>
 		</DialogPortal>
 	),
@@ -51,7 +53,8 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }) => (
 	<div
-		className={cn("flex flex-col gap-1.5 text-left", className)}
+		// Added pr-8 to ensure flex/badge content doesn't overlap the absolute close button
+		className={cn("flex flex-col gap-1.5 text-left pr-8", className)}
 		{...props}
 	/>
 );
