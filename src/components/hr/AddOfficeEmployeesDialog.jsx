@@ -67,24 +67,31 @@ export function AddOfficeEmployeesDialog({
 	}, [open, fetchUnassignedEmployees]);
 
 	const handleSelect = (employeeId, checked) => {
-		setSelectedIds((prev) =>
-			checked
-				? [...prev, employeeId]
-				: prev.filter((id) => id !== employeeId),
-		);
+		setSelectedIds((prev) => {
+			if (checked) {
+				return prev.includes(employeeId) ? prev : [...prev, employeeId];
+			}
+
+			return prev.filter((id) => id !== employeeId);
+		});
 	};
 
 	const handleSelectAll = (checked) => {
-		if (checked) {
-			setSelectedIds(employees.map((employee) => employee._id));
-		} else {
-			setSelectedIds([]);
-		}
+		const currentPageIds = employees.map((employee) => employee._id);
+
+		setSelectedIds((prev) => {
+			if (checked) {
+				return [
+					...prev,
+					...currentPageIds.filter((id) => !prev.includes(id)),
+				];
+			}
+
+			return prev.filter((id) => !currentPageIds.includes(id));
+		});
 	};
 
 	const handlePageChange = (page) => {
-		setSelectedIds([]);
-
 		fetchUnassignedEmployees({
 			page,
 			limit: 20,
@@ -111,9 +118,7 @@ export function AddOfficeEmployeesDialog({
 
 	const allSelected =
 		employees.length > 0 &&
-		employees.every((employee) =>
-			selectedIds.includes(employee._id),
-		);
+		employees.every((employee) => selectedIds.includes(employee._id));
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -261,6 +266,13 @@ export function AddOfficeEmployeesDialog({
 								<ChevronRight className="h-4 w-4 ml-1" />
 							</Button>
 						</div>
+					</div>
+				)}
+
+				{selectedIds.length > 0 && (
+					<div className="text-sm text-muted-foreground">
+						{selectedIds.length} employee{selectedIds.length !== 1 ? "s" : ""} selected
+						across pages
 					</div>
 				)}
 
