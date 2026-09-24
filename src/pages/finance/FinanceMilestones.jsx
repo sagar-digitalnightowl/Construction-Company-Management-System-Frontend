@@ -1,26 +1,8 @@
-// // src/pages/finance/FinanceMilestones.jsx
+
 import React, { useEffect, useState } from "react";
 import { useFinance } from "@/hooks/useFinance";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-} from "@/components/ui/dialog";
 import {
 	Select,
 	SelectContent,
@@ -29,25 +11,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { formatDate } from "@/lib/helpers";
-import { CheckCircle, Clock, Loader2 } from "lucide-react";
 import { projectApi } from "@/api";
-import { toast } from "sonner"; // Added toast import
-
-const ALL_MILESTONES = [
-	"Within 30 days of Booking",
-	"On Completion of Plinth Work",
-	"At the time of Ground Roof Casting",
-	"2nd Slab Casting",
-	"3rd Slab Casting",
-	"4th Slab Casting",
-	"5th Slab Casting",
-	"6th Slab Casting",
-	"7th Slab Casting",
-	"8th Slab Casting",
-	"At the completion of Internal Wall of Flat",
-	"At the time of Flooring",
-	"At the time of Possession",
-];
+import { toast } from "sonner";
+import { MilestoneTable } from "./FinanceMilestones/MilestoneTable";
+import { MarkMilestoneDialog } from "./FinanceMilestones/MarkMilestoneDialog";
 
 export function FinanceMilestones() {
 	const { milestones, fetchProjectMilestones, markMilestone, loading } = useFinance();
@@ -171,112 +138,23 @@ export function FinanceMilestones() {
 			</div>
 
 			{selectedProject && (
-				<Card>
-					<CardContent className="p-0">
-						<Table>
-							<TableHeader className="bg-muted/10">
-								<TableRow className="hover:bg-transparent">
-									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
-										Milestone
-									</TableHead>
-
-									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
-										Status
-									</TableHead>
-
-									<TableHead className="whitespace-nowrap font-semibold text-muted-foreground">
-										Completed At
-									</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{ALL_MILESTONES.map((name) => {
-									const found = milestones.find((m) => m.milestone === name);
-									const completed = found?.completed;
-									return (
-										<TableRow key={name} className="hover:bg-muted/40">
-											<TableCell className="min-w-[220px]">
-												<div className="truncate font-medium">
-													{name}
-												</div>
-											</TableCell>
-
-											<TableCell className="whitespace-nowrap">
-												{completed ? (
-													<span className="flex items-center gap-1.5 text-sm font-medium text-success">
-														<CheckCircle className="h-4 w-4" />
-														Completed
-													</span>
-												) : (
-													<span className="flex items-center gap-1.5 text-sm font-medium text-amber-600">
-														<Clock className="h-4 w-4" />
-														Pending
-													</span>
-												)}
-											</TableCell>
-
-											<TableCell className="whitespace-nowrap">
-												{completed ? formatDate(found.completedAt) : "—"}
-											</TableCell>
-										</TableRow>
-									);
-								})}
-							</TableBody>
-						</Table>
-					</CardContent>
-				</Card>
+				<MilestoneTable
+					milestones={milestones}
+					formatDate={formatDate}
+				/>
 			)}
 
 			{/* Mark Milestone Dialog */}
-			<Dialog open={markOpen} onOpenChange={setMarkOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Mark Milestone as Completed</DialogTitle>
-					</DialogHeader>
-					<div className="grid gap-3">
-						<div className="space-y-1.5">
-							<Label>Milestone</Label>
-							<Select
-								value={markMilestoneName}
-								onValueChange={setMarkMilestoneName}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select milestone" />
-								</SelectTrigger>
-								<SelectContent>
-									{ALL_MILESTONES.map((name) => (
-										<SelectItem key={name} value={name}>
-											{name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-						<div className="space-y-1.5">
-							<Label>Completed At</Label>
-							<Input
-								type="datetime-local"
-								value={markCompletedAt}
-								onChange={(e) => setMarkCompletedAt(e.target.value)}
-							/>
-						</div>
-					</div>
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setMarkOpen(false)}>
-							Cancel
-						</Button>
-						<Button
-							onClick={handleMark}
-							disabled={!markMilestoneName || loading}
-						>
-							{loading ? (
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							) : null}
-							Mark Completed
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<MarkMilestoneDialog
+				markOpen={markOpen}
+				setMarkOpen={setMarkOpen}
+				markMilestoneName={markMilestoneName}
+				setMarkMilestoneName={setMarkMilestoneName}
+				markCompletedAt={markCompletedAt}
+				setMarkCompletedAt={setMarkCompletedAt}
+				handleMark={handleMark}
+				loading={loading}
+			/>
 		</div>
 	);
 }
