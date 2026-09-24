@@ -68,7 +68,7 @@ import { EmployeeSalary } from "./pages/hr/EmployeeSalary";
 import { EmployeeAnnouncements } from "./pages/hr/EmployeeAnnouncements";
 import EmployeeLayout from "./pages/hr/EmployeeLayout";
 import FinanceBookings from "./pages/finance/FinanceBookings";
-import FinanceBookingDetail from "./pages/finance/FinanceBookingDetail";
+import FinanceBookingDetail from "./pages/finance/FinanceBookings/FinanceBookingDetail";
 import ExpenseReports from "./pages/finance/ExpenseReports";
 import ProjectDetailPage from "./components/propertyInventory/ProjectDetailPage";
 import { AppLoader } from "./AppLoader";
