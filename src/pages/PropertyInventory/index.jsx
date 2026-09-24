@@ -38,10 +38,6 @@ export default function PropertyInventory() {
 		fetchDashboard({ ...filters });
 	}, []);
 
-	const applyFilters = () => {
-		fetchDashboard({ ...filters, page: 1 });
-	};
-
 	const goToPage = (page) => {
 		if (page < 1 || page > pagination.pages || page === pagination.page) return;
 		fetchDashboard({ ...filters, page });
@@ -124,46 +120,6 @@ export default function PropertyInventory() {
 					valueClassName="text-lg sm:text-xl lg:text-2xl truncate"
 				/>
 			</div>
-
-			{/* Filters */}
-			{/* <Card>
-				<CardContent className="p-4">
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-						<div>
-							<Label>Status</Label>
-							<Select
-								value={filters.status}
-								onValueChange={(v) => setFilters({ ...filters, status: v })}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="All statuses" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value=" ">All</SelectItem>
-									<SelectItem value="active">Active</SelectItem>
-									<SelectItem value="completed">Completed</SelectItem>
-									<SelectItem value="delayed">Delayed</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-						<div>
-							<Label>Search</Label>
-							<Input
-								placeholder="Project name..."
-								value={filters.search}
-								onChange={(e) =>
-									setFilters({ ...filters, search: e.target.value })
-								}
-							/>
-						</div>
-						<div className="flex items-end">
-							<Button onClick={applyFilters}>
-								<Search className="h-4 w-4 mr-1" /> Search
-							</Button>
-						</div>
-					</div>
-				</CardContent>
-			</Card> */}
 
 			{/* Projects Table */}
 			<Card>
