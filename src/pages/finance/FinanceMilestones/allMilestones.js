@@ -1,0 +1,15 @@
+export const ALL_MILESTONES = [
+	"Within 30 days of Booking",
+	"On Completion of Plinth Work",
+	"At the time of Ground Roof Casting",
+	"2nd Slab Casting",
+	"3rd Slab Casting",
+	"4th Slab Casting",
+	"5th Slab Casting",
+	"6th Slab Casting",
+	"7th Slab Casting",
+	"8th Slab Casting",
+	"At the completion of Internal Wall of Flat",
+	"At the time of Flooring",
+	"At the time of Possession",
+];
