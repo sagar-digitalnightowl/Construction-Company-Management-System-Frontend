@@ -4,11 +4,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
 	ArrowLeft,
 	Download,
-	Wallet,
 	Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBooking } from "@/hooks/useBooking";
 import { FinanceInstallmentTable } from "../FinanceInstallmentTable";
