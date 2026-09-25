@@ -1,0 +1,166 @@
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useProject } from "@/hooks/useProject";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowLeft, CheckCircle, Clock } from "lucide-react";
+import { formatINR } from "@/lib/helpers";
+
+const getPercentageColor = (pct) => {
+	if (pct >= 80) return "#28A745";
+	if (pct >= 50) return "#FFC107";
+	if (pct >= 25) return "#FD7E14";
+	return "#DC3545";
+};
+
+export function MilestonePaymentSummaryPage() {
+	const location = useLocation();
+	const navigate = useNavigate();
+	const { projectId } = location.state || {};
+
+	const { fetchMilestonePaymentSummary, fetchMilestoneBuyers, loading } = useProject();
+	const [data, setData] = useState(location.state?.initialData || null);
+
+	const handleLoad = async () => {
+		const summary = await fetchMilestonePaymentSummary(projectId);
+		if (summary) setData(summary);
+	};
+
+	const handleViewBuyers = async (milestoneName) => {
+		const buyersData = await fetchMilestoneBuyers({
+			projectId,
+			milestone: milestoneName,
+			page: 1,
+			limit: 10,
+		});
+		if (buyersData) {
+			navigate("/finance-milestones-buyers", {
+				state: { projectId, milestone: milestoneName, initialData: buyersData },
+			});
+		}
+	};
+
+	if (!data) {
+		return (
+			<div className="flex flex-col items-center justify-center gap-4 p-10">
+				<p className="text-muted-foreground">No summary loaded yet.</p>
+				{projectId ? (
+					<Button onClick={handleLoad} disabled={loading}>
+						{loading ? "Loading..." : "Load Summary"}
+					</Button>
+				) : (
+					<Button variant="outline" onClick={() => navigate(-1)}>
+						<ArrowLeft className="mr-1.5 h-4 w-4" />
+						Go Back
+					</Button>
+				)}
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-4 p-4">
+			<Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+				<ArrowLeft className="mr-1.5 h-4 w-4" />
+				Back
+			</Button>
+
+			<Card>
+				<CardContent className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-3 lg:grid-cols-6">
+					<div>
+						<p className="text-xs text-muted-foreground">Total Bookings</p>
+						<p className="text-xl font-semibold">{data.totalBookings}</p>
+					</div>
+					<div>
+						<p className="text-xs text-muted-foreground">Milestones Completed</p>
+						<p className="text-xl font-semibold">
+							{data.completedMilestones}/{data.totalMilestones}
+						</p>
+					</div>
+					<div>
+						<p className="text-xs text-muted-foreground">Total Amount</p>
+						<p className="text-xl font-semibold">{formatINR(data.overall.totalAmount)}</p>
+					</div>
+					<div>
+						<p className="text-xs text-muted-foreground">Total Paid</p>
+						<p className="text-xl font-semibold">{formatINR(data.overall.totalPaid)}</p>
+					</div>
+					<div>
+						<p className="text-xs text-muted-foreground">Total Remaining</p>
+						<p className="text-xl font-semibold">{formatINR(data.overall.totalRemaining)}</p>
+					</div>
+					<div>
+						<p className="text-xs text-muted-foreground">Collection %</p>
+						<p
+							className="text-xl font-semibold"
+							style={{ color: getPercentageColor(data.overall.collectionPercentage) }}
+						>
+							{data.overall.collectionPercentage}%
+						</p>
+					</div>
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardContent className="p-0">
+					<Table>
+						<TableHeader className="bg-muted/10">
+							<TableRow>
+								<TableHead>Milestone</TableHead>
+								<TableHead>Status</TableHead>
+								<TableHead className="text-right">Total Buyers</TableHead>
+								<TableHead>Buyers (Paid/Partial/Unpaid)</TableHead>
+								<TableHead className="text-right">Collection %</TableHead>
+								<TableHead className="text-right">Buyers</TableHead>
+								<TableHead className="text-center">Action</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{data.milestones.map((m) => (
+								<TableRow key={m.milestone}>
+									<TableCell className="min-w-[200px]">{m.milestone}</TableCell>
+									<TableCell>
+										{m.completed ? (
+											<span className="flex items-center gap-1.5 text-sm font-medium text-success">
+												<CheckCircle className="h-4 w-4" /> Completed
+											</span>
+										) : (
+											<span className="flex items-center gap-1.5 text-sm font-medium text-amber-600">
+												<Clock className="h-4 w-4" /> Pending
+											</span>
+										)}
+									</TableCell>
+									<TableCell className="text-right">
+										{m.totalBuyers}
+									</TableCell>
+
+									<TableCell>
+										{m.paidCount} / {m.partialCount} / {m.unpaidCount}
+									</TableCell>
+									<TableCell className="text-right">{m.totalBuyers}</TableCell>
+									<TableCell
+										className="text-right font-medium"
+										style={{ color: getPercentageColor(m.collectionPercentage) }}
+									>
+										{m.collectionPercentage}%
+									</TableCell>
+									<TableCell className="text-right">
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handleViewBuyers(m.milestone)}
+											disabled={loading || m.totalBuyers === 0}
+										>
+											View Buyers
+										</Button>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</CardContent>
+			</Card>
+		</div>
+	);
+}

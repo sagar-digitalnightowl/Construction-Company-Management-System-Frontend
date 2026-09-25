@@ -1,5 +1,6 @@
 
-import React, {useState} from "react";
+import React from "react";
+import { useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinanceDashboard } from "./FinanceDashboard";
@@ -7,17 +8,17 @@ import { FinanceBookingsReminder } from "./FinanceBookingsReminder";
 import { FinanceMilestones } from "./FinanceMilestones";
 import { FinanceReminders } from "./FinanceReminders";
 import { FinancePayrollApprovals } from "./FinancePayrollApprovals";
-// ✅ Consistent naming import
 import { FinanceExpenses } from "./FinanceExpenses";
-// ✅ Import the new WhatsApp Reminders component
 import { FinanceDueInstallments } from "./FinanceDueInstallments";
-import FinanceBookings from "./FinanceBookings";
 import ExpenseReports from "./ExpenseReports";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 
 export default function Finance() {
-	const [dashboardExport, setDashboardExport] = useState(null);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const activeTab = searchParams.get("tab") || "dashboard";
+
+	const handleTabChange = (value) => {
+		setSearchParams({ tab: value }, { replace: true });
+	};
 
 	return (
 		<div className="space-y-6">
@@ -27,7 +28,7 @@ export default function Finance() {
 				description="Project‑wise dashboards, bookings, milestones, reminders, payroll, and expense approvals."
 			/>
 
-			<Tabs defaultValue="dashboard">
+			<Tabs value={activeTab} onValueChange={handleTabChange}>
 				<div className="w-full overflow-auto scrollbar-none">
 					<TabsList>
 						<TabsTrigger value="dashboard">Dashboard</TabsTrigger>

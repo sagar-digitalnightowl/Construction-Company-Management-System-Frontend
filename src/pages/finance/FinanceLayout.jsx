@@ -8,6 +8,8 @@ const pageTitles = {
 	"/finance-expense-reports": "Expense Reports",
 	"/finance-due-installments": "WhatsApp Reminders",
 	"/finance-milestones": "Milestones",
+	"/finance-milestones-summary": "Milestone Payment Summary",
+	"/finance-milestones-buyers": "Milestone Buyers",
 	"/finance-payroll": "Payroll Approvals",
 	"/finance-expenses": "Expense Approvals",
 	"/finance-reminders": "Reminder Logs",
@@ -20,6 +22,10 @@ export default function FinanceLayout({ children }) {
 
 	if (pathname.startsWith("/finance-bookings/")) {
 		title = "Booking Details";
+	}
+
+	if (pathname.startsWith("/finance-milestones-buyers/")) {
+		title = "Buyer Payment Details";
 	}
 
 	return (
