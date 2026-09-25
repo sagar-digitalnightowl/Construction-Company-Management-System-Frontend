@@ -14,6 +14,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, ArrowRight, Download } from "lucide-react";
 import { formatINR } from "@/lib/helpers";
+import { StatCard } from "@/components/common/PageHeader";
 
 const STATUS_COLORS = {
 	paid: { bg: "#D4EDDA", text: "#155724" },
@@ -123,67 +124,97 @@ export function MilestoneBuyersPage() {
 				</Button>
 			</div>
 
+			<div className="space-y-4">
+				<div>
+					<h2 className="font-display text-lg font-semibold text-foreground">
+						{data.milestone}
+					</h2>
+				</div>
+
+				<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+					<StatCard
+						label="Total Buyers"
+						value={summary.totalBuyers}
+						size="compact"
+						accent="primary"
+					/>
+
+					<StatCard
+						label="Total Amount"
+						value={formatINR(summary.totalAmount)}
+						size="compact"
+						accent="info"
+					/>
+
+					<StatCard
+						label="Total Paid"
+						value={formatINR(summary.totalPaid)}
+						size="compact"
+						accent="success"
+					/>
+
+					<StatCard
+						label="Total Remaining"
+						value={formatINR(summary.totalRemaining)}
+						size="compact"
+						accent="warning"
+					/>
+				</div>
+			</div>
+
 			<Card>
-				<CardHeader>
-					<CardTitle className="text-lg">{data.milestone}</CardTitle>
-				</CardHeader>
-				<CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-					<div>
-						<p className="text-xs text-muted-foreground">Total Buyers</p>
-						<p className="text-xl font-semibold">{summary.totalBuyers}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Amount</p>
-						<p className="text-xl font-semibold">{formatINR(summary.totalAmount)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Paid</p>
-						<p className="text-xl font-semibold">{formatINR(summary.totalPaid)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Remaining</p>
-						<p className="text-xl font-semibold">{formatINR(summary.totalRemaining)}</p>
+				<CardContent className="p-4">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+						<Select
+							value={status}
+							onValueChange={handleStatusChange}
+						>
+							<SelectTrigger className="w-full sm:w-[180px]">
+								<SelectValue placeholder="Status" />
+							</SelectTrigger>
+
+							<SelectContent>
+								<SelectItem value="all">All</SelectItem>
+								<SelectItem value="paid">Paid</SelectItem>
+								<SelectItem value="partial">Partial</SelectItem>
+								<SelectItem value="unpaid">Unpaid</SelectItem>
+								<SelectItem value="pending">Pending</SelectItem>
+							</SelectContent>
+						</Select>
+
+						<div className="flex flex-1 gap-2">
+							<Input
+								placeholder="Search buyer, phone, flat..."
+								value={search}
+								onChange={(e) => {
+									const value = e.target.value;
+
+									setSearch(value);
+
+									if (!value.trim()) {
+										setPage(1);
+										fetchBuyers({
+											search: "",
+											page: 1,
+										});
+									}
+								}}
+								onKeyDown={(e) =>
+									e.key === "Enter" && handleSearch()
+								}
+							/>
+
+							<Button
+								variant="outline"
+								onClick={handleSearch}
+								disabled={loading}
+							>
+								Search
+							</Button>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
-
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-				<Select value={status} onValueChange={handleStatusChange}>
-					<SelectTrigger className="w-full sm:w-[180px]">
-						<SelectValue placeholder="Status" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="all">All</SelectItem>
-						<SelectItem value="paid">Paid</SelectItem>
-						<SelectItem value="partial">Partial</SelectItem>
-						<SelectItem value="unpaid">Unpaid</SelectItem>
-						<SelectItem value="pending">Pending</SelectItem>
-					</SelectContent>
-				</Select>
-
-				<div className="flex flex-1 gap-2">
-					<Input
-						placeholder="Search buyer, phone, flat..."
-						value={search}
-						onChange={(e) => {
-							const value = e.target.value;
-							setSearch(value);
-
-							if (!value.trim()) {
-								setPage(1);
-								fetchBuyers({
-									search: "",
-									page: 1,
-								});
-							}
-						}}
-						onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-					/>
-					<Button variant="outline" onClick={handleSearch} disabled={loading}>
-						Search
-					</Button>
-				</div>
-			</div>
 
 			<Card>
 				<CardContent className="p-0">
@@ -204,20 +235,7 @@ export function MilestoneBuyersPage() {
 						</TableHeader>
 						<TableBody>
 							{buyers.map((b) => (
-								<TableRow
-									key={b.bookingId}
-									className="cursor-pointer hover:bg-muted/40"
-									onClick={async () => {
-										const details = await fetchMilestoneBuyerDetails(b.bookingId, {
-											milestone: data.milestone,
-										});
-										if (details) {
-											navigate(`/finance/milestones/buyers/${b.bookingId}`, {
-												state: { initialData: details },
-											});
-										}
-									}}
-								>
+								<TableRow key={b.bookingId}>
 									<TableCell>{b.bookingReferenceNumber}</TableCell>
 									<TableCell>{b.buyer.name}</TableCell>
 									<TableCell>{b.buyer.phone}</TableCell>
