@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProject } from "@/hooks/useProject";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, CheckCircle, Clock } from "lucide-react";
 import { formatINR } from "@/lib/helpers";
 import { StatCard } from "@/components/common/PageHeader";
+import { projectApi } from "@/api";
 
 const getPercentageColor = (pct) => {
 	if (pct >= 80) return "#28A745";
@@ -18,14 +19,41 @@ const getPercentageColor = (pct) => {
 export function MilestonePaymentSummaryPage() {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const { projectId } = location.state || {};
+	const { projectId, projectName: projectNameFromState } = location.state || {};
 
 	const { fetchMilestonePaymentSummary, fetchMilestoneBuyers, loading } = useProject();
 	const [data, setData] = useState(location.state?.initialData || null);
+	const [projectName, setProjectName] = useState(projectNameFromState || "");
+
+	useEffect(() => {
+		const fetchMissingName = async () => {
+			if (!projectName && projectId) {
+				try {
+					const res = await projectApi.getById(projectId);
+					if (res.data.success) {
+						setProjectName(res.data.data?.project?.name || res.data.data?.name || "");
+					}
+				} catch (err) {
+					console.error(err);
+				}
+			}
+		};
+		fetchMissingName();
+	}, [projectId, projectName]);
 
 	const handleLoad = async () => {
 		const summary = await fetchMilestonePaymentSummary(projectId);
 		if (summary) setData(summary);
+		if (!projectNameFromState) {
+			try {
+				const res = await projectApi.getById(projectId);
+				if (res.data.success) {
+					setProjectName(res.data.data?.project?.name || res.data.data?.name || "");
+				}
+			} catch (err) {
+				// Non-critical — page still works, just without a project name shown
+			}
+		}
 	};
 
 	const handleViewBuyers = async (milestoneName) => {
@@ -37,7 +65,12 @@ export function MilestonePaymentSummaryPage() {
 		});
 		if (buyersData) {
 			navigate("/finance-milestones-buyers", {
-				state: { projectId, milestone: milestoneName, initialData: buyersData },
+				state: {
+					projectId,
+					projectName,
+					milestone: milestoneName,
+					initialData: buyersData,
+				},
 			});
 		}
 	};
@@ -66,6 +99,15 @@ export function MilestonePaymentSummaryPage() {
 				<ArrowLeft className="mr-1.5 h-4 w-4" />
 				Back
 			</Button>
+
+			{projectName && (
+				<div>
+					<p className="text-xs text-muted-foreground">Project</p>
+					<h2 className="font-display text-lg font-semibold text-foreground">
+						{projectName}
+					</h2>
+				</div>
+			)}
 
 			<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
 				<StatCard

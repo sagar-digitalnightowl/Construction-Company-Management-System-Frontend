@@ -231,6 +231,18 @@ export function MilestoneBuyerDetailPage() {
 				Back to Buyers
 			</Button>
 
+			<div>
+				<p className="text-xs text-muted-foreground">Project</p>
+				<p className="font-medium text-foreground">
+					{project.name?.trim() || "Project"}
+				</p>
+				{appliedMilestoneFilter && (
+					<p className="mt-1 text-sm text-muted-foreground">
+						{appliedMilestoneFilter}
+					</p>
+				)}
+			</div>
+
 			{/* 1. Buyer Header */}
 			<Card>
 				<CardContent className="space-y-3 p-4">

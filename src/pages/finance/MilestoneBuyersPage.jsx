@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 export function MilestoneBuyersPage() {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const { projectId, milestone } = location.state || {};
+	const { projectId, projectName: projectNameFromState, milestone } = location.state || {};
 
 	const [exporting, setExporting] = useState(false);
 	const {
@@ -32,6 +32,9 @@ export function MilestoneBuyersPage() {
 	} = useProject();
 
 	const [data, setData] = useState(location.state?.initialData || null);
+	const [projectName, setProjectName] = useState(
+		projectNameFromState || location.state?.initialData?.buyers?.[0]?.project?.name || ""
+	);
 	const [status, setStatus] = useState("all");
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
@@ -47,6 +50,12 @@ export function MilestoneBuyersPage() {
 			limit: 10,
 		});
 		if (result) setData(result);
+		if (result) {
+			setData(result);
+			if (!projectName && result.buyers?.[0]?.project?.name) {
+				setProjectName(result.buyers[0].project.name);
+			}
+		}
 	};
 
 	const handleStatusChange = (value) => {
@@ -122,9 +131,13 @@ export function MilestoneBuyersPage() {
 
 			<div className="space-y-4">
 				<div>
+					<p className="text-xs text-muted-foreground">Project</p>
 					<h2 className="font-display text-lg font-semibold text-foreground">
-						{data.milestone}
+						{projectName || "Project"}
 					</h2>
+					<p className="mt-1 text-sm text-muted-foreground">
+						{milestone}
+					</p>
 				</div>
 
 				<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
