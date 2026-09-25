@@ -15,25 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, ArrowRight, Download } from "lucide-react";
 import { formatINR } from "@/lib/helpers";
 import { StatCard } from "@/components/common/PageHeader";
-
-const STATUS_COLORS = {
-	paid: { bg: "#D4EDDA", text: "#155724" },
-	partial: { bg: "#FFF3CD", text: "#856404" },
-	unpaid: { bg: "#F8D7DA", text: "#721C24" },
-	pending: { bg: "#F8D7DA", text: "#721C24" },
-};
-
-function StatusBadge({ status }) {
-	const c = STATUS_COLORS[status] || STATUS_COLORS.unpaid;
-	return (
-		<span
-			style={{ background: c.bg, color: c.text }}
-			className="rounded-full px-3 py-1 text-xs font-semibold uppercase"
-		>
-			{status}
-		</span>
-	);
-}
+import { Badge } from "@/components/ui/badge";
 
 export function MilestoneBuyersPage() {
 	const location = useLocation();
@@ -256,7 +238,19 @@ export function MilestoneBuyersPage() {
 									<TableCell>{b.flat.number}</TableCell>
 									<TableCell>{b.flat.tower}</TableCell>
 									<TableCell>
-										<StatusBadge status={b.summary.status} />
+										<Badge
+											variant={
+												b.summary.status === "paid"
+													? "success"
+													: b.summary.status === "partial"
+														? "warning"
+														: b.summary.status === "pending"
+															? "warning"
+															: "destructive"
+											}
+										>
+											{b.summary.status}
+										</Badge>
 									</TableCell>
 									<TableCell className="text-right">{formatINR(b.summary.totalAmount)}</TableCell>
 									<TableCell className="text-right">{formatINR(b.summary.totalPaid)}</TableCell>

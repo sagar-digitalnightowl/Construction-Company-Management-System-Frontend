@@ -1,65 +1,197 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useProject } from "@/hooks/useProject";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import { ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronDown, ArrowLeft } from "lucide-react";
 import { formatDate, formatINR } from "@/lib/helpers";
+import { StatCard } from "@/components/common/PageHeader";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-const STATUS_COLORS = {
-	paid: { bg: "#D4EDDA", text: "#155724" },
-	partial: { bg: "#FFF3CD", text: "#856404" },
-	unpaid: { bg: "#F8D7DA", text: "#721C24" },
-	pending: { bg: "#F8D7DA", text: "#721C24" },
+const statusVariant = (status) => {
+	if (status === "paid") return "success";
+	if (status === "partial" || status === "pending") return "warning";
+	return "destructive";
 };
-
-function StatusBadge({ status }) {
-	const c = STATUS_COLORS[status] || STATUS_COLORS.unpaid;
-	return (
-		<span style={{ background: c.bg, color: c.text }} className="rounded-full px-3 py-1 text-xs font-semibold uppercase">
-			{status}
-		</span>
-	);
-}
 
 function CollapsibleMilestone({ milestone }) {
 	const [open, setOpen] = useState(false);
 
 	return (
-		<div className="border-t first:border-t-0">
+		<div className="border-b last:border-b-0">
 			<button
 				type="button"
 				onClick={() => setOpen((prev) => !prev)}
-				className="flex w-full items-center justify-between py-3 text-left text-sm"
+				className="flex w-full cursor-pointer items-center gap-4 px-2 py-4 text-left transition-colors hover:bg-muted/30"
 			>
-				<span className="flex items-center gap-2">
-					<ChevronDown
-						className={`h-4 w-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-					/>
-					{milestone.milestone}
-				</span>
-				<span className="flex items-center gap-2">
-					<StatusBadge status={milestone.status} />
-					{formatINR(milestone.totalPaid)} / {formatINR(milestone.totalAmount)}
-				</span>
+				<div className="min-w-0 flex-1">
+					<div className="flex flex-wrap items-center gap-2">
+						<p className="font-medium text-foreground">
+							{milestone.milestone}
+						</p>
+
+						<Badge variant={statusVariant(milestone.status)}>
+							{milestone.status}
+						</Badge>
+					</div>
+
+					<p className="mt-1 text-xs text-muted-foreground">
+						{milestone.installmentCount} installment
+						{milestone.installmentCount !== 1 ? "s" : ""}
+					</p>
+				</div>
+
+				<div className="shrink-0 text-right">
+					<p className="text-xs text-muted-foreground">
+						Paid / Total
+					</p>
+
+					<p className="text-sm font-semibold">
+						{formatINR(milestone.totalPaid)} /{" "}
+						{formatINR(milestone.totalAmount)}
+					</p>
+
+					{milestone.totalRemaining > 0 && (
+						<p className="mt-0.5 text-xs text-warning">
+							{formatINR(milestone.totalRemaining)} remaining
+						</p>
+					)}
+				</div>
+
+				<ChevronDown
+					className={`h-6 w-6 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""
+						}`}
+				/>
 			</button>
 
 			{open && (
-				<div className="pb-3 pl-6">
-					{milestone.installments.map((inst) => (
-						<div
-							key={inst.installmentId}
-							className="flex flex-wrap items-center justify-between border-t py-2 text-sm first:border-t-0"
-						>
-							<span>{inst.description}</span>
-							<span>{formatINR(inst.paidAmount)} / {formatINR(inst.amount)}</span>
-							<StatusBadge status={inst.status} />
-							<span className="text-muted-foreground">
-								{inst.paidAt ? formatDate(inst.paidAt) : "Not paid"}
-							</span>
-						</div>
-					))}
+				<div className="mb-4 ml-2 overflow-hidden rounded-md border bg-muted/10">
+					<div className="overflow-x-auto">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead className="w-12">#</TableHead>
+									<TableHead>Description</TableHead>
+									<TableHead className="text-right">
+										Amount
+									</TableHead>
+									<TableHead className="text-right">
+										Paid
+									</TableHead>
+									<TableHead className="text-right">
+										Remaining
+									</TableHead>
+									<TableHead>GST</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead>Due Date</TableHead>
+									<TableHead>Payment</TableHead>
+								</TableRow>
+							</TableHeader>
+
+							<TableBody>
+								{milestone.installments.map((inst) => (
+									<TableRow key={inst.installmentId}>
+										<TableCell className="text-muted-foreground">
+											{inst.installmentNumber}
+										</TableCell>
+
+										<TableCell>
+											<div>
+												<p className="font-medium">
+													{inst.description}
+												</p>
+
+												{inst.voucherNumber && (
+													<p className="mt-1 text-xs text-muted-foreground">
+														Voucher:{" "}
+														{inst.voucherNumber}
+													</p>
+												)}
+											</div>
+										</TableCell>
+
+										<TableCell className="text-right font-medium">
+											{formatINR(inst.amount)}
+										</TableCell>
+
+										<TableCell className="text-right text-success">
+											{formatINR(inst.paidAmount)}
+										</TableCell>
+
+										<TableCell className="text-right">
+											{inst.remaining > 0 ? (
+												<span className="text-warning">
+													{formatINR(inst.remaining)}
+												</span>
+											) : (
+												<span className="text-muted-foreground">
+													—
+												</span>
+											)}
+										</TableCell>
+
+										<TableCell>
+											<div className="text-sm">
+												<p>
+													{formatINR(inst.gstAmount)}
+												</p>
+												<p className="text-xs text-muted-foreground">
+													Paid:{" "}
+													{formatINR(inst.gstPaid)}
+												</p>
+											</div>
+										</TableCell>
+
+										<TableCell>
+											<Badge
+												variant={statusVariant(
+													inst.status
+												)}
+											>
+												{inst.status}
+											</Badge>
+										</TableCell>
+
+										<TableCell className="text-muted-foreground">
+											{inst.dueDate
+												? formatDate(inst.dueDate)
+												: "—"}
+										</TableCell>
+
+										<TableCell>
+											{inst.paymentMode ? (
+												<div>
+													<p className="font-medium">
+														{inst.paymentMode}
+													</p>
+
+													{inst.receiptNumber && (
+														<p className="text-xs text-muted-foreground">
+															Receipt:{" "}
+															{inst.receiptNumber}
+														</p>
+													)}
+
+													{inst.paidAt && (
+														<p className="text-xs text-muted-foreground">
+															{formatDate(
+																inst.paidAt
+															)}
+														</p>
+													)}
+												</div>
+											) : (
+												<span className="text-muted-foreground">
+													Not paid
+												</span>
+											)}
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</div>
 				</div>
 			)}
 		</div>
@@ -90,7 +222,7 @@ export function MilestoneBuyerDetailPage() {
 		);
 	}
 
-	const { buyer, project, flat, summary, milestoneBreakdown, paymentHistory, booking } = data;
+	const { buyer, project, flat, customerType, appliedMilestoneFilter, summary, milestoneBreakdown, paymentHistory, booking } = data;
 
 	return (
 		<div className="space-y-4 p-4">
@@ -99,80 +231,148 @@ export function MilestoneBuyerDetailPage() {
 				Back to Buyers
 			</Button>
 
+			{/* 1. Buyer Header */}
 			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center justify-between text-lg">
-						{buyer.name}
-						<span className="text-sm font-normal text-muted-foreground">
-							{data.bookingReferenceNumber}
-						</span>
-					</CardTitle>
-				</CardHeader>
-				<CardContent className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-					<div>Phone: {buyer.phone}</div>
-					<div>Email: {buyer.email}</div>
-					<div>Project: {project.name}</div>
-					<div>Flat: {flat.number} ({flat.tower}, Floor {flat.floor})</div>
-					<div>Flat Price: {formatINR(flat.flatPrice)}</div>
-					<div>Customer Type: {data.customerType}</div>
-				</CardContent>
-			</Card>
-
-			<Card>
-				<CardContent className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4">
-					<div>
-						<p className="text-xs text-muted-foreground">Total Amount</p>
-						<p className="text-lg font-semibold">{formatINR(summary.totalAmount)}</p>
+				<CardContent className="space-y-3 p-4">
+					<div className="flex flex-wrap items-center justify-between gap-2">
+						<h2 className="font-display text-lg font-semibold text-foreground">
+							{buyer.name?.trim()}
+						</h2>
+						<div className="flex items-center gap-2">
+							{customerType && (
+								<Badge variant="secondary">{customerType.toUpperCase()}</Badge>
+							)}
+							<span className="text-sm font-normal text-muted-foreground">
+								{data.bookingReferenceNumber}
+							</span>
+						</div>
 					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Paid</p>
-						<p className="text-lg font-semibold">{formatINR(summary.totalPaid)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Remaining</p>
-						<p className="text-lg font-semibold">{formatINR(summary.totalRemaining)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Status</p>
-						<StatusBadge status={summary.status} />
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">GST Total</p>
-						<p className="text-sm font-medium">{formatINR(summary.totalGst)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">GST Paid</p>
-						<p className="text-sm font-medium">{formatINR(summary.totalGstPaid)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">GST Remaining</p>
-						<p className="text-sm font-medium">{formatINR(summary.totalGstRemaining)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Installments</p>
-						<p className="text-sm font-medium">
-							{summary.paidInstallments} paid / {summary.partialInstallments} partial / {summary.pendingInstallments} pending
-						</p>
+					<div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
+						<div>Phone: {buyer.phone}</div>
+						<div>Email: {buyer.email}</div>
+						<div>Project: {project.name?.trim()}</div>
+						<div>Location: {project.location}</div>
+						<div>Flat: {flat.number} ({flat.tower}, Floor {flat.floor})</div>
+						<div>Flat Price: {formatINR(flat.flatPrice)}</div>
 					</div>
 				</CardContent>
 			</Card>
 
+			{/* 2. Booking Overview — whole-booking totals, shown before the scoped milestone summary */}
 			<Card>
-				<CardHeader>
-					<CardTitle className="text-base">Milestone Breakdown</CardTitle>
-				</CardHeader>
-				<CardContent>
+				<CardContent className="space-y-3 p-4">
+					<div className="flex items-center justify-between">
+						<h3 className="text-sm font-medium text-muted-foreground">Booking Overview</h3>
+						<Badge variant={statusVariant(booking.paymentStatus)}>{booking.paymentStatus}</Badge>
+					</div>
+					<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+						<StatCard
+							label="Booking Amount"
+							value={formatINR(booking.bookingAmount)}
+							size="compact"
+							accent="info"
+						/>
+						<StatCard
+							label="Total Paid"
+							value={formatINR(booking.totalPaid)}
+							size="compact"
+							accent="success"
+						/>
+						<StatCard
+							label="Remaining"
+							value={formatINR(booking.remainingAmount)}
+							size="compact"
+							accent="warning"
+						/>
+						<StatCard
+							label="Booking Date"
+							value={formatDate(booking.bookingDate)}
+							size="compact"
+							accent="primary"
+						/>
+					</div>
+				</CardContent>
+			</Card>
+
+			{/* 3. Payment Summary — scoped to the applied milestone filter */}
+			<Card>
+				<CardContent className="space-y-3 p-4">
+					<div className="flex flex-wrap items-center justify-between gap-2">
+						<div>
+							<h3 className="text-sm font-medium text-muted-foreground">Payment Summary</h3>
+							{appliedMilestoneFilter && (
+								<p className="text-xs text-muted-foreground">
+									Filtered by milestone: <span className="font-medium">{appliedMilestoneFilter}</span>
+								</p>
+							)}
+						</div>
+						<Badge variant={statusVariant(summary.status)}>{summary.status}</Badge>
+					</div>
+
+					<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+						<StatCard
+							label="Total Amount"
+							value={formatINR(summary.totalAmount)}
+							size="compact"
+							accent="info"
+						/>
+						<StatCard
+							label="Total Paid"
+							value={formatINR(summary.totalPaid)}
+							size="compact"
+							accent="success"
+						/>
+						<StatCard
+							label="Total Remaining"
+							value={formatINR(summary.totalRemaining)}
+							size="compact"
+							accent="warning"
+						/>
+						<StatCard
+							label="Installments"
+							value={`${summary.paidInstallments}/${summary.totalInstallments} paid`}
+							size="compact"
+							accent="primary"
+						/>
+					</div>
+
+					<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+						<StatCard
+							label="GST Total"
+							value={formatINR(summary.totalGst)}
+							size="compact"
+							accent="info"
+						/>
+						<StatCard
+							label="GST Paid"
+							value={formatINR(summary.totalGstPaid)}
+							size="compact"
+							accent="success"
+						/>
+						<StatCard
+							label="GST Remaining"
+							value={formatINR(summary.totalGstRemaining)}
+							size="compact"
+							accent="warning"
+						/>
+					</div>
+				</CardContent>
+			</Card>
+
+			{/* 4. Milestone Breakdown */}
+			<Card>
+				<CardContent className="p-4">
+					<h3 className="mb-2 text-sm font-medium text-muted-foreground">Milestone Breakdown</h3>
 					{milestoneBreakdown.map((m) => (
 						<CollapsibleMilestone key={m.milestone} milestone={m} />
 					))}
 				</CardContent>
 			</Card>
 
+			{/* 5. Payment History — transaction log, last since it's the most granular */}
 			<Card>
-				<CardHeader>
-					<CardTitle className="text-base">Payment History</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-2">
+				<CardContent className="space-y-2 p-4">
+					<h3 className="mb-2 text-sm font-medium text-muted-foreground">Payment History</h3>
 					{paymentHistory.length === 0 ? (
 						<p className="text-sm text-muted-foreground">No payments recorded yet.</p>
 					) : (
@@ -186,27 +386,6 @@ export function MilestoneBuyerDetailPage() {
 							</div>
 						))
 					)}
-				</CardContent>
-			</Card>
-
-			<Card>
-				<CardContent className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4">
-					<div>
-						<p className="text-xs text-muted-foreground">Booking Amount</p>
-						<p className="font-medium">{formatINR(booking.bookingAmount)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Paid</p>
-						<p className="font-medium">{formatINR(booking.totalPaid)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Remaining</p>
-						<p className="font-medium">{formatINR(booking.remainingAmount)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Booking Date</p>
-						<p className="font-medium">{formatDate(booking.bookingDate)}</p>
-					</div>
 				</CardContent>
 			</Card>
 		</div>
