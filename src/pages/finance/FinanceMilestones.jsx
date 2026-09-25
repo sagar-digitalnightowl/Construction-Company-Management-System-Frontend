@@ -1,5 +1,7 @@
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useFinance } from "@/hooks/useFinance";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,12 +14,17 @@ import {
 } from "@/components/ui/select";
 import { formatDate } from "@/lib/helpers";
 import { projectApi } from "@/api";
+import { useProject } from "@/hooks/useProject";
 import { toast } from "sonner";
 import { MilestoneTable } from "./FinanceMilestones/MilestoneTable";
 import { MarkMilestoneDialog } from "./FinanceMilestones/MarkMilestoneDialog";
 
 export function FinanceMilestones() {
+	const navigate = useNavigate();
+	const location = useLocation();
 	const { milestones, fetchProjectMilestones, markMilestone, loading } = useFinance();
+
+	const { fetchMilestonePaymentSummary, loading: summaryLoading } = useProject();
 
 	// Projects Dropdown States
 	const [projects, setProjects] = useState([]);
@@ -60,6 +67,19 @@ export function FinanceMilestones() {
 		} catch (err) {
 			console.error(err);
 			toast.error("Failed to load projects");
+		}
+	};
+
+	const handleViewSummary = async () => {
+		const summary = await fetchMilestonePaymentSummary(selectedProject);
+		if (summary) {
+			navigate("/finance-milestones-summary", {
+				state: {
+					projectId: selectedProject,
+					initialData: summary,
+					backTo: location.pathname + location.search,
+				},
+			});
 		}
 	};
 
@@ -127,14 +147,22 @@ export function FinanceMilestones() {
 					</Select>
 				</div>
 
-				{selectedProject && (
-					<Button
-						onClick={() => setMarkOpen(true)}
-						className="w-full sm:w-auto"
-					>
-						Mark Milestone Completed
-					</Button>
-				)}
+				<div className="flex gap-2">
+					{selectedProject && (
+						<Button
+							variant="secondary"
+							onClick={handleViewSummary}
+							disabled={summaryLoading}
+						>
+							{summaryLoading ? "Loading..." : "View Payment Summary"}
+						</Button>
+					)}
+					{selectedProject && (
+						<Button onClick={() => setMarkOpen(true)}>
+							Mark Milestone Completed
+						</Button>
+					)}
+				</div>
 			</div>
 
 			{selectedProject && (

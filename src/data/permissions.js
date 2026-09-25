@@ -200,6 +200,22 @@ export const VIEW = {
 		"finance_executive",
 	],
 
+	"finance-milestones-summary": [
+		"admin",
+		"director",
+		"project_manager",
+		"finance_executive",
+		"hr_manager",
+	],
+
+	"finance-milestones-buyers": [
+		"admin",
+		"director",
+		"project_manager",
+		"finance_executive",
+		"hr_manager",
+	],
+
 	"finance-payroll": ["admin", "director", "accountant", "finance_executive"],
 
 	"finance-expenses": [

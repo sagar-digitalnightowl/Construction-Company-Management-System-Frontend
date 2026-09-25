@@ -1,220 +1,273 @@
-// src/api/projectApi.js
-import api from './axios';
+import api from "./axios";
 
 export const projectApi = {
+	// =========================
+	// BASIC CRUD
+	// =========================
+	getAll: (params) => api.get("/project", { params }),
+	getById: (id) => api.get(`/project/${id}`),
 
-    // =========================
-    // BASIC CRUD
-    // =========================
-    getAll: (params) => api.get('/project', { params }),
-    getById: (id) => api.get(`/project/${id}`),
-    
-    /**
-     * CREATE PROJECT
-     * @param {Object} data - Project data
-     * @param {string} data.coverImageKey - File key from presigned URL for cover image (optional)
-     * @param {string[]} data.galleryImageKeys - File keys from presigned URL for gallery images (optional)
-     * 
-     * @example
-     * // Step 1: Upload cover image using presigned URL
-     * // Step 2: Upload gallery images using presigned URL
-     * // Step 3: Create project with keys
-     * projectApi.create({
-     *   name: "Sky Residency",
-     *   location: "Mumbai",
-     *   startDate: "2024-01-01",
-     *   coverImageKey: "projects/PROJECT_ID/123456789-cover.jpg",
-     *   galleryImageKeys: ["projects/PROJECT_ID/123456789-gallery1.jpg"]
-     * });
-     */
-    create: (data) => api.post('/project', data),
-    
-    /**
-     * UPDATE PROJECT
-     * @param {string} id - Project ID
-     * @param {Object} data - Project data to update
-     * @param {string} data.coverImageKey - File key from presigned URL for cover image (optional)
-     * @param {string[]} data.galleryImageKeys - File keys from presigned URL for gallery images (optional)
-     * 
-     * @example
-     * projectApi.update("65a1b2c3d4e5f67890abcdef", {
-     *   name: "Updated Name",
-     *   coverImageKey: "projects/PROJECT_ID/987654321-new-cover.jpg",
-     *   galleryImageKeys: ["projects/PROJECT_ID/987654321-new-gallery1.jpg"]
-     * });
-     */
-    update: (id, data) => api.put(`/project/${id}`, data),
-    
-    delete: (id) => api.delete(`/project/${id}`),
-    clone: (id) => api.post(`/project/${id}/clone`),
-    export: (params) => api.get('/project/export', { params }),
+	/**
+	 * CREATE PROJECT
+	 * @param {Object} data - Project data
+	 * @param {string} data.coverImageKey - File key from presigned URL for cover image (optional)
+	 * @param {string[]} data.galleryImageKeys - File keys from presigned URL for gallery images (optional)
+	 *
+	 * @example
+	 * // Step 1: Upload cover image using presigned URL
+	 * // Step 2: Upload gallery images using presigned URL
+	 * // Step 3: Create project with keys
+	 * projectApi.create({
+	 *   name: "Sky Residency",
+	 *   location: "Mumbai",
+	 *   startDate: "2024-01-01",
+	 *   coverImageKey: "projects/PROJECT_ID/123456789-cover.jpg",
+	 *   galleryImageKeys: ["projects/PROJECT_ID/123456789-gallery1.jpg"]
+	 * });
+	 */
+	create: (data) => api.post("/project", data),
 
-    // =========================
-    // STATS & ANALYTICS
-    // =========================
-    getStats: () => api.get('/project/stats'),
-    getDelayed: () => api.get('/project/delayed'),
-    compare: (ids) => api.get(`/project/compare?ids=${ids.join(',')}`),
+	/**
+	 * UPDATE PROJECT
+	 * @param {string} id - Project ID
+	 * @param {Object} data - Project data to update
+	 * @param {string} data.coverImageKey - File key from presigned URL for cover image (optional)
+	 * @param {string[]} data.galleryImageKeys - File keys from presigned URL for gallery images (optional)
+	 *
+	 * @example
+	 * projectApi.update("65a1b2c3d4e5f67890abcdef", {
+	 *   name: "Updated Name",
+	 *   coverImageKey: "projects/PROJECT_ID/987654321-new-cover.jpg",
+	 *   galleryImageKeys: ["projects/PROJECT_ID/987654321-new-gallery1.jpg"]
+	 * });
+	 */
+	update: (id, data) => api.put(`/project/${id}`, data),
 
-    // =========================
-    // TEAM MANAGEMENT
-    // =========================
-    assignTeam: (id, data) => api.post(`/project/${id}/assign-team`, data),
-    removeTeamMember: (projectId, userId) => api.delete(`/project/${projectId}/team/${userId}`),
-    updateTeamRole: (projectId, userId, data) => api.patch(`/project/${projectId}/team/${userId}/role`, data),
+	delete: (id) => api.delete(`/project/${id}`),
+	clone: (id) => api.post(`/project/${id}/clone`),
+	export: (params) => api.get("/project/export", { params }),
 
-    // =========================
-    // MILESTONES
-    // =========================
-    addMilestone: (id, data) => api.post(`/project/${id}/milestones`, data),
-    updateMilestone: (id, milestoneId, data) => api.put(`/project/${id}/milestones/${milestoneId}`, data),
+	// =========================
+	// STATS & ANALYTICS
+	// =========================
+	getStats: () => api.get("/project/stats"),
+	getDelayed: () => api.get("/project/delayed"),
+	compare: (ids) => api.get(`/project/compare?ids=${ids.join(",")}`),
 
-    // =========================
-    // PROGRESS & PHASE
-    // =========================
-    updateProgress: (id, data) => api.patch(`/project/${id}/progress`, data),
-    updatePhase: (id, data) => api.patch(`/project/${id}/phase`, data),
+	// =========================
+	// TEAM MANAGEMENT
+	// =========================
+	assignTeam: (id, data) => api.post(`/project/${id}/assign-team`, data),
+	removeTeamMember: (projectId, userId) =>
+		api.delete(`/project/${projectId}/team/${userId}`),
+	updateTeamRole: (projectId, userId, data) =>
+		api.patch(`/project/${projectId}/team/${userId}/role`, data),
 
-    // =========================
-    // BOQ
-    // =========================
-    addBOQItem: (id, data) => api.post(`/project/${id}/boq`, data),
-    updateBOQItem: (id, itemId, data) => api.put(`/project/${id}/boq/${itemId}`, data),
+	// =========================
+	// MILESTONES
+	// =========================
+	addMilestone: (id, data) => api.post(`/project/${id}/milestones`, data),
+	updateMilestone: (id, milestoneId, data) =>
+		api.put(`/project/${id}/milestones/${milestoneId}`, data),
 
-    // =========================
-    // COMMENTS
-    // =========================
-    addComment: (id, data) => api.post(`/project/${id}/comments`, data),
+	// =========================
+	// PROGRESS & PHASE
+	// =========================
+	updateProgress: (id, data) => api.patch(`/project/${id}/progress`, data),
+	updatePhase: (id, data) => api.patch(`/project/${id}/phase`, data),
 
-    // =========================
-    // RISKS
-    // =========================
-    addRisk: (id, data) => api.post(`/project/${id}/risks`, data),
-    updateRisk: (id, riskId, data) => api.put(`/project/${id}/risks/${riskId}`, data),
+	// =========================
+	// BOQ
+	// =========================
+	addBOQItem: (id, data) => api.post(`/project/${id}/boq`, data),
+	updateBOQItem: (id, itemId, data) =>
+		api.put(`/project/${id}/boq/${itemId}`, data),
 
-    // =========================
-    // ISSUES
-    // =========================
-    reportIssue: (id, data) => api.post(`/project/${id}/issues`, data),
-    getIssues: (id) => api.get(`/project/${id}/issues`),
-    resolveIssue: (id, issueId, data) => api.patch(`/project/${id}/issues/${issueId}/resolve`, data),
+	// =========================
+	// COMMENTS
+	// =========================
+	addComment: (id, data) => api.post(`/project/${id}/comments`, data),
 
-    // =========================
-    // RESOURCES
-    // =========================
-    allocateResource: (id, data) => api.post(`/project/${id}/resources`, data),
-    getResources: (id) => api.get(`/project/${id}/resources`),
+	// =========================
+	// RISKS
+	// =========================
+	addRisk: (id, data) => api.post(`/project/${id}/risks`, data),
+	updateRisk: (id, riskId, data) =>
+		api.put(`/project/${id}/risks/${riskId}`, data),
 
-    // =========================
-    // ACTIVITY
-    // =========================
-    getActivity: (id, params) => api.get(`/project/${id}/activity`, { params }),
+	// =========================
+	// ISSUES
+	// =========================
+	reportIssue: (id, data) => api.post(`/project/${id}/issues`, data),
+	getIssues: (id) => api.get(`/project/${id}/issues`),
+	resolveIssue: (id, issueId, data) =>
+		api.patch(`/project/${id}/issues/${issueId}/resolve`, data),
 
-    // =========================
-    // HEALTH & DEPENDENCIES
-    // =========================
-    getHealth: (id) => api.get(`/project/${id}/health`),
-    getDependencies: (id) => api.get(`/project/${id}/dependencies`),
+	// =========================
+	// RESOURCES
+	// =========================
+	allocateResource: (id, data) => api.post(`/project/${id}/resources`, data),
+	getResources: (id) => api.get(`/project/${id}/resources`),
 
-    // =========================
-    // BUDGET & TIMELINE
-    // =========================
-    getBudgetUtilization: (id) => api.get(`/project/${id}/budget-utilization`),
-    getTimeline: (id) => api.get(`/project/${id}/timeline`),
+	// =========================
+	// ACTIVITY
+	// =========================
+	getActivity: (id, params) => api.get(`/project/${id}/activity`, { params }),
 
-    // =========================
-    // DOCUMENTS
-    // =========================
-    getDocuments: (id) => api.get(`/project/${id}/documents`),
-    getPresignedUrl: (id, data) => api.post(`/project/${id}/documents/presigned-url`, data),
-    confirmUpload: (id, data) => api.post(`/project/${id}/documents/confirm`, data),
-    deleteDocument: (documentId) => api.delete(`/project/documents/${documentId}`),
+	// =========================
+	// HEALTH & DEPENDENCIES
+	// =========================
+	getHealth: (id) => api.get(`/project/${id}/health`),
+	getDependencies: (id) => api.get(`/project/${id}/dependencies`),
 
-    // =========================
-    // DPR (DAILY PROGRESS REPORT)
-    // =========================
-    getDPR: (id, params) => api.get(`/project/${id}/dpr`, { params }),
-    createDPR: (id, data) => api.post(`/project/${id}/dpr`, data),
+	// =========================
+	// BUDGET & TIMELINE
+	// =========================
+	getBudgetUtilization: (id) => api.get(`/project/${id}/budget-utilization`),
+	getTimeline: (id) => api.get(`/project/${id}/timeline`),
 
-    // =========================
-    // MATERIAL REQUESTS
-    // =========================
-    getMaterialRequests: (id) => api.get(`/project/${id}/material-requests`),
-    createMaterialRequest: (id, data) => api.post(`/project/${id}/material-requests`, data),
+	// =========================
+	// DOCUMENTS
+	// =========================
+	getDocuments: (id) => api.get(`/project/${id}/documents`),
+	getPresignedUrl: (id, data) =>
+		api.post(`/project/${id}/documents/presigned-url`, data),
+	confirmUpload: (id, data) =>
+		api.post(`/project/${id}/documents/confirm`, data),
+	deleteDocument: (documentId) =>
+		api.delete(`/project/documents/${documentId}`),
 
-    // =========================
-    // TEMPLATES
-    // =========================
-    getTemplates: () => api.get('/project/templates'),
-    createTemplate: (data) => api.post('/project/templates', data),
-    applyTemplate: (id, templateId) => api.post(`/project/${id}/from-template/${templateId}`),
+	// =========================
+	// DPR (DAILY PROGRESS REPORT)
+	// =========================
+	getDPR: (id, params) => api.get(`/project/${id}/dpr`, { params }),
+	createDPR: (id, data) => api.post(`/project/${id}/dpr`, data),
 
-    // =========================
-    // WEATHER
-    // =========================
-    addWeatherLog: (id, data) => api.post(`/project/${id}/weather`, data),
-    getWeatherLogs: (id, params) => api.get(`/project/${id}/weather`, { params }),
+	// =========================
+	// MATERIAL REQUESTS
+	// =========================
+	getMaterialRequests: (id) => api.get(`/project/${id}/material-requests`),
+	createMaterialRequest: (id, data) =>
+		api.post(`/project/${id}/material-requests`, data),
 
-    // =========================
-    // VISITORS
-    // =========================
-    addVisitor: (id, data) => api.post(`/project/${id}/visitors`, data),
-    getVisitors: (id, params) => api.get(`/project/${id}/visitors`, { params }),
-    checkoutVisitor: (id, visitorId) => api.patch(`/project/${id}/visitors/${visitorId}/checkout`),
+	// =========================
+	// TEMPLATES
+	// =========================
+	getTemplates: () => api.get("/project/templates"),
+	createTemplate: (data) => api.post("/project/templates", data),
+	applyTemplate: (id, templateId) =>
+		api.post(`/project/${id}/from-template/${templateId}`),
 
-    // =========================
-    // SAFETY CHECKLIST
-    // =========================
-    createSafetyChecklist: (id, data) => api.post(`/project/${id}/safety-checklist`, data),
-    getSafetyChecklists: (id) => api.get(`/project/${id}/safety-checklist`),
-    getSafetyChecklistById: (id, checklistId) => api.get(`/project/${id}/safety-checklist/${checklistId}`),
-    updateSafetyChecklist: (id, checklistId, data) => api.patch(`/project/${id}/safety-checklist/${checklistId}`, data),
+	// =========================
+	// WEATHER
+	// =========================
+	addWeatherLog: (id, data) => api.post(`/project/${id}/weather`, data),
+	getWeatherLogs: (id, params) =>
+		api.get(`/project/${id}/weather`, { params }),
 
-    // =========================
-    // NOTES
-    // =========================
-    addNote: (id, data) => api.post(`/project/${id}/notes`, data),
-    getNotes: (id, params) => api.get(`/project/${id}/notes`, { params }),
-    updateNote: (id, noteId, data) => api.patch(`/project/${id}/notes/${noteId}`, data),
-    deleteNote: (id, noteId) => api.delete(`/project/${id}/notes/${noteId}`),
+	// =========================
+	// VISITORS
+	// =========================
+	addVisitor: (id, data) => api.post(`/project/${id}/visitors`, data),
+	getVisitors: (id, params) => api.get(`/project/${id}/visitors`, { params }),
+	checkoutVisitor: (id, visitorId) =>
+		api.patch(`/project/${id}/visitors/${visitorId}/checkout`),
 
-    // =========================
-    // BOOKINGS
-    // =========================
-    cancelAllBookings: (id, data) => api.post(`/project/${id}/cancel-all-bookings`, data),
+	// =========================
+	// SAFETY CHECKLIST
+	// =========================
+	createSafetyChecklist: (id, data) =>
+		api.post(`/project/${id}/safety-checklist`, data),
+	getSafetyChecklists: (id) => api.get(`/project/${id}/safety-checklist`),
+	getSafetyChecklistById: (id, checklistId) =>
+		api.get(`/project/${id}/safety-checklist/${checklistId}`),
+	updateSafetyChecklist: (id, checklistId, data) =>
+		api.patch(`/project/${id}/safety-checklist/${checklistId}`, data),
 
-    // =========================
-    // Units (Legacy - kept for backward compatibility)
-    // =========================
-    getUnits: (id) => api.get(`/project/${id}/units`),
+	// =========================
+	// NOTES
+	// =========================
+	addNote: (id, data) => api.post(`/project/${id}/notes`, data),
+	getNotes: (id, params) => api.get(`/project/${id}/notes`, { params }),
+	updateNote: (id, noteId, data) =>
+		api.patch(`/project/${id}/notes/${noteId}`, data),
+	deleteNote: (id, noteId) => api.delete(`/project/${id}/notes/${noteId}`),
 
-    // =========================
-    // TOWERS, FLOORS & FLATS MANAGEMENT
-    // =========================
-    towers: {
-        getAll: (projectId) => api.get(`/project/${projectId}/towers`),
-        getByName: (projectId, towerName) =>
-            api.get(`/project/${projectId}/towers/${encodeURIComponent(towerName)}`),
-        create: (projectId, data) => api.post(`/project/${projectId}/towers`, data),
-        update: (projectId, towerIndex, data) =>
-            api.put(`/project/${projectId}/towers/${towerIndex}`, data),
-        delete: (projectId, towerIndex) =>
-            api.delete(`/project/${projectId}/towers/${towerIndex}`),
-        addFloor: (projectId, towerIndex, data) =>
-            api.post(`/project/${projectId}/towers/${towerIndex}/floors`, data),
-        updateFloor: (projectId, towerIndex, floorIndex, data) =>
-            api.put(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}`, data),
-        deleteFloor: (projectId, towerIndex, floorIndex) =>
-            api.delete(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}`),
-        addFlat: (projectId, towerIndex, floorIndex, data) =>
-            api.post(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats`, data),
-        updateFlat: (projectId, towerIndex, floorIndex, flatIndex, data) =>
-            api.patch(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats/${flatIndex}`, data),
-        deleteFlat: (projectId, towerIndex, floorIndex, flatIndex) =>
-            api.delete(`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats/${flatIndex}`),
-        getAvailableFlats: (projectId, towerName) =>
-            api.get(`/project/${projectId}/towers/${encodeURIComponent(towerName)}/available-flats`),
-        getAllFlats: (projectId, params) =>
-            api.get(`/project/${projectId}/flats`, { params }),
-    },
+	// =========================
+	// BOOKINGS
+	// =========================
+	cancelAllBookings: (id, data) =>
+		api.post(`/project/${id}/cancel-all-bookings`, data),
+
+	// =========================
+	// Units (Legacy - kept for backward compatibility)
+	// =========================
+	getUnits: (id) => api.get(`/project/${id}/units`),
+
+	// =========================
+	// TOWERS, FLOORS & FLATS MANAGEMENT
+	// =========================
+	towers: {
+		getAll: (projectId) => api.get(`/project/${projectId}/towers`),
+		getByName: (projectId, towerName) =>
+			api.get(
+				`/project/${projectId}/towers/${encodeURIComponent(towerName)}`,
+			),
+		create: (projectId, data) =>
+			api.post(`/project/${projectId}/towers`, data),
+		update: (projectId, towerIndex, data) =>
+			api.put(`/project/${projectId}/towers/${towerIndex}`, data),
+		delete: (projectId, towerIndex) =>
+			api.delete(`/project/${projectId}/towers/${towerIndex}`),
+		addFloor: (projectId, towerIndex, data) =>
+			api.post(`/project/${projectId}/towers/${towerIndex}/floors`, data),
+		updateFloor: (projectId, towerIndex, floorIndex, data) =>
+			api.put(
+				`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}`,
+				data,
+			),
+		deleteFloor: (projectId, towerIndex, floorIndex) =>
+			api.delete(
+				`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}`,
+			),
+		addFlat: (projectId, towerIndex, floorIndex, data) =>
+			api.post(
+				`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats`,
+				data,
+			),
+		updateFlat: (projectId, towerIndex, floorIndex, flatIndex, data) =>
+			api.patch(
+				`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats/${flatIndex}`,
+				data,
+			),
+		deleteFlat: (projectId, towerIndex, floorIndex, flatIndex) =>
+			api.delete(
+				`/project/${projectId}/towers/${towerIndex}/floors/${floorIndex}/flats/${flatIndex}`,
+			),
+		getAvailableFlats: (projectId, towerName) =>
+			api.get(
+				`/project/${projectId}/towers/${encodeURIComponent(towerName)}/available-flats`,
+			),
+		getAllFlats: (projectId, params) =>
+			api.get(`/project/${projectId}/flats`, { params }),
+	},
+
+	// Milestone payment summary
+	getMilestonePaymentSummary: (projectId) =>
+		api.get(`/finance/project/${projectId}/milestone-payment-summary`),
+
+	// Milestone-wise buyers
+	getMilestoneBuyers: (params) =>
+		api.get("/finance/milestone-buyers", { params }),
+
+	// Per-buyer milestone payment details
+	getMilestoneBuyerDetails: (bookingId, params) =>
+		api.get(`/finance/milestone-buyers/buyer/${bookingId}`, { params }),
+
+	// Milestone buyers Excel export
+	exportMilestoneBuyers: (params) =>
+		api.get("/finance/milestone-buyers/export", {
+			params,
+			responseType: "blob",
+		}),
 };

@@ -74,6 +74,9 @@ import ProjectDetailPage from "./components/propertyInventory/ProjectDetailPage"
 import { AppLoader } from "./AppLoader";
 import EmployeeOverview from "./pages/hr/EmployeeOverview";
 import { OfficeViewPage } from "./pages/hr/OfficeViewPage";
+import { MilestoneBuyersPage } from "./pages/finance/MilestoneBuyersPage";
+import { MilestonePaymentSummaryPage } from "./pages/finance/MilestonePaymentSummaryPage";
+import { MilestoneBuyerDetailPage } from "./pages/finance/MilestoneBuyerDetailPage";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -279,6 +282,28 @@ export default function App() {
 								<FinanceMilestones />
 							</FinanceLayout>
 						}
+					/>
+
+					<Route
+						path="/finance-milestones-summary"
+						element={
+							<FinanceLayout>
+								<MilestonePaymentSummaryPage />
+							</FinanceLayout>}
+					/>
+					<Route
+						path="/finance-milestones-buyers"
+						element={
+							<FinanceLayout>
+								<MilestoneBuyersPage />
+							</FinanceLayout>}
+					/>
+					<Route
+						path="/finance-milestones-buyers/:bookingId"
+						element={
+							<FinanceLayout>
+								<MilestoneBuyerDetailPage />
+							</FinanceLayout>}
 					/>
 
 					<Route
