@@ -89,6 +89,20 @@ export function MilestoneBuyersPage() {
 		setExporting(false);
 	};
 
+	const handleViewBuyerDetails = async (bookingId) => {
+		const details = await fetchMilestoneBuyerDetails(bookingId, {
+			milestone: data.milestone,
+		});
+
+		if (details) {
+			navigate(`/finance-milestones-buyers/${bookingId}`, {
+				state: {
+					initialData: details,
+				},
+			});
+		}
+	};
+
 	if (!data) {
 		return (
 			<div className="flex flex-col items-center justify-center gap-4 p-10">
@@ -252,26 +266,7 @@ export function MilestoneBuyersPage() {
 											variant="ghost"
 											size="sm"
 											className="gap-1.5"
-											onClick={async (e) => {
-												e.stopPropagation();
-
-												const details = await fetchMilestoneBuyerDetails(
-													b.bookingId,
-													{
-														milestone: data.milestone,
-													}
-												);
-
-												if (details) {
-													navigate(`/finance-milestones-buyers/${b.bookingId}`,
-														{
-															state: {
-																initialData: details,
-															},
-														}
-													);
-												}
-											}}
+											onClick={() => handleViewBuyerDetails(b.bookingId)}
 										>
 											View Detail
 											<ArrowRight className="h-4 w-4" />
