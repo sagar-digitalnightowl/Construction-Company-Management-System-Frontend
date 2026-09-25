@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, CheckCircle, Clock } from "lucide-react";
 import { formatINR } from "@/lib/helpers";
+import { StatCard } from "@/components/common/PageHeader";
 
 const getPercentageColor = (pct) => {
 	if (pct >= 80) return "#28A745";
@@ -66,41 +67,50 @@ export function MilestonePaymentSummaryPage() {
 				Back
 			</Button>
 
-			<Card>
-				<CardContent className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-3 lg:grid-cols-6">
-					<div>
-						<p className="text-xs text-muted-foreground">Total Bookings</p>
-						<p className="text-xl font-semibold">{data.totalBookings}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Milestones Completed</p>
-						<p className="text-xl font-semibold">
-							{data.completedMilestones}/{data.totalMilestones}
-						</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Amount</p>
-						<p className="text-xl font-semibold">{formatINR(data.overall.totalAmount)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Paid</p>
-						<p className="text-xl font-semibold">{formatINR(data.overall.totalPaid)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Remaining</p>
-						<p className="text-xl font-semibold">{formatINR(data.overall.totalRemaining)}</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Collection %</p>
-						<p
-							className="text-xl font-semibold"
-							style={{ color: getPercentageColor(data.overall.collectionPercentage) }}
-						>
-							{data.overall.collectionPercentage}%
-						</p>
-					</div>
-				</CardContent>
-			</Card>
+			<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+				<StatCard
+					label="Total Bookings"
+					value={data.totalBookings}
+					size="compact"
+					accent="primary"
+				/>
+
+				<StatCard
+					label="Milestones Completed"
+					value={`${data.completedMilestones}/${data.totalMilestones}`}
+					size="compact"
+					accent="success"
+				/>
+
+				<StatCard
+					label="Total Amount"
+					value={formatINR(data.overall.totalAmount)}
+					size="compact"
+					accent="info"
+				/>
+
+				<StatCard
+					label="Total Paid"
+					value={formatINR(data.overall.totalPaid)}
+					size="compact"
+					accent="success"
+				/>
+
+				<StatCard
+					label="Total Remaining"
+					value={formatINR(data.overall.totalRemaining)}
+					size="compact"
+					accent="warning"
+				/>
+
+				<StatCard
+					label="Collection %"
+					value={`${data.overall.collectionPercentage}%`}
+					size="compact"
+					accent="primary"
+					valueClassName="text-primary"
+				/>
+			</div>
 
 			<Card>
 				<CardContent className="p-0">
@@ -112,7 +122,6 @@ export function MilestonePaymentSummaryPage() {
 								<TableHead className="text-right">Total Buyers</TableHead>
 								<TableHead>Buyers (Paid/Partial/Unpaid)</TableHead>
 								<TableHead className="text-right">Collection %</TableHead>
-								<TableHead className="text-right">Buyers</TableHead>
 								<TableHead className="text-center">Action</TableHead>
 							</TableRow>
 						</TableHeader>
@@ -138,7 +147,6 @@ export function MilestonePaymentSummaryPage() {
 									<TableCell>
 										{m.paidCount} / {m.partialCount} / {m.unpaidCount}
 									</TableCell>
-									<TableCell className="text-right">{m.totalBuyers}</TableCell>
 									<TableCell
 										className="text-right font-medium"
 										style={{ color: getPercentageColor(m.collectionPercentage) }}
