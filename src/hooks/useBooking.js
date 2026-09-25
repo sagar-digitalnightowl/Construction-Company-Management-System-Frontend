@@ -5,6 +5,8 @@ import { bookingApi } from "@/api";
 export const useBooking = () => {
 	const [bookings, setBookings] = useState([]);
 	const [myBookings, setMyBookings] = useState([]);
+	const [managerBookings, setManagerBookings] = useState([]);
+	const [managerSummary, setManagerSummary] = useState(null);
 	const [pendingBookings, setPendingBookings] = useState([]);
 	const [currentBooking, setCurrentBooking] = useState(null);
 	const [installments, setInstallments] = useState([]);
@@ -48,6 +50,56 @@ export const useBooking = () => {
 			setMyBookings(res.data?.data || []);
 		} catch (err) {
 			toast.error("Failed to load your bookings");
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	// Fetch manager's own bookings (PM/BM/TM)
+	const fetchManagerMyBookings = useCallback(async (params = {}) => {
+		setLoading(true);
+
+		try {
+			const res = await bookingApi.getManagerMyBookings(params);
+
+			setManagerBookings(res.data?.data?.bookings || []);
+
+			setPagination(
+				res.data?.data?.pagination || {
+					page: 1,
+					limit: 10,
+					total: 0,
+					pages: 0,
+				},
+			);
+
+			return res.data?.data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message ||
+					"Failed to load manager bookings",
+			);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	// Fetch manager dashboard summary (PM/BM/TM)
+	const fetchManagerSummary = useCallback(async (params = {}) => {
+		setLoading(true);
+
+		try {
+			const res = await bookingApi.getManagerSummary(params);
+
+			setManagerSummary(res.data?.data || null);
+
+			return res.data?.data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to load manager summary",
+			);
+			return null;
 		} finally {
 			setLoading(false);
 		}
@@ -527,6 +579,8 @@ export const useBooking = () => {
 		// Data
 		bookings,
 		myBookings,
+		managerBookings,
+		managerSummary,
 		pendingBookings,
 		currentBooking,
 		installments,
@@ -538,6 +592,8 @@ export const useBooking = () => {
 		// Fetch functions
 		fetchBookings,
 		fetchMyBookings,
+		fetchManagerMyBookings,
+		fetchManagerSummary,
 		fetchPendingBookings,
 		fetchBookingById,
 		fetchInstallmentsByBooking,

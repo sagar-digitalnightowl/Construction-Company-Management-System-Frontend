@@ -290,8 +290,18 @@ export default function BookingDetail() {
 							</div>
 
 							<div>
-								<span className="text-muted-foreground block mb-1">Project</span>
-								<span className="font-medium">{booking.projectId?.name}</span>
+								<span className="text-muted-foreground block mb-1">
+									Project
+								</span>
+								<span className="font-medium">
+									{booking.projectId?.name || "—"}
+								</span>
+
+								{booking.projectId?.location && (
+									<span className="block text-xs text-muted-foreground mt-1">
+										{booking.projectId.location}
+									</span>
+								)}
 							</div>
 							<div>
 								<span className="text-muted-foreground block mb-1">
@@ -419,6 +429,35 @@ export default function BookingDetail() {
 									<span className="font-medium">
 										{booking.bookedBy?.name || "—"}
 									</span>
+								</div>
+
+								<div className="col-span-2 mt-2 pt-4 border-t grid grid-cols-3 gap-4">
+									<div>
+										<span className="text-muted-foreground block mb-1">
+											Business Manager
+										</span>
+										<span className="font-medium">
+											{booking.businessManager?.name || "—"}
+										</span>
+									</div>
+
+									<div>
+										<span className="text-muted-foreground block mb-1">
+											Team Manager
+										</span>
+										<span className="font-medium">
+											{booking.teamManager?.name || "—"}
+										</span>
+									</div>
+
+									<div>
+										<span className="text-muted-foreground block mb-1">
+											Project Manager
+										</span>
+										<span className="font-medium">
+											{booking.projectManager?.name || "—"}
+										</span>
+									</div>
 								</div>
 							</div>
 
