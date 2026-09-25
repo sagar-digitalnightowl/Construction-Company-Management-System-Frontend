@@ -415,8 +415,8 @@ export function BookingFormDialog({
 		nomineeRelation: "",
 
 		keyNumber: "",
-		projectManager: "",
-		businessManager: "",
+		businessCode: "",
+		businessName: "",
 		teamManager: "",
 		remarks: "",
 		transactionId: "",
@@ -554,8 +554,8 @@ export function BookingFormDialog({
 					nomineeName: nominee.name || fullBooking.nomineeName || "",
 					nomineeRelation: nominee.relation || fullBooking.nomineeRelation || "",
 					keyNumber: fullBooking.keyNumber || "",
-					projectManager: fullBooking.projectManager?._id || fullBooking.projectManager || "",
-					businessManager: fullBooking.businessManager?._id || fullBooking.businessManager || "",
+					businessCode: fullBooking.businessCode || "",
+					businessName: fullBooking.businessName || "",
 					teamManager: fullBooking.teamManager?._id || fullBooking.teamManager || "",
 					remarks: fullBooking.remarks || "",
 					transactionId: fullBooking.transactionId || "",
@@ -682,7 +682,7 @@ export function BookingFormDialog({
 		}
 	};
 
-	const fetchManagers = async () => {
+	const fetchTeamManagers = async () => {
 		try {
 			const res = await authApi.getUsers();
 			if (res.data.success) {
@@ -702,7 +702,7 @@ export function BookingFormDialog({
 	useEffect(() => {
 		if (open) {
 			fetchProjects();
-			fetchManagers();
+			fetchTeamManagers();
 		} else {
 			resetForm();
 		}
@@ -957,8 +957,8 @@ export function BookingFormDialog({
 		const payload = {
 			agreementDate: form.agreementDate || undefined,
 			keyNumber: form.keyNumber || undefined,
-			projectManager: form.projectManager || undefined,
-			businessManager: form.businessManager || undefined,
+			businessCode: form.businessCode || undefined,
+			businessName: form.businessName || undefined,
 			teamManager: form.teamManager || undefined,
 			remarks: form.remarks || undefined,
 			customerType: form.customerType || undefined,
@@ -1246,27 +1246,13 @@ export function BookingFormDialog({
 							</Select>
 						</div>
 						<div>
-							<Label>Project Manager</Label>
-							<Select
-								value={form.projectManager}
-								onValueChange={(v) => updateForm("projectManager", v)}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select project manager" />
-								</SelectTrigger>
-								<SelectContent>
-									{teamManagers.map((mgr) => (
-										<SelectItem key={mgr._id} value={mgr._id}>
-											{mgr.name || mgr.email} ({mgr.role})
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<Label>Business Name</Label>
+							<Input placeholder="Optional" value={form.businessName} onChange={(e) => updateForm("businessName", e.target.value)} />
 						</div>
 
 						<div>
 							<Label>Business Manager</Label>
-							<Select value={form.businessManager} onValueChange={(v) => updateForm("businessManager", v)}>
+							<Select value={form.teamManager} onValueChange={(v) => updateForm("teamManager", v)}>
 								<SelectTrigger><SelectValue placeholder="Select manager" /></SelectTrigger>
 								<SelectContent>
 									{teamManagers.map((mgr) => (
@@ -1280,7 +1266,7 @@ export function BookingFormDialog({
 
 						<div>
 							<Label>Team Manager</Label>
-							<Input placeholder="Optional" value={form.teamManager} onChange={(e) => updateForm("teamManager", e.target.value)} />
+							<Input placeholder="Optional" value={form.businessCode} onChange={(e) => updateForm("businessCode", e.target.value)} />
 						</div>
 
 						<div className="md:col-span-2">
