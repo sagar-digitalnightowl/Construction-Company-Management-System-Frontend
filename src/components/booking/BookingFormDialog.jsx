@@ -415,8 +415,8 @@ export function BookingFormDialog({
 		nomineeRelation: "",
 
 		keyNumber: "",
-		businessCode: "",
-		businessName: "",
+		projectManager: "",
+		businessManager: "",
 		teamManager: "",
 		remarks: "",
 		transactionId: "",
@@ -554,8 +554,8 @@ export function BookingFormDialog({
 					nomineeName: nominee.name || fullBooking.nomineeName || "",
 					nomineeRelation: nominee.relation || fullBooking.nomineeRelation || "",
 					keyNumber: fullBooking.keyNumber || "",
-					businessCode: fullBooking.businessCode || "",
-					businessName: fullBooking.businessName || "",
+					projectManager: fullBooking.projectManager?._id || fullBooking.projectManager || "",
+					businessManager: fullBooking.businessManager?._id || fullBooking.businessManager || "",
 					teamManager: fullBooking.teamManager?._id || fullBooking.teamManager || "",
 					remarks: fullBooking.remarks || "",
 					transactionId: fullBooking.transactionId || "",
@@ -682,7 +682,7 @@ export function BookingFormDialog({
 		}
 	};
 
-	const fetchTeamManagers = async () => {
+	const fetchManagers = async () => {
 		try {
 			const res = await authApi.getUsers();
 			if (res.data.success) {
@@ -702,7 +702,7 @@ export function BookingFormDialog({
 	useEffect(() => {
 		if (open) {
 			fetchProjects();
-			fetchTeamManagers();
+			fetchManagers();
 		} else {
 			resetForm();
 		}
@@ -957,14 +957,21 @@ export function BookingFormDialog({
 		const payload = {
 			agreementDate: form.agreementDate || undefined,
 			keyNumber: form.keyNumber || undefined,
-			businessCode: form.businessCode || undefined,
-			businessName: form.businessName || undefined,
-			teamManager: form.teamManager || undefined,
 			remarks: form.remarks || undefined,
 			customerType: form.customerType || undefined,
 		};
 
-		if (!isEdit) {
+		if (isEdit) {
+			payload.projectManager = form.projectManager || null;
+			payload.businessManager = form.businessManager || null;
+			payload.teamManager = form.teamManager || null;
+
+			payload.flatId = form.flatId;
+		} else {
+			payload.projectManager = form.projectManager || undefined;
+			payload.businessManager = form.businessManager || undefined;
+			payload.teamManager = form.teamManager || undefined;
+
 			payload.projectId = form.projectId;
 			payload.flatId = form.flatId;
 			payload.bookingAmount = Number(form.bookingAmount);
@@ -972,8 +979,6 @@ export function BookingFormDialog({
 			payload.transactionId = form.transactionId || undefined;
 			payload.nomineeName = form.nomineeName || undefined;
 			payload.nomineeRelation = form.nomineeRelation || undefined;
-		} else {
-			payload.flatId = form.flatId;
 		}
 
 		if (form.useCustomPlan && form.installments.length > 0) {
@@ -1246,13 +1251,36 @@ export function BookingFormDialog({
 							</Select>
 						</div>
 						<div>
-							<Label>Business Name</Label>
-							<Input placeholder="Optional" value={form.businessName} onChange={(e) => updateForm("businessName", e.target.value)} />
+							<Label>Project Manager</Label>
+
+							<Select
+								value={form.projectManager || "none"}
+								onValueChange={(value) =>
+									updateForm(
+										"projectManager",
+										value === "none" ? "" : value
+									)
+								}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Select manager" />
+								</SelectTrigger>
+
+								<SelectContent>
+									<SelectItem value="none">None</SelectItem>
+
+									{teamManagers.map((mgr) => (
+										<SelectItem key={mgr._id} value={mgr._id}>
+											{mgr.name || mgr.email} ({mgr.role})
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 
 						<div>
 							<Label>Business Manager</Label>
-							<Select value={form.teamManager} onValueChange={(v) => updateForm("teamManager", v)}>
+							<Select value={form.businessManager} onValueChange={(v) => updateForm("businessManager", v)}>
 								<SelectTrigger><SelectValue placeholder="Select manager" /></SelectTrigger>
 								<SelectContent>
 									{teamManagers.map((mgr) => (
@@ -1266,7 +1294,22 @@ export function BookingFormDialog({
 
 						<div>
 							<Label>Team Manager</Label>
-							<Input placeholder="Optional" value={form.businessCode} onChange={(e) => updateForm("businessCode", e.target.value)} />
+							<Select
+								value={form.teamManager}
+								onValueChange={(v) => updateForm("teamManager", v)}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Select manager" />
+								</SelectTrigger>
+
+								<SelectContent>
+									{teamManagers.map((mgr) => (
+										<SelectItem key={mgr._id} value={mgr._id}>
+											{mgr.name || mgr.email} ({mgr.role})
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 
 						<div className="md:col-span-2">

@@ -33,6 +33,15 @@ export const bookingApi = {
 	getPendingBookings: (params) =>
 		api.get("/booking/pending-requests", { params }),
 
+	// ==================== MANAGER BOOKINGS ====================
+	// Get bookings assigned to logged-in manager (PM/BM/TM)
+	getManagerMyBookings: (params) =>
+		api.get("/booking/manager/my-bookings", { params }),
+
+	// Get summary/dashboard stats for logged-in manager (PM/BM/TM)
+	getManagerSummary: (params) =>
+		api.get("/booking/manager/summary", { params }),
+
 	// ==================== INSTALLMENTS ====================
 	// Get installments by booking ID
 	getInstallmentsByBooking: (bookingId) =>
