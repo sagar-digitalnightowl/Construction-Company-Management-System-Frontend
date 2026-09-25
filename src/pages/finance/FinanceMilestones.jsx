@@ -76,6 +76,8 @@ export function FinanceMilestones() {
 			navigate("/finance-milestones-summary", {
 				state: {
 					projectId: selectedProject,
+					projectName:
+						projects.find((p) => String(p._id) === String(selectedProject))?.name || "",
 					initialData: summary,
 					backTo: location.pathname + location.search,
 				},
