@@ -77,6 +77,11 @@ export function Sidebar({ role, onClickLink }) {
 							label: "Pending Bookings",
 							key: "pending-bookings",
 						},
+						{
+							to: "/managers-bookings",
+							label: "Manager Bookings",
+							key: "managers-bookings",
+						},
 					],
 				},
 			],
