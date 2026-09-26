@@ -7,7 +7,7 @@ import {
 	ChevronRight,
 	ChevronLeft,
 	Building2,
-	Home 
+	Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,14 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useBooking } from "@/hooks/useBooking";
 import { projectApi } from "@/api/projectApi";
-import { formatDate } from "@/lib/helpers";
-
-const formatCurrency = (amount) =>
-	new Intl.NumberFormat("en-IN", {
-		style: "currency",
-		currency: "INR",
-		maximumFractionDigits: 0,
-	}).format(amount || 0);
+import { formatDate, formatINR } from "@/lib/helpers";
 
 export default function ManagerBookingDetail() {
 	const { userId } = useParams();
@@ -139,20 +132,20 @@ export default function ManagerBookingDetail() {
 					/>
 					<StatCard
 						label="Booking Amount"
-						value={formatCurrency(managerDetailSummary.totalBookingAmount)}
+						value={formatINR(managerDetailSummary.totalBookingAmount)}
 						accent="neutral"
 						size="compact"
 					/>
 					<StatCard
 						label="Total Paid"
-						value={formatCurrency(managerDetailSummary.totalPaid)}
+						value={formatINR(managerDetailSummary.totalPaid)}
 						accent="success"
 						valueClassName="text-success"
 						size="compact"
 					/>
 					<StatCard
 						label="Remaining"
-						value={formatCurrency(managerDetailSummary.totalRemaining)}
+						value={formatINR(managerDetailSummary.totalRemaining)}
 						accent="warning"
 						valueClassName="text-yellow-600"
 						size="compact"
@@ -285,7 +278,7 @@ export default function ManagerBookingDetail() {
 													Booking Amt
 												</span>
 												<span className="text-sm font-semibold">
-													{formatCurrency(b.bookingAmount)}
+													{formatINR(b.bookingAmount)}
 												</span>
 											</div>
 											<div className="flex flex-col">
@@ -293,7 +286,7 @@ export default function ManagerBookingDetail() {
 													Paid
 												</span>
 												<span className="text-sm font-semibold text-green-600">
-													{formatCurrency(b.totalPaid)}
+													{formatINR(b.totalPaid)}
 												</span>
 											</div>
 											<div className="flex flex-col">
@@ -301,7 +294,7 @@ export default function ManagerBookingDetail() {
 													Remaining
 												</span>
 												<span className="text-sm font-semibold text-yellow-600">
-													{formatCurrency(b.remainingAmount)}
+													{formatINR(b.remainingAmount)}
 												</span>
 											</div>
 										</div>
@@ -314,19 +307,19 @@ export default function ManagerBookingDetail() {
 													<div>
 														<span className="text-muted-foreground block">Plan Total</span>
 														<span className="font-medium">
-															{formatCurrency(b.installmentSummary.totalAmount)}
+															{formatINR(b.installmentSummary.totalAmount)}
 														</span>
 													</div>
 													<div>
 														<span className="text-muted-foreground block">Paid</span>
 														<span className="font-medium text-green-600">
-															{formatCurrency(b.installmentSummary.totalPaid)}
+															{formatINR(b.installmentSummary.totalPaid)}
 														</span>
 													</div>
 													<div>
 														<span className="text-muted-foreground block">Remaining</span>
 														<span className="font-medium text-yellow-600">
-															{formatCurrency(b.installmentSummary.totalRemaining)}
+															{formatINR(b.installmentSummary.totalRemaining)}
 														</span>
 													</div>
 													<div>
@@ -360,13 +353,13 @@ export default function ManagerBookingDetail() {
 																	<td className="px-3 py-2">{inst.installmentNumber}</td>
 																	<td className="px-3 py-2">{inst.description}</td>
 																	<td className="px-3 py-2 text-right">
-																		{formatCurrency(inst.amount)}
+																		{formatINR(inst.amount)}
 																	</td>
 																	<td className="px-3 py-2 text-right text-green-600">
-																		{formatCurrency(inst.paidAmount)}
+																		{formatINR(inst.paidAmount)}
 																	</td>
 																	<td className="px-3 py-2 text-right text-yellow-600">
-																		{formatCurrency(inst.remaining)}
+																		{formatINR(inst.remaining)}
 																	</td>
 																	<td className="px-3 py-2">
 																		{inst.dueDate ? formatDate(inst.dueDate) : "—"}
