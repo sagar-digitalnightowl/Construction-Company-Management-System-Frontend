@@ -699,6 +699,12 @@ export function BookingFormDialog({
 		}
 	};
 
+	const formatRole = (role) =>
+		role
+			?.split("_")
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(" ");
+
 	useEffect(() => {
 		if (open) {
 			fetchProjects();
@@ -1271,7 +1277,7 @@ export function BookingFormDialog({
 
 									{teamManagers.map((mgr) => (
 										<SelectItem key={mgr._id} value={mgr._id}>
-											{mgr.name || mgr.email} ({mgr.role})
+											{mgr.name || mgr.email} ({formatRole(mgr.role)})
 										</SelectItem>
 									))}
 								</SelectContent>
@@ -1285,7 +1291,7 @@ export function BookingFormDialog({
 								<SelectContent>
 									{teamManagers.map((mgr) => (
 										<SelectItem key={mgr._id} value={mgr._id}>
-											{mgr.name || mgr.email} ({mgr.role})
+											{mgr.name || mgr.email} ({formatRole(mgr.role)})
 										</SelectItem>
 									))}
 								</SelectContent>
@@ -1305,7 +1311,7 @@ export function BookingFormDialog({
 								<SelectContent>
 									{teamManagers.map((mgr) => (
 										<SelectItem key={mgr._id} value={mgr._id}>
-											{mgr.name || mgr.email} ({mgr.role})
+											{mgr.name || mgr.email} ({formatRole(mgr.role)})
 										</SelectItem>
 									))}
 								</SelectContent>
