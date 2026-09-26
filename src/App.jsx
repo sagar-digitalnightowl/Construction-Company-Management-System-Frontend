@@ -77,6 +77,8 @@ import { OfficeViewPage } from "./pages/hr/OfficeViewPage";
 import { MilestoneBuyersPage } from "./pages/finance/MilestoneBuyersPage";
 import { MilestonePaymentSummaryPage } from "./pages/finance/MilestonePaymentSummaryPage";
 import { MilestoneBuyerDetailPage } from "./pages/finance/MilestoneBuyerDetailPage";
+import ManagerBookingDetail from "./pages/booking/ManagerBookingDetail";
+import ManagersList from "./pages/booking/ManagersList";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -150,6 +152,8 @@ export default function App() {
 					<Route path="/bookings/:id" element={<BookingDetail />} />
 					<Route path="/my-bookings" element={<MyBookings />} />
 					<Route path="/my-bookings/:id" element={<BookingDetail />} />
+					<Route path="/managers-bookings" element={<ManagersList />} />
+					<Route path="/managers-bookings/:userId" element={<ManagerBookingDetail />} />
 					<Route path="/my-installments" element={<MyInstallments />} />
 					<Route path="/pending-bookings" element={<PendingBookings />} />
 

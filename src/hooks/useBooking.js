@@ -7,6 +7,11 @@ export const useBooking = () => {
 	const [myBookings, setMyBookings] = useState([]);
 	const [managerBookings, setManagerBookings] = useState([]);
 	const [managerSummary, setManagerSummary] = useState(null);
+	const [managersList, setManagersList] = useState([]);
+	const [managersListSummary, setManagersListSummary] = useState(null);
+	const [managerDetail, setManagerDetail] = useState(null);
+	const [managerDetailSummary, setManagerDetailSummary] = useState(null);
+	const [managerDetailBookings, setManagerDetailBookings] = useState([]);
 	const [pendingBookings, setPendingBookings] = useState([]);
 	const [currentBooking, setCurrentBooking] = useState(null);
 	const [installments, setInstallments] = useState([]);
@@ -98,6 +103,48 @@ export const useBooking = () => {
 		} catch (err) {
 			toast.error(
 				err.response?.data?.message || "Failed to load manager summary",
+			);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	// Fetch all managers with stats (admin/director/PM/accountant/finance_executive/hr_manager)
+	const fetchManagersList = useCallback(async (params = {}) => {
+		setLoading(true);
+		try {
+			const res = await bookingApi.getManagersList(params);
+			setManagersList(res.data?.data?.managers || []);
+			setManagersListSummary(res.data?.data?.summary || null);
+			return res.data?.data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to load managers list",
+			);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	// Fetch one manager's bookings  installment breakdown
+	const fetchManagerBookings = useCallback(async (userId, params = {}) => {
+		setLoading(true);
+		try {
+			const res = await bookingApi.getBookingsByManager(userId, params);
+			const data = res.data?.data;
+			setManagerDetail(data?.manager || null);
+			setManagerDetailSummary(data?.summary || null);
+			setManagerDetailBookings(data?.bookings || []);
+			setPagination(
+				data?.pagination || { page: 1, limit: 10, total: 0, pages: 0 },
+			);
+			return data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message ||
+					"Failed to load manager's bookings",
 			);
 			return null;
 		} finally {
@@ -581,6 +628,11 @@ export const useBooking = () => {
 		myBookings,
 		managerBookings,
 		managerSummary,
+		managersList,
+		managersListSummary,
+		managerDetail,
+		managerDetailSummary,
+		managerDetailBookings,
 		pendingBookings,
 		currentBooking,
 		installments,
@@ -594,6 +646,8 @@ export const useBooking = () => {
 		fetchMyBookings,
 		fetchManagerMyBookings,
 		fetchManagerSummary,
+		fetchManagersList,
+		fetchManagerBookings,
 		fetchPendingBookings,
 		fetchBookingById,
 		fetchInstallmentsByBooking,

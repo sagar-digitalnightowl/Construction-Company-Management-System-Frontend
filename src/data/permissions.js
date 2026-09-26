@@ -156,6 +156,14 @@ export const VIEW = {
 	"my-bookings": ["client"],
 	"my-installments": ["client"],
 	"pending-bookings": ["admin", "director", "project_manager"],
+	"managers-bookings": [
+		"admin",
+		"director",
+		"project_manager",
+		"accountant",
+		"finance_executive",
+		"hr_manager",
+	],
 	finance: ["admin", "director", "accountant", "finance_executive"],
 
 	"finance-dashboard": [
