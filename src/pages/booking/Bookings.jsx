@@ -63,6 +63,8 @@ export default function Bookings() {
 		softDeleteBooking,
 		updateBooking,
 		exportBookings,
+		managersList,
+		fetchManagersList,
 	} = useBooking();
 
 	const {
@@ -84,6 +86,8 @@ export default function Bookings() {
 	const [filterTowers, setFilterTowers] = useState([]);
 	const [towerName, setTowerName] = useState("all");
 	const [loadingTowers, setLoadingTowers] = useState(false);
+
+	const [managerId, setManagerId] = useState("all");
 
 	// Cancel All Bookings states
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -116,6 +120,12 @@ export default function Bookings() {
 		};
 
 		loadProjectsForFilter();
+	}, []);
+
+	// Load managers on mount (for the manager filter dropdown)
+	useEffect(() => {
+		fetchManagersList({ includeZero: true });
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const handleProjectChange = (val) => {
@@ -164,16 +174,17 @@ export default function Bookings() {
 		towerName: towerName === "all" ? undefined : towerName,
 		status: statusFilter,
 		approvalStatus: "approved",
+		managerId: managerId === "all" ? undefined : managerId,
 	};
 
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [search, projectName, towerName, statusFilter]);
+	}, [search, projectName, towerName, statusFilter, managerId]);
 
 	useEffect(() => {
 		fetchBookings(fetchParams);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [currentPage, search, projectName, towerName, statusFilter]);
+	}, [currentPage, search, projectName, towerName, statusFilter, managerId]);
 
 	const handleOpenCancelDialog = async () => {
 		setCancelDialogOpen(true);
@@ -340,6 +351,21 @@ export default function Bookings() {
 							{filterTowers.map((tower) => (
 								<SelectItem key={tower.towerName} value={tower.towerName}>
 									{tower.towerName}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					{/* Manager Select Dropdown */}
+					<Select value={managerId} onValueChange={setManagerId}>
+						<SelectTrigger className="w-full sm:w-56 bg-background">
+							<SelectValue placeholder="Select Manager" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Managers</SelectItem>
+							{managersList.map(({ manager, totalBookings }) => (
+								<SelectItem key={manager._id} value={manager._id}>
+									{manager.name}
 								</SelectItem>
 							))}
 						</SelectContent>
