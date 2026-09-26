@@ -49,6 +49,7 @@ import { OverviewTab } from "../../components/employeeDetail/OverviewTab";
 import { AttendanceTab } from "../../components/employeeDetail/AttendanceTab";
 import { LeavesTab } from "../../components/employeeDetail/LeavesTab";
 import { SalaryTab } from "../../components/employeeDetail/SalaryTab";
+import { StatCard } from "@/components/common/PageHeader";
 
 export default function EmployeeDetail() {
 	const { id } = useParams();
@@ -361,103 +362,76 @@ export default function EmployeeDetail() {
 
 			{/* Info Cards */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-				<Card className="min-w-0">
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm">Role</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<p className="text-lg font-medium break-words">
-							{employee.role}
-						</p>
-					</CardContent>
-				</Card>
+				<StatCard
+					size="compact"
+					label="Role"
+					value={employee.role}
+					valueClassName="text-sm"
+				/>
 
-				<Card className="min-w-0">
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm">Department</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<p className="break-words">
-							{employee.department?.name || "-"}
-						</p>
-					</CardContent>
-				</Card>
+				<StatCard
+					size="compact"
+					label="Department"
+					value={employee.department?.name || "-"}
+					valueClassName="text-sm"
+				/>
 
-				<Card className="min-w-0">
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm">Email</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<p className="flex items-start gap-1 break-all">
-							<Mail className="h-3 w-3 mt-1 shrink-0" />
-							<span>{employee.email}</span>
-						</p>
-					</CardContent>
-				</Card>
+				<StatCard
+					size="compact"
+					label="Office"
+					value={employee.office?.name || "-"}
+					valueClassName="text-sm"
+				/>
 
-				<Card className="min-w-0">
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm">Phone</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<p className="flex items-center gap-1 break-words">
-							<Phone className="h-3 w-3 shrink-0" />
-							<span>{employee.phone}</span>
-						</p>
-					</CardContent>
-				</Card>
+				<StatCard
+					size="compact"
+					label="Email"
+					value={employee.email}
+					valueClassName="text-sm break-all"
+				/>
+
+				<StatCard
+					size="compact"
+					label="Phone"
+					value={employee.phone}
+					valueClassName="text-sm"
+				/>
 
 				{employee.employeeId && (
-					<Card className="min-w-0">
-						<CardHeader className="pb-2">
-							<CardTitle className="text-sm">Employee ID</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p className="font-mono break-all">
-								{employee.employeeId}
-							</p>
-						</CardContent>
-					</Card>
+					<StatCard
+						size="compact"
+						label="Employee ID"
+						value={employee.employeeId}
+						valueClassName="text-sm font-mono"
+					/>
 				)}
 
 				{employee.dailyRate > 0 && (
-					<Card className="min-w-0">
-						<CardHeader className="pb-2">
-							<CardTitle className="text-sm">Daily Rate</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p>₹{employee.dailyRate.toLocaleString()}</p>
-						</CardContent>
-					</Card>
+					<StatCard
+						size="compact"
+						label="Daily Rate"
+						value={`₹${employee.dailyRate.toLocaleString()}`}
+						valueClassName="text-sm"
+					/>
 				)}
 
 				{employee.hourlyRate > 0 && (
-					<Card className="min-w-0">
-						<CardHeader className="pb-2">
-							<CardTitle className="text-sm">Hourly Rate</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p>₹{employee.hourlyRate.toLocaleString()}</p>
-						</CardContent>
-					</Card>
+					<StatCard
+						size="compact"
+						label="Hourly Rate"
+						value={`₹${employee.hourlyRate.toLocaleString()}`}
+						valueClassName="text-sm"
+					/>
 				)}
 
 				{shift && (
-					<Card className="min-w-0">
-						<CardHeader className="pb-2">
-							<CardTitle className="text-sm">Current Shift</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p className="break-words">
-								{shift.shiftId?.name || shift.name}{" "}
-								(
-								{shift.shiftId?.startTime || shift.startTime}
-								{" - "}
-								{shift.shiftId?.endTime || shift.endTime}
-								)
-							</p>
-						</CardContent>
-					</Card>
+					<StatCard
+						size="compact"
+						label="Current Shift"
+						value={`${shift.shiftId?.name || shift.name} (${shift.shiftId?.startTime || shift.startTime
+							} - ${shift.shiftId?.endTime || shift.endTime})`}
+						valueClassName="text-sm"
+					/>
 				)}
 			</div>
 
