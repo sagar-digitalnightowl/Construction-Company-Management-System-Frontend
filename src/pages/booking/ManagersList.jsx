@@ -15,13 +15,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBooking } from "@/hooks/useBooking";
 import { projectApi } from "@/api/projectApi";
-
-const formatCurrency = (amount) =>
-	new Intl.NumberFormat("en-IN", {
-		style: "currency",
-		currency: "INR",
-		maximumFractionDigits: 0,
-	}).format(amount || 0);
+import { formatINR } from "@/lib/helpers";
 
 const ROLE_LABELS = {
 	project_manager: "PM",
@@ -97,14 +91,14 @@ export default function ManagersList() {
 					/>
 					<StatCard
 						label="Total Paid"
-						value={formatCurrency(managersListSummary.totalPaid)}
+						value={formatINR(managersListSummary.totalPaid)}
 						accent="success"
 						valueClassName="text-success"
 						size="compact"
 					/>
 					<StatCard
 						label="Total Remaining"
-						value={formatCurrency(managersListSummary.totalRemaining)}
+						value={formatINR(managersListSummary.totalRemaining)}
 						accent="warning"
 						valueClassName="text-yellow-600"
 						size="compact"
@@ -219,13 +213,13 @@ export default function ManagersList() {
 									</td>
 									<td className="px-4 py-3 text-right">{stats.totalBookings}</td>
 									<td className="px-4 py-3 text-right font-medium">
-										{formatCurrency(stats.bookingAmount)}
+										{formatINR(stats.bookingAmount)}
 									</td>
 									<td className="px-4 py-3 text-right text-green-600">
-										{formatCurrency(stats.totalPaid)}
+										{formatINR(stats.totalPaid)}
 									</td>
 									<td className="px-4 py-3 text-right text-yellow-600">
-										{formatCurrency(stats.remaining)}
+										{formatINR(stats.remaining)}
 									</td>
 									<td className="px-4 py-3 text-xs text-muted-foreground">
 										{stats.paidCount} paid, {stats.partialCount} partial
