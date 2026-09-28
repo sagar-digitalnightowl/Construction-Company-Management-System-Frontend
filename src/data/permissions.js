@@ -224,6 +224,13 @@ export const VIEW = {
 		"hr_manager",
 	],
 
+	"finance-advance-salary": [
+		"admin",
+		"director",
+		"accountant",
+		"finance_executive",
+	],
+
 	"finance-payroll": ["admin", "director", "accountant", "finance_executive"],
 
 	"finance-expenses": [
@@ -268,6 +275,7 @@ export const VIEW = {
 	"employee-attendance": ["employee"],
 	"employee-leaves": ["employee"],
 	"employee-salary": ["employee"],
+	"employee-advance-salary": ["employee"],
 	"employee-announcements": ["employee"],
 	crm: ["admin", "director", "project_manager"],
 	documents: [

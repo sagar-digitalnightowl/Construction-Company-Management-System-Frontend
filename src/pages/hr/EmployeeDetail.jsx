@@ -1,16 +1,11 @@
-// // src/pages/hr/EmployeeDetail.tsx
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
 	ArrowLeft,
-	Mail,
-	Phone,
-	Calendar,
 	Clock,
-	DollarSign,
 	Edit,
 	UserCheck,
+	Loader2,
 	UserX,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -40,16 +35,16 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 
 import { useHR } from "@/hooks/useHR";
 import { useAuthStore } from "@/store/authStore";
-import { formatDate } from "@/lib/helpers";
+import { formatDate, formatINR } from "@/lib/helpers";
 import { canMutate } from "@/data/permissions";
 import { EditEmployeeDialog } from "@/components/hr/EditEmployeeDialog";
 
-// Tab components
 import { OverviewTab } from "../../components/employeeDetail/OverviewTab";
 import { AttendanceTab } from "../../components/employeeDetail/AttendanceTab";
 import { LeavesTab } from "../../components/employeeDetail/LeavesTab";
 import { SalaryTab } from "../../components/employeeDetail/SalaryTab";
 import { StatCard } from "@/components/common/PageHeader";
+import { AdvanceSummaryTab } from "./tabs/AdvanceSummaryTab";
 
 export default function EmployeeDetail() {
 	const { id } = useParams();
@@ -61,11 +56,13 @@ export default function EmployeeDetail() {
 		fetchEmployeeById,
 		fetchEmployeeAttendanceById,
 		fetchEmployeeSalarySlips,
+		fetchEmployeeAdvanceSummary,
 		fetchEmployeeLeaveBalance,
 		fetchEmployeeCurrentShift,
 		fetchLeaves,
 		processLeave,
 		assignShiftToEmployee,
+		previewSalarySlip,
 		generateSalarySlip,
 		updateEmployee,
 		checkIn,
@@ -78,6 +75,7 @@ export default function EmployeeDetail() {
 	const [employee, setEmployee] = useState(null);
 	const [attendance, setAttendance] = useState([]);
 	const [salarySlips, setSalarySlips] = useState([]);
+	const [advanceSummary, setAdvanceSummary] = useState(null);
 	const [leaveBalance, setLeaveBalance] = useState(null);
 	const [shift, setShift] = useState(null);
 	const [employeeLeaves, setEmployeeLeaves] = useState([]);
@@ -90,6 +88,10 @@ export default function EmployeeDetail() {
 		month: "January",
 		year: new Date().getFullYear(),
 	});
+	const [salaryPreview, setSalaryPreview] = useState(null);
+	const [advanceDeduction, setAdvanceDeduction] = useState("");
+	const [previewedDeduction, setPreviewedDeduction] = useState("");
+	const [previewing, setPreviewing] = useState(false);
 	const [confirmDialog, setConfirmDialog] = useState({
 		open: false,
 		title: "",
@@ -143,6 +145,17 @@ export default function EmployeeDetail() {
 		}
 	};
 
+	const loadAdvanceSummaryData = async () => {
+		try {
+			const res = await fetchEmployeeAdvanceSummary(id);
+			setAdvanceSummary(res);
+			return true;
+		} catch (err) {
+			console.error("Failed to load advance summary:", err);
+			return false;
+		}
+	};
+
 	const loadLeaveBalanceData = async () => {
 		try {
 			const res = await fetchEmployeeLeaveBalance(id);
@@ -190,6 +203,7 @@ export default function EmployeeDetail() {
 		await Promise.allSettled([
 			loadAttendanceData(),
 			loadSalaryData(),
+			loadAdvanceSummaryData(),
 			loadLeaveBalanceData(),
 			loadShiftData(),
 			loadLeavesData(),
@@ -243,16 +257,53 @@ export default function EmployeeDetail() {
 		}
 	};
 
+	const buildSalaryPayload = () => ({
+		employeeId: id,
+		month: salaryForm.month,
+		year: salaryForm.year,
+		...(advanceDeduction !== "" && {
+			manualAdvanceDeduction: Number(advanceDeduction),
+		}),
+	});
+
+	const isValidDeduction = () => {
+		if (advanceDeduction === "") return true;
+		const amount = Number(advanceDeduction);
+		return !Number.isNaN(amount) && amount >= 0;
+	};
+
+	const handleSalaryFormChange = (patch) => {
+		setSalaryForm((prev) => ({ ...prev, ...patch }));
+		setSalaryPreview(null);
+	};
+
+	const handleGenerateDialogChange = (open) => {
+		setGenerateSalaryDialogOpen(open);
+		if (!open) {
+			setSalaryPreview(null);
+			setAdvanceDeduction("");
+			setPreviewedDeduction("");
+		}
+	};
+
+	const handlePreviewSalary = async () => {
+		if (!isValidDeduction()) return toast.error("Enter a valid advance deduction amount");
+
+		setPreviewing(true);
+		const data = await previewSalarySlip(buildSalaryPayload());
+		setSalaryPreview(data);
+		setPreviewedDeduction(advanceDeduction);
+		setPreviewing(false);
+	};
+
 	const handleGenerateSalary = async () => {
-		const slip = await generateSalarySlip({
-			employeeId: id,
-			month: salaryForm.month,
-			year: salaryForm.year,
-		});
+		if (!isValidDeduction()) return toast.error("Enter a valid advance deduction amount");
+
+		// Removed the totalDue check since this input is for manual deduction
+		const slip = await generateSalarySlip(buildSalaryPayload());
 		if (slip) {
 			toast.success("Salary slip generated");
-			setGenerateSalaryDialogOpen(false);
-			// ✅ FIXED: Only refresh salary data, not everything
+			handleGenerateDialogChange(false);
 			await refreshSalaryOnly();
 		}
 	};
@@ -279,6 +330,25 @@ export default function EmployeeDetail() {
 	const handleSalaryUpdate = async () => {
 		await refreshSalaryOnly();
 	};
+
+	const previewGross = salaryPreview?.earnings?.grossEarnings || 0;
+	const previewBase = salaryPreview?.deductions?.baseDeductions || 0;
+
+	const autoScenario = salaryPreview?.preview?.autoDeduction;
+	const manualScenario = salaryPreview?.preview?.manualDeduction;
+	const usingManual = previewedDeduction !== "" && Boolean(manualScenario);
+	const previewScenario = usingManual ? manualScenario : autoScenario;
+	const previewAdvanceDeducted = usingManual
+		? manualScenario.actualDeducted
+		: autoScenario?.advanceDeduction;
+	const previewNet =
+		previewScenario?.netSalary ??
+		previewGross - previewBase - (previewAdvanceDeducted || 0);
+	const previewTotalDue = salaryPreview?.advanceDues?.totalDue || 0;
+	const previewCarriedForward = Math.max(0, previewTotalDue - (previewAdvanceDeducted || 0));
+	const isManualCapped =
+		usingManual && manualScenario.actualDeducted < manualScenario.requestedAmount;
+	const isPreviewStale = Boolean(salaryPreview) && previewedDeduction !== advanceDeduction;
 
 	if (!employee && loading) return <Skeleton className="h-96" />;
 	if (!employee) return null;
@@ -442,6 +512,7 @@ export default function EmployeeDetail() {
 					<TabsTrigger value="attendance">Attendance</TabsTrigger>
 					<TabsTrigger value="leaves">Leaves</TabsTrigger>
 					<TabsTrigger value="salary">Salary</TabsTrigger>
+					<TabsTrigger value="advance-summary">Advance Summary</TabsTrigger>
 					<TabsTrigger value="statutory">Statutory</TabsTrigger>
 				</TabsList>
 
@@ -471,6 +542,11 @@ export default function EmployeeDetail() {
 						employeeId={id}
 						onGenerate={() => setGenerateSalaryDialogOpen(true)}
 						onStatusUpdate={handleSalaryUpdate}
+					/>
+				</TabsContent>
+				<TabsContent value="advance-summary">
+					<AdvanceSummaryTab
+						summary={advanceSummary}
 					/>
 				</TabsContent>
 
@@ -623,49 +699,164 @@ export default function EmployeeDetail() {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-			<Dialog open={generateSalaryDialogOpen} onOpenChange={setGenerateSalaryDialogOpen}>
-				<DialogContent>
+			<Dialog open={generateSalaryDialogOpen} onOpenChange={handleGenerateDialogChange}>
+				<DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>Generate Salary Slip</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-4">
-						<div>
-							<Label>Month</Label>
-							<Select
-								value={salaryForm.month}
-								onValueChange={(v) => setSalaryForm({ ...salaryForm, month: v })}
-							>
-								<SelectTrigger>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{[
-										"January", "February", "March", "April", "May", "June",
-										"July", "August", "September", "October", "November", "December",
-									].map((m) => (
-										<SelectItem key={m} value={m}>
-											{m}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<Label>Month</Label>
+								<Select value={salaryForm.month} onValueChange={(v) => handleSalaryFormChange({ month: v })}>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{[
+											"January", "February", "March", "April", "May", "June",
+											"July", "August", "September", "October", "November", "December",
+										].map((m) => (
+											<SelectItem key={m} value={m}>
+												{m}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+							<div>
+								<Label>Year</Label>
+								<Input
+									type="number"
+									value={salaryForm.year}
+									onChange={(e) => handleSalaryFormChange({ year: parseInt(e.target.value) })}
+								/>
+							</div>
 						</div>
-						<div>
-							<Label>Year</Label>
+
+						<div className="space-y-1.5">
+							<Label>Manual advance deduction (optional)</Label>
 							<Input
 								type="number"
-								value={salaryForm.year}
-								onChange={(e) =>
-									setSalaryForm({ ...salaryForm, year: parseInt(e.target.value) })
-								}
+								min={0}
+								placeholder="Leave empty to auto-deduct the due EMI"
+								value={advanceDeduction}
+								onChange={(e) => setAdvanceDeduction(e.target.value)}
 							/>
+							<p className="text-xs text-muted-foreground">
+								If you enter an amount, it is used for both the preview and the salary slip.
+							</p>
 						</div>
+
+						<Button variant="outline" className="w-full" onClick={handlePreviewSalary} disabled={previewing}>
+							{previewing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+							{salaryPreview ? "Refresh preview" : "Preview salary slip"}
+						</Button>
+
+						{salaryPreview && (
+							<div className="space-y-3 text-sm">
+								<div className="rounded-md border p-3 space-y-1">
+									<div className="flex justify-between">
+										<span className="text-muted-foreground">Gross earnings</span>
+										<span className="text-green-600">
+											{formatINR(previewGross)}
+										</span>
+									</div>
+									<div className="flex justify-between">
+										<span className="text-muted-foreground">Other deductions (PF, PT, absent, late)</span>
+										<span className="text-red-600">
+											{formatINR(previewBase)}
+										</span>
+									</div>
+									<div className="flex justify-between">
+										<span className="text-muted-foreground">
+											Advance deduction ({usingManual ? "manual" : "auto"})
+										</span>
+										<span className="text-red-600">
+											{formatINR(previewAdvanceDeducted)}
+										</span>
+									</div>
+									{previewTotalDue > 0 && (
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">Carried forward</span>
+											<span>{formatINR(previewCarriedForward)}</span>
+										</div>
+									)}
+									<div className="flex justify-between">
+										<span className="text-muted-foreground">Present / working days</span>
+										<span>
+											{salaryPreview.attendance?.presentDays ?? 0} / {salaryPreview.attendance?.totalWorkingDays ?? 0}
+										</span>
+									</div>
+								</div>
+
+								<div className="rounded-md border p-3 space-y-2">
+									<p className="font-semibold">Advance dues</p>
+									{(salaryPreview.advanceDues?.breakdown || []).length === 0 ? (
+										<p className="text-muted-foreground">No advance is due for this month.</p>
+									) : (
+										<>
+											{salaryPreview.advanceDues.breakdown.map((item, index) => (
+												<div key={`${item.advanceId}-${item.installmentNumber}-${index}`} className="flex justify-between gap-2">
+													<span className="text-muted-foreground">
+														{item.advanceNumber} · #{item.installmentNumber} · {item.month}
+														{item.isArrear && <Badge variant="warning" className="ml-2">Arrear</Badge>}
+													</span>
+													<span>{formatINR(item.amount)}</span>
+												</div>
+											))}
+											<div className="flex justify-between font-medium border-t pt-2">
+												<span>Total due</span>
+												<span>{formatINR(salaryPreview.advanceDues.totalDue)}</span>
+											</div>
+											<p className="text-xs text-muted-foreground">
+												Suggested deduction: {formatINR(salaryPreview.advanceDues.suggestedDeduction)}. Confirm the amount with the employee; anything not deducted is carried forward.
+											</p>
+
+											<div className="grid grid-cols-2 gap-2 pt-1">
+												<div className={`rounded-md border p-2 ${!usingManual ? "border-primary bg-primary/5" : ""}`}>
+													<div className="text-xs text-muted-foreground">Auto (EMI)</div>
+													<div className="font-medium">{formatINR(autoScenario?.advanceDeduction)}</div>
+													<div className="text-xs text-muted-foreground">Net {formatINR(autoScenario?.netSalary)}</div>
+												</div>
+												{manualScenario && (
+													<div className={`rounded-md border p-2 ${usingManual ? "border-primary bg-primary/5" : ""}`}>
+														<div className="text-xs text-muted-foreground">Manual</div>
+														<div className="font-medium">{formatINR(manualScenario.actualDeducted)}</div>
+														<div className="text-xs text-muted-foreground">Net {formatINR(manualScenario.netSalary)}</div>
+													</div>
+												)}
+											</div>
+
+											{isManualCapped && (
+												<p className="text-xs text-amber-600">
+													You requested {formatINR(manualScenario.requestedAmount)}, but only {formatINR(manualScenario.actualDeducted)} can be deducted from this salary.
+												</p>
+											)}
+										</>
+									)}
+								</div>
+
+								<div className="flex justify-between text-base font-bold">
+									<span>Net payable</span>
+									<span className="text-primary">{formatINR(previewNet)}</span>
+								</div>
+
+								{isPreviewStale && (
+									<p className="text-xs text-amber-600">
+										Deduction amount changed. Refresh the preview before generating.
+									</p>
+								)}
+							</div>
+						)}
 					</div>
 					<DialogFooter>
-						<Button variant="outline" onClick={() => setGenerateSalaryDialogOpen(false)}>
+						<Button variant="outline" onClick={() => handleGenerateDialogChange(false)}>
 							Cancel
 						</Button>
-						<Button onClick={handleGenerateSalary}>Generate</Button>
+						<Button onClick={handleGenerateSalary} disabled={!salaryPreview || isPreviewStale || loading}>
+							Generate
+						</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>

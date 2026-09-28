@@ -78,6 +78,22 @@ export const useHR = () => {
 	const [companySalarySlips, setCompanySalarySlips] = useState([]);
 	const [myPayrollBatches, setMyPayrollBatches] = useState([]);
 
+	// ==================== ADVANCE SALARY ====================
+
+	const [advances, setAdvances] = useState([]);
+	const [myAdvances, setMyAdvances] = useState(null);
+	const [advanceDetail, setAdvanceDetail] = useState(null);
+	const [employeeAdvanceSummary, setEmployeeAdvanceSummary] = useState(null);
+	const [advanceDueForMonth, setAdvanceDueForMonth] = useState(null);
+	const [salarySlipPreview, setSalarySlipPreview] = useState(null);
+
+	const [advancesPagination, setAdvancesPagination] = useState({
+		page: 1,
+		limit: 10,
+		total: 0,
+		pages: 0,
+	});
+
 	const [shifts, setShifts] = useState([]);
 	const [employeeShift, setEmployeeShift] = useState(null);
 
@@ -1998,6 +2014,372 @@ export const useHR = () => {
 
 	const payExpense = payExpenseCash;
 
+	// ==================== ADVANCE SALARY ====================
+
+	const fetchAdvances = useCallback(async (params = {}) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.getAllAdvances(params);
+			const data = res.data?.data || {};
+
+			setAdvances(data.advances || []);
+
+			if (data.pagination) {
+				setAdvancesPagination(data.pagination);
+			}
+
+			return data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to load advances",
+			);
+
+			setAdvances([]);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const fetchMyAdvances = useCallback(async () => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.getMyAdvances();
+			const data = res.data?.data || null;
+
+			setMyAdvances(data);
+
+			return data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to load your advances",
+			);
+
+			setMyAdvances(null);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const createAdvance = async (data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.createAdvance(data);
+
+			toast.success(
+				res.data?.message || "Advance request created successfully",
+			);
+
+			await fetchMyAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message ||
+					"Failed to create advance request",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const fetchAdvanceById = useCallback(async (id) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.getAdvanceById(id);
+			const data = res.data?.data || null;
+
+			setAdvanceDetail(data);
+
+			return data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to load advance details",
+			);
+
+			setAdvanceDetail(null);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const fetchEmployeeAdvanceSummary = useCallback(async (employeeId) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.getEmployeeAdvanceSummary(employeeId);
+			const data = res.data?.data || null;
+
+			setEmployeeAdvanceSummary(data);
+
+			return data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message ||
+					"Failed to load employee advance summary",
+			);
+
+			setEmployeeAdvanceSummary(null);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	const fetchEmployeeAdvanceDueForMonth = useCallback(
+		async (employeeId, month) => {
+			setLoading(true);
+
+			try {
+				const res = await hrApi.getEmployeeAdvanceDueForMonth(
+					employeeId,
+					month,
+				);
+
+				const data = res.data?.data || null;
+
+				setAdvanceDueForMonth(data);
+
+				return data;
+			} catch (err) {
+				toast.error(
+					err.response?.data?.message ||
+						"Failed to load advance dues",
+				);
+
+				setAdvanceDueForMonth(null);
+				return null;
+			} finally {
+				setLoading(false);
+			}
+		},
+		[],
+	);
+
+	const previewSalarySlip = async (data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.previewSalarySlip(data);
+			const preview = res.data?.data || null;
+
+			setSalarySlipPreview(preview);
+
+			return preview;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to preview salary slip",
+			);
+
+			setSalarySlipPreview(null);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const approveAdvance = async (id, data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.approveAdvance(id, data);
+
+			toast.success(res.data?.message || "Advance approved successfully");
+
+			await fetchAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to approve advance",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const rejectAdvance = async (id, data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.rejectAdvance(id, data);
+
+			toast.success(res.data?.message || "Advance rejected successfully");
+
+			await fetchAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to reject advance",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const disburseAdvance = async (id, data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.disburseAdvance(id, data);
+
+			toast.success(
+				res.data?.message || "Advance disbursed successfully",
+			);
+
+			await fetchAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to disburse advance",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const cancelAdvance = async (id) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.cancelAdvance(id);
+
+			toast.success(
+				res.data?.message || "Advance cancelled successfully",
+			);
+
+			await fetchAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to cancel advance",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const reviseAdvancePlan = async (id, data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.reviseAdvancePlan(id, data);
+
+			toast.success(
+				res.data?.message ||
+					"Advance repayment plan revised successfully",
+			);
+
+			await fetchAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message ||
+					"Failed to revise repayment plan",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const skipAdvanceInstallment = async (id, data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.skipAdvanceInstallment(id, data);
+
+			toast.success(
+				res.data?.message || "Advance installment skipped successfully",
+			);
+
+			await fetchAdvanceById(id);
+			await fetchAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to skip installment",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const waiveAdvanceInstallment = async (id, data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.waiveAdvanceInstallment(id, data);
+
+			toast.success(
+				res.data?.message || "Advance installment waived successfully",
+			);
+
+			await fetchAdvanceById(id);
+			await fetchAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to waive installment",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const manualAdvanceRepayment = async (id, data) => {
+		setLoading(true);
+
+		try {
+			const res = await hrApi.manualAdvanceRepayment(id, data);
+
+			toast.success(
+				res.data?.message || "Advance repayment recorded successfully",
+			);
+
+			await fetchAdvanceById(id);
+			await fetchAdvances();
+
+			return res.data?.data || null;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message ||
+					"Failed to record advance repayment",
+			);
+
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return {
 		// States
 		employees,
@@ -2026,6 +2408,15 @@ export const useHR = () => {
 		salarySlips,
 		employeeSalarySlips,
 		companySalarySlips,
+
+		advances,
+		myAdvances,
+		advanceDetail,
+		employeeAdvanceSummary,
+		advanceDueForMonth,
+		salarySlipPreview,
+		advancesPagination,
+
 		myPayrollBatches,
 		shifts,
 		employeeShift,
@@ -2129,6 +2520,23 @@ export const useHR = () => {
 		downloadSalarySlipPdf,
 		submitPayrollForApproval,
 		fetchMyPayrollBatches,
+
+		// Advance Salary
+		fetchAdvances,
+		fetchMyAdvances,
+		createAdvance,
+		fetchAdvanceById,
+		fetchEmployeeAdvanceSummary,
+		fetchEmployeeAdvanceDueForMonth,
+		previewSalarySlip,
+		approveAdvance,
+		rejectAdvance,
+		disburseAdvance,
+		cancelAdvance,
+		reviseAdvancePlan,
+		skipAdvanceInstallment,
+		waiveAdvanceInstallment,
+		manualAdvanceRepayment,
 
 		// Shifts
 		fetchShifts,

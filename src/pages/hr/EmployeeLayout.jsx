@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { PageHeader } from "@/components/common/PageHeader";
 import { EmployeeStatsCards } from "./EmployeeStatsCards";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge"; 
+import { Badge } from "@/components/ui/badge";
 import { LogIn, LogOut, Clock, CheckCircle2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useHR } from "@/hooks/useHR";
@@ -13,6 +13,7 @@ const pageTitles = {
 	"/employee-attendance": "My Attendance",
 	"/employee-leaves": "My Leaves",
 	"/employee-salary": "Salary Slips",
+	"/employee-advance-salary": "Advance Salary",
 	"/employee-announcements": "Announcements",
 };
 
@@ -96,7 +97,7 @@ export default function EmployeeLayout({ children }) {
 
 		if (success) {
 			toast.success("Checked in successfully");
-			await fetchMyAttendance(); 
+			await fetchMyAttendance();
 		}
 	};
 
@@ -105,7 +106,7 @@ export default function EmployeeLayout({ children }) {
 
 		if (success) {
 			toast.success("Checked out successfully");
-			await fetchMyAttendance(); 
+			await fetchMyAttendance();
 		}
 	};
 
@@ -122,35 +123,37 @@ export default function EmployeeLayout({ children }) {
 
 	return (
 		<div className="space-y-6">
-			<PageHeader
-				title={title}
-				actions={
-					pathname === "/employee-overview" ? (
-						<div className="flex gap-2">
-							{!isCheckedIn && !isCheckedOut && (
-								<Button
-									variant="outline"
-									className="border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white hover:border-emerald-700"
-									onClick={handleCheckIn}
-								>
-									<LogIn className="h-4 w-4 mr-2" />
-									Check In
-								</Button>
-							)}
+			{pathname !== "/employee-advance-salary" && (
+				<PageHeader
+					title={title}
+					actions={
+						pathname === "/employee-overview" ? (
+							<div className="flex gap-2">
+								{!isCheckedIn && !isCheckedOut && (
+									<Button
+										variant="outline"
+										className="border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white hover:border-emerald-700"
+										onClick={handleCheckIn}
+									>
+										<LogIn className="h-4 w-4 mr-2" />
+										Check In
+									</Button>
+								)}
 
-							{isCheckedIn && !isCheckedOut && (
-								<Button
-									variant="destructive"
-									onClick={handleCheckOut}
-								>
-									<LogOut className="h-4 w-4 mr-2" />
-									Check Out
-								</Button>
-							)}
-						</div>
-					) : null
-				}
-			/>
+								{isCheckedIn && !isCheckedOut && (
+									<Button
+										variant="destructive"
+										onClick={handleCheckOut}
+									>
+										<LogOut className="h-4 w-4 mr-2" />
+										Check Out
+									</Button>
+								)}
+							</div>
+						) : null
+					}
+				/>
+			)}
 
 			{/* Live Status and Time Dashboard Card */}
 			{pathname === "/employee-overview" && (
