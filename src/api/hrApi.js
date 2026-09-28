@@ -1,7 +1,6 @@
 import api from "./axios";
 
 export const hrApi = {
-	
 	// ==================== EMPLOYEES ====================
 	createEmployee: (data) => api.post("/hr/employees", data),
 
@@ -102,6 +101,47 @@ export const hrApi = {
 	// Get HR's own submission history/batches
 	getMyPayrollBatches: (params) =>
 		api.get("/hr/salary/report/my-batches", { params }),
+
+	// ==================== ADVANCE SALARY ====================
+
+	createAdvance: (data) => api.post("/hr/advances", data),
+
+	getAllAdvances: (params) => api.get("/hr/advances", { params }),
+
+	getMyAdvances: () => api.get("/hr/advances/my"),
+
+	getAdvanceById: (id) => api.get(`/hr/advances/${id}`),
+
+	getEmployeeAdvanceSummary: (employeeId) =>
+		api.get(`/hr/advances/employee/${employeeId}/summary`),
+
+	getEmployeeAdvanceDueForMonth: (employeeId, month) =>
+		api.get(`/hr/advances/employee/${employeeId}/due-for-month`, {
+			params: { month },
+		}),
+
+	previewSalarySlip: (data) => api.post("/hr/salary/preview-slip", data),
+
+	approveAdvance: (id, data) => api.patch(`/hr/advances/${id}/approve`, data),
+
+	rejectAdvance: (id, data) => api.patch(`/hr/advances/${id}/reject`, data),
+
+	disburseAdvance: (id, data) =>
+		api.patch(`/hr/advances/${id}/disburse`, data),
+
+	cancelAdvance: (id) => api.patch(`/hr/advances/${id}/cancel`),
+
+	reviseAdvancePlan: (id, data) =>
+		api.patch(`/hr/advances/${id}/revise-plan`, data),
+
+	skipAdvanceInstallment: (id, data) =>
+		api.patch(`/hr/advances/${id}/skip-installment`, data),
+
+	waiveAdvanceInstallment: (id, data) =>
+		api.patch(`/hr/advances/${id}/waive-installment`, data),
+
+	manualAdvanceRepayment: (id, data) =>
+		api.post(`/hr/advances/${id}/repayment`, data),
 
 	// ==================== LEAVES ====================
 	applyLeave: (data) => api.post("/hr/leaves", data),

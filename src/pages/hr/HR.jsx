@@ -15,6 +15,7 @@ import {
 	HardHat,
 	FileText,
 	Receipt,
+	WalletCards,
 } from "lucide-react";
 
 import { PageHeader, StatCard } from "@/components/common/PageHeader";
@@ -33,6 +34,7 @@ import { LaborWagesTab } from "./tabs/LaborWagesTab";
 import { AnnouncementsTab } from "./tabs/AnnouncementsTab";
 import { HRExpenseTab } from "./tabs/HRExpenseTab";
 import { OfficesTab } from "./tabs/OfficesTab";
+import { AdvanceSalaryTab } from "./tabs/AdvanceSalaryTab";
 
 // 👇 NEW: Mapping for dynamic page headers
 const TAB_HEADERS = {
@@ -43,6 +45,7 @@ const TAB_HEADERS = {
 	},
 	departments: { title: "Departments", desc: "Manage company departments." },
 	salary: { title: "Salary & Payroll", desc: "Process and view employee salaries." },
+	"advance-salary": { title: "Advance Salary", desc: "Approve, disburse and track employee salary advances." },
 	"expense-approvals": { title: "Expense Approvals", desc: "Review and approve HR expenses." },
 	shifts: { title: "Shifts", desc: "Manage employee shifts and timings." },
 	"labor-wages": { title: "Labor Wages", desc: "Manage labor wages and payments." },
@@ -104,6 +107,10 @@ export default function HR() {
 		checkIn,
 		checkOut,
 		fetchLaborWages,
+
+		advances,
+		advancesPagination,
+		fetchAdvances,
 	} = useHR();
 
 	// 1. Initial Load: Fetch only globally required data
@@ -138,6 +145,9 @@ export default function HR() {
 			case "salary":
 				if (!salarySlips?.length) fetchMySalarySlips();
 				break;
+			case "advance-salary":
+				if (!advances?.length) fetchAdvances({ page: 1, limit: 10 });
+				break;
 			case "shifts":
 				if (!shifts?.length) fetchShifts();
 				break;
@@ -159,7 +169,7 @@ export default function HR() {
 	// Safe check for employees object/array
 	const hasNoEmployees = !employees?.employees?.length && !employees?.length;
 
-	if (loading && hasNoEmployees) {
+	if (loading && hasNoEmployees && currentTab === "employees") {
 		return (
 			<div className="space-y-5">
 				<Skeleton className="h-8 w-48" />
@@ -279,6 +289,10 @@ export default function HR() {
 								<FileText className="h-3.5 w-3.5 mr-1.5" />
 								Salary
 							</TabsTrigger>
+							<TabsTrigger value="advance-salary">
+								<WalletCards className="h-3.5 w-3.5 mr-1.5" />
+								Advance Salary
+							</TabsTrigger>
 							<TabsTrigger value="expense-approvals">
 								<Receipt className="h-3.5 w-3.5 mr-1.5" />
 								Expense Approvals
@@ -338,6 +352,15 @@ export default function HR() {
 
 					<TabsContent value="salary">
 						<SalaryTab />
+					</TabsContent>
+
+					<TabsContent value="advance-salary">
+						<AdvanceSalaryTab
+							advances={advances}
+							pagination={advancesPagination}
+							onRefresh={fetchAdvances}
+							canEdit={canEdit}
+						/>
 					</TabsContent>
 
 					<TabsContent value="expense-approvals">

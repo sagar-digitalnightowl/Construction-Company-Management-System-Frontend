@@ -79,6 +79,8 @@ import { MilestonePaymentSummaryPage } from "./pages/finance/MilestonePaymentSum
 import { MilestoneBuyerDetailPage } from "./pages/finance/MilestoneBuyerDetailPage";
 import ManagerBookingDetail from "./pages/booking/ManagerBookingDetail";
 import ManagersList from "./pages/booking/ManagersList";
+import { EmployeeAdvanceSalary } from "./pages/hr/tabs/EmployeeAdvanceSalary";
+import { FinanceAdvanceSalary } from "./pages/finance/FinanceAdvanceSalary";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -208,6 +210,15 @@ export default function App() {
 					/>
 
 					<Route
+						path="/employee-advance-salary"
+						element={
+							<EmployeeLayout>
+								<EmployeeAdvanceSalary />
+							</EmployeeLayout>
+						}
+					/>
+
+					<Route
 						path="/employee-announcements"
 						element={
 							<EmployeeLayout>
@@ -308,6 +319,15 @@ export default function App() {
 							<FinanceLayout>
 								<MilestoneBuyerDetailPage />
 							</FinanceLayout>}
+					/>
+
+					<Route
+						path="/finance-advance-salary"
+						element={
+							<FinanceLayout>
+								<FinanceAdvanceSalary />
+							</FinanceLayout>
+						}
 					/>
 
 					<Route

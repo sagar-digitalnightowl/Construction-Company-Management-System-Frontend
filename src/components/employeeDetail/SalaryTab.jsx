@@ -1,7 +1,5 @@
-
-// src/components/hr/employeeDetail/SalaryTab.tsx
-
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
 	Table,
 	TableBody,
@@ -31,10 +29,13 @@ import { DollarSign, Download, Eye, Loader2, RefreshCcw, FileText } from "lucide
 import { useHR } from "@/hooks/useHR";
 import { useState } from "react";
 import { toast } from "sonner";
+import { formatINR } from "@/lib/helpers";
 import { useAuthStore } from "@/store/authStore";
 
+const currentMonth = () => new Date().toISOString().slice(0, 7);
+
 export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
-	const { downloadSalarySlipPdf, updateSalaryStatus, loading } = useHR();
+	const { downloadSalarySlipPdf, updateSalaryStatus, fetchEmployeeAdvanceDueForMonth, loading } = useHR();
 	const { current } = useAuthStore();
 	const [downloadingId, setDownloadingId] = useState(null);
 	const [updatingId, setUpdatingId] = useState(null);
@@ -47,6 +48,10 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 	// ✅ NEW: Slip Detail Dialog
 	const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 	const [selectedSlipDetail, setSelectedSlipDetail] = useState(null);
+
+	const [dueMonth, setDueMonth] = useState(currentMonth());
+	const [due, setDue] = useState(null);
+	const [checkingDue, setCheckingDue] = useState(false);
 
 	// Check if user can update status (Admin or HR Manager)
 	const canUpdateStatus = current?.role === "admin" || current?.role === "hr_manager";
@@ -105,6 +110,19 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 		setDetailDialogOpen(true);
 	};
 
+	const handleDueMonthChange = (e) => {
+		setDueMonth(e.target.value);
+		setDue(null);
+	};
+
+	const handleCheckDue = async () => {
+		if (!dueMonth) return;
+		setCheckingDue(true);
+		const data = await fetchEmployeeAdvanceDueForMonth(employeeId, dueMonth);
+		setDue(data);
+		setCheckingDue(false);
+	};
+
 	const getStatusBadge = (status) => {
 		switch (status) {
 			case "Paid":
@@ -151,6 +169,83 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 					</Button>
 				)}
 			</div>
+
+			{canEdit && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Advance dues for a month</CardTitle>
+						<CardDescription>
+							Check how much advance is due before generating the salary slip.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="flex flex-wrap items-end gap-3">
+							<div className="space-y-1.5">
+								<Label className="text-sm">Month</Label>
+								<Input type="month" value={dueMonth} onChange={handleDueMonthChange} className="w-44" />
+							</div>
+							<Button onClick={handleCheckDue} disabled={checkingDue || !dueMonth}>
+								{checkingDue && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+								Check dues
+							</Button>
+						</div>
+						{due && (
+							<div className="space-y-3">
+								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+									<div>
+										<div className="text-muted-foreground">Total due</div>
+										<div className="font-semibold">{formatINR(due.totalDue)}</div>
+									</div>
+									<div>
+										<div className="text-muted-foreground">Suggested deduction</div>
+										<div className="font-semibold">{formatINR(due.suggestedDeduction)}</div>
+									</div>
+									<div>
+										<div className="text-muted-foreground">Can deduct up to</div>
+										<div className="font-semibold">{formatINR(due.canDeductUpTo)}</div>
+									</div>
+								</div>
+
+								{(due.breakdown || []).length === 0 ? (
+									<p className="text-sm text-muted-foreground">
+										No advance installment is due for {due.month || dueMonth}.
+									</p>
+								) : (
+									<div className="rounded-md border overflow-x-auto">
+										<Table>
+											<TableHeader>
+												<TableRow>
+													<TableHead>Advance</TableHead>
+													<TableHead>Installment</TableHead>
+													<TableHead>Month</TableHead>
+													<TableHead className="text-right">Amount</TableHead>
+													<TableHead>Type</TableHead>
+												</TableRow>
+											</TableHeader>
+											<TableBody>
+												{due.breakdown.map((item, index) => (
+													<TableRow key={`${item.advanceId}-${item.installmentNumber}-${index}`}>
+														<TableCell className="font-medium">{item.advanceNumber}</TableCell>
+														<TableCell>#{item.installmentNumber}</TableCell>
+														<TableCell>{item.month}</TableCell>
+														<TableCell className="text-right">{formatINR(item.amount)}</TableCell>
+														<TableCell>
+															<Badge variant={item.isArrear ? "warning" : "outline"}>
+																{item.isArrear ? "Arrear" : "Current"}
+															</Badge>
+														</TableCell>
+													</TableRow>
+												))}
+											</TableBody>
+										</Table>
+									</div>
+								)}
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			)}
+
 			<Card>
 				<CardContent className="p-0">
 					<Table>
@@ -207,7 +302,7 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 												</Button>
 
 												{/* View PDF */}
-												{slip.pdfUrl && (
+												{/* {slip.pdfUrl && (
 													<Button
 														size="sm"
 														variant="ghost"
@@ -216,7 +311,7 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 													>
 														<Eye className="h-4 w-4" />
 													</Button>
-												)}
+												)} */}
 
 												{/* Download PDF */}
 												<Button
@@ -308,7 +403,7 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 
 			{/* ==================== SLIP DETAIL DIALOG ==================== */}
 			<Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-				<DialogContent className="sm:max-w-[500px]">
+				<DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>Salary Slip Details</DialogTitle>
 					</DialogHeader>
@@ -343,21 +438,154 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 
 							<div className="border-t pt-3">
 								<p className="font-semibold mb-2">Deductions</p>
-								<div className="grid grid-cols-2 gap-1 text-sm">
+
+								<div className="grid grid-cols-2 gap-1.5 text-sm">
 									<p className="text-muted-foreground">Provident Fund</p>
-									<p className="text-right">₹{(selectedSlipDetail.deductions?.providentFund || 0).toLocaleString('en-IN')}</p>
-									<p className="text-muted-foreground">ESI</p>
-									<p className="text-right">₹{(selectedSlipDetail.deductions?.esiDeduction || 0).toLocaleString('en-IN')}</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.providentFund || 0)}
+									</p>
+
 									<p className="text-muted-foreground">Professional Tax</p>
-									<p className="text-right">₹{(selectedSlipDetail.deductions?.professionalTax || 0).toLocaleString('en-IN')}</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.professionalTax || 0)}
+									</p>
+
+									<p className="text-muted-foreground">Tax Deduction</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.taxDeduction || 0)}
+									</p>
+
+									<p className="text-muted-foreground">Loan Deduction</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.loanDeduction || 0)}
+									</p>
+
+									<p className="text-muted-foreground">ESI</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.esiDeduction || 0)}
+									</p>
+
 									<p className="text-muted-foreground">Absent Deduction</p>
-									<p className="text-right">₹{(selectedSlipDetail.deductions?.absentDeduction || 0).toLocaleString('en-IN')}</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.absentDeduction || 0)}
+									</p>
+
 									<p className="text-muted-foreground">Late Deduction</p>
-									<p className="text-right">₹{(selectedSlipDetail.deductions?.lateDeduction || 0).toLocaleString('en-IN')}</p>
-									<p className="font-medium text-muted-foreground">Total Deductions</p>
-									<p className="font-medium text-right">₹{(selectedSlipDetail.totalDeductions || 0).toLocaleString('en-IN')}</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.lateDeduction || 0)}
+									</p>
+
+									<p className="text-muted-foreground">Labour Welfare Fund</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.labourWelfareFund || 0)}
+									</p>
+
+									<p className="text-muted-foreground">Uniform Deduction</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.uniformDeduction || 0)}
+									</p>
+
+									<p className="text-muted-foreground">Accommodation Deduction</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.accommodationDeduction || 0)}
+									</p>
+
+									<p className="text-muted-foreground">Other Deductions</p>
+									<p className="text-right">
+										{formatINR(selectedSlipDetail.deductions?.otherDeductions || 0)}
+									</p>
+
+									{/* Advance Deduction */}
+									<p className="font-medium text-muted-foreground">
+										Advance Deduction
+									</p>
+									<p className="text-right">
+										{formatINR(
+											selectedSlipDetail.deductions?.advanceDeduction || 0
+										)}
+									</p>
+
+									{/* Total */}
+									<div className="col-span-2 border-t mt-2 pt-2 flex justify-between">
+										<p className="font-semibold">Total Deductions</p>
+										<p className="font-bold text-red-600">
+											{formatINR(selectedSlipDetail.totalDeductions || 0)}
+										</p>
+									</div>
 								</div>
 							</div>
+
+							{selectedSlipDetail.deductions?.advanceDeduction > 0 && (
+								<div className="border-t pt-3">
+									<p className="font-semibold mb-2">Advance Recovery</p>
+
+									<div className="rounded-md border p-3 bg-muted/30">
+										<div className="flex justify-between text-sm">
+											<span className="text-muted-foreground">
+												Deducted in this slip
+											</span>
+											<span className="font-semibold text-red-600">
+												{formatINR(
+													selectedSlipDetail.deductions?.advanceDeduction || 0
+												)}
+											</span>
+										</div>
+
+										{selectedSlipDetail.advanceRecovery?.due != null && (
+											<div className="flex justify-between text-sm mt-1">
+												<span className="text-muted-foreground">
+													Total due
+												</span>
+												<span>
+													{formatINR(selectedSlipDetail.advanceRecovery.due)}
+												</span>
+											</div>
+										)}
+
+										{selectedSlipDetail.advanceRecovery?.carriedForward > 0 && (
+											<div className="flex justify-between text-sm mt-1">
+												<span className="text-muted-foreground">
+													Carried forward
+												</span>
+												<span className="text-amber-600 font-medium">
+													{formatINR(
+														selectedSlipDetail.advanceRecovery.carriedForward
+													)}
+												</span>
+											</div>
+										)}
+									</div>
+
+									{(selectedSlipDetail.advanceRecovery?.breakdown || []).length > 0 && (
+										<div className="mt-2 space-y-1 text-sm">
+											{selectedSlipDetail.advanceRecovery.breakdown.map(
+												(item, index) => (
+													<div
+														key={`${item.advanceId}-${item.installmentNumber}-${index}`}
+														className="flex justify-between gap-2"
+													>
+														<span className="text-muted-foreground">
+															{item.advanceNumber} · #
+															{item.installmentNumber} · {item.month}
+
+															{item.isArrear && (
+																<Badge
+																	variant="warning"
+																	className="ml-2"
+																>
+																	Arrear
+																</Badge>
+															)}
+														</span>
+
+														<span>{formatINR(item.amount)}</span>
+													</div>
+												)
+											)}
+										</div>
+									)}
+								</div>
+							)}
 
 							<div className="border-t pt-3">
 								<div className="flex justify-between text-lg">
