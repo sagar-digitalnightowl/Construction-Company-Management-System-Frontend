@@ -16,11 +16,13 @@ import {
 	FileText,
 	Receipt,
 	WalletCards,
+	Gift,
 } from "lucide-react";
 
 import { PageHeader, StatCard } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useHR } from "@/hooks/useHR";
+import { useIncentive } from "@/hooks/useIncentive";
 import { useAuthStore } from "@/store/authStore";
 
 // Tab components
@@ -35,6 +37,7 @@ import { AnnouncementsTab } from "./tabs/AnnouncementsTab";
 import { HRExpenseTab } from "./tabs/HRExpenseTab";
 import { OfficesTab } from "./tabs/OfficesTab";
 import { AdvanceSalaryTab } from "./tabs/AdvanceSalaryTab";
+import { IncentiveBonusTab } from "./tabs/IncentiveBonusTab";
 
 // 👇 NEW: Mapping for dynamic page headers
 const TAB_HEADERS = {
@@ -48,6 +51,7 @@ const TAB_HEADERS = {
 	"advance-salary": { title: "Advance Salary", desc: "Approve, disburse and track employee salary advances." },
 	"expense-approvals": { title: "Expense Approvals", desc: "Review and approve HR expenses." },
 	shifts: { title: "Shifts", desc: "Manage employee shifts and timings." },
+	"incentives-bonus": { title: "Incentive & Bonus", desc: "Review, adjust and approve BM / TM / PM incentives." },
 	"labor-wages": { title: "Labor Wages", desc: "Manage labor wages and payments." },
 	labors: { title: "Labors", desc: "Manage daily labors and attendance." },
 	announcements: { title: "Announcements", desc: "Manage company-wide announcements." },
@@ -113,6 +117,14 @@ export default function HR() {
 		fetchAdvances,
 	} = useHR();
 
+	const {
+		incentives,
+		pagination: incentivePagination,
+		incentiveSummary,
+		fetchIncentives,
+		fetchIncentiveSummary,
+	} = useIncentive();
+
 	// 1. Initial Load: Fetch only globally required data
 	useEffect(() => {
 		fetchEmployeeStats();
@@ -147,6 +159,10 @@ export default function HR() {
 				break;
 			case "advance-salary":
 				if (!advances?.length) fetchAdvances({ page: 1, limit: 10 });
+				break;
+			case "incentives-bonus":
+				fetchIncentives({ page: 1, limit: 10, payoutStatus: "pending" });
+				fetchIncentiveSummary();
 				break;
 			case "shifts":
 				if (!shifts?.length) fetchShifts();
@@ -293,6 +309,10 @@ export default function HR() {
 								<WalletCards className="h-3.5 w-3.5 mr-1.5" />
 								Advance Salary
 							</TabsTrigger>
+							<TabsTrigger value="incentives-bonus">
+								<Gift className="h-3.5 w-3.5 mr-1.5" />
+								Incentive & Bonus
+							</TabsTrigger>
 							<TabsTrigger value="expense-approvals">
 								<Receipt className="h-3.5 w-3.5 mr-1.5" />
 								Expense Approvals
@@ -360,6 +380,18 @@ export default function HR() {
 							pagination={advancesPagination}
 							onRefresh={fetchAdvances}
 							canEdit={canEdit}
+						/>
+					</TabsContent>
+
+					<TabsContent value="incentives-bonus">
+						<IncentiveBonusTab
+							incentives={incentives}
+							pagination={incentivePagination}
+							summary={incentiveSummary}
+							onRefresh={fetchIncentives}
+							onRefreshSummary={fetchIncentiveSummary}
+							canEdit={canEdit}
+							isAdmin={onlyAdmin}
 						/>
 					</TabsContent>
 
