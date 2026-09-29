@@ -161,8 +161,6 @@ export const VIEW = {
 		"director",
 		"project_manager",
 		"accountant",
-		"finance_executive",
-		"hr_manager",
 	],
 	finance: ["admin", "director", "accountant", "finance_executive"],
 
@@ -225,6 +223,13 @@ export const VIEW = {
 	],
 
 	"finance-advance-salary": [
+		"admin",
+		"director",
+		"accountant",
+		"finance_executive",
+	],
+
+	"finance-incentives": [
 		"admin",
 		"director",
 		"accountant",
@@ -299,6 +304,7 @@ export const VIEW = {
 		"client",
 		"employee",
 	],
+	"incentive-config": ["admin", "director"],
 };
 
 // who can mutate (create / edit / delete) records on a resource
@@ -389,6 +395,8 @@ export const MUTATE = {
 		"accountant",
 		"finance_executive",
 	],
+
+	"incentive-config": ["admin", "director"],
 };
 
 export function canView(role, resource) {

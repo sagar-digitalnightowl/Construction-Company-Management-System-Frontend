@@ -9,6 +9,6 @@ export * from "./vendorApi";
 export * from "./bookingApi";
 export * from "./leadApi";
 export * from "./hrApi";
-export * from "./propertyInventoryApi"
-export * from "./financeApi"; 
-
+export * from "./propertyInventoryApi";
+export * from "./financeApi";
+export * from "./incentiveApi";

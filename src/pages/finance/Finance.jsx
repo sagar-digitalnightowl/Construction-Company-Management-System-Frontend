@@ -11,6 +11,7 @@ import { FinancePayrollApprovals } from "./FinancePayrollApprovals";
 import { FinanceExpenses } from "./FinanceExpenses";
 import { FinanceDueInstallments } from "./FinanceDueInstallments";
 import { FinanceAdvanceSalary } from "./FinanceAdvanceSalary";
+import { FinanceIncentives } from "./FinanceIncentives";
 import ExpenseReports from "./ExpenseReports";
 
 export default function Finance() {
@@ -41,6 +42,7 @@ export default function Finance() {
 						<TabsTrigger value="due-installments">WhatsApp Reminders</TabsTrigger>
 						<TabsTrigger value="milestones">Milestones</TabsTrigger>
 						<TabsTrigger value="advance-salary">Advance Salary</TabsTrigger>
+						<TabsTrigger value="incentives">Incentive & Bonus</TabsTrigger>
 						<TabsTrigger value="payroll">Payroll Approvals</TabsTrigger>
 						<TabsTrigger value="expenses">Expense Approvals</TabsTrigger>
 						<TabsTrigger value="reminders">Reminder Logs</TabsTrigger>
@@ -78,6 +80,10 @@ export default function Finance() {
 
 				<TabsContent value="advance-salary">
 					<FinanceAdvanceSalary />
+				</TabsContent>
+
+				<TabsContent value="incentives">
+					<FinanceIncentives />
 				</TabsContent>
 
 				<TabsContent value="expenses">

@@ -19,7 +19,9 @@ import {
 	Clock,
 	DollarSign,
 	Megaphone,
-	WalletCards
+	WalletCards,
+	Gift,
+	SlidersHorizontal
 } from "lucide-react";
 import { cn } from "@/lib/helpers";
 import { canView } from "@/data/permissions";
@@ -141,6 +143,12 @@ export function Sidebar({ role, onClickLink }) {
 							key: "finance-advance-salary",
 						},
 						{
+							to: "/finance-incentives",
+							label: "Incentive & Bonus",
+							icon: Gift,
+							key: "finance-incentives",
+						},
+						{
 							to: "/finance-payroll",
 							label: "Payroll Approvals",
 							icon: BadgeIndianRupee,
@@ -259,6 +267,7 @@ export function Sidebar({ role, onClickLink }) {
 				{ to: "/hr/departments", label: "Departments", icon: Building2, key: "hr" },
 				{ to: "/hr/salary", label: "Salary", icon: FileText, key: "hr" },
 				{ to: "/hr/advance-salary", label: "Advance Salary", icon: WalletCards, key: "hr" },
+				{ to: "/hr/incentives-bonus", label: "Incentive & Bonus", icon: Gift, key: "hr" },
 				{ to: "/hr/expense-approvals", label: "Expense Approvals", icon: Receipt, key: "hr" },
 				{ to: "/hr/shifts", label: "Shifts", icon: Clock, key: "hr" },
 				{ to: "/hr/labor-wages", label: "Labor Wages", icon: DollarSign, key: "hr" },
@@ -281,6 +290,12 @@ export function Sidebar({ role, onClickLink }) {
 					label: "User & Roles",
 					icon: Users2,
 					key: "users",
+				},
+				{
+					to: "/incentive-config",
+					label: "Incentive Config",
+					icon: SlidersHorizontal,
+					key: "incentive-config",
 				},
 				{ to: "/settings", label: "Settings", icon: Settings, key: "settings" },
 			],

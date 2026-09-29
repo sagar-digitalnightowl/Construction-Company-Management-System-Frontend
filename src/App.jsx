@@ -81,6 +81,8 @@ import ManagerBookingDetail from "./pages/booking/ManagerBookingDetail";
 import ManagersList from "./pages/booking/ManagersList";
 import { EmployeeAdvanceSalary } from "./pages/hr/tabs/EmployeeAdvanceSalary";
 import { FinanceAdvanceSalary } from "./pages/finance/FinanceAdvanceSalary";
+import { FinanceIncentives } from "./pages/finance/FinanceIncentives";
+import IncentiveConfig from "./pages/IncentiveConfig";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -331,6 +333,15 @@ export default function App() {
 					/>
 
 					<Route
+						path="/finance-incentives"
+						element={
+							<FinanceLayout>
+								<FinanceIncentives />
+							</FinanceLayout>
+						}
+					/>
+
+					<Route
 						path="/finance-payroll"
 						element={
 							<FinanceLayout>
@@ -361,6 +372,7 @@ export default function App() {
 					<Route path="/documents" element={<Documents />} />
 					<Route path="/reports" element={<Reports />} />
 					<Route path="/settings" element={<Settings />} />
+					<Route path="/incentive-config" element={<IncentiveConfig />} />
 				</Route>
 
 				<Route path="/" element={<Navigate to="/dashboard" replace />} />
