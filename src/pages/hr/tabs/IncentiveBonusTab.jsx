@@ -706,7 +706,7 @@ export function IncentiveBonusTab({
 											) : (
 												<div className="relative">
 													<Input
-														placeholder="Type phone number to search client"
+														placeholder="Type phone number or email to search client"
 														value={form.clientPhone}
 														onChange={(e) => handleClientPhoneChange(e.target.value)}
 													/>
