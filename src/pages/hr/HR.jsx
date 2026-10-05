@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-// 👇 NEW: Imported for URL syncing
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +16,7 @@ import {
 	Receipt,
 	WalletCards,
 	Gift,
+	Calculator,
 } from "lucide-react";
 
 import { PageHeader, StatCard } from "@/components/common/PageHeader";
@@ -38,6 +38,7 @@ import { HRExpenseTab } from "./tabs/HRExpenseTab";
 import { OfficesTab } from "./tabs/OfficesTab";
 import { AdvanceSalaryTab } from "./tabs/AdvanceSalaryTab";
 import { IncentiveBonusTab } from "./tabs/IncentiveBonusTab";
+import { PayrollPreviewDialog } from "./tabs/PayrollPreviewDialog";
 
 // 👇 NEW: Mapping for dynamic page headers
 const TAB_HEADERS = {
@@ -70,6 +71,8 @@ export default function HR() {
 	// 👇 NEW: Extract active tab from URL and setup navigation
 	const location = useLocation();
 	const navigate = useNavigate();
+	const [payrollPreviewOpen, setPayrollPreviewOpen] = useState(false);
+
 	const currentTab = location.pathname.split("/")[2] || "employees";
 
 	const handleTabChange = (value) => {
@@ -271,6 +274,12 @@ export default function HR() {
 							</div>
 						)}
 						<div className="flex gap-2">
+							{canEdit && (
+								<Button size="sm" variant="outline" onClick={() => setPayrollPreviewOpen(true)}>
+									<Calculator className="h-3.5 w-3.5 mr-1.5" />
+									Payroll Calculator
+								</Button>
+							)}
 							<Button size="sm" variant="outline" onClick={checkIn}>
 								Check In
 							</Button>
@@ -433,6 +442,11 @@ export default function HR() {
 					</TabsContent>
 				</div>
 			</Tabs>
+
+			<PayrollPreviewDialog
+				open={payrollPreviewOpen}
+				onOpenChange={setPayrollPreviewOpen}
+			/>
 		</div>
 	);
 }

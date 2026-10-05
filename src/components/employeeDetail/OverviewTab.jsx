@@ -35,7 +35,9 @@ export function OverviewTab({ employee }) {
 						</div>
 						<div>
 							<span className="font-medium">Joined:</span>{" "}
-							{formatDate(employee.createdAt)}
+							{employee.jobDetails?.joiningDate
+								? formatDate(employee.jobDetails.joiningDate)
+								: "—"}
 						</div>
 						<div>
 							<span className="font-medium">Last Login:</span>{" "}
@@ -81,12 +83,12 @@ export function OverviewTab({ employee }) {
 							<span className="font-medium">Weekly Off:</span>{" "}
 							{employee.jobDetails?.weeklyOff?.join(", ") || "—"}
 						</div>
-						<div>
+						{/* <div>
 							<span className="font-medium">Manager:</span>{" "}
 							{employee.jobDetails?.manager?.name ||
 								employee.jobDetails?.manager ||
 								"—"}
-						</div>
+						</div> */}
 					</div>
 					{employee.jobDetails?.salary && (
 						<div className="mt-2 pt-2 border-t">
@@ -173,18 +175,21 @@ export function OverviewTab({ employee }) {
 							</div>
 						</div>
 					)}
-					{employee.personalDetails?.address && (
+					{employee.personalDetails?.address?.permanentAddress && (
 						<div className="mt-2 pt-2 border-t">
 							<p className="font-medium">Address</p>
 							<div className="text-sm pl-2">
-								{employee.personalDetails.address.line1 && (
-									<div>{employee.personalDetails.address.line1}</div>
-								)}
-								{employee.personalDetails.address.city && (
+								{employee.personalDetails.address.permanentAddress.line1 && (
 									<div>
-										{employee.personalDetails.address.city},{" "}
-										{employee.personalDetails.address.state}{" "}
-										{employee.personalDetails.address.pincode}
+										{employee.personalDetails.address.permanentAddress.line1}
+									</div>
+								)}
+
+								{employee.personalDetails.address.permanentAddress.city && (
+									<div>
+										{employee.personalDetails.address.permanentAddress.city},{" "}
+										{employee.personalDetails.address.permanentAddress.state}{" "}
+										{employee.personalDetails.address.permanentAddress.pincode}
 									</div>
 								)}
 							</div>
@@ -295,6 +300,36 @@ export function OverviewTab({ employee }) {
 							</div>
 						</div>
 					)}
+
+					<div className="pt-2 border-t">
+						<p className="font-medium mb-1">Payroll & Wage Details</p>
+
+						<div className="grid grid-cols-2 gap-1 pl-2">
+							<div>
+								New Salary:{" "}
+								{employee.jobDetails?.newSalary != null
+									? `₹${employee.jobDetails.newSalary.toLocaleString("en-IN")}`
+									: "—"}
+							</div>
+
+							<div>
+								Basic Rate of Wages:{" "}
+								{employee.jobDetails?.basicRateOfWages != null
+									? `₹${employee.jobDetails.basicRateOfWages.toLocaleString("en-IN")}`
+									: "—"}
+							</div>
+
+							<div>
+								Payroll Day Divisor:{" "}
+								{employee.jobDetails?.payrollDayDivisor ?? "—"}
+							</div>
+
+							<div>
+								Salary Payment Day:{" "}
+								{employee.jobDetails?.salaryPaymentDay || "—"}
+							</div>
+						</div>
+					</div>
 				</CardContent>
 			</Card>
 		</div>

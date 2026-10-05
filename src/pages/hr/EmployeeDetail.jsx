@@ -7,6 +7,7 @@ import {
 	UserCheck,
 	Loader2,
 	UserX,
+	Calculator,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,13 +39,13 @@ import { useAuthStore } from "@/store/authStore";
 import { formatDate, formatINR } from "@/lib/helpers";
 import { canMutate } from "@/data/permissions";
 import { EditEmployeeDialog } from "@/components/hr/EditEmployeeDialog";
-
 import { OverviewTab } from "../../components/employeeDetail/OverviewTab";
 import { AttendanceTab } from "../../components/employeeDetail/AttendanceTab";
 import { LeavesTab } from "../../components/employeeDetail/LeavesTab";
 import { SalaryTab } from "../../components/employeeDetail/SalaryTab";
 import { StatCard } from "@/components/common/PageHeader";
 import { AdvanceSummaryTab } from "./tabs/AdvanceSummaryTab";
+import { PayrollPreviewDialog } from "./tabs/PayrollPreviewDialog";
 
 export default function EmployeeDetail() {
 	const { id } = useParams();
@@ -81,6 +82,7 @@ export default function EmployeeDetail() {
 	const [employeeLeaves, setEmployeeLeaves] = useState([]);
 
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
+	const [payrollPreviewOpen, setPayrollPreviewOpen] = useState(false);
 	const [assignShiftDialogOpen, setAssignShiftDialogOpen] = useState(false);
 	const [generateSalaryDialogOpen, setGenerateSalaryDialogOpen] = useState(false);
 	const [selectedShiftId, setSelectedShiftId] = useState("");
@@ -334,6 +336,17 @@ export default function EmployeeDetail() {
 	const previewGross = salaryPreview?.earnings?.grossEarnings || 0;
 	const previewBase = salaryPreview?.deductions?.baseDeductions || 0;
 
+	const previewDeductions = salaryPreview?.deductions;
+	const deductionRows = previewDeductions
+		? [
+			["Provident Fund", previewDeductions.providentFund],
+			["ESI", previewDeductions.esiDeduction],
+			["Professional Tax", previewDeductions.professionalTax],
+			["Absent deduction", previewDeductions.absentDeduction],
+			["Late deduction", previewDeductions.lateDeduction],
+		]
+		: [];
+
 	const autoScenario = salaryPreview?.preview?.autoDeduction;
 	const manualScenario = salaryPreview?.preview?.manualDeduction;
 	const usingManual = previewedDeduction !== "" && Boolean(manualScenario);
@@ -425,6 +438,16 @@ export default function EmployeeDetail() {
 						>
 							<Edit className="h-4 w-4 mr-1" />
 							Edit Profile
+						</Button>
+
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setPayrollPreviewOpen(true)}
+							className="w-full sm:w-auto"
+						>
+							<Calculator className="h-4 w-4 mr-1" />
+							Payroll Preview
 						</Button>
 					</div>
 				)}
@@ -552,112 +575,135 @@ export default function EmployeeDetail() {
 
 				<TabsContent value="statutory">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						{/* PAN */}
 						<Card>
 							<CardHeader className="pb-2">
-								<CardTitle className="text-sm">PAN Number</CardTitle>
+								<CardTitle className="text-sm">PAN Details</CardTitle>
 							</CardHeader>
-							<CardContent>
-								<p className="font-mono">
-									{employee.personalDetails?.panNumber || "Not Provided"}
-								</p>
+							<CardContent className="space-y-2 text-sm">
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">PAN Number</span>
+									<span className="font-mono">
+										{employee.personalDetails?.panNumber || "Not Provided"}
+									</span>
+								</div>
 							</CardContent>
 						</Card>
 
+						{/* Payroll Settings */}
 						<Card>
 							<CardHeader className="pb-2">
-								<CardTitle className="text-sm">PF Status</CardTitle>
+								<CardTitle className="text-sm">Payroll Settings</CardTitle>
 							</CardHeader>
-							<CardContent>
+							<CardContent className="space-y-2 text-sm">
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Basic Rate of Wages</span>
+									<span>
+										{employee.jobDetails?.basicRateOfWages > 0
+											? formatINR(employee.jobDetails.basicRateOfWages)
+											: "Auto"}
+									</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">New Salary (Revised)</span>
+									<span>
+										{employee.jobDetails?.newSalary > 0
+											? formatINR(employee.jobDetails.newSalary)
+											: "-"}
+									</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Salary Payment Day</span>
+									<span>{employee.jobDetails?.salaryPaymentDay || "10th of every month"}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Payroll Day Divisor</span>
+									<span>{employee.jobDetails?.payrollDayDivisor || 26}</span>
+								</div>
+								{employee.jobDetails?.khorakiPerDay > 0 && (
+									<div className="flex justify-between">
+										<span className="text-muted-foreground">Khoraki Per Day</span>
+										<span>{formatINR(employee.jobDetails.khorakiPerDay)}</span>
+									</div>
+								)}
+							</CardContent>
+						</Card>
+
+						{/* PF */}
+						<Card>
+							<CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+								<CardTitle className="text-sm">Provident Fund (PF)</CardTitle>
 								<Badge variant={employee.jobDetails?.isPfApplicable ? "success" : "outline"}>
 									{employee.jobDetails?.isPfApplicable ? "Applicable" : "Not Applicable"}
 								</Badge>
+							</CardHeader>
+							<CardContent className="space-y-2 text-sm">
+								{employee.jobDetails?.isPfApplicable ? (
+									<>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">PF Number</span>
+											<span className="font-mono">{employee.jobDetails?.pfNumber || "-"}</span>
+										</div>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">UAN Number</span>
+											<span className="font-mono">
+												{employee.jobDetails?.uanNumber || employee.personalDetails?.uanNumber || "-"}
+											</span>
+										</div>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">Employee Contribution</span>
+											<span>
+												{employee.jobDetails?.pfEmployeeContributionPercent != null
+													? `${employee.jobDetails.pfEmployeeContributionPercent}%`
+													: "-"}
+											</span>
+										</div>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">Joining Date</span>
+											<span>{formatDate(employee.jobDetails?.pfJoiningDate) || "-"}</span>
+										</div>
+									</>
+								) : (
+									<p className="text-muted-foreground">PF is not applicable for this employee.</p>
+								)}
 							</CardContent>
 						</Card>
 
-						{employee.jobDetails?.isPfApplicable && (
-							<>
-								<Card>
-									<CardHeader className="pb-2">
-										<CardTitle className="text-sm">PF Number</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<p className="font-mono">{employee.jobDetails?.pfNumber || "-"}</p>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader className="pb-2">
-										<CardTitle className="text-sm">UAN Number</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<p className="font-mono">{employee.jobDetails?.uanNumber || "-"}</p>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader className="pb-2">
-										<CardTitle className="text-sm">PF Employee Contribution</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<p>
-											{employee.jobDetails?.pfEmployeeContributionPercent != null
-												? `${employee.jobDetails.pfEmployeeContributionPercent}%`
-												: "-"}
-										</p>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader className="pb-2">
-										<CardTitle className="text-sm">PF Joining Date</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<p>{formatDate(employee.jobDetails?.pfJoiningDate) || "-"}</p>
-									</CardContent>
-								</Card>
-							</>
-						)}
-
+						{/* ESI */}
 						<Card>
-							<CardHeader className="pb-2">
-								<CardTitle className="text-sm">ESI Status</CardTitle>
-							</CardHeader>
-							<CardContent>
+							<CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+								<CardTitle className="text-sm">ESI</CardTitle>
 								<Badge variant={employee.jobDetails?.isEsiApplicable ? "success" : "outline"}>
 									{employee.jobDetails?.isEsiApplicable ? "Applicable" : "Not Applicable"}
 								</Badge>
+							</CardHeader>
+							<CardContent className="space-y-2 text-sm">
+								{employee.jobDetails?.isEsiApplicable ? (
+									<>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">ESI Number</span>
+											<span className="font-mono">
+												{employee.jobDetails?.esiNumber || employee.personalDetails?.esicNumber || "-"}
+											</span>
+										</div>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">Employee Contribution</span>
+											<span>
+												{employee.jobDetails?.esiEmployeeContributionPercent != null
+													? `${employee.jobDetails.esiEmployeeContributionPercent}%`
+													: "-"}
+											</span>
+										</div>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">Joining Date</span>
+											<span>{formatDate(employee.jobDetails?.esiJoiningDate) || "-"}</span>
+										</div>
+									</>
+								) : (
+									<p className="text-muted-foreground">ESI is not applicable for this employee.</p>
+								)}
 							</CardContent>
 						</Card>
-
-						{employee.jobDetails?.isEsiApplicable && (
-							<>
-								<Card>
-									<CardHeader className="pb-2">
-										<CardTitle className="text-sm">ESI Number</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<p className="font-mono">{employee.jobDetails?.esiNumber || "-"}</p>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader className="pb-2">
-										<CardTitle className="text-sm">ESI Employee Contribution</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<p>
-											{employee.jobDetails?.esiEmployeeContributionPercent != null
-												? `${employee.jobDetails.esiEmployeeContributionPercent}%`
-												: "-"}
-										</p>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader className="pb-2">
-										<CardTitle className="text-sm">ESI Joining Date</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<p>{formatDate(employee.jobDetails?.esiJoiningDate) || "-"}</p>
-									</CardContent>
-								</Card>
-							</>
-						)}
 					</div>
 				</TabsContent>
 			</Tabs>
@@ -669,6 +715,13 @@ export default function EmployeeDetail() {
 				employee={employee}
 				onSuccess={loadAllData}
 			/>
+
+			<PayrollPreviewDialog
+				open={payrollPreviewOpen}
+				onOpenChange={setPayrollPreviewOpen}
+				employeeId={id}
+			/>
+
 			<Dialog open={assignShiftDialogOpen} onOpenChange={setAssignShiftDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
@@ -756,24 +809,54 @@ export default function EmployeeDetail() {
 						{salaryPreview && (
 							<div className="space-y-3 text-sm">
 								<div className="rounded-md border p-3 space-y-1">
-									<div className="flex justify-between">
-										<span className="text-muted-foreground">Gross earnings</span>
-										<span className="text-green-600">
-											{formatINR(previewGross)}
-										</span>
+									{/* Earnings */}
+									{[
+										["Basic", salaryPreview.earnings?.basic],
+										["HRA", salaryPreview.earnings?.hra],
+										["Allowances", salaryPreview.earnings?.allowances],
+										["Overtime", salaryPreview.earnings?.overtimePay],
+									].map(([label, amount]) => (
+										<div key={label} className="flex justify-between pl-3">
+											<span className="text-muted-foreground">{label}</span>
+											<span className={amount > 0 ? "text-green-600" : "text-muted-foreground"}>
+												{amount > 0 ? "+ " : ""}
+												{formatINR(amount ?? 0)}
+											</span>
+										</div>
+									))}
+									<div className="flex justify-between font-medium border-t pt-1">
+										<span>Gross earnings</span>
+										<span className="text-green-600">+ {formatINR(previewGross)}</span>
 									</div>
-									<div className="flex justify-between">
-										<span className="text-muted-foreground">Other deductions (PF, PT, absent, late)</span>
-										<span className="text-red-600">
-											{formatINR(previewBase)}
-										</span>
+
+									{/* Base deductions */}
+									{deductionRows.map(([label, amount]) => (
+										<div key={label} className="flex justify-between pl-3">
+											<span className="text-muted-foreground">
+												{label}
+												{label === "ESI" && !previewDeductions.esiApplicable && (
+													<span className="text-xs ml-1">(not applicable)</span>
+												)}
+											</span>
+											<span className={amount > 0 ? "text-red-600" : "text-muted-foreground"}>
+												{amount > 0 ? "− " : ""}
+												{formatINR(amount ?? 0)}
+											</span>
+										</div>
+									))}
+									<div className="flex justify-between font-medium border-t pt-1">
+										<span>Total base deductions</span>
+										<span className="text-red-600">− {formatINR(previewBase)}</span>
 									</div>
+
+									{/* Advance */}
 									<div className="flex justify-between">
 										<span className="text-muted-foreground">
 											Advance deduction ({usingManual ? "manual" : "auto"})
 										</span>
-										<span className="text-red-600">
-											{formatINR(previewAdvanceDeducted)}
+										<span className={previewAdvanceDeducted > 0 ? "text-red-600" : "text-muted-foreground"}>
+											{previewAdvanceDeducted > 0 ? "− " : ""}
+											{formatINR(previewAdvanceDeducted ?? 0)}
 										</span>
 									</div>
 									{previewTotalDue > 0 && (
@@ -837,9 +920,17 @@ export default function EmployeeDetail() {
 									)}
 								</div>
 
-								<div className="flex justify-between text-base font-bold">
-									<span>Net payable</span>
-									<span className="text-primary">{formatINR(previewNet)}</span>
+								<div className="rounded-md border p-3 space-y-1">
+									<div className="flex justify-between text-xs text-muted-foreground">
+										<span>Gross − base deductions − advance</span>
+										<span>
+											{formatINR(previewGross)} − {formatINR(previewBase)} − {formatINR(previewAdvanceDeducted || 0)}
+										</span>
+									</div>
+									<div className="flex justify-between text-base font-bold">
+										<span>Net payable</span>
+										<span className="text-primary">{formatINR(previewNet)}</span>
+									</div>
 								</div>
 
 								{isPreviewStale && (
