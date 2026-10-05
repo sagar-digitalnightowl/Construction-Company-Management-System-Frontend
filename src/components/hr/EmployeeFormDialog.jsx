@@ -121,6 +121,13 @@ const initialFormState = {
 	esiEmployeeContributionPercent: "",
 	pfJoiningDate: "",
 	esiJoiningDate: "",
+
+	// ─── PAYROLL SETTINGS (NEW) ───
+	basicRateOfWages: "",
+	newSalary: "",
+	salaryPaymentDay: "10th of every month",
+	payrollDayDivisor: "26",
+	khorakiPerDay: "",
 };
 
 const emptyWorkExperience = {
@@ -331,6 +338,13 @@ export function EmployeeFormDialog({
 					esiEmployeeContributionPercent: job.esiEmployeeContributionPercent ?? "",
 					pfJoiningDate: job.pfJoiningDate?.slice(0, 10) || "",
 					esiJoiningDate: job.esiJoiningDate?.slice(0, 10) || "",
+
+					// ─── PAYROLL SETTINGS (NEW) ───
+					basicRateOfWages: job.basicRateOfWages ?? "",
+					newSalary: job.newSalary ?? "",
+					salaryPaymentDay: job.salaryPaymentDay || "10th of every month",
+					payrollDayDivisor: String(job.payrollDayDivisor ?? 26),
+					khorakiPerDay: job.khorakiPerDay ?? "",
 				});
 
 				setWorkExperiences(
@@ -468,6 +482,9 @@ export function EmployeeFormDialog({
 			branchName: form.branchName || undefined,
 		};
 
+		// 0 is a valid value ("0 = auto"), so don't use a truthy check here
+		const numOrUndefined = (v) => (v === "" || v == null ? undefined : Number(v));
+
 		const jobDetails = {
 			designation: form.designation || undefined,
 			joiningDate: form.joiningDate || undefined,
@@ -495,6 +512,13 @@ export function EmployeeFormDialog({
 				: undefined,
 			pfJoiningDate: form.pfJoiningDate || undefined,
 			esiJoiningDate: form.esiJoiningDate || undefined,
+
+			// ─── PAYROLL SETTINGS (NEW) ───
+			basicRateOfWages: numOrUndefined(form.basicRateOfWages),
+			newSalary: numOrUndefined(form.newSalary),
+			salaryPaymentDay: form.salaryPaymentDay || undefined,
+			payrollDayDivisor: numOrUndefined(form.payrollDayDivisor),
+			khorakiPerDay: numOrUndefined(form.khorakiPerDay),
 		};
 
 		const workExpForApi = workExperiences.map((exp) => ({
@@ -1596,6 +1620,87 @@ export function EmployeeFormDialog({
 										</div>
 									</div>
 								)}
+							</div>
+
+							<div>
+								<h3 className="text-sm font-semibold mb-3 border-b pb-1 text-muted-foreground">
+									Payroll Settings
+								</h3>
+								<div className="grid grid-cols-2 gap-4">
+									<div className="space-y-2">
+										<Label htmlFor="basicRateOfWages">Basic Rate of Wages (PF Basic)</Label>
+										<Input
+											id="basicRateOfWages"
+											type="number"
+											min="0"
+											placeholder="0 = auto"
+											value={form.basicRateOfWages}
+											onChange={(e) => handleChange("basicRateOfWages", e.target.value)}
+										/>
+										<p className="text-xs text-muted-foreground">
+											Used for PF. Keep 0 for auto, or for PF-exempt employees.
+										</p>
+									</div>
+									<div className="space-y-2">
+										<Label htmlFor="newSalary">New Salary (Revised)</Label>
+										<Input
+											id="newSalary"
+											type="number"
+											min="0"
+											placeholder="0"
+											value={form.newSalary}
+											onChange={(e) => handleChange("newSalary", e.target.value)}
+										/>
+										<p className="text-xs text-muted-foreground">
+											Bonus is calculated from the difference vs. current salary.
+										</p>
+									</div>
+									<div className="space-y-2">
+										<Label>Salary Payment Day</Label>
+										<Select
+											value={form.salaryPaymentDay}
+											onValueChange={(v) => handleChange("salaryPaymentDay", v)}
+										>
+											<SelectTrigger>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{["05th", "10th", "15th"].map((d) => (
+													<SelectItem key={d} value={`${d} of every month`}>
+														{d} of every month
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
+									<div className="space-y-2">
+										<Label>Payroll Day Divisor</Label>
+										<Select
+											value={form.payrollDayDivisor}
+											onValueChange={(v) => handleChange("payrollDayDivisor", v)}
+										>
+											<SelectTrigger>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="26">26</SelectItem>
+												<SelectItem value="30">30</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+									<div className="space-y-2">
+										<Label htmlFor="khorakiPerDay">Khoraki Per Day</Label>
+										<Input
+											id="khorakiPerDay"
+											type="number"
+											min="0"
+											placeholder="0"
+											value={form.khorakiPerDay}
+											onChange={(e) => handleChange("khorakiPerDay", e.target.value)}
+										/>
+										<p className="text-xs text-muted-foreground">For site workers.</p>
+									</div>
+								</div>
 							</div>
 						</div>
 					)}

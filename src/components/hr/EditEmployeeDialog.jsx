@@ -21,6 +21,9 @@ import {
 import { useHR } from "@/hooks/useHR";
 import { toast } from "sonner";
 
+// 0 is a valid value ("0 = auto"), so don't use a truthy check
+const numOrUndefined = (v) => (v === "" || v == null ? undefined : Number(v));
+
 export function EditEmployeeDialog({
 	open,
 	onOpenChange,
@@ -78,6 +81,13 @@ export function EditEmployeeDialog({
 			esiEmployeeContributionPercent: "",
 			pfJoiningDate: "",
 			esiJoiningDate: "",
+
+			// ─── PAYROLL SETTINGS (NEW) ───
+			basicRateOfWages: "",
+			newSalary: "",
+			salaryPaymentDay: "10th of every month",
+			payrollDayDivisor: "26",
+			khorakiPerDay: "",
 		},
 	});
 
@@ -189,6 +199,13 @@ export function EditEmployeeDialog({
 
 				esiJoiningDate:
 					employee.jobDetails?.esiJoiningDate?.split("T")[0] || "",
+
+				basicRateOfWages: employee.jobDetails?.basicRateOfWages ?? "",
+				newSalary: employee.jobDetails?.newSalary ?? "",
+				salaryPaymentDay:
+					employee.jobDetails?.salaryPaymentDay || "10th of every month",
+				payrollDayDivisor: String(employee.jobDetails?.payrollDayDivisor ?? 26),
+				khorakiPerDay: employee.jobDetails?.khorakiPerDay ?? "",
 			},
 		});
 	}, [employee, open]);
@@ -262,6 +279,13 @@ export function EditEmployeeDialog({
 					: undefined,
 				pfJoiningDate: form.jobDetails.pfJoiningDate || undefined,
 				esiJoiningDate: form.jobDetails.esiJoiningDate || undefined,
+
+				// ─── PAYROLL SETTINGS (NEW) ───
+				basicRateOfWages: numOrUndefined(form.jobDetails.basicRateOfWages),
+				newSalary: numOrUndefined(form.jobDetails.newSalary),
+				salaryPaymentDay: form.jobDetails.salaryPaymentDay || undefined,
+				payrollDayDivisor: numOrUndefined(form.jobDetails.payrollDayDivisor),
+				khorakiPerDay: numOrUndefined(form.jobDetails.khorakiPerDay),
 			},
 		};
 		const success = await updateEmployee(employee._id, payload);
@@ -271,6 +295,12 @@ export function EditEmployeeDialog({
 			onOpenChange(false);
 		}
 	};
+
+	const handleJobChange = (field, value) =>
+		setForm((prev) => ({
+			...prev,
+			jobDetails: { ...prev.jobDetails, [field]: value },
+		}));
 
 	const handleWeeklyOffChange = (day) => {
 		const current = form.jobDetails.weeklyOff;
@@ -904,6 +934,73 @@ export function EditEmployeeDialog({
 								/>
 							</div>
 						)}
+
+						<h3 className="font-medium pt-3">Payroll Settings</h3>
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<Label>Basic Rate of Wages (PF Basic)</Label>
+								<Input
+									type="number"
+									min="0"
+									placeholder="0 = auto"
+									value={form.jobDetails.basicRateOfWages}
+									onChange={(e) => handleJobChange("basicRateOfWages", e.target.value)}
+								/>
+							</div>
+							<div>
+								<Label>New Salary (Revised)</Label>
+								<Input
+									type="number"
+									min="0"
+									placeholder="0"
+									value={form.jobDetails.newSalary}
+									onChange={(e) => handleJobChange("newSalary", e.target.value)}
+								/>
+							</div>
+							<div>
+								<Label>Salary Payment Day</Label>
+								<Select
+									value={form.jobDetails.salaryPaymentDay}
+									onValueChange={(v) => handleJobChange("salaryPaymentDay", v)}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{["05th", "10th", "15th"].map((d) => (
+											<SelectItem key={d} value={`${d} of every month`}>
+												{d} of every month
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+							<div>
+								<Label>Payroll Day Divisor</Label>
+								<Select
+									value={form.jobDetails.payrollDayDivisor}
+									onValueChange={(v) => handleJobChange("payrollDayDivisor", v)}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="26">26</SelectItem>
+										<SelectItem value="30">30</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+							<div>
+								<Label>Khoraki Per Day</Label>
+								<Input
+									type="number"
+									min="0"
+									placeholder="0"
+									value={form.jobDetails.khorakiPerDay}
+									onChange={(e) => handleJobChange("khorakiPerDay", e.target.value)}
+								/>
+							</div>
+						</div>
 					</div>
 				</div>
 				<DialogFooter>

@@ -287,6 +287,44 @@ export function ViewEmployeeDialog({ open, onOpenChange, employeeId }) {
 										</>
 									)}
 								</div>
+
+								<div className="space-y-3 sm:space-y-4 pt-2">
+									<h3 className="text-[11px] sm:text-xs font-bold uppercase tracking-wide text-primary/80 border-b pb-1">
+										Payroll & Wage Details
+									</h3>
+
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+										<DataField
+											label="New Salary"
+											value={
+												employee.jobDetails?.newSalary != null
+													? `₹${employee.jobDetails.newSalary.toLocaleString("en-IN")}`
+													: null
+											}
+										/>
+
+										<DataField
+											label="Basic Rate of Wages"
+											value={
+												employee.jobDetails?.basicRateOfWages != null
+													? `₹${employee.jobDetails.basicRateOfWages.toLocaleString("en-IN")}`
+													: null
+											}
+										/>
+									</div>
+
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+										<DataField
+											label="Payroll Day Divisor"
+											value={employee.jobDetails?.payrollDayDivisor}
+										/>
+
+										<DataField
+											label="Salary Payment Day"
+											value={employee.jobDetails?.salaryPaymentDay}
+										/>
+									</div>
+								</div>
 							</TabsContent>
 						</div>
 					</Tabs>
