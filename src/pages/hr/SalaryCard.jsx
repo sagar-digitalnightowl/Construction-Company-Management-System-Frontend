@@ -83,7 +83,7 @@ export const SalaryCard = ({ slip }) => {
 	const netWorkingDays = slip.attendanceSummary?.presentDays || slip.attendanceSummary?.totalWorkingDays;
 
 	// Core recurring earnings shown in the SALARY breakup (bonuses are broken out separately below)
-	const bonusKeys = ["performanceBonus", "safetyBonus"];
+	const bonusKeys = ["performanceBonus", "safetyBonus", "bookingBonus"];
 	const earningEntries = Object.entries(EARNING_LABELS)
 		.filter(([key]) => !bonusKeys.includes(key) && (slip.earnings?.[key] ?? 0) !== 0)
 		.map(([key, label]) => ({ key, label, amount: slip.earnings[key] }));
