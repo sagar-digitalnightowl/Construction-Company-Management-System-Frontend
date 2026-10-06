@@ -814,6 +814,7 @@ export default function EmployeeDetail() {
 										["Basic", salaryPreview.earnings?.basic],
 										["HRA", salaryPreview.earnings?.hra],
 										["Allowances", salaryPreview.earnings?.allowances],
+										["Bonus", salaryPreview.earnings?.bonus],
 										["Overtime", salaryPreview.earnings?.overtimePay],
 									].map(([label, amount]) => (
 										<div key={label} className="flex justify-between pl-3">

@@ -422,95 +422,69 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 
 							<div className="border-t pt-3">
 								<p className="font-semibold mb-2">Earnings</p>
-								<div className="grid grid-cols-2 gap-1 text-sm">
-									<p className="text-muted-foreground">Basic</p>
-									<p className="text-right">₹{(selectedSlipDetail.earnings?.basic || 0).toLocaleString('en-IN')}</p>
-									<p className="text-muted-foreground">HRA</p>
-									<p className="text-right">₹{(selectedSlipDetail.earnings?.hra || 0).toLocaleString('en-IN')}</p>
-									<p className="text-muted-foreground">Allowances</p>
-									<p className="text-right">₹{(selectedSlipDetail.earnings?.allowances || 0).toLocaleString('en-IN')}</p>
-									<p className="text-muted-foreground">Overtime Pay</p>
-									<p className="text-right">₹{(selectedSlipDetail.earnings?.overtimePay || 0).toLocaleString('en-IN')}</p>
-									<p className="font-medium text-muted-foreground">Gross Earnings</p>
-									<p className="font-medium text-right">₹{(selectedSlipDetail.grossEarnings || 0).toLocaleString('en-IN')}</p>
+
+								<div className="rounded-md border p-3 space-y-1.5 text-sm">
+									{[
+										["Basic", selectedSlipDetail.earnings?.basic],
+										["HRA", selectedSlipDetail.earnings?.hra],
+										["Allowances", selectedSlipDetail.earnings?.allowances],
+										["Bonus", selectedSlipDetail.earnings?.bonus],
+										["Overtime Pay", selectedSlipDetail.earnings?.overtimePay],
+									].map(([label, amount]) => (
+										<div key={label} className="flex justify-between">
+											<span className="text-muted-foreground">{label}</span>
+
+											<span className="text-green-600">
+												{Number(amount) > 0 ? "+ " : ""}
+												{formatINR(amount || 0)}
+											</span>
+										</div>
+									))}
+
+									<div className="flex justify-between border-t pt-2 font-semibold">
+										<span>Gross Earnings</span>
+
+										<span className="text-green-600">
+											+ {formatINR(selectedSlipDetail.grossEarnings || 0)}
+										</span>
+									</div>
 								</div>
 							</div>
 
 							<div className="border-t pt-3">
 								<p className="font-semibold mb-2">Deductions</p>
 
-								<div className="grid grid-cols-2 gap-1.5 text-sm">
-									<p className="text-muted-foreground">Provident Fund</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.providentFund || 0)}
-									</p>
+								<div className="rounded-md border p-3 space-y-1.5 text-sm">
+									{[
+										["Provident Fund", selectedSlipDetail.deductions?.providentFund],
+										["ESI", selectedSlipDetail.deductions?.esiDeduction],
+										["Professional Tax", selectedSlipDetail.deductions?.professionalTax],
+										["Tax Deduction", selectedSlipDetail.deductions?.taxDeduction],
+										["Loan Deduction", selectedSlipDetail.deductions?.loanDeduction],
+										["Absent Deduction", selectedSlipDetail.deductions?.absentDeduction],
+										["Late Deduction", selectedSlipDetail.deductions?.lateDeduction],
+										["Labour Welfare Fund", selectedSlipDetail.deductions?.labourWelfareFund],
+										["Uniform Deduction", selectedSlipDetail.deductions?.uniformDeduction],
+										["Accommodation Deduction", selectedSlipDetail.deductions?.accommodationDeduction],
+										["Other Deductions", selectedSlipDetail.deductions?.otherDeductions],
+										["Advance Deduction", selectedSlipDetail.deductions?.advanceDeduction],
+									].map(([label, amount]) => (
+										<div key={label} className="flex justify-between">
+											<span className="text-muted-foreground">{label}</span>
 
-									<p className="text-muted-foreground">Professional Tax</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.professionalTax || 0)}
-									</p>
+											<span className="text-red-600">
+												{Number(amount) > 0 ? "− " : ""}
+												{formatINR(amount || 0)}
+											</span>
+										</div>
+									))}
 
-									<p className="text-muted-foreground">Tax Deduction</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.taxDeduction || 0)}
-									</p>
+									<div className="flex justify-between border-t pt-2 font-semibold">
+										<span>Total Deductions</span>
 
-									<p className="text-muted-foreground">Loan Deduction</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.loanDeduction || 0)}
-									</p>
-
-									<p className="text-muted-foreground">ESI</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.esiDeduction || 0)}
-									</p>
-
-									<p className="text-muted-foreground">Absent Deduction</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.absentDeduction || 0)}
-									</p>
-
-									<p className="text-muted-foreground">Late Deduction</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.lateDeduction || 0)}
-									</p>
-
-									<p className="text-muted-foreground">Labour Welfare Fund</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.labourWelfareFund || 0)}
-									</p>
-
-									<p className="text-muted-foreground">Uniform Deduction</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.uniformDeduction || 0)}
-									</p>
-
-									<p className="text-muted-foreground">Accommodation Deduction</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.accommodationDeduction || 0)}
-									</p>
-
-									<p className="text-muted-foreground">Other Deductions</p>
-									<p className="text-right">
-										{formatINR(selectedSlipDetail.deductions?.otherDeductions || 0)}
-									</p>
-
-									{/* Advance Deduction */}
-									<p className="font-medium text-muted-foreground">
-										Advance Deduction
-									</p>
-									<p className="text-right">
-										{formatINR(
-											selectedSlipDetail.deductions?.advanceDeduction || 0
-										)}
-									</p>
-
-									{/* Total */}
-									<div className="col-span-2 border-t mt-2 pt-2 flex justify-between">
-										<p className="font-semibold">Total Deductions</p>
-										<p className="font-bold text-red-600">
-											{formatINR(selectedSlipDetail.totalDeductions || 0)}
-										</p>
+										<span className="text-red-600">
+											− {formatINR(selectedSlipDetail.totalDeductions || 0)}
+										</span>
 									</div>
 								</div>
 							</div>
@@ -588,14 +562,27 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 							)}
 
 							<div className="border-t pt-3">
-								<div className="flex justify-between text-lg">
-									<p className="font-bold">Net Payable</p>
-									<p className="font-bold text-primary">
-										₹{(selectedSlipDetail.netSalary || selectedSlipDetail.netPay || 0).toLocaleString('en-IN')}
+								<div className="rounded-md border p-3">
+									<div className="flex justify-between text-lg">
+										<p className="font-bold">Net Payable</p>
+
+										<p className="font-bold text-primary">
+											{formatINR(
+												selectedSlipDetail.netSalary ||
+												selectedSlipDetail.netPay ||
+												0
+											)}
+										</p>
+									</div>
+
+									<p className="text-xs text-muted-foreground mt-1">
+										Gross earnings − total deductions
 									</p>
 								</div>
-								<div className="flex justify-between text-sm mt-1">
+
+								<div className="flex justify-between text-sm mt-2">
 									<p className="text-muted-foreground">Status</p>
+
 									<Badge variant={getStatusBadge(selectedSlipDetail.paymentStatus)}>
 										{selectedSlipDetail.paymentStatus || "Pending"}
 									</Badge>
