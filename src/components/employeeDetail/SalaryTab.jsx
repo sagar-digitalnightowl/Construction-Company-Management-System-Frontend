@@ -429,6 +429,8 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 										["HRA", selectedSlipDetail.earnings?.hra],
 										["Allowances", selectedSlipDetail.earnings?.allowances],
 										["Bonus", selectedSlipDetail.earnings?.bonus],
+										["Held-back release", selectedSlipDetail.earnings?.heldBackSalary],
+										["Booking bonus", selectedSlipDetail.earnings?.bookingBonus],
 										["Overtime Pay", selectedSlipDetail.earnings?.overtimePay],
 									].map(([label, amount]) => (
 										<div key={label} className="flex justify-between">
@@ -468,6 +470,7 @@ export function SalaryTab({ salarySlips, canEdit, employeeId, onGenerate }) {
 										["Accommodation Deduction", selectedSlipDetail.deductions?.accommodationDeduction],
 										["Other Deductions", selectedSlipDetail.deductions?.otherDeductions],
 										["Advance Deduction", selectedSlipDetail.deductions?.advanceDeduction],
+										["Held back (booking rule)", selectedSlipDetail.deductions?.heldBackSalaryDeduction],
 									].map(([label, amount]) => (
 										<div key={label} className="flex justify-between">
 											<span className="text-muted-foreground">{label}</span>
