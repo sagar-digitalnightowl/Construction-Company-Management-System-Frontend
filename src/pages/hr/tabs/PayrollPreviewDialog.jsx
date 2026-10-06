@@ -111,6 +111,12 @@ export function PayrollPreviewDialog({ open, onOpenChange, employeeId }) {
 
 	const b = payrollPreview?.breakdown;
 
+	const rule = payrollPreview?.bookingRule;
+	const heldBack = rule?.enabled ? rule.heldBackAccrued || 0 : 0;
+	const fullSalary = (b?.payableSalary || 0) + heldBack;
+	const holdPercentLabel = Math.round((rule?.holdPercent ?? 0) * 100);
+	const esiOnHeldSalary = Boolean(b?.esiApplicable) && fullSalary > 21000;
+
 	const sumRows = (rows) => rows.reduce((acc, [key]) => acc + (b?.[key] || 0), 0);
 	const totalAdditions = b ? sumRows(ADDITION_ROWS) : 0;
 	const totalDeductions = b ? sumRows(DEDUCTION_ROWS) : 0;
@@ -124,6 +130,12 @@ export function PayrollPreviewDialog({ open, onOpenChange, employeeId }) {
 						{label}
 						{key === "esi" && !b.esiApplicable && (
 							<span className="text-xs ml-1">(not applicable)</span>
+						)}
+						{key === "payableSalary" && heldBack > 0 && (
+							<span className="text-xs ml-1">(after {holdPercentLabel}% hold)</span>
+						)}
+						{key === "esi" && esiOnHeldSalary && (
+							<span className="text-xs ml-1 text-amber-600">(on held salary)</span>
 						)}
 					</span>
 					<span className={amount > 0 ? colorClass : "text-muted-foreground"}>
@@ -214,6 +226,29 @@ export function PayrollPreviewDialog({ open, onOpenChange, employeeId }) {
 							</div>
 						</div>
 
+						{heldBack > 0 && (
+							<div className="rounded-md border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20 p-3 space-y-1">
+								<p className="font-semibold text-amber-700 dark:text-amber-400">Booking rule applied</p>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">
+										Full salary ({payrollPreview.inputs?.workedDays}/{payrollPreview.inputs?.dayDivisor} days)
+									</span>
+									<span>{formatINR(fullSalary)}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Held back ({holdPercentLabel}%)</span>
+									<span className="text-red-600 dark:text-red-400">− {formatINR(heldBack)}</span>
+								</div>
+								<div className="flex justify-between font-medium border-t pt-1">
+									<span>Payable now</span>
+									<span>{formatINR(b.payableSalary)}</span>
+								</div>
+								<p className="text-xs text-muted-foreground">
+									Bookings: {rule.bookingsCount} · Released so far: {formatINR(rule.heldBackReleased || 0)}
+								</p>
+							</div>
+						)}
+
 						{/* Additions */}
 						<div className="rounded-md border border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20 p-3 space-y-1">
 							<p className="font-semibold text-green-700 dark:text-green-400">Additions</p>
@@ -240,6 +275,12 @@ export function PayrollPreviewDialog({ open, onOpenChange, employeeId }) {
 
 						{/* Net */}
 						<div className="rounded-md border p-3 space-y-1">
+							{heldBack > 0 && (
+								<div className="flex justify-between text-xs text-muted-foreground">
+									<span>Held back (not paid this month)</span>
+									<span>{formatINR(heldBack)}</span>
+								</div>
+							)}
 							<div className="flex justify-between text-xs text-muted-foreground">
 								<span>PF basis (actual basic)</span>
 								<span>{formatINR(b.actualBasic ?? 0)}</span>

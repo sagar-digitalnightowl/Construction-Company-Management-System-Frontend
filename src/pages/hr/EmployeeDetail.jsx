@@ -35,6 +35,7 @@ import {
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 
 import { useHR } from "@/hooks/useHR";
+import { usePF } from "@/hooks/usePF";
 import { useAuthStore } from "@/store/authStore";
 import { formatDate, formatINR } from "@/lib/helpers";
 import { canMutate } from "@/data/permissions";
@@ -46,6 +47,25 @@ import { SalaryTab } from "../../components/employeeDetail/SalaryTab";
 import { StatCard } from "@/components/common/PageHeader";
 import { AdvanceSummaryTab } from "./tabs/AdvanceSummaryTab";
 import { PayrollPreviewDialog } from "./tabs/PayrollPreviewDialog";
+
+const formatMonthLabel = (ym) => {
+	if (!ym) return "-";
+	const [y, m] = ym.split("-");
+	return new Date(Number(y), Number(m) - 1, 1).toLocaleString("en-IN", {
+		month: "short",
+		year: "numeric",
+	});
+};
+
+const renderDelta = (added, released, format = (v) => v) => {
+	if (!added && !released) return <span className="text-muted-foreground">-</span>;
+	return (
+		<div className="space-y-0.5">
+			{added > 0 && <div className="text-green-600">+ {format(added)}</div>}
+			{released > 0 && <div className="text-red-600">− {format(released)}</div>}
+		</div>
+	);
+};
 
 export default function EmployeeDetail() {
 	const { id } = useParams();
@@ -72,6 +92,8 @@ export default function EmployeeDetail() {
 		fetchShifts,
 		loading,
 	} = useHR();
+
+	const { bookingLedger, ledgerLoading, fetchBookingLedger, adjustBookingLedger } = usePF();
 
 	const [employee, setEmployee] = useState(null);
 	const [attendance, setAttendance] = useState([]);
@@ -101,6 +123,16 @@ export default function EmployeeDetail() {
 		onConfirm: null,
 	});
 	const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+	const [adjustOpen, setAdjustOpen] = useState(false);
+	const [adjustForm, setAdjustForm] = useState({
+		month: "",
+		holdDelta: "",
+		bonusUnitsDelta: "",
+		bonusPerUnit: "",
+		note: "",
+	});
+	const [bookingsOverride, setBookingsOverride] = useState("");
 
 	// ✅ FIXED: Individual load functions with proper error handling
 	const loadEmployeeData = async () => {
@@ -266,6 +298,9 @@ export default function EmployeeDetail() {
 		...(advanceDeduction !== "" && {
 			manualAdvanceDeduction: Number(advanceDeduction),
 		}),
+		...(bookingsOverride !== "" && {
+			bookingsCount: Number(bookingsOverride),
+		}),
 	});
 
 	const isValidDeduction = () => {
@@ -285,6 +320,7 @@ export default function EmployeeDetail() {
 			setSalaryPreview(null);
 			setAdvanceDeduction("");
 			setPreviewedDeduction("");
+			setBookingsOverride("");
 		}
 	};
 
@@ -304,9 +340,10 @@ export default function EmployeeDetail() {
 		// Removed the totalDue check since this input is for manual deduction
 		const slip = await generateSalarySlip(buildSalaryPayload());
 		if (slip) {
-			toast.success("Salary slip generated");
+			// toast.success("Salary slip generated");
 			handleGenerateDialogChange(false);
 			await refreshSalaryOnly();
+			await fetchBookingLedger(id);
 		}
 	};
 
@@ -333,6 +370,29 @@ export default function EmployeeDetail() {
 		await refreshSalaryOnly();
 	};
 
+	const handleTabChange = (value) => {
+		if (value === "booking-ledger") fetchBookingLedger(id);
+	};
+
+	const handleAdjustLedger = async () => {
+		const { month, holdDelta, bonusUnitsDelta, bonusPerUnit, note } = adjustForm;
+		if (!/^\d{4}-\d{2}$/.test(month)) return toast.error("Month format: YYYY-MM");
+
+		const res = await adjustBookingLedger({
+			employeeId: id,
+			month,
+			...(holdDelta !== "" && { holdDelta: Number(holdDelta) }),
+			...(bonusUnitsDelta !== "" && { bonusUnitsDelta: Number(bonusUnitsDelta) }),
+			...(bonusPerUnit !== "" && { bonusPerUnit: Number(bonusPerUnit) }),
+			...(note && { note }),
+		});
+		if (res) {
+			setAdjustOpen(false);
+			setAdjustForm({ month: "", holdDelta: "", bonusUnitsDelta: "", bonusPerUnit: "", note: "" });
+			await fetchBookingLedger(id);
+		}
+	};
+
 	const previewGross = salaryPreview?.earnings?.grossEarnings || 0;
 	const previewBase = salaryPreview?.deductions?.baseDeductions || 0;
 
@@ -344,6 +404,7 @@ export default function EmployeeDetail() {
 			["Professional Tax", previewDeductions.professionalTax],
 			["Absent deduction", previewDeductions.absentDeduction],
 			["Late deduction", previewDeductions.lateDeduction],
+			["Held back (booking rule)", previewDeductions.heldBackSalaryDeduction],
 		]
 		: [];
 
@@ -362,6 +423,20 @@ export default function EmployeeDetail() {
 	const isManualCapped =
 		usingManual && manualScenario.actualDeducted < manualScenario.requestedAmount;
 	const isPreviewStale = Boolean(salaryPreview) && previewedDeduction !== advanceDeduction;
+
+	const bookingRule = salaryPreview?.bookingRule;
+	const heldBack = bookingRule?.enabled ? bookingRule.heldBackAccrued || 0 : 0;
+	const holdPercentLabel = Math.round((bookingRule?.holdPercent ?? 0) * 100);
+	const payableNow = salaryPreview?.payableSalary ?? previewGross;
+	const expectedNet = payableNow - previewBase - (previewAdvanceDeducted || 0);
+	const netIgnoresHold = heldBack > 0 && Math.abs(previewNet - expectedNet) > 0.5;
+	const esiOnHeldSalary = Boolean(previewDeductions?.esiApplicable) && heldBack > 0;
+
+	const fullSalary = payableNow + heldBack;
+
+	const ledgerRows = [...(bookingLedger?.rows || [])].sort((a, b) =>
+		b.month.localeCompare(a.month),
+	);
 
 	if (!employee && loading) return <Skeleton className="h-96" />;
 	if (!employee) return null;
@@ -529,7 +604,7 @@ export default function EmployeeDetail() {
 			</div>
 
 			{/* Tabs */}
-			<Tabs defaultValue="overview">
+			<Tabs defaultValue="overview" onValueChange={handleTabChange}>
 				<TabsList>
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 					<TabsTrigger value="attendance">Attendance</TabsTrigger>
@@ -537,6 +612,7 @@ export default function EmployeeDetail() {
 					<TabsTrigger value="salary">Salary</TabsTrigger>
 					<TabsTrigger value="advance-summary">Advance Summary</TabsTrigger>
 					<TabsTrigger value="statutory">Statutory</TabsTrigger>
+					<TabsTrigger value="booking-ledger">Booking Ledger</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="overview">
@@ -706,6 +782,109 @@ export default function EmployeeDetail() {
 						</Card>
 					</div>
 				</TabsContent>
+
+				<TabsContent value="booking-ledger" className="space-y-4">
+					{ledgerLoading && !bookingLedger ? (
+						<Skeleton className="h-24" />
+					) : (
+						<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+							<StatCard
+								size="compact"
+								label="Hold balance"
+								value={formatINR(bookingLedger?.currentHoldBalance ?? 0)}
+								valueClassName="text-sm"
+							/>
+							<StatCard
+								size="compact"
+								label="Bonus queue"
+								value={`${bookingLedger?.currentBonusQueueUnits ?? 0} units (${formatINR(bookingLedger?.currentBonusQueueAmount ?? 0)})`}
+								valueClassName="text-sm"
+							/>
+							<StatCard
+								size="compact"
+								label="Next month bonus release"
+								value={formatINR(bookingLedger?.nextMonthBonusRelease ?? 0)}
+								valueClassName="text-sm"
+							/>
+						</div>
+					)}
+
+					{canEdit && (
+						<Button variant="outline" size="sm" onClick={() => setAdjustOpen(true)}>
+							Opening balance
+						</Button>
+					)}
+
+					<Card>
+						<CardHeader className="pb-2">
+							<CardTitle className="text-sm">Monthly ledger</CardTitle>
+						</CardHeader>
+						<CardContent>
+							{ledgerRows.length === 0 ? (
+								<p className="text-sm text-muted-foreground">
+									No ledger entries yet. Entries are created when salary slips are generated.
+								</p>
+							) : (
+								<div className="overflow-x-auto">
+									<table className="w-full text-sm">
+										<thead>
+											<tr className="border-b text-left text-xs text-muted-foreground">
+												<th className="py-2 pr-4 font-medium">Month</th>
+												<th className="py-2 pr-4 font-medium">Type</th>
+												<th className="py-2 pr-4 font-medium">Bookings</th>
+												<th className="py-2 pr-4 font-medium">Salary</th>
+												<th className="py-2 pr-4 font-medium">Hold</th>
+												<th className="py-2 pr-4 font-medium">Hold balance</th>
+												<th className="py-2 pr-4 font-medium">Bonus units</th>
+												<th className="py-2 pr-4 font-medium">Queue after</th>
+												<th className="py-2 font-medium">Note</th>
+											</tr>
+										</thead>
+										<tbody>
+											{ledgerRows.map((row) => (
+												<tr key={row._id} className="border-b last:border-0 align-top">
+													<td className="py-2 pr-4 whitespace-nowrap">{formatMonthLabel(row.month)}</td>
+													<td className="py-2 pr-4">
+														<Badge variant={row.type === "auto" ? "outline" : "warning"} className="capitalize">
+															{row.type}
+														</Badge>
+													</td>
+													<td className="py-2 pr-4">{row.bookingsCount ?? 0}</td>
+													<td className="py-2 pr-4 whitespace-nowrap">
+														{row.monthlySalarySnapshot > 0 ? formatINR(row.monthlySalarySnapshot) : "-"}
+													</td>
+													<td className="py-2 pr-4 whitespace-nowrap">
+														{renderDelta(row.holdAccrued, row.holdReleased, formatINR)}
+													</td>
+													<td className="py-2 pr-4 whitespace-nowrap font-medium">
+														{formatINR(row.holdBalanceAfter ?? 0)}
+													</td>
+													<td className="py-2 pr-4 whitespace-nowrap">
+														{renderDelta(row.bonusUnitsAccrued, row.bonusUnitsReleased)}
+														{row.bonusAmountAccrued > 0 && (
+															<div className="text-xs text-muted-foreground">
+																{formatINR(row.bonusAmountAccrued)} accrued
+															</div>
+														)}
+														{row.bonusAmountReleased > 0 && (
+															<div className="text-xs text-muted-foreground">
+																{formatINR(row.bonusAmountReleased)} released
+															</div>
+														)}
+													</td>
+													<td className="py-2 pr-4 whitespace-nowrap">
+														{row.bonusQueueUnitsAfter ?? 0} units ({formatINR(row.bonusQueueAmountAfter ?? 0)})
+													</td>
+													<td className="py-2 text-muted-foreground">{row.note || "-"}</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				</TabsContent>
 			</Tabs>
 
 			{/* Dialogs */}
@@ -721,6 +900,49 @@ export default function EmployeeDetail() {
 				onOpenChange={setPayrollPreviewOpen}
 				employeeId={id}
 			/>
+
+			<Dialog open={adjustOpen} onOpenChange={setAdjustOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Opening balance</DialogTitle>
+					</DialogHeader>
+					<div className="grid grid-cols-2 gap-3">
+						{[
+							["month", "Month", "month", "YYYY-MM"],
+							["holdDelta", "Hold amount", "number", "e.g. 20000"],
+							["bonusUnitsDelta", "Bonus units", "number", "e.g. 3"],
+							["bonusPerUnit", "Bonus per unit", "number", "e.g. 10000"],
+						].map(([key, label, type, placeholder]) => (
+							<div key={key} className="space-y-1.5">
+								<Label>{label}</Label>
+								<Input
+									type={type}
+									min={type === "number" ? 0 : undefined}
+									placeholder={placeholder}
+									value={adjustForm[key]}
+									onChange={(e) => setAdjustForm((p) => ({ ...p, [key]: e.target.value }))}
+								/>
+							</div>
+						))}
+						<div className="col-span-2 space-y-1.5">
+							<Label>Note</Label>
+							<Input
+								placeholder="e.g. Jan+Feb held-back opening"
+								value={adjustForm.note}
+								onChange={(e) => setAdjustForm((p) => ({ ...p, note: e.target.value }))}
+							/>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setAdjustOpen(false)}>
+							Cancel
+						</Button>
+						<Button onClick={handleAdjustLedger} disabled={ledgerLoading}>
+							Save
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			<Dialog open={assignShiftDialogOpen} onOpenChange={setAssignShiftDialogOpen}>
 				<DialogContent>
@@ -801,6 +1023,17 @@ export default function EmployeeDetail() {
 							</p>
 						</div>
 
+						<div className="space-y-1.5">
+							<Label>Bookings count (optional)</Label>
+							<Input
+								type="number"
+								min={0}
+								placeholder="Leave empty to use system bookings"
+								value={bookingsOverride}
+								onChange={(e) => setBookingsOverride(e.target.value)}
+							/>
+						</div>
+
 						<Button variant="outline" className="w-full" onClick={handlePreviewSalary} disabled={previewing}>
 							{previewing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
 							{salaryPreview ? "Refresh preview" : "Preview salary slip"}
@@ -815,10 +1048,17 @@ export default function EmployeeDetail() {
 										["HRA", salaryPreview.earnings?.hra],
 										["Allowances", salaryPreview.earnings?.allowances],
 										["Bonus", salaryPreview.earnings?.bonus],
+										["Held-back release", salaryPreview.heldBackSalary],
+										["Booking bonus", salaryPreview.bookingBonus],
 										["Overtime", salaryPreview.earnings?.overtimePay],
 									].map(([label, amount]) => (
 										<div key={label} className="flex justify-between pl-3">
-											<span className="text-muted-foreground">{label}</span>
+											<span className="text-muted-foreground">
+												{label}
+												{label === "Bonus" && salaryPreview.bonusSource === "replaced-by-booking-rule" && (
+													<span className="text-xs ml-1">(replaced by booking rule)</span>
+												)}
+											</span>
 											<span className={amount > 0 ? "text-green-600" : "text-muted-foreground"}>
 												{amount > 0 ? "+ " : ""}
 												{formatINR(amount ?? 0)}
@@ -837,6 +1077,9 @@ export default function EmployeeDetail() {
 												{label}
 												{label === "ESI" && !previewDeductions.esiApplicable && (
 													<span className="text-xs ml-1">(not applicable)</span>
+												)}
+												{label === "ESI" && esiOnHeldSalary && (
+													<span className="text-xs ml-1 text-amber-600">(calculated on held salary)</span>
 												)}
 											</span>
 											<span className={amount > 0 ? "text-red-600" : "text-muted-foreground"}>
@@ -921,6 +1164,27 @@ export default function EmployeeDetail() {
 									)}
 								</div>
 
+								{heldBack > 0 && (
+									<div className="rounded-md border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20 p-3 space-y-1">
+										<p className="font-semibold text-amber-700 dark:text-amber-400">Booking rule applied</p>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">Gross salary</span>
+											<span>{formatINR(fullSalary)}</span>
+										</div>
+										<div className="flex justify-between">
+											<span className="text-muted-foreground">Held back ({holdPercentLabel}%)</span>
+											<span className="text-red-600">− {formatINR(heldBack)}</span>
+										</div>
+										<div className="flex justify-between font-medium border-t pt-1">
+											<span>Payable now</span>
+											<span>{formatINR(payableNow)}</span>
+										</div>
+										<p className="text-xs text-muted-foreground">
+											Bookings: {bookingRule.bookingsCount} · Hold balance: {formatINR(bookingRule.holdBalanceAfter || 0)}
+										</p>
+									</div>
+								)}
+
 								<div className="rounded-md border p-3 space-y-1">
 									<div className="flex justify-between text-xs text-muted-foreground">
 										<span>Gross − base deductions − advance</span>
@@ -932,6 +1196,11 @@ export default function EmployeeDetail() {
 										<span>Net payable</span>
 										<span className="text-primary">{formatINR(previewNet)}</span>
 									</div>
+									{/* {netIgnoresHold && (
+										<p className="text-xs text-amber-600">
+											Net is calculated on full gross. With the hold applied it would be {formatINR(expectedNet)}. Please verify before generating.
+										</p>
+									)} */}
 								</div>
 
 								{isPreviewStale && (
