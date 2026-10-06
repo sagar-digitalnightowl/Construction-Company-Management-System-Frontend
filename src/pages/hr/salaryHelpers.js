@@ -75,6 +75,7 @@ export const EARNING_LABELS = {
 	hazardousAllowance: "Hazardous Allowance",
 	overtimePay: "Overtime Pay",
 	bonus: "Bonus",
+	heldBackSalary: "Held-back Release",
 	performanceBonus: "Performance Bonus",
 	safetyBonus: "Safety Bonus",
 	otherEarnings: "Other Earnings",
@@ -92,6 +93,7 @@ export const DEDUCTION_LABELS = {
 	labourWelfareFund: "Labour Welfare Fund",
 	uniformDeduction: "Uniform Deduction",
 	accommodationDeduction: "Accommodation Deduction",
+	heldBackSalaryDeduction: "Held Back (Booking Rule)",
 	otherDeductions: "Other Deductions",
 };
 
