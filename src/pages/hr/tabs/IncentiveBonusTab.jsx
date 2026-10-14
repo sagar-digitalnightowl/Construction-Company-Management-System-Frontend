@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { toast } from "sonner";
-import { Eye, PlusCircle, CalendarCheck, Briefcase, Users, FolderKanban, Plus, Pencil, Loader2, UserCheck } from "lucide-react";
+import { Eye, PlusCircle, CalendarCheck, Briefcase, Users, FolderKanban, Plus, Pencil, Loader2, UserCheck, Clock, CheckCircle, DollarSign } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,10 +53,10 @@ const PAYMENT_TYPES = [
 const CLEARED_OPTIONS = ["pending", "cleared", "uncleared"];
 const PAYMENT_MODES = ["Cash", "Cheque", "Bank Transfer", "Card", "NEFT", "RTGS", "Demand Draft"];
 
-const STATUS_STYLES = {
-	pending: "bg-amber-100 text-amber-800",
-	approved: "bg-blue-100 text-blue-800",
-	paid: "bg-emerald-100 text-emerald-800",
+const STATUS_ICONS = {
+	pending: { icon: Clock, className: "text-yellow-500" },
+	approved: { icon: CheckCircle, className: "text-blue-500" },
+	paid: { icon: DollarSign, className: "text-emerald-500" },
 };
 
 const ACTION_TITLES = {
@@ -125,11 +126,23 @@ const formatRole = (role) =>
 		.join(" ");
 
 function StatusBadge({ status }) {
-	const s = String(status || "").toLowerCase();
+	const s = String(status || "pending").toLowerCase();
+	const config = STATUS_ICONS[s] || STATUS_ICONS.pending;
+	const IconComponent = config.icon;
+	
 	return (
-		<Badge className={`capitalize font-medium ${STATUS_STYLES[s] || ""}`} variant="secondary">
-			{s || "—"}
-		</Badge>
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<span className="inline-flex items-center cursor-help">
+						<IconComponent className={`h-5 w-5 ${config.className}`} />
+					</span>
+				</TooltipTrigger>
+				<TooltipContent>
+					<p className="capitalize">{s}</p>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }
 
@@ -174,7 +187,7 @@ export function IncentiveBonusTab({
 
 	// ─── Handlers ───
 	const buildParams = (f, page = 1) => {
-		const params = { page, limit: pagination?.limit || 10 };
+		const params = { page, limit: pagination?.limit || 12 };
 
 		if (f.payoutStatus !== "all") params.payoutStatus = f.payoutStatus;
 		if (f.paymentType !== "all") params.paymentType = f.paymentType;
@@ -369,32 +382,53 @@ export function IncentiveBonusTab({
 	};
 
 	const renderActions = (inc) => {
-		const btn = "h-8 px-2";
 		const status = statusOf(inc);
 		return (
 			<div className="flex justify-end gap-1">
-				<Button size="sm" variant="outline" className={btn} onClick={() => handleOpenDetail(inc)}>
-					<Eye className="h-4 w-4 mr-1" /> View
-				</Button>
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="icon" variant="outline" className="h-8 w-8" onClick={() => handleOpenDetail(inc)}>
+								<Eye className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent><p>View</p></TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+				
 				{canEdit && status !== "paid" && (
-					<Button
-						size="sm"
-						variant="outline"
-						className={btn}
-						onClick={() => openAction("extra", inc)}
-					>
-						{totalExtra(inc) > 0 ? (
-							<Pencil className="h-4 w-4 mr-1" />
-						) : (
-							<PlusCircle className="h-4 w-4 mr-1" />
-						)}
-						Extra
-					</Button>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									size="icon"
+									variant="outline"
+									className="h-8 w-8"
+									onClick={() => openAction("extra", inc)}
+								>
+									{totalExtra(inc) > 0 ? (
+										<Pencil className="h-4 w-4" />
+									) : (
+										<PlusCircle className="h-4 w-4" />
+									)}
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent><p>Extra</p></TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				)}
+				
 				{canEdit && status === "pending" && (
-					<Button size="sm" variant="outline" className={btn} onClick={() => openAction("approve", inc)}>
-						<CalendarCheck className="h-4 w-4 mr-1" /> Approve
-					</Button>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="icon" variant="outline" className="h-8 w-8" onClick={() => openAction("approve", inc)}>
+									<CalendarCheck className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent><p>Approve</p></TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				)}
 			</div>
 		);

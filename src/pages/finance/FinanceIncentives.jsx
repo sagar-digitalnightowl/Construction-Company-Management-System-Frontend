@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Eye, BadgeCheck, Pencil, Briefcase, Users, FolderKanban } from "lucide-react";
+import { Eye, BadgeCheck, Pencil, Briefcase, Users, FolderKanban, Clock, CheckCircle, DollarSign } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,10 +48,10 @@ const PAYMENT_TYPE_LABELS = {
 	NONE: "None",
 };
 
-const STATUS_STYLES = {
-	pending: "bg-amber-100 text-amber-800",
-	approved: "bg-blue-100 text-blue-800",
-	paid: "bg-emerald-100 text-emerald-800",
+const STATUS_ICONS = {
+	pending: { icon: Clock, className: "text-yellow-500" },
+	approved: { icon: CheckCircle, className: "text-blue-500" },
+	paid: { icon: DollarSign, className: "text-emerald-500" },
 };
 
 const breakupOf = (s, status) =>
@@ -91,11 +92,23 @@ const totalFinal = (inc) => ROLES.reduce((sum, r) => sum + roleAmount(inc, r.key
 const statusOf = (inc) => String(inc?.payoutStatus || "pending").toLowerCase();
 
 function StatusBadge({ status }) {
-	const s = String(status || "").toLowerCase();
+	const s = String(status || "pending").toLowerCase();
+	const config = STATUS_ICONS[s] || STATUS_ICONS.pending;
+	const IconComponent = config.icon;
+	
 	return (
-		<Badge className={`capitalize font-medium ${STATUS_STYLES[s] || ""}`} variant="secondary">
-			{s || "—"}
-		</Badge>
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<span className="inline-flex items-center cursor-help">
+						<IconComponent className={`h-5 w-5 ${config.className}`} />
+					</span>
+				</TooltipTrigger>
+				<TooltipContent>
+					<p className="capitalize">{s}</p>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }
 
@@ -134,7 +147,7 @@ export function FinanceIncentives() {
 
 	// ─── Handlers ───
 	const buildParams = (f, page = 1) => {
-		const params = { page, limit: pagination?.limit || 10 };
+		const params = { page, limit: pagination?.limit || 12 };
 		if (f.payoutStatus !== "all") params.payoutStatus = f.payoutStatus;
 		if (f.payoutMonth) params.payoutMonth = f.payoutMonth;
 		return params;
@@ -235,28 +248,49 @@ export function FinanceIncentives() {
 	};
 
 	const renderActions = (inc) => {
-		const btn = "h-8 px-2";
 		const status = statusOf(inc);
 		return (
 			<div className="flex justify-end gap-1">
-				<Button size="sm" variant="outline" className={btn} onClick={() => handleOpenDetail(inc)}>
-					<Eye className="h-4 w-4 mr-1" /> View
-				</Button>
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="icon" variant="outline" className="h-8 w-8" onClick={() => handleOpenDetail(inc)}>
+								<Eye className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent><p>View</p></TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+				
 				{canPay && status === "approved" && (
-					<Button size="sm" variant="outline" className={btn} onClick={() => openAction("paid", inc)}>
-						<BadgeCheck className="h-4 w-4 mr-1" /> Pay
-					</Button>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="icon" variant="outline" className="h-8 w-8" onClick={() => openAction("paid", inc)}>
+									<BadgeCheck className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent><p>Pay</p></TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				)}
+				
 				{canPay && status === "paid" && (
-					<Button
-						size="sm"
-						variant="ghost"
-						className={btn}
-						onClick={() => openAction("meta", inc)}
-					>
-						<Pencil className="h-4 w-4 mr-1" />
-						Edit Payment
-					</Button>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									size="icon"
+									variant="ghost"
+									className="h-8 w-8"
+									onClick={() => openAction("meta", inc)}
+								>
+									<Pencil className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent><p>Edit Payment</p></TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				)}
 			</div>
 		);

@@ -38,7 +38,7 @@ export function FinancePayrollApprovals() {
 
 	// Naya State: Pagination ke liye
 	const [currentPage, setCurrentPage] = useState(1);
-	const limit = 10;
+	const limit = 12;
 
 	// Fetch data based on active tab and currentPage
 	useEffect(() => {

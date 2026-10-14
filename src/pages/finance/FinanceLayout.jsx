@@ -11,7 +11,7 @@ const pageTitles = {
 	"/finance-milestones-summary": "Milestone Payment Summary",
 	"/finance-milestones-buyers": "Milestone Buyers",
 	"/finance-advance-salary": "Advance Salary",
-	"/finance-incentives": "Incentive & Bonus",
+	"/finance-incentives": "Incentive",
 	"/finance-payroll": "Payroll Approvals",
 	"/finance-expenses": "Expense Approvals",
 	"/finance-reminders": "Reminder Logs",

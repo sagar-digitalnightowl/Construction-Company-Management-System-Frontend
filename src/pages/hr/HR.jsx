@@ -52,7 +52,7 @@ const TAB_HEADERS = {
 	"advance-salary": { title: "Advance Salary", desc: "Approve, disburse and track employee salary advances." },
 	"expense-approvals": { title: "Expense Approvals", desc: "Review and approve HR expenses." },
 	shifts: { title: "Shifts", desc: "Manage employee shifts and timings." },
-	"incentives-bonus": { title: "Incentive & Bonus", desc: "Review, adjust and approve BM / TM / PM incentives." },
+	"incentives-bonus": { title: "Bonus", desc: "Review, adjust and approve BM / TM / PM incentives." },
 	"labor-wages": { title: "Labor Wages", desc: "Manage labor wages and payments." },
 	labors: { title: "Labors", desc: "Manage daily labors and attendance." },
 	announcements: { title: "Announcements", desc: "Manage company-wide announcements." },
@@ -161,10 +161,10 @@ export default function HR() {
 				if (!salarySlips?.length) fetchMySalarySlips();
 				break;
 			case "advance-salary":
-				if (!advances?.length) fetchAdvances({ page: 1, limit: 10 });
+				if (!advances?.length) fetchAdvances({ page: 1, limit: 12 });
 				break;
 			case "incentives-bonus":
-				fetchIncentives({ page: 1, limit: 10, payoutStatus: "pending" });
+				fetchIncentives({ page: 1, limit: 12, payoutStatus: "pending" });
 				fetchIncentiveSummary();
 				break;
 			case "shifts":
@@ -320,7 +320,7 @@ export default function HR() {
 							</TabsTrigger>
 							<TabsTrigger value="incentives-bonus">
 								<Gift className="h-3.5 w-3.5 mr-1.5" />
-								Incentive & Bonus
+								Bonus
 							</TabsTrigger>
 							<TabsTrigger value="expense-approvals">
 								<Receipt className="h-3.5 w-3.5 mr-1.5" />

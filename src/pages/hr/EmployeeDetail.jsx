@@ -458,6 +458,8 @@ export default function EmployeeDetail() {
 				{/* Actions */}
 				{canEdit && (
 					<div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full lg:w-auto">
+						{/* COMMENTED OUT: Check In, Check Out, Assign Shift buttons */}
+						{/* 
 						<Button
 							variant="outline"
 							size="sm"
@@ -487,6 +489,7 @@ export default function EmployeeDetail() {
 							<Clock className="h-4 w-4 mr-1" />
 							Assign Shift
 						</Button>
+						*/}
 
 						<Button
 							variant="outline"
@@ -782,16 +785,19 @@ export default function EmployeeDetail() {
 							</p>
 						</div>
 
-						<div className="space-y-1.5">
-							<Label>Bookings count (optional)</Label>
-							<Input
-								type="number"
-								min={0}
-								placeholder="Leave empty to use system bookings"
-								value={bookingsOverride}
-								onChange={(e) => setBookingsOverride(e.target.value)}
-							/>
-						</div>
+						{/* COMMENTED OUT: Bookings count field */}
+					{/* 
+					<div className="space-y-1.5">
+						<Label>Bookings count (optional)</Label>
+						<Input
+							type="number"
+							min={0}
+							placeholder="Leave empty to use system bookings"
+							value={bookingsOverride}
+							onChange={(e) => setBookingsOverride(e.target.value)}
+						/>
+					</div>
+					*/}
 
 						<Button variant="outline" className="w-full" onClick={handlePreviewSalary} disabled={previewing}>
 							{previewing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

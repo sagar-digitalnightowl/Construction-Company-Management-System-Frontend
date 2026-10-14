@@ -49,7 +49,7 @@ export default function Users() {
     const [users, setUsers] = useState([]);
     const [roleStats, setRoleStats] = useState({}); // 🆕 Backend Role Stats
     const [page, setPage] = useState(1);
-    const [limit] = useState(10);
+    const [limit] = useState(12);
     const [pagination, setPagination] = useState({ total: 0, pages: 1 });
 
     const [otpStep, setOtpStep] = useState(null);

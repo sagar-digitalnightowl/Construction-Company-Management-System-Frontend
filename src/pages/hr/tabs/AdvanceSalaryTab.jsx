@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Search, Eye, Check, X, CalendarClock } from "lucide-react";
+import { Search, Eye, Check, X, CalendarClock, Ban, Clock, CheckCircle, XCircle, BanknoteIcon, Loader2, Wallet, DollarSign, AlertCircle, RefreshCw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,20 @@ const STATUS_OPTIONS = [
 	"rejected",
 	"cancelled",
 ];
+
+const STATUS_ICONS = {
+	pending: { icon: Clock, className: "text-yellow-500" },
+	approved: { icon: CheckCircle, className: "text-green-500" },
+	disbursed: { icon: BanknoteIcon, className: "text-cyan-500" },
+	recovering: { icon: Loader2, className: "text-orange-500" },
+	closed: { icon: CheckCircle, className: "text-gray-500" },
+	rejected: { icon: XCircle, className: "text-red-500" },
+	cancelled: { icon: Ban, className: "text-gray-400" },
+	deducted: { icon: DollarSign, className: "text-indigo-500" },
+	paid: { icon: Wallet, className: "text-emerald-500" },
+	waived: { icon: AlertCircle, className: "text-purple-500" },
+	skipped: { icon: RefreshCw, className: "text-slate-500" },
+};
 
 const STATUS_STYLES = {
 	pending: "bg-amber-100 text-amber-800",
@@ -102,10 +117,23 @@ const outstandingOf = (adv) =>
 	);
 
 function StatusBadge({ status }) {
+	const s = String(status || "pending").toLowerCase();
+	const config = STATUS_ICONS[s] || STATUS_ICONS.pending;
+	const IconComponent = config.icon;
+	
 	return (
-		<Badge className={`capitalize font-medium ${STATUS_STYLES[status] || ""}`} variant="secondary">
-			{status}
-		</Badge>
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<span className="inline-flex items-center cursor-help">
+						<IconComponent className={`h-5 w-5 ${config.className}`} />
+					</span>
+				</TooltipTrigger>
+				<TooltipContent>
+					<p className="capitalize">{s}</p>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }
 
@@ -140,7 +168,7 @@ export function AdvanceSalaryTab({ advances = [], pagination, onRefresh, canEdit
 	// ─── Handlers ───
 	const buildParams = (f, page = 1) => {
 
-		const params = { page, limit: pagination?.limit || 10 };
+		const params = { page, limit: pagination?.limit || 12 };
 		if (f.status && f.status !== "all") params.status = f.status;
 		if (f.search.trim()) params.search = f.search.trim();
 		if (f.outstandingOnly) params.outstandingOnly = true;
@@ -253,33 +281,69 @@ export function AdvanceSalaryTab({ advances = [], pagination, onRefresh, canEdit
 
 	const renderActions = (adv) => {
 		if (!canEdit) return null;
-		const btn = "h-8 px-2";
 		return (
 			<div className="flex justify-end gap-1">
-				<Button size="sm" variant="outline" className={btn} onClick={() => handleOpenDetail(adv)}>
-					<Eye className="h-4 w-4 mr-1" /> View
-				</Button>
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="icon" variant="outline" className="h-8 w-8" onClick={() => handleOpenDetail(adv)}>
+								<Eye className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent><p>View</p></TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+				
 				{adv.status === "pending" && (
 					<>
-						<Button size="sm" variant="outline" className={btn} onClick={() => openAction("approve", adv)}>
-							<Check className="h-4 w-4 mr-1" /> Approve
-						</Button>
-						<Button size="sm" variant="outline" className={`${btn} text-red-600`} onClick={() => openAction("reject", adv)}>
-							<X className="h-4 w-4 mr-1" /> Reject
-						</Button>
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button size="icon" variant="outline" className="h-8 w-8" onClick={() => openAction("approve", adv)}>
+										<Check className="h-4 w-4" />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent><p>Approve</p></TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+						
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button size="icon" variant="outline" className="h-8 w-8 text-red-600" onClick={() => openAction("reject", adv)}>
+										<X className="h-4 w-4" />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent><p>Reject</p></TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
 					</>
 				)}
+				
 				{adv.status === "approved" && (
-					<>
-						<Button size="sm" variant="outline" className={`${btn} text-red-600`} onClick={() => openAction("cancel", adv)}>
-							<X className="h-4 w-4 mr-1" /> Cancel
-						</Button>
-					</>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="icon" variant="outline" className="h-8 w-8 text-red-600" onClick={() => openAction("cancel", adv)}>
+									<Ban className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent><p>Cancel</p></TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				)}
+				
 				{["disbursed", "recovering"].includes(adv.status) && (
-					<Button size="sm" variant="outline" className={btn} onClick={() => openAction("revise", adv)}>
-						<CalendarClock className="h-4 w-4 mr-1" /> Revise
-					</Button>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="icon" variant="outline" className="h-8 w-8" onClick={() => openAction("revise", adv)}>
+									<CalendarClock className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent><p>Revise</p></TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				)}
 			</div>
 		);

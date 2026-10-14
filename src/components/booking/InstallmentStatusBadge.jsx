@@ -1,18 +1,30 @@
-// src/components/booking/InstallmentStatusBadge.jsx
-import React from "react";
-import { Badge } from "@/components/ui/badge";
+import { Clock, CheckCircle, DollarSign, AlertTriangle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const config = {
-  pending: { label: "Pending", variant: "secondary" },
-  partial: { label: "Partial", variant: "warning" },
-  paid: { label: "Paid", variant: "success" },
-  overdue: { label: "Overdue", variant: "destructive" },
+const STATUS_ICONS = {
+	pending: { icon: Clock, className: "text-yellow-500" },
+	partial: { icon: DollarSign, className: "text-blue-500" },
+	paid: { icon: CheckCircle, className: "text-emerald-500" },
+	overdue: { icon: AlertTriangle, className: "text-red-600" },
 };
 
 export function InstallmentStatusBadge({ status }) {
-  const { label, variant } = config[status] || {
-    label: status,
-    variant: "secondary",
-  };
-  return <Badge variant={variant}>{label}</Badge>;
+	const s = String(status || "pending").toLowerCase();
+	const config = STATUS_ICONS[s] || STATUS_ICONS.pending;
+	const IconComponent = config.icon;
+	
+	return (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<span className="inline-flex items-center cursor-help">
+						<IconComponent className={`h-5 w-5 ${config.className}`} />
+					</span>
+				</TooltipTrigger>
+				<TooltipContent>
+					<p className="capitalize">{s}</p>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	);
 }
