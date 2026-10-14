@@ -1,22 +1,29 @@
+import { Calendar, PackageCheck, Ban } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-import React from "react";
-import { Badge } from "@/components/ui/badge";
-
-const statusConfig = {
-  booked: { label: "Booked", variant: "default" },
-  sold: { label: "Sold", variant: "success" },
-  cancelled: { label: "Cancelled", variant: "destructive" },
+const STATUS_ICONS = {
+	booked: { icon: Calendar, className: "text-blue-500" },
+	sold: { icon: PackageCheck, className: "text-green-600" },
+	cancelled: { icon: Ban, className: "text-gray-400" },
 };
 
 export function BookingStatusBadge({ status }) {
-  const statusInfo = statusConfig[status] || {
-    label: status,
-    variant: "secondary",
-  };
-
-  return (
-    <Badge variant={statusInfo.variant} className={'max-h-min text-nowrap'}>
-      {statusInfo.label}
-    </Badge>
-  );
+	const s = String(status || "booked").toLowerCase();
+	const config = STATUS_ICONS[s] || STATUS_ICONS.booked;
+	const IconComponent = config.icon;
+	
+	return (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<span className="inline-flex items-center cursor-help">
+						<IconComponent className={`h-5 w-5 ${config.className}`} />
+					</span>
+				</TooltipTrigger>
+				<TooltipContent>
+					<p className="capitalize">{s}</p>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	);
 }

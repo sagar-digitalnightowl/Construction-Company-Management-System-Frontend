@@ -42,7 +42,7 @@ export default function Finance() {
 						<TabsTrigger value="due-installments">WhatsApp Reminders</TabsTrigger>
 						<TabsTrigger value="milestones">Milestones</TabsTrigger>
 						<TabsTrigger value="advance-salary">Advance Salary</TabsTrigger>
-						<TabsTrigger value="incentives">Incentive & Bonus</TabsTrigger>
+						<TabsTrigger value="incentives">Incentive</TabsTrigger>
 						<TabsTrigger value="payroll">Payroll Approvals</TabsTrigger>
 						<TabsTrigger value="expenses">Expense Approvals</TabsTrigger>
 						<TabsTrigger value="reminders">Reminder Logs</TabsTrigger>
