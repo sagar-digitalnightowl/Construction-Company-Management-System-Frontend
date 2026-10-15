@@ -255,4 +255,27 @@ export const hrApi = {
 	// Pending Payments (Finance)
 	getPendingPayments: (params) =>
 		api.get("/hr/wallet/pending-payments", { params }),
+
+	// ==================== MONTHLY WORKING DAYS ====================
+	
+	// Save/Update single employee working days entry
+	saveWorkingDays: (data) => api.post("/hr/salary/working-days", data),
+	
+	// Bulk save working days for multiple employees
+	bulkSaveWorkingDays: (data) => api.post("/hr/salary/working-days/bulk", data),
+	
+	// Get working days list for a month (with filters)
+	getWorkingDaysList: (params) => api.get("/hr/salary/working-days", { params }),
+	
+	// Get single employee's working days for specific month
+	getWorkingDaysEntry: (employeeId, month) => 
+		api.get(`/hr/salary/working-days/${employeeId}/${month}`),
+	
+	// Delete working days entry
+	deleteWorkingDaysEntry: (employeeId, month) => 
+		api.delete(`/hr/salary/working-days/${employeeId}/${month}`),
+	
+	// Lock/Unlock working days entry
+	lockWorkingDaysEntry: (employeeId, month, data) => 
+		api.patch(`/hr/salary/working-days/${employeeId}/${month}/lock`, data),
 };

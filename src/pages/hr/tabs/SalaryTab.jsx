@@ -18,13 +18,15 @@ import {
 } from "@/components/ui/select";
 import {
 	Download, Send, FileSpreadsheet, RefreshCcw, Eye, Loader2,
-	FileText, Users, AlertCircle, PlayCircle
+	FileText, Users, AlertCircle, PlayCircle, AlertTriangle
 } from "lucide-react";
 import { useHR } from "@/hooks/useHR";
 import { formatDate } from "@/lib/helpers";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function SalaryTab() {
+	const navigate = useNavigate();
 	const {
 		companySalarySlips,
 		fetchAllSalarySlips,
@@ -37,7 +39,8 @@ export function SalaryTab() {
 		generateBulkSalarySlips,
 		departments,        // ✅ Real departments from API
 		fetchDepartments,   // ✅ Fetch departments function
-		loading
+		loading,
+		fetchWorkingDaysList,
 	} = useHR();
 
 	// ---- State ----
@@ -76,6 +79,11 @@ export function SalaryTab() {
 
 	// PDF Download Loading
 	const [downloadingId, setDownloadingId] = useState(null);
+	
+	// Working Days Check
+	const [bulkWarningDialogOpen, setBulkWarningDialogOpen] = useState(false);
+	const [bulkWarningData, setBulkWarningData] = useState(null);
+	const [proceedWithBulk, setProceedWithBulk] = useState(false);
 
 	const months = [
 		"January", "February", "March", "April", "May", "June",
@@ -169,6 +177,44 @@ export function SalaryTab() {
 	};
 
 	const handleBulkGenerate = async () => {
+		// Check for working days entries if not already proceeded
+		if (!proceedWithBulk) {
+			const monthNames = [
+				"January", "February", "March", "April", "May", "June",
+				"July", "August", "September", "October", "November", "December",
+			];
+			const monthIndex = monthNames.indexOf(bulkMonth);
+			const monthStr = `${bulkYear}-${String(monthIndex + 1).padStart(2, "0")}`;
+			
+			// Fetch working days list to check coverage
+			const params = {
+				month: monthStr,
+				includeMissing: true,
+			};
+			
+			if (bulkDepartment && bulkDepartment !== "all") {
+				params.departmentId = bulkDepartment;
+			}
+			
+			const workingDaysData = await fetchWorkingDaysList(params);
+			
+			if (workingDaysData && workingDaysData.withoutEntry > 0) {
+				// Some employees don't have entries
+				setBulkWarningData({
+					month: bulkMonth,
+					year: bulkYear,
+					total: workingDaysData.total,
+					withEntry: workingDaysData.withEntry,
+					withoutEntry: workingDaysData.withoutEntry,
+				});
+				setBulkWarningDialogOpen(true);
+				return;
+			}
+		}
+		
+		// Reset proceed flag
+		setProceedWithBulk(false);
+		
 		const data = {
 			month: bulkMonth,
 			year: parseInt(bulkYear),
@@ -186,6 +232,14 @@ export function SalaryTab() {
 				fetchAllSalarySlips({ month: formattedMonth, page: 1, limit: 50 });
 			}
 		}
+	};
+	
+	const handleContinueBulkWithoutEntries = () => {
+		setProceedWithBulk(true);
+		setBulkWarningDialogOpen(false);
+		setTimeout(() => {
+			handleBulkGenerate();
+		}, 100);
 	};
 
 	const handleUpdateStatus = async () => {
@@ -646,6 +700,77 @@ export function SalaryTab() {
 							) : (
 								"Update Status"
 							)}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* ==================== BULK GENERATE WARNING DIALOG ==================== */}
+			<Dialog open={bulkWarningDialogOpen} onOpenChange={setBulkWarningDialogOpen}>
+				<DialogContent className="sm:max-w-[500px]">
+					<DialogHeader>
+						<div className="flex items-center gap-2 mb-2">
+							<AlertTriangle className="h-6 w-6 text-amber-500" />
+							<DialogTitle>Incomplete Working Days Entries</DialogTitle>
+						</div>
+						<DialogDescription>
+							Some employees don't have working days entries for the selected month.
+						</DialogDescription>
+					</DialogHeader>
+
+					<div className="space-y-4 py-4">
+						{bulkWarningData && (
+							<>
+								{/* Summary Cards */}
+								<div className="grid grid-cols-3 gap-3">
+									<div className="bg-muted p-3 rounded-lg text-center">
+										<div className="text-2xl font-bold">{bulkWarningData.total}</div>
+										<p className="text-xs text-muted-foreground">Total</p>
+									</div>
+									<div className="bg-green-50 p-3 rounded-lg text-center border border-green-200">
+										<div className="text-2xl font-bold text-green-600">{bulkWarningData.withEntry}</div>
+										<p className="text-xs text-muted-foreground">With Entries</p>
+									</div>
+									<div className="bg-amber-50 p-3 rounded-lg text-center border border-amber-200">
+										<div className="text-2xl font-bold text-amber-600">{bulkWarningData.withoutEntry}</div>
+										<p className="text-xs text-muted-foreground">Missing</p>
+									</div>
+								</div>
+
+								{/* Warning Message */}
+								<div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+									<AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+									<div className="space-y-1">
+										<p className="font-medium">
+											{bulkWarningData.withoutEntry} employee(s) don't have working days entries
+										</p>
+										<p className="text-amber-800">
+											Their salary slips will be generated using fallback calculations (attendance or default divisor), which may not be accurate.
+										</p>
+									</div>
+								</div>
+
+								{/* Recommendation */}
+								<div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+									<p className="text-sm text-blue-900">
+										<strong className="font-semibold">Recommendation:</strong> Enter working days for all employees first for accurate calculations.
+									</p>
+								</div>
+							</>
+						)}
+					</div>
+
+					<DialogFooter className="flex-col sm:flex-row gap-2">
+						<Button
+							variant="outline"
+							onClick={() => navigate('/hr/salary/working-days')}
+							className="w-full sm:w-auto"
+						>
+							<AlertCircle className="mr-2 h-4 w-4" />
+							Go to Working Days
+						</Button>
+						<Button onClick={handleContinueBulkWithoutEntries} variant="secondary" className="w-full sm:w-auto">
+							Generate Anyway
 						</Button>
 					</DialogFooter>
 				</DialogContent>

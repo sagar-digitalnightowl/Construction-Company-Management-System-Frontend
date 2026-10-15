@@ -83,6 +83,7 @@ import { EmployeeAdvanceSalary } from "./pages/hr/tabs/EmployeeAdvanceSalary";
 import { FinanceAdvanceSalary } from "./pages/finance/FinanceAdvanceSalary";
 import { FinanceIncentives } from "./pages/finance/FinanceIncentives";
 import IncentiveConfig from "./pages/IncentiveConfig";
+import { WorkingDays } from "./pages/hr/WorkingDays";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -172,6 +173,9 @@ export default function App() {
 
 					<Route path="/hr/employees/:id" element={<EmployeeDetail />} />
 					<Route path="/hr/labors/:id" element={<LaborDetail />} />
+					
+					{/* Working Days Page */}
+					<Route path="/hr/salary/working-days" element={<WorkingDays />} />
 
 					<Route path="/leaves" element={<EmployeeDashboard />} />
 
