@@ -78,6 +78,18 @@ export const useHR = () => {
 	const [companySalarySlips, setCompanySalarySlips] = useState([]);
 	const [myPayrollBatches, setMyPayrollBatches] = useState([]);
 
+	// ==================== MONTHLY WORKING DAYS ====================
+	
+	const [workingDaysList, setWorkingDaysList] = useState({
+		month: null,
+		total: 0,
+		withEntry: 0,
+		withoutEntry: 0,
+		rows: [],
+	});
+	const [workingDaysEntry, setWorkingDaysEntry] = useState(null);
+	const [workingDaysLoading, setWorkingDaysLoading] = useState(false);
+
 	// ==================== ADVANCE SALARY ====================
 
 	const [advances, setAdvances] = useState([]);
@@ -1151,6 +1163,100 @@ export const useHR = () => {
 			setLoading(false);
 		}
 	}, []);
+
+	// ==================== MONTHLY WORKING DAYS ====================
+	
+	const fetchWorkingDaysList = useCallback(async (params = {}) => {
+		setWorkingDaysLoading(true);
+		try {
+			const res = await hrApi.getWorkingDaysList(params);
+			setWorkingDaysList(res.data?.data || {
+				month: null,
+				total: 0,
+				withEntry: 0,
+				withoutEntry: 0,
+				rows: [],
+			});
+			return res.data?.data;
+		} catch (err) {
+			toast.error(err.response?.data?.message || "Failed to load working days list");
+			return null;
+		} finally {
+			setWorkingDaysLoading(false);
+		}
+	}, []);
+
+	const fetchWorkingDaysEntry = useCallback(async (employeeId, month) => {
+		setWorkingDaysLoading(true);
+		try {
+			const res = await hrApi.getWorkingDaysEntry(employeeId, month);
+			setWorkingDaysEntry(res.data?.data);
+			return res.data?.data;
+		} catch (err) {
+			// 404 is expected when no entry exists
+			if (err.response?.status === 404) {
+				setWorkingDaysEntry(null);
+				return null;
+			}
+			toast.error("Failed to load working days entry");
+			return null;
+		} finally {
+			setWorkingDaysLoading(false);
+		}
+	}, []);
+
+	const saveWorkingDays = async (data) => {
+		try {
+			const res = await hrApi.saveWorkingDays(data);
+			toast.success("Working days saved successfully");
+			return res.data?.data;
+		} catch (err) {
+			toast.error(err.response?.data?.message || "Failed to save working days");
+			return null;
+		}
+	};
+
+	const bulkSaveWorkingDays = async (data) => {
+		try {
+			const res = await hrApi.bulkSaveWorkingDays(data);
+			const responseData = res.data?.data;
+			const successCount = responseData?.success?.length || 0;
+			const failedCount = responseData?.failed?.length || 0;
+			
+			if (failedCount > 0) {
+				toast.warning(`${successCount} saved, ${failedCount} failed`);
+			} else {
+				toast.success(`${successCount} entries saved successfully`);
+			}
+			
+			return responseData;
+		} catch (err) {
+			toast.error(err.response?.data?.message || "Failed to bulk save working days");
+			return null;
+		}
+	};
+
+	const deleteWorkingDaysEntry = async (employeeId, month) => {
+		try {
+			await hrApi.deleteWorkingDaysEntry(employeeId, month);
+			toast.success("Working days entry deleted");
+			return true;
+		} catch (err) {
+			toast.error(err.response?.data?.message || "Failed to delete entry");
+			return false;
+		}
+	};
+
+	const lockWorkingDaysEntry = async (employeeId, month, locked) => {
+		try {
+			await hrApi.lockWorkingDaysEntry(employeeId, month, { locked });
+			toast.success(locked ? "Entry locked" : "Entry unlocked");
+			return true;
+		} catch (err) {
+			toast.error(err.response?.data?.message || `Failed to ${locked ? 'lock' : 'unlock'} entry`);
+			return false;
+		}
+	};
 
 	// ==================== Shifts ====================
 	const fetchShifts = useCallback(async () => {
@@ -2409,6 +2515,11 @@ export const useHR = () => {
 		employeeSalarySlips,
 		companySalarySlips,
 
+		// Working Days States
+		workingDaysList,
+		workingDaysEntry,
+		workingDaysLoading,
+
 		advances,
 		myAdvances,
 		advanceDetail,
@@ -2520,6 +2631,14 @@ export const useHR = () => {
 		downloadSalarySlipPdf,
 		submitPayrollForApproval,
 		fetchMyPayrollBatches,
+
+		// Monthly Working Days
+		fetchWorkingDaysList,
+		fetchWorkingDaysEntry,
+		saveWorkingDays,
+		bulkSaveWorkingDays,
+		deleteWorkingDaysEntry,
+		lockWorkingDaysEntry,
 
 		// Advance Salary
 		fetchAdvances,

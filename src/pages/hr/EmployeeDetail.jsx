@@ -49,6 +49,7 @@ import { AdvanceSummaryTab } from "./tabs/AdvanceSummaryTab";
 import { PayrollPreviewDialog } from "./tabs/PayrollPreviewDialog";
 import { StatutoryTab } from "./EmployeeDetails/StatutoryTab";
 import { BookingLedgerTab } from "./EmployeeDetails/BookingLedgerTab";
+import { MissingWorkingDaysDialog } from "@/components/hr/MissingWorkingDaysDialog";
 
 export default function EmployeeDetail() {
 	const { id } = useParams();
@@ -74,6 +75,7 @@ export default function EmployeeDetail() {
 		shifts,
 		fetchShifts,
 		loading,
+		fetchWorkingDaysEntry,
 	} = useHR();
 
 	const { bookingLedger, ledgerLoading, fetchBookingLedger, adjustBookingLedger } = usePF();
@@ -116,6 +118,8 @@ export default function EmployeeDetail() {
 		note: "",
 	});
 	const [bookingsOverride, setBookingsOverride] = useState("");
+	const [missingWorkingDaysDialogOpen, setMissingWorkingDaysDialogOpen] = useState(false);
+	const [proceedWithGenerate, setProceedWithGenerate] = useState(false);
 
 	// ✅ FIXED: Individual load functions with proper error handling
 	const loadEmployeeData = async () => {
@@ -320,6 +324,28 @@ export default function EmployeeDetail() {
 	const handleGenerateSalary = async () => {
 		if (!isValidDeduction()) return toast.error("Enter a valid advance deduction amount");
 
+		// Check if we should proceed or check for working days entry
+		if (!proceedWithGenerate) {
+			// Check if working days entry exists
+			const monthNames = [
+				"January", "February", "March", "April", "May", "June",
+				"July", "August", "September", "October", "November", "December",
+			];
+			const monthIndex = monthNames.indexOf(salaryForm.month);
+			const monthStr = `${salaryForm.year}-${String(monthIndex + 1).padStart(2, "0")}`;
+			
+			const entry = await fetchWorkingDaysEntry(id, monthStr);
+			
+			if (!entry) {
+				// No working days entry found, show warning
+				setMissingWorkingDaysDialogOpen(true);
+				return;
+			}
+		}
+
+		// Reset proceed flag
+		setProceedWithGenerate(false);
+
 		// Removed the totalDue check since this input is for manual deduction
 		const slip = await generateSalarySlip(buildSalaryPayload());
 		if (slip) {
@@ -328,6 +354,16 @@ export default function EmployeeDetail() {
 			await refreshSalaryOnly();
 			await fetchBookingLedger(id);
 		}
+	};
+
+	const handleContinueWithoutEntry = () => {
+		// User chose to continue without working days entry
+		setProceedWithGenerate(true);
+		setMissingWorkingDaysDialogOpen(false);
+		// Trigger generation again
+		setTimeout(() => {
+			handleGenerateSalary();
+		}, 100);
 	};
 
 	const handleManualCheckIn = async () => {
@@ -994,6 +1030,15 @@ export default function EmployeeDetail() {
 				title={confirmDialog.title}
 				description={confirmDialog.message}
 				onConfirm={confirmDialog.onConfirm}
+			/>
+
+			<MissingWorkingDaysDialog
+				open={missingWorkingDaysDialogOpen}
+				onOpenChange={setMissingWorkingDaysDialogOpen}
+				employee={employee}
+				month={salaryForm.month}
+				year={salaryForm.year}
+				onContinue={handleContinueWithoutEntry}
 			/>
 		</div>
 	);

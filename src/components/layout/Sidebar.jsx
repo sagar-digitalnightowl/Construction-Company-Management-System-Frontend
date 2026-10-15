@@ -178,10 +178,16 @@ export function Sidebar({ role, onClickLink }) {
 
 				...(showHRTabToAdminDirector
 					? [{
-						to: "/hr",
 						label: "HR & Payroll",
 						icon: Users2,
 						key: "hr",
+						children: [
+							{ to: "/hr/employees", label: "Employees", key: "hr" },
+							{ to: "/hr/salary", label: "Salary", key: "hr" },
+							{ to: "/hr/salary/working-days", label: "Working Days", key: "hr" },
+							{ to: "/hr/advance-salary", label: "Advance Salary", key: "hr" },
+							{ to: "/hr/expense-approvals", label: "Expense Approvals", key: "hr" },
+						],
 					}]
 					: []
 				),
@@ -266,6 +272,7 @@ export function Sidebar({ role, onClickLink }) {
 				},
 				{ to: "/hr/departments", label: "Departments", icon: Building2, key: "hr" },
 				{ to: "/hr/salary", label: "Salary", icon: FileText, key: "hr" },
+				{ to: "/hr/salary/working-days", label: "Working Days", icon: Clock, key: "hr" },
 				{ to: "/hr/advance-salary", label: "Advance Salary", icon: WalletCards, key: "hr" },
 				{ to: "/hr/incentives-bonus", label: "Bonus", icon: Gift, key: "hr" },
 				{ to: "/hr/expense-approvals", label: "Expense Approvals", icon: Receipt, key: "hr" },
