@@ -8,7 +8,7 @@ const STATUS_ICONS = {
 	booked: { icon: Calendar, className: "text-blue-500" },
 };
 
-export function StatusBadge({ status }) {
+function StatusBadge({ status }) {
 	const s = String(status || "available").toLowerCase();
 	const config = STATUS_ICONS[s] || STATUS_ICONS.available;
 	const IconComponent = config.icon;
@@ -28,3 +28,5 @@ export function StatusBadge({ status }) {
 		</TooltipProvider>
 	);
 }
+
+export default StatusBadge;
