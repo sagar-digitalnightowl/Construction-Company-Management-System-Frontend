@@ -270,4 +270,135 @@ export const projectApi = {
 			params,
 			responseType: "blob",
 		}),
+
+	// =========================
+	// TOWER MILESTONES (v2.0)
+	// =========================
+	/**
+	 * Tower Milestone Management
+	 * Per-tower milestone completion tracking
+	 * Backend v2.0 feature
+	 */
+	towerMilestones: {
+		/**
+		 * Mark milestone complete for a specific tower
+		 * POST /project/:id/towers/:towerName/milestones/:milestoneId/complete
+		 * @param {string} projectId - Project ID
+		 * @param {string} towerName - Tower name (will be URL-encoded)
+		 * @param {string} milestoneId - Milestone ObjectId
+		 * @param {Object} data - Completion data
+		 * @param {boolean} data.isCompleted - Mark complete or in-progress (default: true)
+		 * @param {number} data.progress - Progress 0-100 (default: 100 if complete, else 0)
+		 * @param {string} data.notes - Optional note
+		 * @param {string} data.expectedCompletionDate - Expected completion date (YYYY-MM-DD)
+		 * @returns {Promise} Response with saved milestone progress
+		 */
+		markComplete: (projectId, towerName, milestoneId, data) =>
+			api.post(
+				`/project/${projectId}/towers/${encodeURIComponent(towerName)}/milestones/${milestoneId}/complete`,
+				data,
+			),
+
+		/**
+		 * Bulk mark multiple tower-milestones in one call
+		 * POST /project/:id/tower-milestones/bulk
+		 * Perfect for kanban drag-drop or CSV import
+		 * @param {string} projectId - Project ID
+		 * @param {Object} data - Bulk data
+		 * @param {Array} data.entries - Array of milestone entries
+		 * @param {string} data.entries[].towerName - Tower name
+		 * @param {string} data.entries[].milestoneId - Milestone ID
+		 * @param {boolean} data.entries[].isCompleted - Completion status
+		 * @param {number} data.entries[].progress - Progress 0-100
+		 * @param {string} data.entries[].notes - Optional note
+		 * @returns {Promise} Response with success/failed arrays
+		 */
+		bulkMark: (projectId, data) =>
+			api.post(`/project/${projectId}/tower-milestones/bulk`, data),
+
+		/**
+		 * Update milestone progress without toggling completion
+		 * PATCH /project/:id/towers/:towerName/milestones/:milestoneId
+		 * Use this for partial updates (e.g., drag progress slider from 30% to 50%)
+		 * @param {string} projectId - Project ID
+		 * @param {string} towerName - Tower name (will be URL-encoded)
+		 * @param {string} milestoneId - Milestone ObjectId
+		 * @param {Object} data - Update data
+		 * @param {number} data.progress - Progress 0-100
+		 * @param {string} data.notes - Optional note
+		 * @returns {Promise} Response with updated milestone progress
+		 */
+		updateProgress: (projectId, towerName, milestoneId, data) =>
+			api.patch(
+				`/project/${projectId}/towers/${encodeURIComponent(towerName)}/milestones/${milestoneId}`,
+				data,
+			),
+
+		/**
+		 * Unmark milestone (delete progress entry)
+		 * DELETE /project/:id/towers/:towerName/milestones/:milestoneId/complete
+		 * Idempotent — returns success even if not marked
+		 * Activity log records the unmark action
+		 * @param {string} projectId - Project ID
+		 * @param {string} towerName - Tower name (will be URL-encoded)
+		 * @param {string} milestoneId - Milestone ObjectId
+		 * @returns {Promise} Response confirming deletion
+		 */
+		unmark: (projectId, towerName, milestoneId) =>
+			api.delete(
+				`/project/${projectId}/towers/${encodeURIComponent(towerName)}/milestones/${milestoneId}/complete`,
+			),
+
+		/**
+		 * GET full tower × milestone matrix (MAIN ENDPOINT for "remind" UI)
+		 * GET /project/:id/tower-milestones
+		 * Returns complete matrix with:
+		 * - All towers and their milestone status
+		 * - Overall completion percentage
+		 * - pendingReminders[] array (automatically calculated by backend)
+		 * @param {string} projectId - Project ID
+		 * @returns {Promise} Response with matrix data
+		 * @example
+		 * {
+		 *   projectId, projectName, totalTowers, totalMilestones,
+		 *   overallCompletionPercentage,
+		 *   milestones: [...], // Project-level milestone definitions
+		 *   towers: [
+		 *     {
+		 *       towerName, totalMilestones, completedMilestones,
+		 *       pendingMilestones, completionPercentage,
+		 *       milestones: [
+		 *         {
+		 *           milestoneId, milestoneName, milestoneDueDate,
+		 *           isCompleted, completedAt, completedBy,
+		 *           progress, notes, expectedCompletionDate, hasEntry
+		 *         }
+		 *       ]
+		 *     }
+		 *   ],
+		 *   pendingReminders: [
+		 *     {
+		 *       towerName, milestoneId, milestoneName, milestoneDueDate,
+		 *       currentProgress, expectedCompletionDate, daysOverdue
+		 *     }
+		 *   ]
+		 * }
+		 */
+		getMatrix: (projectId) =>
+			api.get(`/project/${projectId}/tower-milestones`),
+
+		/**
+		 * GET single tower's milestone progress
+		 * GET /project/:id/towers/:towerName/milestones
+		 * Returns just one tower's milestone list (no matrix)
+		 * Use this on the "Tower Detail" page
+		 * @param {string} projectId - Project ID
+		 * @param {string} towerName - Tower name (will be URL-encoded)
+		 * @returns {Promise} Response with single tower's milestone data
+		 */
+		getSingleTower: (projectId, towerName) =>
+			api.get(
+				`/project/${projectId}/towers/${encodeURIComponent(towerName)}/milestones`,
+			),
+	},
 };

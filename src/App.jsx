@@ -84,6 +84,7 @@ import { FinanceAdvanceSalary } from "./pages/finance/FinanceAdvanceSalary";
 import { FinanceIncentives } from "./pages/finance/FinanceIncentives";
 import IncentiveConfig from "./pages/IncentiveConfig";
 import { WorkingDays } from "./pages/hr/WorkingDays";
+import TowerMilestonesMatrix from "./pages/projects/TowerMilestonesMatrix";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -120,6 +121,7 @@ export default function App() {
 					<Route path="/projects" element={<Projects />} />
 					<Route path="/project-templates" element={<ProjectTemplate />} />
 					<Route path="/projects/:id" element={<ProjectDetail />} />
+					<Route path="/projects/:id/tower-milestones" element={<TowerMilestonesMatrix />} />
 					<Route path="/property-inventory" element={<PropertyInventory />} />
 					<Route path="/property-inventory/:projectId" element={<ProjectDetailPage />} />
 

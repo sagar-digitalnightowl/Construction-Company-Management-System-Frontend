@@ -44,6 +44,7 @@ export const VIEW = {
 		"project_manager",
 		"site_engineer",
 		"accountant",
+		"finance_executive",
 	],
 	"project-templates": [
 		"admin",
@@ -51,6 +52,7 @@ export const VIEW = {
 		"project_manager",
 		"site_engineer",
 		"accountant",
+		"finance_executive",
 	],
 	"property-inventory": [
 		"admin",
@@ -316,8 +318,9 @@ export const MUTATE = {
 		"director",
 		"project_manager",
 		"site_engineer",
+		"finance_executive",
 	],
-	"tower-operations": ["admin", "director", "project_manager", "hr_manager"],
+	"tower-operations": ["admin", "director", "project_manager", "hr_manager", "finance_executive"],
 	"project-template": ["admin", "director", "project_manager"],
 	tasks: ["admin", "director", "project_manager"],
 	"task-operations": [
