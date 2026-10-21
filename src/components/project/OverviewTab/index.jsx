@@ -12,6 +12,7 @@ import { VisitorsCard } from "./VisitorsCard";
 import { NotesCard } from "./NotesCard";
 import { HealthCard } from "./HealthCard";
 import { TimelineCard } from "./TimelineCard";
+import { TowerMilestoneSummaryCard } from "./TowerMilestoneSummaryCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function OverviewTab({
@@ -64,6 +65,7 @@ export function OverviewTab({
 
         {/* Right column – side cards */}
         <div className="space-y-3">
+          <TowerMilestoneSummaryCard projectId={project._id} />
           <WeatherCard
             projectId={project._id}
             canOperationsEdit={canOperationsEdit}

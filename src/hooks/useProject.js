@@ -54,6 +54,13 @@ export const useProject = () => {
 		towers: [],
 	});
 
+	// =========================
+	// 🆕 TOWER MILESTONE STATE (v2.0)
+	// =========================
+	const [towerMilestoneMatrix, setTowerMilestoneMatrix] = useState(null);
+	const [singleTowerMilestones, setSingleTowerMilestones] = useState(null);
+	const [towerMilestoneLoading, setTowerMilestoneLoading] = useState(false);
+
 	// Existing fetchProject
 	const fetchProject = useCallback(async (id, showLoading = true) => {
 		if (showLoading) setLoading(true);
@@ -1159,6 +1166,218 @@ export const useProject = () => {
 		}
 	};
 
+	// =========================
+	// 🆕 TOWER MILESTONE OPERATIONS (v2.0)
+	// =========================
+
+	/**
+	 * Fetch tower × milestone matrix with reminder data
+	 * Main endpoint for the matrix view - includes pendingReminders[] array
+	 * @param {string} projectId - Project ID
+	 * @returns {Promise} Matrix data with towers, milestones, and pending reminders
+	 */
+	const fetchTowerMilestoneMatrix = useCallback(async (projectId) => {
+		setTowerMilestoneLoading(true);
+		try {
+			const res = await projectApi.towerMilestones.getMatrix(projectId);
+			if (res.data?.success) {
+				setTowerMilestoneMatrix(res.data?.data);
+				return res.data?.data;
+			}
+			throw new Error(res.data?.message || "Failed to load matrix");
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message ||
+					"Failed to load tower milestone matrix",
+			);
+			throw err;
+		} finally {
+			setTowerMilestoneLoading(false);
+		}
+	}, []);
+
+	/**
+	 * Mark a tower milestone as complete
+	 * @param {string} projectId - Project ID
+	 * @param {string} towerName - Tower name (e.g., "Tower A")
+	 * @param {string} milestoneId - Milestone ObjectId
+	 * @param {Object} data - Completion data
+	 * @param {boolean} data.isCompleted - Mark complete or in-progress
+	 * @param {number} data.progress - Progress 0-100
+	 * @param {string} data.notes - Optional note
+	 * @param {string} data.expectedCompletionDate - Expected date (YYYY-MM-DD)
+	 * @returns {Promise} API response
+	 */
+	const markTowerMilestoneComplete = useCallback(
+		async (projectId, towerName, milestoneId, data) => {
+			try {
+				const res = await projectApi.towerMilestones.markComplete(
+					projectId,
+					towerName,
+					milestoneId,
+					data,
+				);
+				if (res.data?.success) {
+					toast.success(
+						res.data?.message || "Milestone marked complete successfully",
+					);
+					// Refresh matrix data
+					await fetchTowerMilestoneMatrix(projectId);
+					return res.data;
+				}
+				throw new Error(res.data?.message || "Failed to mark complete");
+			} catch (err) {
+				toast.error(
+					err.response?.data?.message ||
+						"Failed to mark milestone complete",
+				);
+				throw err;
+			}
+		},
+		[fetchTowerMilestoneMatrix],
+	);
+
+	/**
+	 * Bulk mark multiple tower milestones
+	 * Perfect for kanban drag-drop or CSV import
+	 * @param {string} projectId - Project ID
+	 * @param {Array} entries - Array of milestone entries
+	 * @param {string} entries[].towerName - Tower name
+	 * @param {string} entries[].milestoneId - Milestone ID
+	 * @param {boolean} entries[].isCompleted - Completion status
+	 * @param {number} entries[].progress - Progress 0-100
+	 * @param {string} entries[].notes - Optional note
+	 * @returns {Promise} API response with success/failed arrays
+	 */
+	const bulkMarkTowerMilestones = useCallback(
+		async (projectId, entries) => {
+			try {
+				const res = await projectApi.towerMilestones.bulkMark(projectId, {
+					entries,
+				});
+				if (res.data?.success) {
+					toast.success(res.data?.message || "Bulk operation completed");
+					// Refresh matrix data
+					await fetchTowerMilestoneMatrix(projectId);
+					return res.data;
+				}
+				throw new Error(res.data?.message || "Bulk operation failed");
+			} catch (err) {
+				toast.error(
+					err.response?.data?.message || "Bulk operation failed",
+				);
+				throw err;
+			}
+		},
+		[fetchTowerMilestoneMatrix],
+	);
+
+	/**
+	 * Update tower milestone progress without toggling completion
+	 * Use this for slider updates (e.g., 30% → 50%)
+	 * @param {string} projectId - Project ID
+	 * @param {string} towerName - Tower name
+	 * @param {string} milestoneId - Milestone ObjectId
+	 * @param {Object} data - Update data
+	 * @param {number} data.progress - Progress 0-100
+	 * @param {string} data.notes - Optional note
+	 * @returns {Promise} API response
+	 */
+	const updateTowerMilestoneProgress = useCallback(
+		async (projectId, towerName, milestoneId, data) => {
+			try {
+				const res = await projectApi.towerMilestones.updateProgress(
+					projectId,
+					towerName,
+					milestoneId,
+					data,
+				);
+				if (res.data?.success) {
+					toast.success("Progress updated successfully");
+					// Refresh matrix data
+					await fetchTowerMilestoneMatrix(projectId);
+					return res.data;
+				}
+				throw new Error(res.data?.message || "Failed to update");
+			} catch (err) {
+				toast.error(
+					err.response?.data?.message || "Failed to update progress",
+				);
+				throw err;
+			}
+		},
+		[fetchTowerMilestoneMatrix],
+	);
+
+	/**
+	 * Unmark a tower milestone (delete progress entry)
+	 * Idempotent - returns success even if not marked
+	 * Activity log records the unmark action
+	 * @param {string} projectId - Project ID
+	 * @param {string} towerName - Tower name
+	 * @param {string} milestoneId - Milestone ObjectId
+	 * @returns {Promise} API response
+	 */
+	const unmarkTowerMilestone = useCallback(
+		async (projectId, towerName, milestoneId) => {
+			try {
+				const res = await projectApi.towerMilestones.unmark(
+					projectId,
+					towerName,
+					milestoneId,
+				);
+				if (res.data?.success) {
+					toast.success("Milestone unmarked successfully");
+					// Refresh matrix data
+					await fetchTowerMilestoneMatrix(projectId);
+					return res.data;
+				}
+				throw new Error(res.data?.message || "Failed to unmark");
+			} catch (err) {
+				toast.error(
+					err.response?.data?.message || "Failed to unmark milestone",
+				);
+				throw err;
+			}
+		},
+		[fetchTowerMilestoneMatrix],
+	);
+
+	/**
+	 * Fetch single tower's milestone progress
+	 * Use this on the "Tower Detail" page
+	 * @param {string} projectId - Project ID
+	 * @param {string} towerName - Tower name
+	 * @returns {Promise} Single tower's milestone data
+	 */
+	const fetchSingleTowerMilestones = useCallback(
+		async (projectId, towerName) => {
+			setTowerMilestoneLoading(true);
+			try {
+				const res = await projectApi.towerMilestones.getSingleTower(
+					projectId,
+					towerName,
+				);
+				if (res.data?.success) {
+					setSingleTowerMilestones(res.data?.data);
+					return res.data?.data;
+				}
+				throw new Error(
+					res.data?.message || "Failed to load tower milestones",
+				);
+			} catch (err) {
+				toast.error(
+					err.response?.data?.message ||
+						"Failed to load tower milestones",
+				);
+				throw err;
+			} finally {
+				setTowerMilestoneLoading(false);
+			}
+		},
+		[],
+	);
+
 	return {
 		// State
 		loading,
@@ -1267,5 +1486,21 @@ export const useProject = () => {
 		deleteFlat,
 		fetchAvailableFlats,
 		fetchAllFlats,
+
+		// =========================
+		// 🆕 TOWER MILESTONES (v2.0)
+		// =========================
+		// State
+		towerMilestoneMatrix,
+		singleTowerMilestones,
+		towerMilestoneLoading,
+
+		// Functions
+		fetchTowerMilestoneMatrix,
+		markTowerMilestoneComplete,
+		bulkMarkTowerMilestones,
+		updateTowerMilestoneProgress,
+		unmarkTowerMilestone,
+		fetchSingleTowerMilestones,
 	};
 };
