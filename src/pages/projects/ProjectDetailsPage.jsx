@@ -38,6 +38,7 @@ import { ResourceTab } from "@/components/project/ResourceTab";
 import { DocumentsTab } from "@/components/project/DocumentsTab";
 import { TowersTab } from "@/components/project/TowersTab";
 import { MediaTab } from "@/components/project/MediaTab"; // 👈 Naya MediaTab component import kiya
+import { StockSummaryTab } from "@/components/project/StockSummaryTab";
 
 
 export default function ProjectDetail() {
@@ -142,6 +143,10 @@ export default function ProjectDetail() {
               <Package className="h-3.5 w-3.5 mr-1.5" />
               Materials
             </TabsTrigger>
+            <TabsTrigger value="stock">
+              <Package className="h-3.5 w-3.5 mr-1.5" />
+              Stock Reports
+            </TabsTrigger>
             <TabsTrigger value="tasks">
               <CheckSquare className="h-3.5 w-3.5 mr-1.5" />
               Tasks
@@ -204,6 +209,9 @@ export default function ProjectDetail() {
           </TabsContent>
           <TabsContent value="materials">
             <MaterialRequestsTab projectId={project._id} canEdit={canEdit} />
+          </TabsContent>
+          <TabsContent value="stock">
+            <StockSummaryTab projectId={project._id} />
           </TabsContent>
           <TabsContent value="tasks">
             {current?.role === "site_engineer" ? (

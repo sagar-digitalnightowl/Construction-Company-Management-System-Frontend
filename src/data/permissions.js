@@ -9,6 +9,7 @@ export const ROLES = {
 	vendor: "Vendor",
 	client: "Client",
 	employee: "Employee",
+	stock_manager: "Stock Manager",
 };
 
 // per-resource: who can VIEW the page
@@ -307,6 +308,10 @@ export const VIEW = {
 		"employee",
 	],
 	"incentive-config": ["admin", "director"],
+	
+	// ─── STOCK MANAGER PERMISSIONS ───
+	"stock-manager": ["admin", "director", "stock_manager", "hr_manager", "finance_executive", "project_manager"],
+	"stock-reports": ["admin", "director", "stock_manager", "hr_manager", "finance_executive", "project_manager", "site_engineer"],
 };
 
 // who can mutate (create / edit / delete) records on a resource
@@ -400,6 +405,10 @@ export const MUTATE = {
 	],
 
 	"incentive-config": ["admin", "director"],
+	
+	// ─── STOCK MANAGER MUTATE PERMISSIONS ───
+	"stock-reports": ["admin", "stock_manager", "project_manager", "site_engineer"],
+	"stock-verify": ["admin", "hr_manager", "finance_executive", "project_manager"],
 };
 
 export function canView(role, resource) {

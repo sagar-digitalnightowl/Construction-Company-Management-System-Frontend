@@ -85,6 +85,8 @@ import { FinanceIncentives } from "./pages/finance/FinanceIncentives";
 import IncentiveConfig from "./pages/IncentiveConfig";
 import { WorkingDays } from "./pages/hr/WorkingDays";
 import TowerMilestonesMatrix from "./pages/projects/TowerMilestonesMatrix";
+import StockManager from "./pages/stockManager/StockManager";
+import AddReportPage from "./pages/stockManager/AddReportPage";
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -379,6 +381,11 @@ export default function App() {
 					<Route path="/reports" element={<Reports />} />
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/incentive-config" element={<IncentiveConfig />} />
+
+					{/* Stock Manager Routes */}
+					<Route path="/stock-manager" element={<Navigate to="/stock-manager/my-reports" replace />} />
+					<Route path="/stock-manager/add-report" element={<AddReportPage />} />
+					<Route path="/stock-manager/:tab" element={<StockManager />} />
 				</Route>
 
 				<Route path="/" element={<Navigate to="/dashboard" replace />} />

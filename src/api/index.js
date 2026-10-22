@@ -6,6 +6,7 @@ export * from "./procurementApi";
 export * from "./siteApi";
 export * from "./users";
 export * from "./vendorApi";
+export * from "./siteStockApi";
 export * from "./bookingApi";
 export * from "./leadApi";
 export * from "./hrApi";

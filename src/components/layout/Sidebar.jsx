@@ -21,7 +21,8 @@ import {
 	Megaphone,
 	WalletCards,
 	Gift,
-	SlidersHorizontal
+	SlidersHorizontal,
+	Package
 } from "lucide-react";
 import { cn } from "@/lib/helpers";
 import { canView } from "@/data/permissions";
@@ -34,7 +35,9 @@ export function Sidebar({ role, onClickLink }) {
 	const isFinanceExecutive = userRole === "finance_executive";
 	const isEmployee = userRole === "employee";
 	const isHRManager = userRole === "hr_manager";
+	const isStockManager = userRole === "stock_manager";
 	const showHRTabToAdminDirector = ["admin", "director"].includes(userRole);
+	const canViewStockManager = ["admin", "director", "stock_manager", "hr_manager", "finance_executive", "project_manager"].includes(userRole);
 
 	const navGroups = [
 		{
@@ -98,6 +101,12 @@ export function Sidebar({ role, onClickLink }) {
 					icon: Boxes,
 					key: "property-inventory",
 				},
+				...(canViewStockManager ? [{
+					to: "/stock-manager/my-reports",
+					label: "Stock Manager",
+					icon: Package,
+					key: "stock-manager",
+				}] : []),
 				...(isFinanceExecutive
 					? [
 						{
