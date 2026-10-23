@@ -1,92 +1,104 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import Users from "@/pages/Users";
-import Projects from "@/pages/projects/Projects";
-import CRM from "@/pages/CRM";
-import Documents from "@/pages/Documents";
-import Reports from "@/pages/Reports";
-import Settings from "@/pages/Settings";
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Users = lazy(() => import("@/pages/Users"));
+const Projects = lazy(() => import("@/pages/projects/Projects"));
+const CRM = lazy(() => import("@/pages/CRM"));
+const Documents = lazy(() => import("@/pages/Documents"));
+const Reports = lazy(() => import("@/pages/Reports"));
+const Settings = lazy(() => import("@/pages/Settings"));
 import { useAuthStore } from "./store/authStore";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import ProjectDetail from "./pages/projects/ProjectDetailsPage";
-import ProjectTemplate from "./pages/projectTemplete/projectTemplete";
-import Inventory from "./pages/inventory/Inventory";
-import Materials from "./pages/inventory/Materials";
-import Warehouses from "./pages/inventory/Warehouses";
-import StockTransactions from "./pages/inventory/StockTransactions";
-import LowStockAlerts from "./pages/inventory/LowStockAlerts";
-import Valuation from "./pages/inventory/Valuation";
-import StockCounts from "./pages/inventory/StockCounts";
+import { rolePerms } from "./pages/stockManager/stockPermissions";
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const ProjectDetail = lazy(() => import("./pages/projects/ProjectDetailsPage"));
+const ProjectTemplate = lazy(() => import("./pages/projectTemplete/projectTemplete"));
+const Inventory = lazy(() => import("./pages/inventory/Inventory"));
+const Materials = lazy(() => import("./pages/inventory/Materials"));
+const Warehouses = lazy(() => import("./pages/inventory/Warehouses"));
+const StockTransactions = lazy(() => import("./pages/inventory/StockTransactions"));
+const LowStockAlerts = lazy(() => import("./pages/inventory/LowStockAlerts"));
+const Valuation = lazy(() => import("./pages/inventory/Valuation"));
+const StockCounts = lazy(() => import("./pages/inventory/StockCounts"));
 
 import { createPortal } from "react-dom";
 
-import Procurement from "./pages/procurement/Procurement";
-import RFQs from "./pages/procurement/RFQs";
-import Quotations from "./pages/procurement/Quotations";
-import PurchaseOrders from "./pages/procurement/PurchaseOrders";
-import Deliveries from "./pages/procurement/Deliveries";
-import TaskRequests from "./pages/projects/TaskRequests";
-import MyTasks from "./pages/projects/MyTasks";
-import VendorDashboard from "./pages/vendor/VendorDashboard";
-import SiteManagement from "./pages/site/SiteManagement";
-import MaterialDetail from "./pages/inventory/MaterialDetail";
-import Bookings from "./pages/booking/Bookings";
-import BookingDetail from "./pages/booking/BookingDetail";
-import MyBookings from "./pages/booking/MyBookings";
-import MyInstallments from "./pages/booking/MyInstallments";
-import PendingBookings from "./pages/booking/PendingBookings";
-import CountDetail from "./pages/inventory/CountDetail";
-import TaskDetailPage from "./pages/projects/TaskDetailPage";
-import HR from "./pages/hr/HR";
-import EmployeeDetail from "./pages/hr/EmployeeDetail";
-import LaborDetail from "./pages/hr/LaborDetail";
-import EmployeeDashboard from "./pages/hr/EmployeeDashboard";
-import LeadManagement from "./pages/lead/LeadManagement";
-import PropertyInventory from "./pages/PropertyInventory";
-import Finance from "./pages/finance/Finance";
+const Procurement = lazy(() => import("./pages/procurement/Procurement"));
+const RFQs = lazy(() => import("./pages/procurement/RFQs"));
+const Quotations = lazy(() => import("./pages/procurement/Quotations"));
+const PurchaseOrders = lazy(() => import("./pages/procurement/PurchaseOrders"));
+const Deliveries = lazy(() => import("./pages/procurement/Deliveries"));
+const TaskRequests = lazy(() => import("./pages/projects/TaskRequests"));
+const MyTasks = lazy(() => import("./pages/projects/MyTasks"));
+const VendorDashboard = lazy(() => import("./pages/vendor/VendorDashboard"));
+const SiteManagement = lazy(() => import("./pages/site/SiteManagement"));
+const MaterialDetail = lazy(() => import("./pages/inventory/MaterialDetail"));
+const Bookings = lazy(() => import("./pages/booking/Bookings"));
+const BookingDetail = lazy(() => import("./pages/booking/BookingDetail"));
+const MyBookings = lazy(() => import("./pages/booking/MyBookings"));
+const MyInstallments = lazy(() => import("./pages/booking/MyInstallments"));
+const PendingBookings = lazy(() => import("./pages/booking/PendingBookings"));
+const CountDetail = lazy(() => import("./pages/inventory/CountDetail"));
+const TaskDetailPage = lazy(() => import("./pages/projects/TaskDetailPage"));
+const HR = lazy(() => import("./pages/hr/HR"));
+const EmployeeDetail = lazy(() => import("./pages/hr/EmployeeDetail"));
+const LaborDetail = lazy(() => import("./pages/hr/LaborDetail"));
+const EmployeeDashboard = lazy(() => import("./pages/hr/EmployeeDashboard"));
+const LeadManagement = lazy(() => import("./pages/lead/LeadManagement"));
+const PropertyInventory = lazy(() => import("./pages/PropertyInventory"));
+const Finance = lazy(() => import("./pages/finance/Finance"));
 
-import FinanceLayout from "./pages/finance/FinanceLayout";
-import { FinanceDashboard } from "./pages/finance/FinanceDashboard";
-import { FinanceBookingsReminder } from "./pages/finance/FinanceBookingsReminder";
-import { FinanceDueInstallments } from "./pages/finance/FinanceDueInstallments";
-import { FinanceMilestones } from "./pages/finance/FinanceMilestones";
-import { FinancePayrollApprovals } from "./pages/finance/FinancePayrollApprovals";
-import { FinanceExpenses } from "./pages/finance/FinanceExpenses";
-import { FinanceReminders } from "./pages/finance/FinanceReminders";
+const FinanceLayout = lazy(() => import("./pages/finance/FinanceLayout"));
+const FinanceDashboard = lazy(() => import("./pages/finance/FinanceDashboard").then((m) => ({ default: m.FinanceDashboard })));
+const FinanceBookingsReminder = lazy(() => import("./pages/finance/FinanceBookingsReminder").then((m) => ({ default: m.FinanceBookingsReminder })));
+const FinanceDueInstallments = lazy(() => import("./pages/finance/FinanceDueInstallments").then((m) => ({ default: m.FinanceDueInstallments })));
+const FinanceMilestones = lazy(() => import("./pages/finance/FinanceMilestones").then((m) => ({ default: m.FinanceMilestones })));
+const FinancePayrollApprovals = lazy(() => import("./pages/finance/FinancePayrollApprovals").then((m) => ({ default: m.FinancePayrollApprovals })));
+const FinanceExpenses = lazy(() => import("./pages/finance/FinanceExpenses").then((m) => ({ default: m.FinanceExpenses })));
+const FinanceReminders = lazy(() => import("./pages/finance/FinanceReminders").then((m) => ({ default: m.FinanceReminders })));
 
 // 👇 NEW COMPONENTS IMPORTED HERE 👇
-import MyExpenses from "./pages/hr/MyExpenses";
-import { EmployeeAttendance } from "./pages/hr/EmployeeAttendance";
-import { EmployeeLeaves } from "./pages/hr/EmployeeLeaves";
-import { EmployeeSalary } from "./pages/hr/EmployeeSalary";
-import { EmployeeAnnouncements } from "./pages/hr/EmployeeAnnouncements";
-import EmployeeLayout from "./pages/hr/EmployeeLayout";
-import FinanceBookings from "./pages/finance/FinanceBookings";
-import FinanceBookingDetail from "./pages/finance/FinanceBookings/FinanceBookingDetail";
-import ExpenseReports from "./pages/finance/ExpenseReports";
-import ProjectDetailPage from "./components/propertyInventory/ProjectDetailPage";
+const MyExpenses = lazy(() => import("./pages/hr/MyExpenses"));
+const EmployeeAttendance = lazy(() => import("./pages/hr/EmployeeAttendance").then((m) => ({ default: m.EmployeeAttendance })));
+const EmployeeLeaves = lazy(() => import("./pages/hr/EmployeeLeaves").then((m) => ({ default: m.EmployeeLeaves })));
+const EmployeeSalary = lazy(() => import("./pages/hr/EmployeeSalary").then((m) => ({ default: m.EmployeeSalary })));
+const EmployeeAnnouncements = lazy(() => import("./pages/hr/EmployeeAnnouncements").then((m) => ({ default: m.EmployeeAnnouncements })));
+const EmployeeLayout = lazy(() => import("./pages/hr/EmployeeLayout"));
+const FinanceBookings = lazy(() => import("./pages/finance/FinanceBookings"));
+const FinanceBookingDetail = lazy(() => import("./pages/finance/FinanceBookings/FinanceBookingDetail"));
+const ExpenseReports = lazy(() => import("./pages/finance/ExpenseReports"));
+const ProjectDetailPage = lazy(() => import("./components/propertyInventory/ProjectDetailPage"));
 import { AppLoader } from "./AppLoader";
-import EmployeeOverview from "./pages/hr/EmployeeOverview";
-import { OfficeViewPage } from "./pages/hr/OfficeViewPage";
-import { MilestoneBuyersPage } from "./pages/finance/MilestoneBuyersPage";
-import { MilestonePaymentSummaryPage } from "./pages/finance/MilestonePaymentSummaryPage";
-import { MilestoneBuyerDetailPage } from "./pages/finance/MilestoneBuyerDetailPage";
-import ManagerBookingDetail from "./pages/booking/ManagerBookingDetail";
-import ManagersList from "./pages/booking/ManagersList";
-import { EmployeeAdvanceSalary } from "./pages/hr/tabs/EmployeeAdvanceSalary";
-import { FinanceAdvanceSalary } from "./pages/finance/FinanceAdvanceSalary";
-import { FinanceIncentives } from "./pages/finance/FinanceIncentives";
-import IncentiveConfig from "./pages/IncentiveConfig";
-import { WorkingDays } from "./pages/hr/WorkingDays";
-import TowerMilestonesMatrix from "./pages/projects/TowerMilestonesMatrix";
-import StockManager from "./pages/stockManager/StockManager";
-import AddReportPage from "./pages/stockManager/AddReportPage";
+const EmployeeOverview = lazy(() => import("./pages/hr/EmployeeOverview"));
+const OfficeViewPage = lazy(() => import("./pages/hr/OfficeViewPage").then((m) => ({ default: m.OfficeViewPage })));
+const MilestoneBuyersPage = lazy(() => import("./pages/finance/MilestoneBuyersPage").then((m) => ({ default: m.MilestoneBuyersPage })));
+const MilestonePaymentSummaryPage = lazy(() => import("./pages/finance/MilestonePaymentSummaryPage").then((m) => ({ default: m.MilestonePaymentSummaryPage })));
+const MilestoneBuyerDetailPage = lazy(() => import("./pages/finance/MilestoneBuyerDetailPage").then((m) => ({ default: m.MilestoneBuyerDetailPage })));
+const ManagerBookingDetail = lazy(() => import("./pages/booking/ManagerBookingDetail"));
+const ManagersList = lazy(() => import("./pages/booking/ManagersList"));
+const EmployeeAdvanceSalary = lazy(() => import("./pages/hr/tabs/EmployeeAdvanceSalary").then((m) => ({ default: m.EmployeeAdvanceSalary })));
+const FinanceAdvanceSalary = lazy(() => import("./pages/finance/FinanceAdvanceSalary").then((m) => ({ default: m.FinanceAdvanceSalary })));
+const FinanceIncentives = lazy(() => import("./pages/finance/FinanceIncentives").then((m) => ({ default: m.FinanceIncentives })));
+const IncentiveConfig = lazy(() => import("./pages/IncentiveConfig"));
+const WorkingDays = lazy(() => import("./pages/hr/WorkingDays").then((m) => ({ default: m.WorkingDays })));
+const TowerMilestonesMatrix = lazy(() => import("./pages/projects/TowerMilestonesMatrix"));
+const StockManager = lazy(() => import("./pages/stockManager/StockManager"));
+const AddReportPage = lazy(() => import("./pages/stockManager/AddReportPage"));
+const AddStockPage = lazy(() => import("./pages/stockManager/AddStockPage"));
+const AddConsumptionPage = lazy(() => import("./pages/stockManager/AddConsumptionPage"));
+const AddConsumptionFormPage = lazy(() => import("./pages/stockManager/AddConsumptionFormPage"));
+const ConsumptionReportPage = lazy(() => import("./pages/stockManager/ConsumptionReportPage"));
+const SiteManagerDashboard = lazy(() => import("./pages/stockManager/SiteManagerDashboard"));
+
+// Opens the page only for roles that can create the record; other roles go to a page they can use
+function StockRoute({ can, to, children }) {
+	const { current } = useAuthStore();
+	return rolePerms(current?.role)[can] ? children : <Navigate to={to} replace />;
+}
 
 export default function App() {
 	const { initAuth, loading } = useAuthStore((s) => s);
@@ -111,7 +123,8 @@ export default function App() {
 				document.body,
 			)}
 
-			<Routes>
+			<Suspense fallback={<AppLoader />}>
+				<Routes>
 				<Route path="/login" element={<Login />} />
 				<Route path="/forgot-password" element={<ForgotPassword />} />
 				<Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -382,15 +395,37 @@ export default function App() {
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/incentive-config" element={<IncentiveConfig />} />
 
-					{/* Stock Manager Routes */}
-					<Route path="/stock-manager" element={<Navigate to="/stock-manager/my-reports" replace />} />
-					<Route path="/stock-manager/add-report" element={<AddReportPage />} />
-					<Route path="/stock-manager/:tab" element={<StockManager />} />
+					{/* Site Manager Routes */}
+					<Route path="/site-manager" element={<Navigate to="/site-manager/dashboard" replace />} />
+					<Route path="/site-manager/dashboard" element={<SiteManagerDashboard />} />
+					<Route path="/site-manager/list" element={<AddStockPage />} />
+					<Route
+						path="/site-manager/add-stock"
+						element={
+							<StockRoute can="canAddStock" to="/site-manager/list">
+								<AddReportPage />
+							</StockRoute>
+						}
+					/>
+					<Route path="/site-manager/add-consumption" element={<AddConsumptionPage />} />
+					<Route
+						path="/site-manager/add-consumption/new"
+						element={
+							<StockRoute can="canAddConsumption" to="/site-manager/add-consumption">
+								<AddConsumptionFormPage />
+							</StockRoute>
+						}
+					/>
+					<Route path="/site-manager/consumption-report" element={<ConsumptionReportPage />} />
+					<Route path="/admin/consumptionreport" element={<ConsumptionReportPage />} />
+					<Route path="/site-manager/manage" element={<Navigate to="/site-manager/manage/dashboard" replace />} />
+					<Route path="/site-manager/manage/:tab" element={<StockManager />} />
 				</Route>
 
 				<Route path="/" element={<Navigate to="/dashboard" replace />} />
 				<Route path="*" element={<Navigate to="/dashboard" replace />} />
 			</Routes>
+			</Suspense>
 		</>
 	);
 }

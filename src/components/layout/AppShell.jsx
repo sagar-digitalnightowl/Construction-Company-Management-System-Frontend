@@ -34,8 +34,8 @@ export function AppShell() {
 		return <Navigate to="/employee-overview" replace />;
 	}
 
-	if (role === "stock_manager" && seg === "dashboard") {
-		return <Navigate to="/stock-manager/my-reports" replace />;
+	if (["site_manager", "site_engineer"].includes(role) && seg === "dashboard") {
+		return <Navigate to="/site-manager/dashboard" replace />;
 	}
 
 	if (!canView(current.role, seg)) {
