@@ -34,11 +34,11 @@ export function useSiteStock() {
 		}
 	}, []);
 
-	// Fetch my reports (Stock Manager)
+	// Fetch my reports (Site Manager)
 	const fetchMyReports = useCallback(async (params = {}) => {
 		try {
 			setLoading(true);
-			const response = await siteStockApi.getMyReports(params);
+			const response = await siteStockApi.getStockReports(params);
 			
 			if (response.data.success) {
 				setReports(response.data.data.items || []);

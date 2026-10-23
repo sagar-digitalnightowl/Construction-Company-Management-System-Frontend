@@ -33,12 +33,16 @@ import { VERIFICATION_STATUS_COLORS, STOCK_ITEM_CATEGORIES, STOCK_UNITS } from "
 import { formatDate } from "@/lib/helpers";
 import { ReportDetailDialog } from "../components/ReportDetailDialog";
 import { useSiteStock } from "@/hooks/useSiteStock";
+import { useAuthStore } from "@/store/authStore";
+import { currentUserId, canEditStock, canDeleteStock } from "../stockPermissions";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 export function MyReportsTab({ reports = [], pagination, loading, onRefresh, onDelete }) {
 	const { fetchReportById, updateReport } = useSiteStock();
+		const { current } = useAuthStore();
+		const userId = currentUserId(current);
 	const [selectedReport, setSelectedReport] = useState(null);
 	const [detailsOpen, setDetailsOpen] = useState(false);
 	const [loadingDetails, setLoadingDetails] = useState(false);
@@ -256,7 +260,7 @@ export function MyReportsTab({ reports = [], pagination, loading, onRefresh, onD
 					<div className="p-6 text-center text-muted-foreground">Loading reports...</div>
 				) : !reports.length ? (
 					<div className="p-6 text-center text-muted-foreground">
-						No reports found. Click "Add Report" to create your first stock report.
+						No reports found. Click "Add Stock" to record your first stock entry.
 					</div>
 				) : !filteredReports.length ? (
 					<div className="p-6 text-center text-muted-foreground">
@@ -326,12 +330,12 @@ export function MyReportsTab({ reports = [], pagination, loading, onRefresh, onD
 										>
 											<Eye className="h-4 w-4" />
 										</Button>
-										{report.verificationStatus === "pending" && (
+										{canEditStock(current?.role, userId, report) && (
 															<Button size="sm" variant="ghost" onClick={() => openEdit(report)}>
 																<Edit className="h-4 w-4" />
 															</Button>
 														)}
-														{report.verificationStatus === "pending" && (
+														{canDeleteStock(current?.role, userId, report) && (
 											<Button
 												size="sm"
 												variant="ghost"

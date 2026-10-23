@@ -22,7 +22,8 @@ import {
 	WalletCards,
 	Gift,
 	SlidersHorizontal,
-	Package
+	Package,
+	Minus,
 } from "lucide-react";
 import { cn } from "@/lib/helpers";
 import { canView } from "@/data/permissions";
@@ -35,9 +36,22 @@ export function Sidebar({ role, onClickLink }) {
 	const isFinanceExecutive = userRole === "finance_executive";
 	const isEmployee = userRole === "employee";
 	const isHRManager = userRole === "hr_manager";
-	const isStockManager = userRole === "stock_manager";
+	const isSiteUser = ["site_manager", "site_engineer"].includes(userRole);
 	const showHRTabToAdminDirector = ["admin", "director"].includes(userRole);
-	const canViewStockManager = ["admin", "director", "stock_manager", "hr_manager", "finance_executive", "project_manager"].includes(userRole);
+	const canViewStockManager = ["admin", "director", "site_manager", "hr_manager", "finance_executive", "project_manager"].includes(userRole);
+
+	// Site managers see only the two pages they work in
+	const siteManagerNavGroups = [
+		{
+			label: "Site Manager",
+			items: [
+				{ to: "/site-manager/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "site-manager" },
+				{ to: "/site-manager/list", label: "Add Stock", icon: Package, key: "site-manager" },
+				{ to: "/site-manager/add-consumption", label: "Add Consumption", icon: Minus, key: "site-manager" },
+					{ to: "/site-manager/consumption-report", label: "Consumption Report", icon: BarChart3, key: "site-manager" },
+			],
+		},
+	];
 
 	const navGroups = [
 		{
@@ -102,10 +116,10 @@ export function Sidebar({ role, onClickLink }) {
 					key: "property-inventory",
 				},
 				...(canViewStockManager ? [{
-					to: "/stock-manager/my-reports",
-					label: "Stock Manager",
+					to: "/site-manager/manage/dashboard",
+					label: "Site Manager",
 					icon: Package,
-					key: "stock-manager",
+					key: "site-manager",
 				}] : []),
 				...(isFinanceExecutive
 					? [
@@ -385,7 +399,7 @@ export function Sidebar({ role, onClickLink }) {
 			{/* ------------------------------- */}
 
 			<nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5 sidebar-scroll">
-				{navGroups.map((group) => {
+				{(isSiteUser ? siteManagerNavGroups : navGroups).map((group) => {
 					const visibleItems = group.items.filter((it) => {
 						if (it.children) {
 							return it.children.some((child) => canView(role, child.key));

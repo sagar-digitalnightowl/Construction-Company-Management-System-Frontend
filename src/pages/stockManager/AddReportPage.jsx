@@ -60,13 +60,10 @@ export default function AddReportPage() {
 	const fetchProjects = async () => {
 		try {
 			const response = await projectApi.getAll({ limit: 100 });
-			console.log("Projects API Response:", response);
 			if (response.data.success) {
 				setProjects(response.data.data.projects || []);
 			}
 		} catch (error) {
-			console.error("Error fetching projects:", error);
-			console.error("Error response:", error.response);
 			toast.error(error.response?.data?.message || "Failed to load projects");
 		}
 	};
@@ -233,7 +230,7 @@ export default function AddReportPage() {
 			saveItemNameToHistory(formData.itemName);
 			
 			toast.success("Stock report created successfully");
-			navigate("/stock-manager/my-reports");
+			navigate("/site-manager/list");
 		} catch (error) {
 			console.error("Error creating report:", error);
 			// Toast already shown in hook
@@ -245,10 +242,10 @@ export default function AddReportPage() {
 	return (
 		<div className="space-y-6">
 			<PageHeader
-				title="Add Stock Report"
+				title="Add Stock"
 				description="Create a new material stock report for the site"
 				actions={
-					<Button variant="outline" onClick={() => navigate("/stock-manager/my-reports")}>
+					<Button variant="outline" onClick={() => navigate("/site-manager/list")}>
 						<ArrowLeft className="h-4 w-4 mr-2" />
 						Back
 					</Button>
@@ -573,7 +570,7 @@ export default function AddReportPage() {
 							<Button
 								type="button"
 								variant="outline"
-								onClick={() => navigate("/stock-manager/my-reports")}
+								onClick={() => navigate("/site-manager/list")}
 								disabled={loading}
 							>
 								Cancel

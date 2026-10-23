@@ -56,6 +56,28 @@ export const STOCK_UNITS = [
 	{ value: "other", label: "Other" },
 ];
 
+// Work types for consumption records (v2.3, 12 values)
+export const CONSUMPTION_WORK_TYPES = [
+	{ value: "foundation", label: "Foundation" },
+	{ value: "structure", label: "Structure" },
+	{ value: "brickwork", label: "Brickwork" },
+	{ value: "plaster", label: "Plaster" },
+	{ value: "flooring", label: "Flooring" },
+	{ value: "electrical", label: "Electrical" },
+	{ value: "plumbing", label: "Plumbing" },
+	{ value: "painting", label: "Painting" },
+	{ value: "finishing", label: "Finishing" },
+	{ value: "waterproofing", label: "Waterproofing" },
+	{ value: "excavation", label: "Excavation" },
+	{ value: "other", label: "Other" },
+];
+
+export const workTypeLabel = (value) => CONSUMPTION_WORK_TYPES.find((w) => w.value === value)?.label || value || "—";
+
+// Older consumption records were saved without a tower or floor (the server reports them as "Unknown" or "(...)")
+export const displayTower = (name) => (!name || name === "Unknown" ? "Tower not recorded" : name);
+export const displayFloor = (floor) => (!floor || String(floor).startsWith("(") ? "No floor" : `Floor ${floor}`);
+
 export const VERIFICATION_STATUS = {
 	PENDING: "pending",
 	VERIFIED: "verified",
