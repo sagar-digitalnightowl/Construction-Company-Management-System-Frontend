@@ -26,9 +26,15 @@ export function useConsumption() {
 	}, []);
 
 	const createConsumption = useCallback(async (data) => {
-		const res = await siteStockApi.createConsumption(data);
-		toast.success("Consumption recorded");
-		return res.data.data;
+		try {
+			const res = await siteStockApi.createConsumption(data);
+			toast.success("Consumption recorded");
+			return res.data.data;
+		} catch (error) {
+			const message = error.response?.data?.message;
+			toast.error((Array.isArray(message) ? message.join(", ") : message) || "Failed to record consumption");
+			throw error;
+		}
 	}, []);
 
 	const updateConsumption = useCallback(async (id, data) => {
