@@ -12,10 +12,12 @@ import { initials } from "@/lib/helpers";
 import { authApi } from "@/api";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AIKeySettingsCard } from "@/components/chat/AIKeySettingsCard";
 
 export default function Settings() {
 	const { current, updateProfile } = useAuthStore();
 	const { dark, toggle } = useThemeStore();
+	const isAdmin = ["admin", "director"].includes((current?.role || "").toLowerCase());
 
 	const [name, setName] = useState(current.name);
 	const [preview, setPreview] = useState(current.profileImage || null);
@@ -226,6 +228,9 @@ export default function Settings() {
 				</Card>
 
 			</div>
+
+			{/* AI ChatBot — API key & provider config (admin only) */}
+			{isAdmin && <AIKeySettingsCard />}
 		</div>
 	);
 }

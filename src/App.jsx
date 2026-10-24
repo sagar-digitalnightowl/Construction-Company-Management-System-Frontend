@@ -93,7 +93,6 @@ const AddConsumptionPage = lazy(() => import("./pages/stockManager/AddConsumptio
 const AddConsumptionFormPage = lazy(() => import("./pages/stockManager/AddConsumptionFormPage"));
 const ConsumptionReportPage = lazy(() => import("./pages/stockManager/ConsumptionReportPage"));
 const SiteManagerDashboard = lazy(() => import("./pages/stockManager/SiteManagerDashboard"));
-const AIChatBot = lazy(() => import("./pages/AIChatBot")); // 🤖 AI ChatBot
 
 // Opens the page only for roles that can create the record; other roles go to a page they can use
 function StockRoute({ can, to, children }) {
@@ -395,7 +394,6 @@ export default function App() {
                                         <Route path="/reports" element={<Reports />} />
                                         <Route path="/settings" element={<Settings />} />
                                         <Route path="/incentive-config" element={<IncentiveConfig />} />
-                                        <Route path="/ai-chatbot" element={<AIChatBot />} />
 
                                         {/* Site Manager Routes */}
                                         <Route path="/site-manager" element={<Navigate to="/site-manager/dashboard" replace />} />

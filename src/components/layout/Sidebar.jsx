@@ -24,7 +24,6 @@ import {
         SlidersHorizontal,
         Package,
         Minus,
-        BotMessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/helpers";
 import { canView } from "@/data/permissions";
@@ -329,7 +328,6 @@ export function Sidebar({ role, onClickLink }) {
                                         key: "incentive-config",
                                 },
                                 { to: "/settings", label: "Settings", icon: Settings, key: "settings" },
-                                { to: "/ai-chatbot", label: "AI ChatBot", icon: BotMessageSquare, key: "ai-chatbot" },
                         ],
                 },
         ];
