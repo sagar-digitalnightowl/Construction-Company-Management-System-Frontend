@@ -28,9 +28,10 @@ export const useAuthStore = create((set) => ({
     initAuth: async () => {
         try {
             const res = await authApi.getProfile();
-            set({ current: res.data.data });
+            // Keep a user who logged in while this check was still running
+            set((s) => ({ current: s.current ?? res.data.data }));
         } catch (error) {
-            set({ current: null });
+            set((s) => ({ current: s.current ?? null }));
         } finally {
             set({ loading: false });
         }
