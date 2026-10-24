@@ -37,15 +37,30 @@ api.interceptors.response.use(
 	async (error) => {
 		const originalRequest = error.config;
 
-		// 1. Handle Network Error / Disconnected Internet
+		// 1. Handle Network Error / Disconnected Internet / Server Down
 		if (!navigator.onLine || error.message === "Network Error") {
-			console.error("Network/Internet error!");
-			error.response = {
-				data: {
-					message:
-						"A network error occurred or the internet connection was lost. Please check your network settings and try again.",
-				},
-			};
+			if (!navigator.onLine) {
+				console.error("Network/Internet error!");
+				error.response = {
+					data: {
+						message:
+							"A network error occurred or the internet connection was lost. Please check your network settings and try again.",
+					},
+				};
+			} else {
+				// Internet is ON but server unreachable -> backend server is
+				// down / wrong API URL / CORS-blocked (e.g. 502 without CORS headers)
+				console.error(
+					"API server unreachable:",
+					(error.config?.baseURL || "") + (error.config?.url || ""),
+				);
+				error.response = {
+					data: {
+						message:
+							"The API server could not be reached. Your internet is working, but the backend server seems to be down or the API URL is misconfigured. Please try again in a few minutes or contact the admin.",
+					},
+				};
+			}
 			return Promise.reject(error);
 		}
 
