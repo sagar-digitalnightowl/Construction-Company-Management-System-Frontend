@@ -310,6 +310,7 @@ export const VIEW = {
 		"employee",
 	],
 	"incentive-config": ["admin", "director"],
+	"ai-chatbot": ["admin", "director", "project_manager", "finance_executive", "hr_manager", "site_manager", "business_manager"],
 	
 	// ─── STOCK MANAGER PERMISSIONS ───
 	"site-manager": ["admin", "director", "site_manager", "site_engineer", "hr_manager", "finance_executive", "project_manager"],

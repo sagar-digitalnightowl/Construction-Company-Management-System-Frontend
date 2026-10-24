@@ -14,3 +14,4 @@ export * from "./propertyInventoryApi";
 export * from "./financeApi";
 export * from "./incentiveApi";
 export * from "./pfApi";
+export * from "./aiChatApi";
