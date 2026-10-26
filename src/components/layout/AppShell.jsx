@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { BarLoader, BeatLoader, ScaleLoader } from "react-spinners";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useAuthStore } from "@/store/authStore";
 import { canView } from "@/data/permissions";
 
@@ -81,6 +82,9 @@ export function AppShell() {
 					)}
 				</main>
 			</div>
+
+			{/* Floating AI chat popup — available on every page (no sidebar menu entry) */}
+			<ChatWidget />
 		</div>
 	);
 }
