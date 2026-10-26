@@ -1,12 +1,12 @@
 import React from "react";
 import { cn } from "../../lib/helpers";
 
-export function PageHeader({ title, eyebrow, description, actions, className }) {
+export function PageHeader({ title, eyebrow, eyebrowProps, description, actions, className }) {
 	return (
 		<div className={cn("mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between", className)}>
 			<div className="space-y-2">
 				{eyebrow && (
-					<div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-medium">
+					<div {...eyebrowProps} className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-medium">
 						{eyebrow}
 					</div>
 				)}

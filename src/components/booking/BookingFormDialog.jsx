@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuthStore } from "@/store/authStore";
 import {
 	Select,
 	SelectContent,
@@ -456,10 +457,16 @@ export function BookingFormDialog({
 
 		useCustomPlan: false,
 		installments: [],
+
+		isGstDeferred: false,
+		gstDeferredLabel: "",
 	};
 
 	const [form, setForm] = useState(initialForm);
 	const isEdit = Boolean(editBooking);
+	const { current } = useAuthStore();
+	// GST deferred is admin panel only
+	const canMarkGstDeferred = current?.role === "admin";
 
 	// ---- GST Helper Functions ----
 	const getGSTPercentage = () => {
@@ -985,6 +992,10 @@ export function BookingFormDialog({
 			payload.transactionId = form.transactionId || undefined;
 			payload.nomineeName = form.nomineeName || undefined;
 			payload.nomineeRelation = form.nomineeRelation || undefined;
+			if (canMarkGstDeferred) {
+				payload.isGstDeferred = form.isGstDeferred;
+				payload.gstDeferredLabel = form.isGstDeferred ? form.gstDeferredLabel.trim() : "";
+			}
 		}
 
 		if (form.useCustomPlan && form.installments.length > 0) {
@@ -1190,6 +1201,28 @@ export function BookingFormDialog({
 								</div>
 							</div>
 						</div>
+
+						{!isEdit && canMarkGstDeferred && (
+							<div className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-md">
+								<label className="flex items-center gap-2 text-sm cursor-pointer">
+									<input
+										type="checkbox"
+										checked={form.isGstDeferred}
+										onChange={(e) => updateForm("isGstDeferred", e.target.checked)}
+										className="w-4 h-4"
+									/>
+									<span className="font-medium">GST</span>
+								</label>
+								{form.isGstDeferred && (
+									<Input
+										placeholder="Label (e.g. GST-DEFERRED-001)"
+										value={form.gstDeferredLabel}
+										onChange={(e) => updateForm("gstDeferredLabel", e.target.value)}
+										className="sm:max-w-xs"
+									/>
+								)}
+							</div>
+						)}
 
 						{/* ✅ Cleaned up Payment Modes - Added Demand Draft */}
 						<div>

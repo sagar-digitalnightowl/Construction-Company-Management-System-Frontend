@@ -18,6 +18,14 @@ export const useBooking = () => {
 	const [myInstallments, setMyInstallments] = useState([]);
 	const [installmentSummary, setInstallmentSummary] = useState(null);
 	const [upcomingInstallments, setUpcomingInstallments] = useState([]);
+	const [gstDeferredBookings, setGstDeferredBookings] = useState([]);
+	const [gstDeferredSummary, setGstDeferredSummary] = useState(null);
+	const [gstDeferredPagination, setGstDeferredPagination] = useState({
+		page: 1,
+		limit: 10,
+		total: 0,
+		pages: 0,
+	});
 	const [loading, setLoading] = useState(false);
 	const [pagination, setPagination] = useState({
 		page: 1,
@@ -173,6 +181,28 @@ export const useBooking = () => {
 		}
 	}, []);
 
+	// Fetch GST deferred bookings with summary (own pagination, so the main list is not affected)
+	const fetchGstDeferredBookings = useCallback(async (params = {}) => {
+		setLoading(true);
+		try {
+			const res = await bookingApi.getGstDeferredBookings(params);
+			const data = res.data?.data;
+			setGstDeferredBookings(data?.bookings || []);
+			setGstDeferredSummary(data?.summary || null);
+			setGstDeferredPagination(
+				data?.pagination || { page: 1, limit: 10, total: 0, pages: 0 },
+			);
+			return data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to load GST deferred bookings",
+			);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
 	// Fetch single booking
 	const fetchBookingById = useCallback(async (id) => {
 		setLoading(true);
@@ -202,6 +232,53 @@ export const useBooking = () => {
 			toast.error(
 				err.response?.data?.message || "Failed to create booking",
 			);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// Add GST deferred amount (cumulative on the server)
+	const addGstDeferredAmount = async (id, data) => {
+		setLoading(true);
+		try {
+			const res = await bookingApi.addGstDeferredAmount(id, data);
+			toast.success(res.data?.message || "GST deferred amount added");
+			return res.data?.data;
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || "Failed to add GST deferred amount",
+			);
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// Replace GST deferred amount (not cumulative)
+	const updateGstDeferredAmount = async (id, data) => {
+		setLoading(true);
+		try {
+			const res = await bookingApi.updateGstDeferredAmount(id, data);
+			toast.success(res.data?.message || "GST deferred amount updated");
+			return res.data?.data;
+		} catch (err) {
+			toast.error(err.response?.data?.message || "Failed to update GST deferred amount");
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// Clear GST deferred amount back to 0
+	const resetGstDeferredAmount = async (id) => {
+		setLoading(true);
+		try {
+			const res = await bookingApi.resetGstDeferredAmount(id);
+			toast.success(res.data?.message || "GST deferred amount reset");
+			return res.data?.data;
+		} catch (err) {
+			toast.error(err.response?.data?.message || "Failed to reset GST deferred amount");
 			return null;
 		} finally {
 			setLoading(false);
@@ -639,6 +716,9 @@ export const useBooking = () => {
 		myInstallments,
 		installmentSummary,
 		upcomingInstallments,
+		gstDeferredBookings,
+		gstDeferredSummary,
+		gstDeferredPagination,
 		loading,
 		pagination,
 		// Fetch functions
@@ -655,8 +735,12 @@ export const useBooking = () => {
 		fetchProjectInstallments,
 		fetchInstallmentSummary,
 		fetchUpcomingInstallments,
+		fetchGstDeferredBookings,
 		// Mutations
 		createBooking,
+		addGstDeferredAmount,
+		updateGstDeferredAmount,
+		resetGstDeferredAmount,
 		updateBookingStatus,
 		cancelBooking,
 		approveBooking,
