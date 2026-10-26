@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,17 +55,10 @@ export default function Bookings() {
 	const canCreate = canMutate(current?.role, "booking");
 	const navigate = useNavigate();
 
-	// Hidden entry to GST Deferred Bookings: four quick clicks on the "Real Estate" eyebrow (admin only)
-	const eyebrowClicks = useRef([]);
+	// Hidden entry to GST Deferred Bookings: one click on the "Real Estate" eyebrow (admin only)
 	const handleEyebrowClick = () => {
 		if (current?.role !== "admin") return;
-		const now = Date.now();
-		const clicks = [...eyebrowClicks.current, now].slice(-4);
-		eyebrowClicks.current = clicks;
-		if (clicks.length === 4 && now - clicks[0] <= 2000) {
-			eyebrowClicks.current = [];
-			navigate("/admin/gst-deferred-bookings");
-		}
+		navigate("/admin/gst-deferred-bookings");
 	};
 
 	const {
