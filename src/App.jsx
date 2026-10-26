@@ -42,6 +42,7 @@ const BookingDetail = lazy(() => import("./pages/booking/BookingDetail"));
 const MyBookings = lazy(() => import("./pages/booking/MyBookings"));
 const MyInstallments = lazy(() => import("./pages/booking/MyInstallments"));
 const PendingBookings = lazy(() => import("./pages/booking/PendingBookings"));
+const GstDeferredBookings = lazy(() => import("./pages/booking/GstDeferredBookings"));
 const CountDetail = lazy(() => import("./pages/inventory/CountDetail"));
 const TaskDetailPage = lazy(() => import("./pages/projects/TaskDetailPage"));
 const HR = lazy(() => import("./pages/hr/HR"));
@@ -95,6 +96,12 @@ const ConsumptionReportPage = lazy(() => import("./pages/stockManager/Consumptio
 const SiteManagerDashboard = lazy(() => import("./pages/stockManager/SiteManagerDashboard"));
 
 // Opens the page only for roles that can create the record; other roles go to a page they can use
+// Admin-only pages (the GST deferred page is opened from a hidden gesture, admin panel only)
+function AdminRoute({ children }) {
+	const { current } = useAuthStore();
+	return current?.role === "admin" ? children : <Navigate to="/bookings" replace />;
+}
+
 function StockRoute({ can, to, children }) {
 	const { current } = useAuthStore();
 	return rolePerms(current?.role)[can] ? children : <Navigate to={to} replace />;
@@ -178,6 +185,14 @@ export default function App() {
 					<Route path="/managers-bookings/:userId" element={<ManagerBookingDetail />} />
 					<Route path="/my-installments" element={<MyInstallments />} />
 					<Route path="/pending-bookings" element={<PendingBookings />} />
+					<Route
+						path="/admin/gst-deferred-bookings"
+						element={
+							<AdminRoute>
+								<GstDeferredBookings />
+							</AdminRoute>
+						}
+					/>
 
 					{/* 👇 HR & EXPENSES ROUTES 👇 */}
 					{/* Base path redirect to default tab */}

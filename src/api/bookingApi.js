@@ -32,6 +32,18 @@ export const bookingApi = {
 	// Get pending booking requests (admin/director)
 	getPendingBookings: (params) =>
 		api.get("/booking/pending-requests", { params }),
+		// Get GST deferred bookings with summary (admin/director/finance/PM/HR/site manager)
+		getGstDeferredBookings: (params) =>
+			api.get("/booking/gst-deferred", { params }),
+		// Add GST deferred amount to a deferred booking (admin/director/finance/accountant)
+		addGstDeferredAmount: (id, data) =>
+			api.patch(`/booking/${id}/gst-deferred/add-amount`, data),
+		// Replace the GST deferred amount with a new value (admin)
+		updateGstDeferredAmount: (id, data) =>
+			api.patch(`/booking/${id}/gst-deferred/update-amount`, data),
+		// Clear the GST deferred amount back to 0 (admin)
+		resetGstDeferredAmount: (id) =>
+			api.patch(`/booking/${id}/gst-deferred/reset-amount`),
 
 	// ==================== MANAGERS (ADMIN VIEW) ====================
 	// List all managers with booking stats
