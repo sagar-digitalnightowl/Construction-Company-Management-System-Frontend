@@ -424,3 +424,6 @@ export function canMutate(role, resource) {
 	const lowerCaseRole = role.toLowerCase();
 	return Boolean(MUTATE[resource]?.includes(lowerCaseRole));
 }
+
+// The v2.5 admin dashboard is only shown in the admin panel.
+export const ADMIN_DASHBOARD_ROLES = ["admin"];
