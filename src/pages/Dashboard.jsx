@@ -1,11 +1,12 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
 	ArrowUpRight, AlertTriangle, Wallet, Users2, FolderKanban,
-	TrendingUp, Boxes, X
+	TrendingUp, Boxes, X, RefreshCw
 } from "lucide-react";
 import { PageHeader, StatCard } from "@/components/common/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAuthStore } from "@/store/authStore";
 import {
@@ -13,6 +14,10 @@ import {
 } from "@/store/dataStore";
 import { formatINR } from "@/lib/helpers";
 import { ROLES } from "@/data/permissions";
+import { useAdminDashboard } from "@/hooks/useAdminDashboard";
+import { AdminKpiCards } from "@/components/dashboard/AdminKpiCards";
+import { AdminActiveProjectsCard } from "@/components/dashboard/AdminActiveProjectsCard";
+import { AdminLatestDprsCard } from "@/components/dashboard/AdminLatestDprsCard";
 import {
 	ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
 	PieChart, Pie, Cell, Legend,
@@ -34,6 +39,9 @@ const matMix = [
 	{ name: "MEP", v: 16, c: "var(--color-chart-4)" },
 	{ name: "Finishing", v: 8, c: "var(--color-chart-5)" },
 ];
+
+// Colour for a live material category, using the same palette as the sample donut
+const colourFor = (name) => matMix.find((m) => m.name === name)?.c ?? "var(--color-chart-5)";
 
 // --- Custom Tooltip Components ---
 
@@ -89,7 +97,7 @@ const CustomAreaTooltip = ({ active, payload, label }) => {
 				{inflow && (
 					<div className="flex items-center justify-between gap-8">
 						<div className="flex items-center gap-2.5">
-							<span className="h-3 w-3 rounded-full" style={{ backgroundColor: "var(--color-primary)" }} />
+							<span className="h-3 w-3 rounded-full" style={{ backgroundColor: "var(--color-chart-1)" }} />
 							<span className="text-[13px] font-medium text-muted-foreground">Inflow</span>
 						</div>
 						<span className="text-[13px] font-mono font-bold text-foreground">₹{inflow.value} Cr</span>
@@ -98,7 +106,7 @@ const CustomAreaTooltip = ({ active, payload, label }) => {
 				{outflow && (
 					<div className="flex items-center justify-between gap-8">
 						<div className="flex items-center gap-2.5">
-							<span className="h-3 w-3 rounded-full" style={{ backgroundColor: "var(--color-foreground)" }} />
+							<span className="h-3 w-3 rounded-full" style={{ backgroundColor: "var(--color-chart-5)" }} />
 							<span className="text-[13px] font-medium text-muted-foreground">Outflow</span>
 						</div>
 						<span className="text-[13px] font-mono font-bold text-foreground">₹{outflow.value} Cr</span>
@@ -157,7 +165,7 @@ const CustomPieTooltip = ({ active, payload }) => {
 				</button>
 			</div>
 			<div className="mt-2 text-base font-mono font-bold text-foreground">
-				{item.value}%
+				{item.payload.amount != null ? formatINR(item.payload.amount) : `${item.value}%`}
 			</div>
 		</div>
 	);
@@ -171,6 +179,7 @@ export default function Dashboard() {
 	const invoices = useFinanceStore((s) => s.invoices);
 	const items = useInventoryStore((s) => s.items);
 	const reports = useSiteStore((s) => s.reports);
+	const { allowed: liveDashboard, data: liveData, error: liveError, loading: liveLoading, refreshing: liveRefreshing, refreshSections } = useAdminDashboard();
 
 	const stats = useMemo(() => {
 		const active = projects.filter((p) => p.status === "in_progress").length;
@@ -182,20 +191,34 @@ export default function Dashboard() {
 		return { active, delayed, budget, spent, lowStock, overdue };
 	}, [projects, items, invoices]);
 
+	const liveCashflow = liveDashboard ? (liveData?.cashflow?.data || []).map((d) => ({ m: d.month, inflow: d.inflow, outflow: d.outflow })) : cashflow;
+	const liveMix = liveDashboard ? (liveData?.materialConsumption?.data || []).map((d) => ({ name: d.name, v: d.percentage, amount: d.amount, c: colourFor(d.name) })) : matMix;
+	const yoyBadge = liveDashboard ? (liveData?.cashflow?.yoyGrowth || "") : "+18% YoY";
+
 	return (
 		<div className="space-y-6 md:space-y-8">
 			<PageHeader
 				eyebrow={`Welcome, ${ROLES[current.role]}`}
 				title={`Hello ${current.name.split(" ")[0]} — here's the pulse today.`}
 				description="Real-time visibility across active projects, sites, procurement and cash."
+				actions={liveDashboard ? (
+					<Button variant="outline" onClick={refreshSections} disabled={liveLoading || liveRefreshing}>
+						<RefreshCw className={`h-4 w-4 mr-2 ${liveRefreshing ? "animate-spin" : ""}`} />
+						Refresh
+					</Button>
+				) : undefined}
 			/>
 
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-				<StatCard size="compact" label="Active Projects" value={stats.active} delta={`${projects.length} total`} icon={FolderKanban} />
-				<StatCard size="compact" label="Delayed" value={stats.delayed} delta={stats.delayed ? "Needs attention" : "On track"} deltaTone={stats.delayed ? "down" : "up"} icon={AlertTriangle} accent="warning" />
-				<StatCard size="compact" label="Budget Utilisation" value={`${Math.round((stats.spent / stats.budget) * 100)}%`} delta={`${formatINR(stats.spent)} of ${formatINR(stats.budget)}`} icon={Wallet} accent="success" />
-				<StatCard size="compact" label="Overdue Invoices" value={stats.overdue} delta={stats.overdue ? "Follow-ups required" : "All current"} deltaTone={stats.overdue ? "down" : "up"} icon={TrendingUp} accent="primary" />
-			</div>
+			{liveDashboard ? (
+				<AdminKpiCards kpiCards={liveData?.kpiCards} error={liveError} />
+			) : (
+				<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+					<StatCard size="compact" label="Active Projects" value={stats.active} delta={`${projects.length} total`} icon={FolderKanban} />
+					<StatCard size="compact" label="Delayed" value={stats.delayed} delta={stats.delayed ? "Needs attention" : "On track"} deltaTone={stats.delayed ? "down" : "up"} icon={AlertTriangle} accent="warning" />
+					<StatCard size="compact" label="Budget Utilisation" value={`${Math.round((stats.spent / stats.budget) * 100)}%`} delta={`${formatINR(stats.spent)} of ${formatINR(stats.budget)}`} icon={Wallet} accent="success" />
+					<StatCard size="compact" label="Overdue Invoices" value={stats.overdue} delta={stats.overdue ? "Follow-ups required" : "All current"} deltaTone={stats.overdue ? "down" : "up"} icon={TrendingUp} accent="primary" />
+				</div>
+			)}
 
 			<div className="grid lg:grid-cols-3 gap-6">
 				<Card className="lg:col-span-2">
@@ -204,20 +227,20 @@ export default function Dashboard() {
 							<CardTitle className="font-display text-sm uppercase tracking-wider text-foreground">Cashflow — Last 6 Months</CardTitle>
 							<CardDescription className="mt-1">Inflow vs outflow in ₹ Cr</CardDescription>
 						</div>
-						<Badge variant="secondary" className="gap-1 font-mono text-[11px]"><ArrowUpRight className="h-3 w-3" /> +18% YoY</Badge>
+						<Badge variant="secondary" className={`gap-1 font-mono text-[11px] ${liveDashboard ? "bg-success/15 text-success" : ""}`}><ArrowUpRight className="h-3 w-3" /> {yoyBadge}</Badge>
 					</CardHeader>
 					<CardContent className="pt-6">
 						<div className="h-[260px]">
 							<ResponsiveContainer>
-								<AreaChart data={cashflow} margin={{ left: -20, right: 10, top: 10, bottom: 0 }}>
+								<AreaChart data={liveCashflow} margin={{ left: -20, right: 10, top: 10, bottom: 0 }}>
 									<defs>
 										<linearGradient id="gIn" x1="0" y1="0" x2="0" y2="1">
-											<stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.35} />
-											<stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
+											<stop offset="0%" stopColor="var(--color-chart-1)" stopOpacity={0.35} />
+											<stop offset="100%" stopColor="var(--color-chart-1)" stopOpacity={0} />
 										</linearGradient>
 										<linearGradient id="gOut" x1="0" y1="0" x2="0" y2="1">
-											<stop offset="0%" stopColor="var(--color-foreground)" stopOpacity={0.18} />
-											<stop offset="100%" stopColor="var(--color-foreground)" stopOpacity={0} />
+											<stop offset="0%" stopColor="var(--color-chart-5)" stopOpacity={0.18} />
+											<stop offset="100%" stopColor="var(--color-chart-5)" stopOpacity={0} />
 										</linearGradient>
 									</defs>
 									<CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.15} vertical={false} />
@@ -231,8 +254,8 @@ export default function Dashboard() {
 										cursor={{ stroke: "var(--color-border)", strokeDasharray: "4 4" }}
 									/>
 
-									<Area type="monotone" dataKey="outflow" stroke="var(--color-foreground)" strokeOpacity={0.55} fill="url(#gOut)" strokeWidth={2} activeDot={{ r: 4, strokeWidth: 0 }} />
-									<Area type="monotone" dataKey="inflow" stroke="var(--color-primary)" fill="url(#gIn)" strokeWidth={2} activeDot={{ r: 4, strokeWidth: 0 }} />
+									<Area type="monotone" dataKey="outflow" stroke="var(--color-chart-5)" strokeOpacity={0.55} fill="url(#gOut)" strokeWidth={2} activeDot={{ r: 4, strokeWidth: 0 }} />
+									<Area type="monotone" dataKey="inflow" stroke="var(--color-chart-1)" fill="url(#gIn)" strokeWidth={2} activeDot={{ r: 4, strokeWidth: 0 }} />
 								</AreaChart>
 							</ResponsiveContainer>
 						</div>
@@ -248,8 +271,8 @@ export default function Dashboard() {
 						<div className="h-[260px]">
 							<ResponsiveContainer>
 								<PieChart>
-									<Pie data={matMix} dataKey="v" nameKey="name" innerRadius={64} outerRadius={88} paddingAngle={2} stroke="none">
-										{matMix.map((e, i) => <Cell key={i} fill={e.c} />)}
+									<Pie data={liveMix} dataKey="v" nameKey="name" innerRadius={64} outerRadius={88} paddingAngle={2} stroke="none">
+										{liveMix.map((e, i) => <Cell key={i} fill={e.c} />)}
 									</Pie>
 									<Tooltip
 										trigger="click"
@@ -265,58 +288,67 @@ export default function Dashboard() {
 			</div>
 
 			<div className="grid lg:grid-cols-2 gap-6">
-				<Card>
-					<CardHeader className="flex-row items-center justify-between border-b border-border/40 pb-4">
-						<div>
-							<CardTitle className="font-display text-sm uppercase tracking-wider text-foreground">Active Projects</CardTitle>
-							<CardDescription className="mt-1">Progress vs schedule</CardDescription>
-						</div>
-						<Badge variant="secondary" className="font-mono text-[11px]">{projects.filter(p => p.status === "in_progress").length} LIVE</Badge>
-					</CardHeader>
-					<CardContent className="pt-6 space-y-5">
-						{
-							projects.filter((p) => p.status !== "completed").slice(0, 4).map((p) => (
-								<div key={p.id} className="space-y-2.5" data-testid={`dash-project-${p.code}`}>
-									<div className="flex items-baseline justify-between gap-3">
-										<div className="min-w-0">
-											<div className="text-sm font-medium text-foreground truncate">{p.name}</div>
-											<div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mt-0.5">{p.code} <span className="opacity-50 mx-1">/</span> {p.location}</div>
+				{liveDashboard ? (
+					<>
+						<AdminActiveProjectsCard data={liveData?.activeProjects} />
+						<AdminLatestDprsCard data={liveData?.latestDprs} />
+					</>
+				) : (
+					<>
+					<Card>
+						<CardHeader className="flex-row items-center justify-between border-b border-border/40 pb-4">
+							<div>
+								<CardTitle className="font-display text-sm uppercase tracking-wider text-foreground">Active Projects</CardTitle>
+								<CardDescription className="mt-1">Progress vs schedule</CardDescription>
+							</div>
+							<Badge variant="secondary" className="font-mono text-[11px]">{projects.filter(p => p.status === "in_progress").length} LIVE</Badge>
+						</CardHeader>
+						<CardContent className="pt-6 space-y-5">
+							{
+								projects.filter((p) => p.status !== "completed").slice(0, 4).map((p) => (
+									<div key={p.id} className="space-y-2.5" data-testid={`dash-project-${p.code}`}>
+										<div className="flex items-baseline justify-between gap-3">
+											<div className="min-w-0">
+												<div className="text-sm font-medium text-foreground truncate">{p.name}</div>
+												<div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mt-0.5">{p.code} <span className="opacity-50 mx-1">/</span> {p.location}</div>
+											</div>
+											<div className="text-sm font-mono font-medium text-foreground">{p.progress}%</div>
 										</div>
-										<div className="text-sm font-mono font-medium text-foreground">{p.progress}%</div>
+										<Progress value={p.progress} indicatorClassName={p.status === "delayed" ? "bg-destructive" : p.progress > 70 ? "bg-success" : "bg-primary"} />
 									</div>
-									<Progress value={p.progress} indicatorClassName={p.status === "delayed" ? "bg-destructive" : p.progress > 70 ? "bg-success" : "bg-primary"} />
-								</div>
-							))}
-					</CardContent>
-				</Card>
+								))}
+						</CardContent>
+					</Card>
 
-				<Card>
-					<CardHeader className="flex-row items-center justify-between border-b border-border/40 pb-4">
-						<div>
-							<CardTitle className="font-display text-sm uppercase tracking-wider text-foreground">Latest From Sites</CardTitle>
-							<CardDescription className="mt-1">Daily progress reports</CardDescription>
-						</div>
-						<Badge variant="outline" className="font-mono text-[11px]">{reports.length} ENTRIES</Badge>
-					</CardHeader>
-					<CardContent className="pt-2 divide-y divide-border/60">
-						{reports.slice(0, 4).map((r) => {
-							const project = projects.find(p => p.id === r.projectId);
-							return (
-								<div key={r.id} className="py-3.5 first:pt-4 last:pb-2">
-									<div className="flex items-center justify-between text-sm">
-										<div className="font-medium text-foreground truncate">{project?.name}</div>
-										<span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{r.date}</span>
+					<Card>
+						<CardHeader className="flex-row items-center justify-between border-b border-border/40 pb-4">
+							<div>
+								<CardTitle className="font-display text-sm uppercase tracking-wider text-foreground">Latest From Sites</CardTitle>
+								<CardDescription className="mt-1">Daily progress reports</CardDescription>
+							</div>
+							<Badge variant="outline" className="font-mono text-[11px]">{reports.length} ENTRIES</Badge>
+						</CardHeader>
+						<CardContent className="pt-2 divide-y divide-border/60">
+							{reports.slice(0, 4).map((r) => {
+								const project = projects.find(p => p.id === r.projectId);
+								return (
+									<div key={r.id} className="py-3.5 first:pt-4 last:pb-2">
+										<div className="flex items-center justify-between text-sm">
+											<div className="font-medium text-foreground truncate">{project?.name}</div>
+											<span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{r.date}</span>
+										</div>
+										<div className="text-sm text-muted-foreground mt-1">{r.milestone}</div>
+										<div className="flex gap-3 mt-2 text-[11px] font-mono text-muted-foreground">
+											<span className="flex items-center gap-1.5"><Users2 className="h-3 w-3" /> {r.manpower} workers</span>
+											<span className="flex items-center gap-1.5"><Boxes className="h-3 w-3" /> {r.photos} photos</span>
+										</div>
 									</div>
-									<div className="text-sm text-muted-foreground mt-1">{r.milestone}</div>
-									<div className="flex gap-3 mt-2 text-[11px] font-mono text-muted-foreground">
-										<span className="flex items-center gap-1.5"><Users2 className="h-3 w-3" /> {r.manpower} workers</span>
-										<span className="flex items-center gap-1.5"><Boxes className="h-3 w-3" /> {r.photos} photos</span>
-									</div>
-								</div>
-							);
-						})}
-					</CardContent>
-				</Card>
+								);
+							})}
+						</CardContent>
+					</Card>
+					</>
+				)}
 			</div>
 		</div>
 	);
