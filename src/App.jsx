@@ -94,6 +94,9 @@ const AddConsumptionPage = lazy(() => import("./pages/stockManager/AddConsumptio
 const AddConsumptionFormPage = lazy(() => import("./pages/stockManager/AddConsumptionFormPage"));
 const ConsumptionReportPage = lazy(() => import("./pages/stockManager/ConsumptionReportPage"));
 const SiteManagerDashboard = lazy(() => import("./pages/stockManager/SiteManagerDashboard"));
+const BankList = lazy(() => import("./pages/bank/BankList"));
+const BankDetail = lazy(() => import("./pages/bank/BankDetail"));
+const BankTransactions = lazy(() => import("./pages/bank/BankTransactions"));
 
 // Opens the page only for roles that can create the record; other roles go to a page they can use
 // Admin-only pages (the GST deferred page is opened from a hidden gesture, admin panel only)
@@ -185,6 +188,9 @@ export default function App() {
 					<Route path="/managers-bookings/:userId" element={<ManagerBookingDetail />} />
 					<Route path="/my-installments" element={<MyInstallments />} />
 					<Route path="/pending-bookings" element={<PendingBookings />} />
+					<Route path="/banks" element={<BankList />} />
+					<Route path="/banks/transactions" element={<BankTransactions />} />
+					<Route path="/banks/:id" element={<BankDetail />} />
 					<Route
 						path="/admin/gst-deferred-bookings"
 						element={

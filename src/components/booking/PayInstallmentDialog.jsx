@@ -21,6 +21,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { PAYMENT_MODE } from "@/data/constants/booking";
+import { bankApi } from "@/api/bankApi";
+import { bankOptionLabel } from "@/lib/bank";
 
 export function PayInstallmentDialog({
   open,
@@ -37,6 +39,9 @@ export function PayInstallmentDialog({
     remarks: "",
   });
   const [loading, setLoading] = useState(false);
+  const [banks, setBanks] = useState([]);
+  const [banksError, setBanksError] = useState(false);
+  const [bankId, setBankId] = useState("none");
 
   React.useEffect(() => {
     if (installment) {
@@ -50,6 +55,24 @@ export function PayInstallmentDialog({
       });
     }
   }, [installment]);
+
+  // Active banks for the "Deposit to Bank" picker. Reloaded on every open, and after a failed payment.
+  const loadBanks = React.useCallback(async () => {
+    try {
+      const res = await bankApi.list();
+      setBanks(res?.data?.data?.banks || []);
+      setBanksError(false);
+    } catch {
+      setBanks([]);
+      setBanksError(true);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    setBankId("none");
+    loadBanks();
+  }, [open, loadBanks]);
 
   const handleSubmit = async () => {
     if (!form.paymentMode) {
@@ -75,9 +98,14 @@ export function PayInstallmentDialog({
       return;
     }
     setLoading(true);
-    const success = await onPay(installment._id, form);
+    // bankId is left out when "None" is picked, so the payment is recorded without a bank entry
+    const success = await onPay(installment._id, {
+      ...form,
+      bankId: bankId === "none" ? undefined : bankId,
+    });
     setLoading(false);
     if (success) onOpenChange(false);
+    else loadBanks();
   };
 
   // Amount ko Indian format (₹ 8,00,000) mein convert karne ke liye helper function
@@ -151,6 +179,23 @@ export function PayInstallmentDialog({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Label>Deposit to Bank</Label>
+            <Select value={bankId} onValueChange={setBankId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select bank" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (do not record in a bank)</SelectItem>
+                {banks.map((b) => (
+                  <SelectItem key={b._id} value={b._id}>
+                    {bankOptionLabel(b)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {banksError && <p className="mt-1 text-xs text-destructive">Could not load banks. Try again.</p>}
           </div>
           {form.paymentMode === "Cheque" && (
             <>

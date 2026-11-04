@@ -113,6 +113,7 @@ export const VIEW = {
 		"accountant",
 		"finance_executive",
 	],
+	banks: ["admin", "director", "finance_executive", "accountant", "hr_manager", "project_manager"],
 	vendor: ["admin", "vendor"],
 	inventory: ["admin", "director", "project_manager", "site_engineer"],
 	"inventory-stock-management": [

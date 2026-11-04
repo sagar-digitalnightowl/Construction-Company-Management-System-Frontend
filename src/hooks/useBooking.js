@@ -441,8 +441,17 @@ export const useBooking = () => {
 		setLoading(true);
 		try {
 			const res = await bookingApi.payInstallment(installmentId, data);
-			toast.success("Payment recorded");
-			return res.data?.data;
+			const payload = res.data?.data;
+			// bankTransaction is null when no bank was chosen, or when the bank entry failed after the payment was saved
+			const bankTransaction = res.data?.bankTransaction ?? null;
+			if (bankTransaction) {
+				toast.success(`Payment of Rs.${Number(bankTransaction.amount).toLocaleString("en-IN")} received. Bank balance updated.`);
+			} else if (data?.bankId) {
+				toast.warning("Payment recorded, but the bank entry failed. Record it on the Banks page.");
+			} else {
+				toast.success("Payment recorded");
+			}
+			return payload && { ...payload, bankTransaction };
 		} catch (err) {
 			toast.error(err.response?.data?.message || "Payment failed");
 			return null;

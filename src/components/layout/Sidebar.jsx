@@ -24,6 +24,7 @@ import {
         SlidersHorizontal,
         Package,
         Minus,
+	Landmark,
 } from "lucide-react";
 import { cn } from "@/lib/helpers";
 import { canView } from "@/data/permissions";
@@ -79,6 +80,12 @@ export function Sidebar({ role, onClickLink }) {
                                         label: "Site Management",
                                         icon: HardHat,
                                         key: "site-management",
+                                },
+                                {
+                                        to: "/banks",
+                                        label: "Banks",
+                                        icon: Landmark,
+                                        key: "banks",
                                 },
                                 {
                                         label: "Booking",

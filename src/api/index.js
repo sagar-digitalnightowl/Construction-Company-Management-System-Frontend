@@ -16,3 +16,4 @@ export * from "./incentiveApi";
 export * from "./pfApi";
 export * from "./aiChatApi";
 export * from "./dashboardApi";
+export * from "./bankApi";
