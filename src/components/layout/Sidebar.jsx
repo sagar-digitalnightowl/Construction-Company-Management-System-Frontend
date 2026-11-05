@@ -24,6 +24,14 @@ import {
         SlidersHorizontal,
         Package,
         Minus,
+        Mic,
+        ShieldCheck,
+        Layers,
+        Wallet,
+        ClipboardList,
+        UserCog,
+        AlertTriangle,
+        ClipboardCheck,
 	Landmark,
 } from "lucide-react";
 import { cn } from "@/lib/helpers";
@@ -37,7 +45,8 @@ export function Sidebar({ role, onClickLink }) {
         const isFinanceExecutive = userRole === "finance_executive";
         const isEmployee = userRole === "employee";
         const isHRManager = userRole === "hr_manager";
-        const isSiteUser = ["site_manager", "site_engineer"].includes(userRole);
+        const isSiteUser = userRole === "site_manager";
+        const isSiteEngineer = userRole === "site_engineer";
         const showHRTabToAdminDirector = ["admin", "director"].includes(userRole);
         const canViewStockManager = ["admin", "director", "site_manager", "hr_manager", "finance_executive", "project_manager"].includes(userRole);
 
@@ -50,6 +59,29 @@ export function Sidebar({ role, onClickLink }) {
                                 { to: "/site-manager/list", label: "Add Stock", icon: Package, key: "site-manager" },
                                 { to: "/site-manager/add-consumption", label: "Add Consumption", icon: Minus, key: "site-manager" },
                                         { to: "/site-manager/consumption-report", label: "Consumption Report", icon: BarChart3, key: "site-manager" },
+                                        { to: "/site-manager/work-reports", label: "Work Reports", icon: ClipboardCheck, key: "site-manager" },
+                        ],
+                },
+        ];
+
+        // Site engineers see only their own panel pages
+        const siteEngineerNavGroups = [
+                {
+                        label: "Site Engineer",
+                        items: [
+                                { to: "/site-engineer/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "site-engineer" },
+                                { to: "/site-engineer/attendance", label: "Attendance & GPS", icon: Clock, key: "site-engineer" },
+                                { to: "/site-engineer/work-reports", label: "Work Reports", icon: ClipboardCheck, key: "site-engineer" },
+                                { to: "/site-engineer/daily-reports", label: "Daily Reports", icon: FileText, key: "site-engineer" },
+                                { to: "/site-engineer/issues", label: "Issues", icon: AlertTriangle, key: "site-engineer" },
+                                { to: "/site-engineer/voice-notes", label: "Voice Notes", icon: Mic, key: "site-engineer" },
+                                { to: "/site-engineer/safety", label: "Safety", icon: ShieldCheck, key: "site-engineer" },
+//                                { to: "/site-engineer/stock", label: "Stock", icon: Package, key: "site-engineer" },
+//                                { to: "/site-engineer/milestones", label: "Milestones", icon: Layers, key: "site-engineer" },
+//                                { to: "/site-engineer/projects", label: "Projects", icon: Building2, key: "site-engineer" },
+//                                { to: "/site-engineer/hr", label: "Salary & Leave", icon: Wallet, key: "site-engineer" },
+//                                { to: "/site-engineer/materials", label: "Material Request", icon: ClipboardList, key: "site-engineer" },
+//                                { to: "/site-engineer/profile", label: "My Profile", icon: UserCog, key: "site-engineer" },
                         ],
                 },
         ];
@@ -81,6 +113,12 @@ export function Sidebar({ role, onClickLink }) {
                                         icon: HardHat,
                                         key: "site-management",
                                 },
+                                       {
+                                        	to: "/work-reports",
+                                        	label: "Work Reports",
+                                        	icon: ClipboardCheck,
+                                        	key: "work-reports",
+                                        },
                                 {
                                         to: "/banks",
                                         label: "Banks",
@@ -406,7 +444,7 @@ export function Sidebar({ role, onClickLink }) {
                         {/* ------------------------------- */}
 
                         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5 sidebar-scroll">
-                                {(isSiteUser ? siteManagerNavGroups : navGroups).map((group) => {
+                                {(isSiteUser ? siteManagerNavGroups : isSiteEngineer ? siteEngineerNavGroups : navGroups).map((group) => {
                                         const visibleItems = group.items.filter((it) => {
                                                 if (it.children) {
                                                         return it.children.some((child) => canView(role, child.key));

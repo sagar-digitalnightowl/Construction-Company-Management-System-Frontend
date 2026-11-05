@@ -6,6 +6,7 @@ import { Topbar } from "./Topbar";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useAuthStore } from "@/store/authStore";
 import { canView } from "@/data/permissions";
+import { OfflineSyncBar, OfflineSyncWatcher } from "@/components/offline/OfflineSync";
 
 export function AppShell() {
 	const { current } = useAuthStore();
@@ -35,7 +36,12 @@ export function AppShell() {
 		return <Navigate to="/employee-overview" replace />;
 	}
 
-	if (["site_manager", "site_engineer"].includes(role) && seg === "dashboard") {
+	// Site engineers stay in their own section of the shared shell
+	if (role === "site_engineer" && seg !== "site-engineer") {
+		return <Navigate to="/site-engineer/dashboard" replace />;
+	}
+
+	if (role === "site_manager" && seg === "dashboard") {
 		return <Navigate to="/site-manager/dashboard" replace />;
 	}
 
@@ -77,6 +83,7 @@ export function AppShell() {
 						</div>
 					) : (
 						<div className="px-2 sm:px-6 lg:px-10 py-8 max-w-[1500px] mx-auto w-full animate-rise">
+							{role === "site_engineer" && <OfflineSyncBar />}
 							<Outlet />
 						</div>
 					)}
@@ -84,6 +91,7 @@ export function AppShell() {
 			</div>
 
 			{/* Floating AI chat popup — available on every page (no sidebar menu entry) */}
+			{role === "site_engineer" && <OfflineSyncWatcher />}
 			<ChatWidget />
 		</div>
 	);

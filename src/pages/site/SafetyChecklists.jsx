@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, CheckCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useSite } from "@/hooks/useSite";
 import { CreateSafetyChecklistDialog } from "@/components/site/CreateSafetyChecklistDialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +15,6 @@ export function SafetyChecklists({ canEdit, canOperationsEdit }) {
     fetchSafetyChecklists,
     createSafetyChecklist,
     updateSafetyChecklist,
-    approveSafetyChecklist,
     loading,
   } = useSite();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -30,9 +29,6 @@ export function SafetyChecklists({ canEdit, canOperationsEdit }) {
     setDialogOpen(true);
   };
 
-  const handleApprove = async (id) => {
-    await approveSafetyChecklist(id);
-  };
 
   const getStatusColor = (status) => {
     if (status === "approved") return "success";
@@ -105,15 +101,6 @@ export function SafetyChecklists({ canEdit, canOperationsEdit }) {
                       onClick={() => handleEdit(c)}
                     >
                       View / Edit
-                    </Button>
-                  )}
-                  {canEdit && c.status !== "approved" && (
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => handleApprove(c._id)}
-                    >
-                      <CheckCircle className="h-3 w-3 mr-1" /> Approve
                     </Button>
                   )}
                 </div>
