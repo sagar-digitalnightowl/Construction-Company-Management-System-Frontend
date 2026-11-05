@@ -306,7 +306,9 @@ export const useBooking = () => {
 		try {
 			const res = await bookingApi.cancelBooking(id, data);
 			toast.success("Booking cancelled");
-			return res.data?.data;
+			// cancellationPdfUrl is returned next to the booking (PDF v2.9, section 4)
+			const payload = res.data?.data;
+			return payload && { ...payload, cancellationPdfUrl: res.data?.cancellationPdfUrl || null };
 		} catch (err) {
 			toast.error("Failed to cancel booking");
 			return null;
@@ -551,7 +553,6 @@ export const useBooking = () => {
 					fileKey,
 					documentUrl: publicUrl,
 				});
-				toast.success("Agreement uploaded");
 				return publicUrl;
 			}
 		} catch (err) {

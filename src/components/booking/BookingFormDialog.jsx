@@ -23,6 +23,7 @@ import { projectApi, authApi } from "@/api";
 import { bookingApi } from "@/api/bookingApi";
 import { PAYMENT_MODE } from "@/data/constants/booking";
 import { toast } from "sonner";
+import { buyerPhoneError } from "@/lib/bookingNotifications";
 import { useLeadList } from "@/hooks/useLeadList";
 import { Trash2, Plus, Info, Calculator, CalendarClock, Loader2, Search, UserCheck } from "lucide-react";
 
@@ -948,6 +949,14 @@ export function BookingFormDialog({
 	};
 
 	const handleSubmit = async () => {
+		// New bookings need a buyer phone number, since the booking notice is sent on WhatsApp (PDF v2.9)
+		if (!isEdit) {
+			const phoneError = buyerPhoneError(form.clientPhone);
+			if (phoneError) {
+				toast.error(phoneError);
+				return;
+			}
+		}
 		if (!form.projectId || !form.towerName || !form.floor || !form.flatId) {
 			toast.error("Project, Tower, Floor, and Flat are required");
 			return;
