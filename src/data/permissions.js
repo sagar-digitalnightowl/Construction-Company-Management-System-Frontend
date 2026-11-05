@@ -113,7 +113,6 @@ export const VIEW = {
 		"accountant",
 		"finance_executive",
 	],
-	banks: ["admin", "director", "finance_executive", "accountant", "hr_manager", "project_manager"],
 	vendor: ["admin", "vendor"],
 	inventory: ["admin", "director", "project_manager", "site_engineer"],
 	"inventory-stock-management": [
@@ -313,7 +312,10 @@ export const VIEW = {
 	"incentive-config": ["admin", "director"],
 	
 	// ─── STOCK MANAGER PERMISSIONS ───
-	"site-manager": ["admin", "director", "site_manager", "site_engineer", "hr_manager", "finance_executive", "project_manager"],
+	"site-manager": ["admin", "director", "site_manager", "hr_manager", "finance_executive", "project_manager"],
+	"site-engineer": ["site_engineer"],
+	banks: ["admin", "director", "finance_executive", "accountant", "hr_manager", "project_manager"],
+	"work-reports": ["admin", "director", "project_manager", "hr_manager"],
 	"stock-reports": ["admin", "director", "site_manager", "hr_manager", "finance_executive", "project_manager", "site_engineer"],
 };
 

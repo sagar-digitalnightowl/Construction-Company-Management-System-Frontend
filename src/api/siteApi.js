@@ -8,7 +8,6 @@ export const siteApi = {
     createDailyReport: (data) => api.post('/site/daily-report', data),
     updateDailyReport: (id, data) => api.patch(`/site/daily-report/${id}`, data),
     deleteDailyReport: (id) => api.delete(`/site/daily-report/${id}`),
-    approveDailyReport: (id) => api.patch(`/site/daily-report/${id}/approve`),
 
     // Attendance
     markAttendance: (data) => api.post('/site/attendance/mark', data),
@@ -22,7 +21,6 @@ export const siteApi = {
     getIssueById: (id) => api.get(`/site/issues/${id}`),
     updateIssue: (id, data) => api.patch(`/site/issues/${id}`, data),
     deleteIssue: (id) => api.delete(`/site/issues/${id}`),
-    resolveIssue: (id, data) => api.patch(`/site/issues/${id}/resolve`, data),
 
     // Check-in / Check-out (GPS)
     checkIn: (data) => api.post('/site/check-in', data),
@@ -41,7 +39,6 @@ export const siteApi = {
     getSafetyChecklists: (params) => api.get('/site/safety/checklist', { params }),
     getSafetyChecklistById: (id) => api.get(`/site/safety/checklist/${id}`),
     updateSafetyChecklist: (id, data) => api.patch(`/site/safety/checklist/${id}`, data),
-    approveSafetyChecklist: (id) => api.patch(`/site/safety/checklist/${id}/approve`),
 
     // Offline Sync
     storeOfflineData: (data) => api.post('/site/offline/sync', data),
