@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
         LayoutDashboard,
+        MessageSquare,
         Users2,
         FolderKanban,
         HardHat,
@@ -36,6 +37,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/helpers";
 import { canView } from "@/data/permissions";
+import { useChatStore, selectUnreadTotal } from "@/store/chatStore";
 
 // IMPORTANT: Import your logo here. Adjust the path based on your folder structure.
 import AshirwadLogo from "@/assets/logo-removebg.png";
@@ -56,6 +58,7 @@ export function Sidebar({ role, onClickLink }) {
                         label: "Site Manager",
                         items: [
                                 { to: "/site-manager/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "site-manager" },
+                                { to: "/chat", label: "Chat", icon: MessageSquare, key: "chat" },
                                 { to: "/site-manager/list", label: "Add Stock", icon: Package, key: "site-manager" },
                                 { to: "/site-manager/add-consumption", label: "Add Consumption", icon: Minus, key: "site-manager" },
                                         { to: "/site-manager/consumption-report", label: "Consumption Report", icon: BarChart3, key: "site-manager" },
@@ -70,6 +73,7 @@ export function Sidebar({ role, onClickLink }) {
                         label: "Site Engineer",
                         items: [
                                 { to: "/site-engineer/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "site-engineer" },
+                                { to: "/chat", label: "Chat", icon: MessageSquare, key: "chat" },
                                 { to: "/site-engineer/attendance", label: "Attendance & GPS", icon: Clock, key: "site-engineer" },
                                 { to: "/site-engineer/work-reports", label: "Work Reports", icon: ClipboardCheck, key: "site-engineer" },
                                 { to: "/site-engineer/daily-reports", label: "Daily Reports", icon: FileText, key: "site-engineer" },
@@ -95,6 +99,12 @@ export function Sidebar({ role, onClickLink }) {
                                         label: "Dashboard",
                                         icon: LayoutDashboard,
                                         key: "dashboard",
+                                },
+                                {
+                                        to: "/chat",
+                                        label: "Chat",
+                                        icon: MessageSquare,
+                                        key: "chat",
                                 },
                         ],
                 },
@@ -378,6 +388,7 @@ export function Sidebar({ role, onClickLink }) {
         ];
 
         const location = useLocation();
+        const chatUnread = useChatStore(selectUnreadTotal);
         const [expandedMenus, setExpandedMenus] = useState(() => {
                 const open = {};
                 for (const group of navGroups) {
@@ -559,6 +570,14 @@ export function Sidebar({ role, onClickLink }) {
                                                                                                         )}
                                                                                                 />
                                                                                                 <span className="truncate">{it.label}</span>
+                                                                                                {it.key === "chat" && chatUnread > 0 && (
+                                                                                                        <span
+                                                                                                                className="ml-auto min-w-[1.25rem] rounded-full bg-sidebar-primary px-1.5 text-center text-[11px] font-semibold text-sidebar-primary-foreground"
+                                                                                                                aria-label={`${chatUnread} unread chat messages`}
+                                                                                                        >
+                                                                                                                {chatUnread > 99 ? "99+" : chatUnread}
+                                                                                                        </span>
+                                                                                                )}
                                                                                         </NavLink>
                                                                                 </li>
                                                                         );
