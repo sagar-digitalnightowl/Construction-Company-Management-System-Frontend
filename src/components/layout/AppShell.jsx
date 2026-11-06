@@ -6,10 +6,12 @@ import { Topbar } from "./Topbar";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useAuthStore } from "@/store/authStore";
 import { canView } from "@/data/permissions";
+import { useChatConnection } from "@/hooks/useChatConnection";
 import { OfflineSyncBar, OfflineSyncWatcher } from "@/components/offline/OfflineSync";
 
 export function AppShell() {
 	const { current } = useAuthStore();
+	useChatConnection(current);
 	const location = useLocation();
 
 	const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -37,7 +39,7 @@ export function AppShell() {
 	}
 
 	// Site engineers stay in their own section of the shared shell
-	if (role === "site_engineer" && seg !== "site-engineer") {
+	if (role === "site_engineer" && seg !== "site-engineer" && seg !== "chat") {
 		return <Navigate to="/site-engineer/dashboard" replace />;
 	}
 

@@ -103,6 +103,7 @@ const SeWorkReports = lazy(() => import("./pages/siteEngineer/SeWorkReports"));
 const SiteManagerWorkReports = lazy(() => import("./pages/stockManager/SiteManagerWorkReports"));
 const WorkReportInbox = lazy(() => import("./pages/site/WorkReportInbox"));
 const BankList = lazy(() => import("./pages/bank/BankList"));
+const InternalChat = lazy(() => import("./pages/internalChat/InternalChat"));
 const BankDetail = lazy(() => import("./pages/bank/BankDetail"));
 const BankTransactions = lazy(() => import("./pages/bank/BankTransactions"));
 const SeIssues = lazy(() => import("./pages/siteEngineer/SeIssues"));
@@ -189,6 +190,7 @@ export default function App() {
 
                                         <Route path="/site-management" element={<SiteManagement />} />
                                         <Route path="/work-reports" element={<WorkReportInbox />} />
+                                        <Route path="/chat" element={<InternalChat />} />
                                         <Route path="/banks" element={<BankList />} />
                                         <Route path="/banks/transactions" element={<BankTransactions />} />
                                         <Route path="/banks/:id" element={<BankDetail />} />

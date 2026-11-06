@@ -314,6 +314,12 @@ export const VIEW = {
 	// ─── STOCK MANAGER PERMISSIONS ───
 	"site-manager": ["admin", "director", "site_manager", "hr_manager", "finance_executive", "project_manager"],
 	"site-engineer": ["site_engineer"],
+	// Internal chat (guide section 1.1): every internal role; clients and vendors are excluded
+	chat: [
+		"admin", "ceo", "cmd", "md", "director", "general_manager", "business_manager", "team_manager",
+		"project_manager", "credit_manager", "finance_executive", "accountant", "hr_manager", "office_supervisor",
+		"mis", "coordinator", "receptionist", "site_engineer", "site_manager", "office_assistant", "employee",
+	],
 	banks: ["admin", "director", "finance_executive", "accountant", "hr_manager", "project_manager"],
 	"work-reports": ["admin", "director", "project_manager", "hr_manager"],
 	"stock-reports": ["admin", "director", "site_manager", "hr_manager", "finance_executive", "project_manager", "site_engineer"],
