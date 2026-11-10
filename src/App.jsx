@@ -97,8 +97,11 @@ const SiteManagerDashboard = lazy(() => import("./pages/stockManager/SiteManager
 
 // Site engineer panel
 const SeDashboard = lazy(() => import("./pages/siteEngineer/SeDashboard"));
-const SeAttendance = lazy(() => import("./pages/siteEngineer/SeAttendance"));
-const SeDailyReports = lazy(() => import("./pages/siteEngineer/SeDailyReports"));
+// const SeAttendance = lazy(() => import("./pages/siteEngineer/SeAttendance")); // switched off for this release
+// const SeDailyReports = lazy(() => import("./pages/siteEngineer/SeDailyReports")); // switched off for this release
+const SeStock = lazy(() => import("./pages/siteEngineer/SeStock"));
+const SeStockAdd = lazy(() => import("./pages/stockManager/AddReportPage"));
+const SeStockConsume = lazy(() => import("./pages/stockManager/AddConsumptionFormPage"));
 const SeWorkReports = lazy(() => import("./pages/siteEngineer/SeWorkReports"));
 const SiteManagerWorkReports = lazy(() => import("./pages/stockManager/SiteManagerWorkReports"));
 const WorkReportInbox = lazy(() => import("./pages/site/WorkReportInbox"));
@@ -109,6 +112,7 @@ const BankTransactions = lazy(() => import("./pages/bank/BankTransactions"));
 const SeIssues = lazy(() => import("./pages/siteEngineer/SeIssues"));
 const SeVoiceNotes = lazy(() => import("./pages/siteEngineer/SeVoiceNotes"));
 const SeSafety = lazy(() => import("./pages/siteEngineer/SeSafety"));
+const SeMaterialRequests = lazy(() => import("./pages/siteEngineer/SeMaterialRequests"));
 
 // Opens the page only for roles that can create the record; other roles go to a page they can use
 // Admin-only pages (the GST deferred page is opened from a hidden gesture, admin panel only)
@@ -461,12 +465,16 @@ export default function App() {
                                         <Route path="/site-engineer">
                                                 <Route index element={<Navigate to="/site-engineer/dashboard" replace />} />
                                                 <Route path="dashboard" element={<SeDashboard />} />
-                                                <Route path="attendance" element={<SeAttendance />} />
+                                                {/* <Route path="attendance" element={<SeAttendance />} /> switched off for this release */}
                                                 <Route path="work-reports" element={<SeWorkReports />} />
-                                                <Route path="daily-reports" element={<SeDailyReports />} />
+                                                {/* <Route path="daily-reports" element={<SeDailyReports />} /> switched off for this release */}
+                                                <Route path="stock" element={<SeStock />} />
+                                                <Route path="stock/add" element={<SeStockAdd />} />
+                                                <Route path="stock/consume" element={<SeStockConsume />} />
                                                 <Route path="issues" element={<SeIssues />} />
                                                 <Route path="voice-notes" element={<SeVoiceNotes />} />
                                                 <Route path="safety" element={<SeSafety />} />
+                                                <Route path="materials" element={<SeMaterialRequests />} />
                                         </Route>
                                 </Route>
 

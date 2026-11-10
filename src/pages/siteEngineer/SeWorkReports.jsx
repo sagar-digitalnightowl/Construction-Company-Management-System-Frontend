@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Eye, Plus, RotateCcw, Trash2, X } from "lucide-react";
+import { AlertTriangle, Download, Eye, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { PageHeader, StatCard } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,16 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { siteEngineerApi } from "@/api/siteEngineerApi";
 import { submitOrQueue } from "@/lib/offlineQueue";
-import { validatePhoto, uploadWorkReportPhoto } from "@/lib/workReportPhotos";
-import { formatDate, formatDateTime } from "@/lib/helpers";
+import { PHOTO_ACCEPT, validatePhoto, uploadWorkReportPhoto } from "@/lib/workReportPhotos";
+import {
+	LAST_PROJECT_KEY,
+	STATUS_LABEL,
+	pickDefaultProject,
+	rejectionReasonOf,
+	statusClass,
+	towersFrom,
+} from "@/lib/workReportFormat";
+import { cn, formatDate, formatDateTime } from "@/lib/helpers";
 import {
 	ConfirmDelete,
 	Field,
@@ -21,7 +29,6 @@ import {
 	Pager,
 	ProjectSelect,
 	RecordDetailDialog,
-	StatusPill,
 	errMsg,
 	getPositionOrNull,
 	linesToList,
@@ -31,23 +38,8 @@ import {
 	useAssignedProjects,
 } from "./shared";
 
-const STATUS_LABEL = {
-	submitted: "Submitted",
-	reviewed: "Reviewed",
-	forwarded: "Forwarded",
-	acknowledged: "Acknowledged",
-	rejected: "Rejected",
-};
-
-const STATUS_TONE = {
-	submitted: "warn",
-	reviewed: "neutral",
-	forwarded: "neutral",
-	acknowledged: "good",
-	rejected: "bad",
-};
-
 const NO_MANAGER_WARNING = "WARNING: This project has no Site Manager assigned";
+const PAGE_SIZE = 10;
 
 const emptyForm = (projectId = "") => ({
 	projectId,
@@ -87,17 +79,67 @@ const timelineOf = (r) => {
 	return items;
 };
 
+const readLastProject = () => {
+	try {
+		return localStorage.getItem(LAST_PROJECT_KEY) || "";
+	} catch (err) {
+		return "";
+	}
+};
+
+const saveLastProject = (projectId) => {
+	try {
+		if (projectId) localStorage.setItem(LAST_PROJECT_KEY, projectId);
+	} catch (err) {
+		// storage blocked: the default falls back to the first project
+	}
+};
+
+// Native selects keep the tower, floor and flat choices simple. An empty option means "not set".
+function PlaceField({ label, value, onChange, options, placeholder, disabled }) {
+	if (options && options.length > 0) {
+		return (
+			<div>
+				<Label>{label}</Label>
+				<select
+					aria-label={label}
+					className="h-9 w-full rounded-md border bg-background px-3 text-sm disabled:opacity-60"
+					value={value}
+					disabled={disabled}
+					onChange={(e) => onChange(e.target.value)}
+				>
+					<option value="">Not set</option>
+					{options.map((o) => (
+						<option key={o} value={o}>
+							{o}
+						</option>
+					))}
+				</select>
+			</div>
+		);
+	}
+	return (
+		<div>
+			<Label>{label}</Label>
+			<Input value={value} placeholder={placeholder} disabled={disabled} onChange={(e) => onChange(e.target.value)} />
+		</div>
+	);
+}
+
 export default function SeWorkReports() {
 	const { projects } = useAssignedProjects();
 	const [summary, setSummary] = useState(null);
-	const [filters, setFilters] = useState({ projectId: "all", status: "all", towerName: "", flatNumber: "" });
+	const [filters, setFilters] = useState({ projectId: "all", status: "all", towerName: "", flatNumber: "", from: "", to: "" });
 	const [reports, setReports] = useState([]);
+	const [rejected, setRejected] = useState([]);
 	const [page, setPage] = useState({ page: 1, pages: 1 });
 	const [loading, setLoading] = useState(false);
+	const [exporting, setExporting] = useState(false);
 	const [noManagerWarning, setNoManagerWarning] = useState(false);
 
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [form, setForm] = useState(emptyForm());
+	const [towers, setTowers] = useState([]);
 	const [saving, setSaving] = useState(false);
 	const [uploaded, setUploaded] = useState([]);
 	const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine !== false);
@@ -112,6 +154,28 @@ export default function SeWorkReports() {
 			window.removeEventListener("offline", off);
 		};
 	}, []);
+
+	// Towers, floors and flats for the chosen project (guide section 12)
+	useEffect(() => {
+		if (!dialogOpen || !form.projectId) {
+			setTowers([]);
+			return undefined;
+		}
+		let cancelled = false;
+		siteEngineerApi
+			.getProject(form.projectId)
+			.then((res) => {
+				if (cancelled) return;
+				const body = unwrap(res) || {};
+				setTowers(towersFrom(body.project || body));
+			})
+			.catch(() => {
+				if (!cancelled) setTowers([]);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [dialogOpen, form.projectId]);
 
 	const handlePickPhotos = async (e) => {
 		const files = Array.from(e.target.files || []);
@@ -145,16 +209,22 @@ export default function SeWorkReports() {
 			.catch(() => setSummary(null));
 	}, []);
 
+	const serverParams = useCallback(() => {
+		const params = {};
+		if (filters.projectId !== "all") params.projectId = filters.projectId;
+		if (filters.status !== "all") params.status = filters.status;
+		if (filters.towerName.trim()) params.towerName = filters.towerName.trim();
+		if (filters.flatNumber.trim()) params.flatNumber = filters.flatNumber.trim();
+		if (filters.from) params.createdFrom = filters.from;
+		if (filters.to) params.createdTo = filters.to;
+		return params;
+	}, [filters]);
+
 	const load = useCallback(
 		async (p = 1) => {
 			setLoading(true);
 			try {
-				const params = { page: p, limit: 10 };
-				if (filters.projectId !== "all") params.projectId = filters.projectId;
-				if (filters.status !== "all") params.status = filters.status;
-				if (filters.towerName.trim()) params.towerName = filters.towerName.trim();
-				if (filters.flatNumber.trim()) params.flatNumber = filters.flatNumber.trim();
-				const res = await siteEngineerApi.listWorkReports(params);
+				const res = await siteEngineerApi.listWorkReports({ ...serverParams(), page: p, limit: PAGE_SIZE });
 				const body = unwrap(res) || {};
 				setReports(body.reports || []);
 				setPage(body.pagination || { page: p, pages: 1 });
@@ -164,8 +234,16 @@ export default function SeWorkReports() {
 				setLoading(false);
 			}
 		},
-		[filters]
+		[serverParams]
 	);
+
+	// Rejected reports are shown at the top, with their reasons, so the engineer can fix and resubmit
+	const loadRejected = useCallback(() => {
+		siteEngineerApi
+			.listWorkReports({ status: "rejected", limit: 20 })
+			.then((res) => setRejected(unwrap(res)?.reports || []))
+			.catch(() => setRejected([]));
+	}, []);
 
 	useEffect(() => {
 		load(1);
@@ -173,15 +251,18 @@ export default function SeWorkReports() {
 
 	useEffect(() => {
 		loadSummary();
-	}, [loadSummary]);
+		loadRejected();
+	}, [loadSummary, loadRejected]);
 
 	const reloadAll = () => {
 		load(page.page);
 		loadSummary();
+		loadRejected();
 	};
 
 	const openCreate = (prefill) => {
-		setForm(prefill || emptyForm(filters.projectId !== "all" ? filters.projectId : projects[0]?._id || ""));
+		const fallback = filters.projectId !== "all" ? filters.projectId : pickDefaultProject(projects, readLastProject());
+		setForm(prefill || emptyForm(fallback));
 		setDialogOpen(true);
 	};
 
@@ -209,7 +290,8 @@ export default function SeWorkReports() {
 			const outcome = await submitOrQueue({ recordType: "work_report", endpoint: "/site/work-reports", data: body, send: (payload) => siteEngineerApi.createWorkReport(payload) });
 			const message = outcome.res?.data?.message || "Work report submitted";
 			setNoManagerWarning(message.includes(NO_MANAGER_WARNING));
-			toast.success("Work report submitted");
+			saveLastProject(form.projectId);
+			toast.success(outcome.queued ? "Saved offline. It will be sent when you are online" : "Work report submitted");
 			setDialogOpen(false);
 			setUploaded([]);
 			reloadAll();
@@ -234,6 +316,36 @@ export default function SeWorkReports() {
 		}
 	};
 
+	const downloadFile = (blob, name) => {
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = name;
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+		URL.revokeObjectURL(url);
+	};
+
+	const handleExport = async () => {
+		setExporting(true);
+		const stamp = new Date().toISOString().slice(0, 10);
+		try {
+			// Excel workbook from the server, with the project, status, tower, flat and date filters applied there
+			const res = await siteEngineerApi.exportWorkReports(serverParams());
+			if (!res.data || res.data.size === 0) return toast.error("No work reports to export for these filters");
+			downloadFile(res.data, `work-reports-${stamp}.xlsx`);
+			toast.success("Excel file downloaded");
+		} catch (err) {
+			toast.error(errMsg(err, "Could not export the work reports"));
+		} finally {
+			setExporting(false);
+		}
+	};
+
+	const selectedTower = towers.find((t) => t.towerName === form.towerName);
+	const selectedFloor = selectedTower?.floors.find((f) => f.floorNumber === form.floorNumber);
+
 	return (
 		<div className="space-y-5 sm:space-y-6">
 			<PageHeader
@@ -257,6 +369,38 @@ export default function SeWorkReports() {
 						Dismiss
 					</Button>
 				</div>
+			)}
+
+			{rejected.length > 0 && (
+				<Card className="border-destructive/50">
+					<CardHeader>
+						<CardTitle className="text-base text-destructive flex items-center gap-2">
+							<AlertTriangle className="h-4 w-4" /> {rejected.length} rejected work report{rejected.length === 1 ? "" : "s"}
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="pt-2 space-y-3">
+						{rejected.map((r) => (
+							<div key={r._id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 rounded-md border p-3">
+								<div className="min-w-0 space-y-1">
+									<div className="text-sm font-medium truncate">{r.workTitle}</div>
+									<div className="text-xs text-muted-foreground">{r.projectId?.name || "—"} · {formatDate(r.createdAt)}</div>
+									<div className="text-sm">
+										<span className="font-medium">Reason: </span>
+										{rejectionReasonOf(r) || "No reason was given. Ask your site manager, then resubmit."}
+									</div>
+								</div>
+								<div className="flex gap-2 shrink-0">
+									<Button variant="outline" size="sm" onClick={() => setViewingId(r._id)}>
+										View
+									</Button>
+									<Button size="sm" onClick={() => openCreate(formFromReport(r))}>
+										<RotateCcw className="h-4 w-4 mr-2" /> Fix and resubmit
+									</Button>
+								</div>
+							</div>
+						))}
+					</CardContent>
+				</Card>
 			)}
 
 			<div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
@@ -304,6 +448,25 @@ export default function SeWorkReports() {
 									))}
 								</SelectContent>
 							</Select>
+							<Input
+								type="date"
+								className="w-40"
+								aria-label="From date"
+								title="From date"
+								value={filters.from}
+								onChange={(e) => setFilters({ ...filters, from: e.target.value })}
+							/>
+							<Input
+								type="date"
+								className="w-40"
+								aria-label="To date"
+								title="To date"
+								value={filters.to}
+								onChange={(e) => setFilters({ ...filters, to: e.target.value })}
+							/>
+							<Button variant="outline" onClick={handleExport} disabled={exporting}>
+								<Download className="h-4 w-4 mr-2" /> {exporting ? "Exporting..." : "Export to Excel"}
+							</Button>
 						</div>
 					</div>
 				</CardHeader>
@@ -339,7 +502,14 @@ export default function SeWorkReports() {
 											</TableCell>
 											<TableCell>{r.workProgress ?? 0}%</TableCell>
 											<TableCell>
-												<StatusPill tone={STATUS_TONE[r.status] || "neutral"}>{STATUS_LABEL[r.status] || r.status}</StatusPill>
+												<span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", statusClass(r.status))}>
+													{STATUS_LABEL[r.status] || r.status}
+												</span>
+												{r.status === "rejected" && rejectionReasonOf(r) && (
+													<div className="mt-1 max-w-[220px] truncate text-xs text-destructive" title={rejectionReasonOf(r)}>
+														{rejectionReasonOf(r)}
+													</div>
+												)}
 											</TableCell>
 											<TableCell className="text-right">
 												<div className="flex justify-end gap-1">
@@ -383,24 +553,33 @@ export default function SeWorkReports() {
 							<Label>Project</Label>
 							<ProjectSelect
 								value={form.projectId}
-								onChange={(v) => setForm({ ...form, projectId: v })}
+								onChange={(v) => setForm({ ...form, projectId: v, towerName: "", floorNumber: "", flatNumber: "" })}
 								projects={projects}
 								className="w-full"
 							/>
 						</div>
-						<div>
-							<Label>Tower (optional)</Label>
-							<Input value={form.towerName} placeholder="Tower A" onChange={(e) => setForm({ ...form, towerName: e.target.value })} />
-						</div>
+						<PlaceField
+							label="Tower (optional)"
+							value={form.towerName}
+							placeholder="Tower A"
+							options={towers.map((t) => t.towerName)}
+							onChange={(v) => setForm({ ...form, towerName: v, floorNumber: "", flatNumber: "" })}
+						/>
 						<div className="grid grid-cols-2 gap-3">
-							<div>
-								<Label>Floor</Label>
-								<Input value={form.floorNumber} placeholder="1" onChange={(e) => setForm({ ...form, floorNumber: e.target.value })} />
-							</div>
-							<div>
-								<Label>Flat</Label>
-								<Input value={form.flatNumber} placeholder="101" onChange={(e) => setForm({ ...form, flatNumber: e.target.value })} />
-							</div>
+							<PlaceField
+								label="Floor"
+								value={form.floorNumber}
+								placeholder="1"
+								options={selectedTower?.floors.map((f) => f.floorNumber).filter(Boolean)}
+								onChange={(v) => setForm({ ...form, floorNumber: v, flatNumber: "" })}
+							/>
+							<PlaceField
+								label="Flat"
+								value={form.flatNumber}
+								placeholder="101"
+								options={selectedFloor?.flats}
+								onChange={(v) => setForm({ ...form, flatNumber: v })}
+							/>
 						</div>
 						<div className="sm:col-span-2">
 							<Label>Work title</Label>
@@ -422,8 +601,11 @@ export default function SeWorkReports() {
 							/>
 						</div>
 						<div className="sm:col-span-2">
-							<Label>Photos</Label>
-							<Input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={!online} onChange={handlePickPhotos} />
+							<Label>Photos and documents</Label>
+							<Input type="file" accept={PHOTO_ACCEPT} multiple disabled={!online} onChange={handlePickPhotos} />
+							<div className="text-xs text-muted-foreground">
+								JPG, PNG, WebP or PDF, up to 10 MB each. Large photos are made smaller before upload. HEIC photos must be converted to JPEG first.
+							</div>
 							{!online && <div className="text-xs text-muted-foreground">Photos can be uploaded when you are online. You can still add photo links below.</div>}
 							{uploaded.map((u) => (
 								<div key={u.id} className="flex items-center justify-between gap-2 text-sm">
@@ -462,6 +644,12 @@ export default function SeWorkReports() {
 				load={(id) => siteEngineerApi.getWorkReport(id).then((res) => pick(unwrap(res), "report", "workReport"))}
 				render={(r) => (
 					<div className="space-y-5 text-sm">
+						{r.status === "rejected" && (
+							<div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+								<div className="font-medium text-destructive">This report was rejected</div>
+								<div>{rejectionReasonOf(r) || "No reason was given. Ask your site manager, then resubmit."}</div>
+							</div>
+						)}
 						<div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
 							<Field label="Project">{r.projectId?.name}</Field>
 							<Field label="Status">{STATUS_LABEL[r.status] || r.status}</Field>
@@ -476,14 +664,13 @@ export default function SeWorkReports() {
 						</div>
 						<Field label="Work title">{r.workTitle}</Field>
 						<Field label="Work description">{r.workDescription}</Field>
-						{r.status === "rejected" && <Field label="Rejection reason">{r.rejectionReason}</Field>}
 						<ListBlock label="Timeline" items={timelineOf(r)} />
 						<Field label="Notes">{r.notes}</Field>
 						<ListBlock
-							label="Photos"
+							label="Photos and documents"
 							items={(r.photos || []).map((u, i) => (
 								<a key={i} href={u} target="_blank" rel="noreferrer" className="text-primary underline">
-									Photo {i + 1}
+									File {i + 1}
 								</a>
 							))}
 						/>

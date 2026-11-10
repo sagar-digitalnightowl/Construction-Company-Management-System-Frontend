@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Pencil, Plus, RotateCcw, Search } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -277,7 +277,7 @@ export default function GstDeferredBookings() {
 
 			<div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
 				<SummaryCard label="Total deferred bookings" value={summary.totalBookings ?? 0} />
-				<SummaryCard label="Total original amount" value={formatINR(summary.totalOriginalAmount ?? 0)} />
+				<SummaryCard label="Total agreement amount" value={formatINR(summary.totalOriginalAmount ?? 0)} />
 				<SummaryCard label="Total deferred amount (GST)" value={formatINR(summary.totalDeferredAmount ?? 0)} />
 				<SummaryCard label="Total with deferred" value={formatINR(summary.totalAmountWithDeferred ?? 0)} />
 				<SummaryCard label="Pending (no GST added yet)" value={summary.pendingDeferredCount ?? 0} />
@@ -349,7 +349,7 @@ export default function GstDeferredBookings() {
 							<th className="px-4 py-3 font-medium">Client</th>
 							<th className="px-4 py-3 font-medium">Project</th>
 							<th className="px-4 py-3 font-medium">Tower / flat</th>
-							<th className="px-4 py-3 font-medium text-right">Original</th>
+							<th className="px-4 py-3 font-medium text-right">Agreement</th>
 							<th className="px-4 py-3 font-medium text-right">Deferred</th>
 							<th className="px-4 py-3 font-medium text-right">Total</th>
 							<th className="px-4 py-3 font-medium">Status</th>
@@ -399,14 +399,14 @@ export default function GstDeferredBookings() {
 								<td className="px-4 py-3">
 									{canAddAmount && (
 										<div className="flex flex-wrap gap-2">
-											<Button variant="outline" size="sm" onClick={() => openAddAmount(b)}>
-												Add Amount
+											<Button variant="outline" size="icon" title="Add Amount" aria-label="Add Amount" onClick={() => openAddAmount(b)}>
+												<Plus className="h-4 w-4" />
 											</Button>
-											<Button variant="outline" size="sm" onClick={() => openEdit(b)}>
-												Edit
+											<Button variant="outline" size="icon" title="Edit" aria-label="Edit" onClick={() => openEdit(b)}>
+												<Pencil className="h-4 w-4" />
 											</Button>
-											<Button variant="outline" size="sm" onClick={() => setResetTarget(b)}>
-												Reset
+											<Button variant="outline" size="icon" title="Reset" aria-label="Reset" onClick={() => setResetTarget(b)}>
+												<RotateCcw className="h-4 w-4" />
 											</Button>
 										</div>
 									)}
@@ -462,7 +462,7 @@ export default function GstDeferredBookings() {
 									{selected.flatSnapshot?.flatNumber || "—"}
 								</div>
 								<div>
-									<span className="text-muted-foreground">Original amount: </span>
+									<span className="text-muted-foreground">Agreement amount: </span>
 									{formatINR(selected.originalBookingAmount ?? selected.bookingAmount)}
 								</div>
 								<div>
@@ -529,7 +529,7 @@ export default function GstDeferredBookings() {
 									{editTarget.clientId?.name || "—"}
 								</div>
 								<div>
-									<span className="text-muted-foreground">Original amount: </span>
+									<span className="text-muted-foreground">Agreement amount: </span>
 									{formatINR(editTarget.originalBookingAmount ?? editTarget.bookingAmount)}
 								</div>
 								<div>

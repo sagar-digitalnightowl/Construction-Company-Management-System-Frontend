@@ -70,6 +70,7 @@ export default function SeVoiceNotes() {
 		}
 	};
 
+
 	const handleDelete = async () => {
 		setDeleteBusy(true);
 		try {

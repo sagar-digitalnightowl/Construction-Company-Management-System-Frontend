@@ -79,10 +79,10 @@ export const useChatStore = create((set, get) => ({
 	handleSocketEvent: (name, payload) => {
 		switch (name) {
 			case "message:new":
-				get().receiveMessage(payload);
+				get().receiveMessage(payload.message ?? payload);
 				break;
 			case "message:sent":
-				get().receiveMessage(payload, { mine: true });
+				get().receiveMessage(payload.message ?? payload, { mine: true });
 				break;
 			case "message:read-receipt":
 				set((state) => ({
@@ -95,6 +95,23 @@ export const useChatStore = create((set, get) => ({
 						unreadCount: payload.unreadCount,
 					}),
 				}));
+				break;
+			case "message:deleted":
+				set((state) => {
+					const list = state.messages[payload.conversationId] || [];
+					const wasLast = list[list.length - 1]?._id === payload.messageId;
+					return {
+						messages: {
+							...state.messages,
+							[payload.conversationId]: list.map((item) =>
+								item._id === payload.messageId ? { ...item, isDeleted: true, content: DELETED_TEXT } : item,
+							),
+						},
+						conversations: wasLast
+							? patchConversation(state.conversations, payload.conversationId, { lastMessagePreview: DELETED_TEXT })
+							: state.conversations,
+					};
+				});
 				break;
 			case "typing:update":
 				get().setTyping(payload.conversationId, payload.userId, payload.isTyping);

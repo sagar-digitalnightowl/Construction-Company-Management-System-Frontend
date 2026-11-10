@@ -26,7 +26,10 @@ export const chatApi = {
 			};
 		});
 	},
-	createConversation: (participantId) => api.post("/chat/conversations", { participantId }),
+	createConversation: async (participantId) => {
+		const res = await api.post("/chat/conversations", { participantId });
+		return asEnvelope(res, unwrap);
+	},
 	messages: async (conversationId, params) => {
 		const res = await api.get(`/chat/conversations/${conversationId}/messages`, { params });
 		return asEnvelope(res, (body) => {
@@ -34,7 +37,10 @@ export const chatApi = {
 			return { messages: Array.isArray(src) ? src : src.messages || [] };
 		});
 	},
-	sendMessage: (conversationId, data) => api.post(`/chat/conversations/${conversationId}/messages`, data),
+	sendMessage: async (conversationId, data) => {
+		const res = await api.post(`/chat/conversations/${conversationId}/messages`, data);
+		return asEnvelope(res, unwrap);
+	},
 	markRead: (conversationId, lastReadMessageId) =>
 		api.patch(`/chat/conversations/${conversationId}/read`, { lastReadMessageId }),
 	archive: (conversationId, isArchived) => api.patch(`/chat/conversations/${conversationId}/archive`, { isArchived }),
@@ -52,7 +58,10 @@ export const chatApi = {
 			};
 		});
 	},
-	confirmAttachment: (data) => api.post("/chat/attachments/confirm", data),
+	confirmAttachment: async (data) => {
+		const res = await api.post("/chat/attachments/confirm", data);
+		return asEnvelope(res, unwrap);
+	},
 	deleteMessage: (messageId) => api.delete(`/chat/messages/${messageId}`),
 	presence: (userId) => api.get(`/chat/presence/${userId}`),
 	onlineUsers: async () => {

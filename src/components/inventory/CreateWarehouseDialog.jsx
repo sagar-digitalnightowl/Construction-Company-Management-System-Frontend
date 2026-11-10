@@ -14,7 +14,7 @@ export function CreateWarehouseDialog({ open, onOpenChange, onSave }) {
         capacity: '',
         manager: '',
         contactNumber: '',
-    });
+    }); 
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async () => {

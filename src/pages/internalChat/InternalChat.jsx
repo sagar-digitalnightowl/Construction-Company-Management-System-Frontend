@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { PageHeader } from "@/components/common/PageHeader";
 import { ConversationList } from "@/components/internalChat/ConversationList";
 import { ChatWindow } from "@/components/internalChat/ChatWindow";
 import { ContactPicker } from "@/components/internalChat/ContactPicker";
@@ -7,14 +6,8 @@ import { useChatStore } from "@/store/chatStore";
 import { filterConversations } from "@/lib/chatHelpers";
 import { cn } from "@/lib/helpers";
 
-const STATUS_TEXT = {
-	idle: "",
-	connecting: "Connecting...",
-	connected: "",
-	disconnected: "Offline. Messages will be sent over the connection when it returns.",
-	"auth-failed": "Chat could not connect. Please log in again.",
-};
-
+// Full-height chat workspace: conversation list on the left, the open conversation on the right.
+// On small screens the two panels are shown one at a time.
 export default function InternalChat() {
 	const conversations = useChatStore((s) => s.conversations);
 	const conversationsLoading = useChatStore((s) => s.conversationsLoading);
@@ -40,7 +33,7 @@ export default function InternalChat() {
 	const [query, setQuery] = useState("");
 	const [showArchived, setShowArchived] = useState(false);
 	const [pickerOpen, setPickerOpen] = useState(false);
-	// On small screens the list and the window are shown one at a time
+	// Phones show the list or the open chat, not both
 	const [mobileWindow, setMobileWindow] = useState(false);
 
 	useEffect(() => {
@@ -55,11 +48,11 @@ export default function InternalChat() {
 	const active = conversations.find((item) => item._id === activeId) || null;
 	const activeMessages = activeId ? messages[activeId] || [] : [];
 	const activeTyping = (activeId && typing[activeId]) || [];
-	// The server sends typing updates only for other participants, so any entry means the other person
-	const typingNames =
-		activeTyping.length > 0 && active?.otherParticipant?.name ? [active.otherParticipant.name] : [];
+	// Show "typing" only when the other participant is typing. Our own typing is never shown, even if the server echoes it.
+	const otherId = active?.otherParticipant?._id ?? null;
+	const otherTyping = !!otherId && activeTyping.includes(otherId) && otherId !== currentUserId;
+	const typingNames = otherTyping ? [active.otherParticipant.name] : [];
 	const isOnline = !!active && (!!online[active.otherParticipant?._id] || !!active.otherParticipant?.isOnline);
-	const statusText = STATUS_TEXT[socketStatus];
 
 	const select = (id) => {
 		setMobileWindow(true);
@@ -67,52 +60,50 @@ export default function InternalChat() {
 	};
 
 	return (
-		<div className="flex h-full min-h-0 flex-col">
-			<PageHeader
-				eyebrow="Internal"
-				title="Chat"
-				description="Message management and your team. Employees can talk to management, and management can talk to everyone."
-			/>
-			{statusText && (
-				<div className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-					{statusText}
-				</div>
-			)}
-			<div className="grid min-h-[480px] grid-cols-1 overflow-hidden rounded-xl border bg-card md:grid-cols-[320px_1fr]" style={{ height: "calc(100vh - 13rem)" }}>
-				<div className={cn("min-h-0", mobileWindow && "hidden md:block")}>
-					<ConversationList
-						conversations={visible}
-						activeId={activeId}
-						onSelect={select}
-						online={online}
-						query={query}
-						onQueryChange={setQuery}
-						showArchived={showArchived}
-						onToggleArchived={() => setShowArchived((value) => !value)}
-						onNewChat={() => setPickerOpen(true)}
-						loading={conversationsLoading}
-					/>
-				</div>
-				<div className={cn("min-h-0", !mobileWindow && "hidden md:block")}>
-					<ChatWindow
-						conversation={active}
-						messages={activeMessages}
-						hasOlder={!!hasOlder[activeId]}
-						loading={messagesLoading}
-						typingNames={typingNames}
-						currentUserId={currentUserId}
-						isOnline={isOnline}
-						lastReadMessageId={activeId ? readUpTo[activeId] : null}
-						onBack={() => setMobileWindow(false)}
-						onLoadOlder={() => loadMessages(activeId, { older: true })}
-						onSend={(id, payload) => sendMessage(id, payload)}
-						onDelete={deleteMessage}
-						onSetMuted={setMuted}
-						onSetArchived={setArchived}
-						onTyping={sendTyping}
-					/>
-				</div>
-			</div>
+		<div className="flex h-full min-h-0 bg-background">
+			<aside
+				className={cn(
+					"flex min-h-0 w-full flex-col border-r md:flex md:w-80 md:shrink-0 xl:w-96",
+					mobileWindow && "hidden md:flex",
+				)}
+			>
+				<ConversationList
+					conversations={visible}
+					activeId={activeId}
+					onSelect={select}
+					online={online}
+					query={query}
+					onQueryChange={setQuery}
+					showArchived={showArchived}
+					onToggleArchived={() => setShowArchived((value) => !value)}
+					onNewChat={() => setPickerOpen(true)}
+					loading={conversationsLoading}
+					socketStatus={socketStatus}
+					archivedCount={conversations.filter((item) => item.isArchived).length}
+				/>
+			</aside>
+
+			<section className={cn("flex min-h-0 min-w-0 flex-1 flex-col", !mobileWindow && "hidden md:flex")}>
+				<ChatWindow
+					conversation={active}
+					messages={activeMessages}
+					messagesReady={!!activeId && messages[activeId] !== undefined}
+					hasOlder={!!hasOlder[activeId]}
+					loading={messagesLoading}
+					typingNames={typingNames}
+					currentUserId={currentUserId}
+					isOnline={isOnline}
+					lastReadMessageId={activeId ? readUpTo[activeId] : null}
+					onBack={() => setMobileWindow(false)}
+					onLoadOlder={() => loadMessages(activeId, { older: true })}
+					onSend={(id, payload) => sendMessage(id, payload)}
+					onDelete={deleteMessage}
+					onSetMuted={setMuted}
+					onSetArchived={setArchived}
+					onTyping={sendTyping}
+				/>
+			</section>
+
 			<ContactPicker open={pickerOpen} onOpenChange={setPickerOpen} />
 		</div>
 	);

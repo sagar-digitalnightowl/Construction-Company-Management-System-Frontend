@@ -83,6 +83,14 @@ export function AppShell() {
 								speedMultiplier={1.2}
 							/>
 						</div>
+					) : seg === "chat" ? (
+						// Chat is a full-height workspace: no page padding, the chat fills the remaining height
+						<div className="flex h-full min-h-0 flex-col">
+							{role === "site_engineer" && <OfflineSyncBar />}
+							<div className="min-h-0 flex-1">
+								<Outlet />
+							</div>
+						</div>
 					) : (
 						<div className="px-2 sm:px-6 lg:px-10 py-8 max-w-[1500px] mx-auto w-full animate-rise">
 							{role === "site_engineer" && <OfflineSyncBar />}
@@ -94,7 +102,8 @@ export function AppShell() {
 
 			{/* Floating AI chat popup — available on every page (no sidebar menu entry) */}
 			{role === "site_engineer" && <OfflineSyncWatcher />}
-			<ChatWidget />
+			{/* Hidden on the chat page, where its button would cover the message box */}
+			{seg !== "chat" && <ChatWidget />}
 		</div>
 	);
 }

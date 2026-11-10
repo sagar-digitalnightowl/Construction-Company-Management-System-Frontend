@@ -1,7 +1,7 @@
 // src/pages/stockManager/AddConsumptionFormPage.jsx
 
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -31,6 +31,9 @@ const EMPTY_FORM = {
 
 export default function AddConsumptionFormPage() {
 	const navigate = useNavigate();
+	// Site engineers use the same forms; after saving or cancelling they return to their own stock page
+	const { pathname } = useLocation();
+	const inSiteEngineer = pathname.startsWith("/site-engineer");
 	const { createConsumption } = useConsumption();
 	const [projects, setProjects] = useState([]);
 	const [balances, setBalances] = useState([]);
@@ -123,7 +126,7 @@ export default function AddConsumptionFormPage() {
 				photoKeys: photos.map((p) => p.key),
 				notes: form.notes,
 			});
-			navigate("/site-manager/add-consumption");
+			navigate(inSiteEngineer ? "/site-engineer/stock" : "/site-manager/add-consumption");
 		} catch (error) {
 			// Toast shown by the hook
 		} finally {
@@ -137,7 +140,7 @@ export default function AddConsumptionFormPage() {
 				title="Add Consumption"
 				description="Record material used on site, by tower, floor and work type. Remaining stock updates from these records."
 				actions={
-					<Button variant="outline" onClick={() => navigate("/site-manager/add-consumption")}>
+					<Button variant="outline" onClick={() => navigate(inSiteEngineer ? "/site-engineer/stock" : "/site-manager/add-consumption")}>
 						<ArrowLeft className="h-4 w-4 mr-2" />
 						Back
 					</Button>
@@ -304,7 +307,7 @@ export default function AddConsumptionFormPage() {
 						</div>
 
 						<div className="flex justify-end gap-2">
-							<Button type="button" variant="outline" onClick={() => navigate("/site-manager/add-consumption")} disabled={saving}>
+							<Button type="button" variant="outline" onClick={() => navigate(inSiteEngineer ? "/site-engineer/stock" : "/site-manager/add-consumption")} disabled={saving}>
 								Cancel
 							</Button>
 							<Button type="submit" disabled={saving || uploading}>

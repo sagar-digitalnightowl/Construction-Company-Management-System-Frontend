@@ -1,3 +1,7 @@
+// SWITCHED OFF FOR THIS RELEASE: Daily progress reports.
+// The whole module is commented out so it can be restored by removing this block comment.
+// Its route, navigation and API calls are also commented out in App.jsx, Sidebar.jsx and siteEngineerApi.js.
+/*
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
@@ -443,3 +447,5 @@ export default function SeDailyReports() {
 		</div>
 	);
 }
+
+*/

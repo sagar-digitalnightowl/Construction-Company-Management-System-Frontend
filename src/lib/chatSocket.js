@@ -14,6 +14,7 @@ const SERVER_EVENTS = [
 	"message:sent",
 	"message:read-receipt",
 	"message:read-ack",
+	"message:deleted",
 	"typing:update",
 	"presence:update",
 	"chat:joined",
@@ -38,7 +39,9 @@ export function connectChatSocket(token, nextHandlers) {
 	handlers = nextHandlers;
 	setStatus("connecting");
 
-	const next = io(CHAT_SOCKET_URL, { auth: { token }, transports: ["websocket"], reconnection: true });
+	// auth as a function is read on every (re)connect, so a token refreshed by api/axios.js is used after a reconnect
+	const auth = (cb) => cb({ token: localStorage.getItem("accessToken") || token });
+	const next = io(CHAT_SOCKET_URL, { auth, transports: ["websocket"], reconnection: true });
 	socket = next;
 	let everConnected = false;
 	let lastError = null;

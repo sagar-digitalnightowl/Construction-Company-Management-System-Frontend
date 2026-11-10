@@ -561,6 +561,13 @@ function ProjectCard({ project, canEdit, onEdit, onDelete, onClone }) {
                 {project.projectManager?.name ?? "—"}
               </span>
             </div>
+              <div>
+                SM:{" "}
+                <span className="text-foreground">{project.siteManager?.name ?? "—"}</span>
+              </div>
+              {!project.siteManager && (
+                <div className="text-destructive text-xs">No Site Manager: reports will be unrouted</div>
+              )}
             <div>
               Priority:{" "}
               <span className="text-foreground capitalize">

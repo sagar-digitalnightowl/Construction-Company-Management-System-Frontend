@@ -1,3 +1,7 @@
+// SWITCHED OFF FOR THIS RELEASE: Attendance (mark attendance, my attendance, GPS check-in/check-out).
+// The whole module is commented out so it can be restored by removing this block comment.
+// Its route, navigation and API calls are also commented out in App.jsx, Sidebar.jsx and siteEngineerApi.js.
+/*
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { MapPin, LogIn, LogOut, AlarmClock, CheckCircle2, Clock, Pencil, XCircle } from "lucide-react";
@@ -531,3 +535,5 @@ export default function SeAttendance() {
 		</div>
 	);
 }
+
+*/

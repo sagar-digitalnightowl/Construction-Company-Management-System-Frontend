@@ -235,6 +235,9 @@ export function MilestoneBuyersPage() {
 								<TableHead>Phone</TableHead>
 								<TableHead>Flat</TableHead>
 								<TableHead>Tower</TableHead>
+								<TableHead>Business Manager</TableHead>
+								<TableHead>Project Manager</TableHead>
+								<TableHead>Team Manager</TableHead>
 								<TableHead>Status</TableHead>
 								<TableHead className="text-right">Total</TableHead>
 								<TableHead className="text-right">Paid</TableHead>
@@ -250,6 +253,9 @@ export function MilestoneBuyersPage() {
 									<TableCell>{b.buyer.phone}</TableCell>
 									<TableCell>{b.flat.number}</TableCell>
 									<TableCell>{b.flat.tower}</TableCell>
+									<TableCell>{b.businessManager?.name?.trim() || "—"}</TableCell>
+									<TableCell>{b.projectManager?.name?.trim() || "—"}</TableCell>
+									<TableCell>{b.teamManager?.name?.trim() || "—"}</TableCell>
 									<TableCell>
 										<Badge
 											variant={

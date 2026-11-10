@@ -74,17 +74,17 @@ export function Sidebar({ role, onClickLink }) {
                         items: [
                                 { to: "/site-engineer/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "site-engineer" },
                                 { to: "/chat", label: "Chat", icon: MessageSquare, key: "chat" },
-                                { to: "/site-engineer/attendance", label: "Attendance & GPS", icon: Clock, key: "site-engineer" },
+                                // { to: "/site-engineer/attendance", label: "Attendance & GPS", icon: Clock, key: "site-engineer" }, // switched off for this release
                                 { to: "/site-engineer/work-reports", label: "Work Reports", icon: ClipboardCheck, key: "site-engineer" },
-                                { to: "/site-engineer/daily-reports", label: "Daily Reports", icon: FileText, key: "site-engineer" },
+                                // { to: "/site-engineer/daily-reports", label: "Daily Reports", icon: FileText, key: "site-engineer" }, // switched off for this release
                                 { to: "/site-engineer/issues", label: "Issues", icon: AlertTriangle, key: "site-engineer" },
                                 { to: "/site-engineer/voice-notes", label: "Voice Notes", icon: Mic, key: "site-engineer" },
                                 { to: "/site-engineer/safety", label: "Safety", icon: ShieldCheck, key: "site-engineer" },
-//                                { to: "/site-engineer/stock", label: "Stock", icon: Package, key: "site-engineer" },
+                                { to: "/site-engineer/stock", label: "Site Stock", icon: Package, key: "site-engineer" },
 //                                { to: "/site-engineer/milestones", label: "Milestones", icon: Layers, key: "site-engineer" },
 //                                { to: "/site-engineer/projects", label: "Projects", icon: Building2, key: "site-engineer" },
 //                                { to: "/site-engineer/hr", label: "Salary & Leave", icon: Wallet, key: "site-engineer" },
-//                                { to: "/site-engineer/materials", label: "Material Request", icon: ClipboardList, key: "site-engineer" },
+                                { to: "/site-engineer/materials", label: "Material Request", icon: ClipboardList, key: "site-engineer" },
 //                                { to: "/site-engineer/profile", label: "My Profile", icon: UserCog, key: "site-engineer" },
                         ],
                 },
