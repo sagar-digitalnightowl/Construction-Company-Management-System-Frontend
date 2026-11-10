@@ -13,7 +13,7 @@ import { ManualTransactionDialog } from "@/components/bank/ManualTransactionDial
 import { TransactionDetailDialog } from "@/components/bank/TransactionDetailDialog";
 import { bankApi } from "@/api/bankApi";
 import { useAuthStore } from "@/store/authStore";
-import { BANK_VIEW_ROLES, BANK_WRITE_ROLES, downloadBlobResponse, flatLabel, formatAmount } from "@/lib/bank";
+import { BANK_EXPORT_ROLES, BANK_VIEW_ROLES, BANK_WRITE_ROLES, downloadBlobResponse, flatLabel, formatAmount } from "@/lib/bank";
 import { formatDateTime } from "@/lib/helpers";
 
 const errMsg = (err, fallback) => err?.response?.data?.message || fallback;
@@ -34,6 +34,7 @@ export default function BankDetail() {
 	const role = (useAuthStore((s) => s.current)?.role || "").toLowerCase();
 	const canWrite = BANK_WRITE_ROLES.includes(role);
 	const canView = BANK_VIEW_ROLES.includes(role);
+	const canExport = BANK_EXPORT_ROLES.includes(role);
 
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(true);
@@ -114,9 +115,11 @@ export default function BankDetail() {
 				description={`${bank.branchName || ""} · A/c ${bank.accountNumber || "—"} · IFSC ${bank.ifscCode || "—"}`}
 				actions={
 					<div className="flex flex-wrap gap-2">
+						{canExport && (
 						<Button variant="outline" onClick={downloadStatement} disabled={exporting}>
 							<Download className="h-4 w-4 mr-2" /> {exporting ? "Preparing..." : "Download statement"}
 						</Button>
+						)}
 						{canWrite && (
 							<Button onClick={() => setManualOpen(true)}>
 								<Plus className="h-4 w-4 mr-2" /> Add manual transaction

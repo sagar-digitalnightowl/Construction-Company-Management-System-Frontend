@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, CheckCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import { formatDate } from "@/lib/helpers";
 import { useSite } from "@/hooks/useSite";
 import { ReportIssueDialog } from "@/components/site/ReportIssueDialog";
@@ -17,17 +17,13 @@ const severityVariant = {
 };
 
 export function SiteIssues({ canEdit, canOperationsEdit }) {
-  const { issues, fetchIssues, createIssue, resolveIssue, loading } = useSite();
+  const { issues, fetchIssues, createIssue, loading } = useSite();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchIssues();
   }, [fetchIssues]);
 
-  const handleResolve = async (id) => {
-    const resolution = prompt("Enter resolution details:");
-    if (resolution) await resolveIssue(id, resolution);
-  };
 
   if (loading)
     return (
@@ -93,15 +89,6 @@ export function SiteIssues({ canEdit, canOperationsEdit }) {
                   <p className="text-xs text-green-600 mt-1">
                     <strong>Resolution:</strong> {issue.resolution}
                   </p>
-                )}
-                {canEdit && issue.status !== "resolved" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleResolve(issue._id)}
-                  >
-                    <CheckCircle className="h-3 w-3 mr-1" /> Resolve
-                  </Button>
                 )}
               </CardContent>
             </Card>

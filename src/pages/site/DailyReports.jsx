@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Eye, Edit, Trash2, CheckCircle } from "lucide-react";
+import { Plus, Eye, Edit, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/helpers";
 import { useSite } from "@/hooks/useSite";
 import { CreateDailyReportDialog } from "@/components/site/CreateDailyReportDialog";
@@ -18,7 +18,6 @@ export function DailyReports({ canEdit, canOperationsEdit }) {
     createDailyReport,
     updateDailyReport,
     deleteDailyReport,
-    approveDailyReport,
     loading,
   } = useSite();
   const [projects, setProjects] = useState([]);
@@ -51,9 +50,6 @@ export function DailyReports({ canEdit, canOperationsEdit }) {
     if (confirm("Delete this report?")) await deleteDailyReport(id);
   };
 
-  const handleApprove = async (id) => {
-    await approveDailyReport(id);
-  };
 
   if (loading)
     return (
@@ -138,15 +134,6 @@ export function DailyReports({ canEdit, canOperationsEdit }) {
                         <Trash2 className="h-3 w-3 mr-1" /> Delete
                       </Button>
                     </>
-                  )}
-                  {canEdit && !report.isApproved && (
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => handleApprove(report._id)}
-                    >
-                      <CheckCircle className="h-3 w-3 mr-1" /> Approve
-                    </Button>
                   )}
                 </div>
               </CardContent>

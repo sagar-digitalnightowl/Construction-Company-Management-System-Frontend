@@ -5,6 +5,8 @@
 export const BANK_WRITE_ROLES = ["admin", "director", "finance_executive", "accountant"];
 // Who can soft-delete a bank (PDF 3.5)
 export const BANK_DELETE_ROLES = ["admin", "director"];
+// Who can download exports (PDF 1.1 role table: admin, director, finance, accountant, HR)
+export const BANK_EXPORT_ROLES = [...BANK_WRITE_ROLES, "hr_manager"];
 // Who can see inactive banks (PDF 3.2)
 export const BANK_INACTIVE_ROLES = ["admin", "director", "finance_executive", "accountant"];
 // Who can open the bank pages, dashboards, transactions and exports

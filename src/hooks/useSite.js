@@ -71,19 +71,6 @@ export const useSite = () => {
         }
     }, [fetchDailyReports]);
 
-    const approveDailyReport = useCallback(async (id) => {
-        try {
-            const res = await siteApi.approveDailyReport(id);
-            if (res.data?.success) {
-                toast.success('Report approved');
-                await fetchDailyReports();
-                return true;
-            }
-        } catch (err) {
-            toast.error('Failed to approve report');
-            return false;
-        }
-    }, [fetchDailyReports]);
 
     // ---------- Attendance ----------
     const fetchAttendance = useCallback(async (params = {}) => {
@@ -166,19 +153,6 @@ export const useSite = () => {
         }
     }, [fetchIssues]);
 
-    const resolveIssue = useCallback(async (id, resolution) => {
-        try {
-            const res = await siteApi.resolveIssue(id, { resolution });
-            if (res.data?.success) {
-                toast.success('Issue resolved');
-                await fetchIssues();
-                return true;
-            }
-        } catch (err) {
-            toast.error('Failed to resolve issue');
-            return false;
-        }
-    }, [fetchIssues]);
 
     // ---------- Check-in / Check-out ----------
     const fetchActiveCheckin = useCallback(async () => {
@@ -328,19 +302,6 @@ export const useSite = () => {
         }
     }, [fetchSafetyChecklists]);
 
-    const approveSafetyChecklist = useCallback(async (id) => {
-        try {
-            const res = await siteApi.approveSafetyChecklist(id);
-            if (res.data?.success) {
-                toast.success('Safety checklist approved');
-                await fetchSafetyChecklists();
-                return true;
-            }
-        } catch (err) {
-            toast.error('Failed to approve safety checklist');
-            return false;
-        }
-    }, [fetchSafetyChecklists]);
 
     // Auto-fetch for site engineer's active check-in
     useEffect(() => {
@@ -363,14 +324,12 @@ export const useSite = () => {
         createDailyReport,
         updateDailyReport,
         deleteDailyReport,
-        approveDailyReport,
         fetchAttendance,
         fetchMyAttendance,
         markAttendance,
         updateAttendance,
         fetchIssues,
         createIssue,
-        resolveIssue,
         fetchActiveCheckin,
         fetchCheckinHistory,
         checkIn,
@@ -382,6 +341,5 @@ export const useSite = () => {
         fetchSafetyChecklists,
         createSafetyChecklist,
         updateSafetyChecklist,
-        approveSafetyChecklist,
     };
 };

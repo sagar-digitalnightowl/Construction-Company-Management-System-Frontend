@@ -6,9 +6,12 @@ import { Topbar } from "./Topbar";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useAuthStore } from "@/store/authStore";
 import { canView } from "@/data/permissions";
+import { useChatConnection } from "@/hooks/useChatConnection";
+import { OfflineSyncBar, OfflineSyncWatcher } from "@/components/offline/OfflineSync";
 
 export function AppShell() {
 	const { current } = useAuthStore();
+	useChatConnection(current);
 	const location = useLocation();
 
 	const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,7 +38,12 @@ export function AppShell() {
 		return <Navigate to="/employee-overview" replace />;
 	}
 
-	if (["site_manager", "site_engineer"].includes(role) && seg === "dashboard") {
+	// Site engineers stay in their own section of the shared shell
+	if (role === "site_engineer" && seg !== "site-engineer" && seg !== "chat") {
+		return <Navigate to="/site-engineer/dashboard" replace />;
+	}
+
+	if (role === "site_manager" && seg === "dashboard") {
 		return <Navigate to="/site-manager/dashboard" replace />;
 	}
 
@@ -75,8 +83,17 @@ export function AppShell() {
 								speedMultiplier={1.2}
 							/>
 						</div>
+					) : seg === "chat" ? (
+						// Chat is a full-height workspace: no page padding, the chat fills the remaining height
+						<div className="flex h-full min-h-0 flex-col">
+							{role === "site_engineer" && <OfflineSyncBar />}
+							<div className="min-h-0 flex-1">
+								<Outlet />
+							</div>
+						</div>
 					) : (
 						<div className="px-2 sm:px-6 lg:px-10 py-8 max-w-[1500px] mx-auto w-full animate-rise">
+							{role === "site_engineer" && <OfflineSyncBar />}
 							<Outlet />
 						</div>
 					)}
@@ -84,7 +101,9 @@ export function AppShell() {
 			</div>
 
 			{/* Floating AI chat popup — available on every page (no sidebar menu entry) */}
-			<ChatWidget />
+			{role === "site_engineer" && <OfflineSyncWatcher />}
+			{/* Hidden on the chat page, where its button would cover the message box */}
+			{seg !== "chat" && <ChatWidget />}
 		</div>
 	);
 }

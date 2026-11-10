@@ -104,6 +104,7 @@ const EMPTY_PROJECT = {
   name: "",
   description: "",
   location: "",
+  siteManager: "",
   startDate: "",
   endDate: "",
   budget: "",
@@ -769,6 +770,19 @@ export function ProjectForm({ open, onOpenChange, initialData, onSave }) {
   const [newVideoFiles, setNewVideoFiles] = useState([]);
   const [newVideoPreviews, setNewVideoPreviews] = useState([]);
 
+  // Site Managers for the picker (PDF v2.7: each project needs one to receive work reports)
+  const [siteManagers, setSiteManagers] = useState([]);
+  useEffect(() => {
+    if (!open) return;
+    authApi
+      .getUsers({ role: "site_manager" })
+      .then((res) => {
+        const list = res?.data?.data?.users ?? res?.data?.data ?? [];
+        setSiteManagers(Array.isArray(list) ? list : []);
+      })
+      .catch(() => toast.error("Failed to load site managers"));
+  }, [open]);
+
   useEffect(() => {
     if (open) {
       if (initialData) {
@@ -776,6 +790,7 @@ export function ProjectForm({ open, onOpenChange, initialData, onSave }) {
           name: initialData.name ?? "",
           description: initialData.description ?? "",
           location: initialData.location ?? "",
+          siteManager: initialData.siteManager?._id ?? initialData.siteManager ?? "",
           startDate: initialData.startDate ? initialData.startDate.slice(0, 10) : "",
           endDate: initialData.endDate ? initialData.endDate.slice(0, 10) : "",
           budget: initialData.budget ?? "",
@@ -924,6 +939,7 @@ export function ProjectForm({ open, onOpenChange, initialData, onSave }) {
       };
       
       if (!payload.endDate) delete payload.endDate;
+      if (!payload.siteManager) delete payload.siteManager;
       
       // 5. Save to Database
       await onSave(payload);
@@ -989,6 +1005,20 @@ export function ProjectForm({ open, onOpenChange, initialData, onSave }) {
                 onChange={(e) => setField("location", e.target.value)}
                 placeholder="Mumbai, Maharashtra"
               />
+            </div>
+
+            {/* Site Manager: receives the work reports submitted on this project */}
+            <div className="space-y-1.5">
+              <Label>Site Manager</Label>
+              <Select value={form.siteManager || "none"} onValueChange={(v) => setField("siteManager", v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Select a site manager" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Site Manager</SelectItem>
+                  {siteManagers.map((u) => (
+                    <SelectItem key={u._id} value={u._id}>{u.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Dates */}

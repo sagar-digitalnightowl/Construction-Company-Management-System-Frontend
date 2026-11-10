@@ -94,9 +94,25 @@ const AddConsumptionPage = lazy(() => import("./pages/stockManager/AddConsumptio
 const AddConsumptionFormPage = lazy(() => import("./pages/stockManager/AddConsumptionFormPage"));
 const ConsumptionReportPage = lazy(() => import("./pages/stockManager/ConsumptionReportPage"));
 const SiteManagerDashboard = lazy(() => import("./pages/stockManager/SiteManagerDashboard"));
+
+// Site engineer panel
+const SeDashboard = lazy(() => import("./pages/siteEngineer/SeDashboard"));
+// const SeAttendance = lazy(() => import("./pages/siteEngineer/SeAttendance")); // switched off for this release
+// const SeDailyReports = lazy(() => import("./pages/siteEngineer/SeDailyReports")); // switched off for this release
+const SeStock = lazy(() => import("./pages/siteEngineer/SeStock"));
+const SeStockAdd = lazy(() => import("./pages/stockManager/AddReportPage"));
+const SeStockConsume = lazy(() => import("./pages/stockManager/AddConsumptionFormPage"));
+const SeWorkReports = lazy(() => import("./pages/siteEngineer/SeWorkReports"));
+const SiteManagerWorkReports = lazy(() => import("./pages/stockManager/SiteManagerWorkReports"));
+const WorkReportInbox = lazy(() => import("./pages/site/WorkReportInbox"));
 const BankList = lazy(() => import("./pages/bank/BankList"));
+const InternalChat = lazy(() => import("./pages/internalChat/InternalChat"));
 const BankDetail = lazy(() => import("./pages/bank/BankDetail"));
 const BankTransactions = lazy(() => import("./pages/bank/BankTransactions"));
+const SeIssues = lazy(() => import("./pages/siteEngineer/SeIssues"));
+const SeVoiceNotes = lazy(() => import("./pages/siteEngineer/SeVoiceNotes"));
+const SeSafety = lazy(() => import("./pages/siteEngineer/SeSafety"));
+const SeMaterialRequests = lazy(() => import("./pages/siteEngineer/SeMaterialRequests"));
 
 // Opens the page only for roles that can create the record; other roles go to a page they can use
 // Admin-only pages (the GST deferred page is opened from a hidden gesture, admin panel only)
@@ -177,6 +193,11 @@ export default function App() {
                                         <Route path="/inventory/counts" element={<StockCounts />} />
 
                                         <Route path="/site-management" element={<SiteManagement />} />
+                                        <Route path="/work-reports" element={<WorkReportInbox />} />
+                                        <Route path="/chat" element={<InternalChat />} />
+                                        <Route path="/banks" element={<BankList />} />
+                                        <Route path="/banks/transactions" element={<BankTransactions />} />
+                                        <Route path="/banks/:id" element={<BankDetail />} />
 
                                         <Route path="/vendor/dashboard" element={<VendorDashboard />} />
 
@@ -188,9 +209,6 @@ export default function App() {
 					<Route path="/managers-bookings/:userId" element={<ManagerBookingDetail />} />
 					<Route path="/my-installments" element={<MyInstallments />} />
 					<Route path="/pending-bookings" element={<PendingBookings />} />
-					<Route path="/banks" element={<BankList />} />
-					<Route path="/banks/transactions" element={<BankTransactions />} />
-					<Route path="/banks/:id" element={<BankDetail />} />
 					<Route
 						path="/admin/gst-deferred-bookings"
 						element={
@@ -382,7 +400,7 @@ export default function App() {
                                                         </FinanceLayout>
                                                 }
                                         />
-
+ 
                                         <Route
                                                 path="/finance-payroll"
                                                 element={
@@ -441,6 +459,23 @@ export default function App() {
                                         <Route path="/admin/consumptionreport" element={<ConsumptionReportPage />} />
                                         <Route path="/site-manager/manage" element={<Navigate to="/site-manager/manage/dashboard" replace />} />
                                         <Route path="/site-manager/manage/:tab" element={<StockManager />} />
+                                        <Route path="/site-manager/work-reports" element={<SiteManagerWorkReports />} />
+
+                                        {/* Site Engineer Panel: same shell, sidebar and topbar as the other panels */}
+                                        <Route path="/site-engineer">
+                                                <Route index element={<Navigate to="/site-engineer/dashboard" replace />} />
+                                                <Route path="dashboard" element={<SeDashboard />} />
+                                                {/* <Route path="attendance" element={<SeAttendance />} /> switched off for this release */}
+                                                <Route path="work-reports" element={<SeWorkReports />} />
+                                                {/* <Route path="daily-reports" element={<SeDailyReports />} /> switched off for this release */}
+                                                <Route path="stock" element={<SeStock />} />
+                                                <Route path="stock/add" element={<SeStockAdd />} />
+                                                <Route path="stock/consume" element={<SeStockConsume />} />
+                                                <Route path="issues" element={<SeIssues />} />
+                                                <Route path="voice-notes" element={<SeVoiceNotes />} />
+                                                <Route path="safety" element={<SeSafety />} />
+                                                <Route path="materials" element={<SeMaterialRequests />} />
+                                        </Route>
                                 </Route>
 
                                 <Route path="/" element={<Navigate to="/dashboard" replace />} />

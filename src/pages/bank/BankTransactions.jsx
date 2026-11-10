@@ -15,7 +15,7 @@ import { TransactionDetailDialog } from "@/components/bank/TransactionDetailDial
 import { bankApi } from "@/api/bankApi";
 import { projectApi } from "@/api/projectApi";
 import { useAuthStore } from "@/store/authStore";
-import { BANK_INACTIVE_ROLES, SOURCE_LABEL, bankOptionLabel, cleanParams, downloadBlobResponse, formatAmount } from "@/lib/bank";
+import { BANK_EXPORT_ROLES, BANK_INACTIVE_ROLES, SOURCE_LABEL, bankOptionLabel, cleanParams, downloadBlobResponse, formatAmount } from "@/lib/bank";
 import { formatDate } from "@/lib/helpers";
 
 const errMsg = (err, fallback) => err?.response?.data?.message || fallback;
@@ -60,6 +60,7 @@ export default function BankTransactions() {
 	const [searchParams] = useSearchParams();
 	const role = (useAuthStore((s) => s.current)?.role || "").toLowerCase();
 	const canSeeInactive = BANK_INACTIVE_ROLES.includes(role);
+	const canExport = BANK_EXPORT_ROLES.includes(role);
 
 	const [filters, setFilters] = useState({ ...EMPTY_FILTERS, bankId: searchParams.get("bankId") || "" });
 	const [draftSearch, setDraftSearch] = useState("");
@@ -160,12 +161,16 @@ export default function BankTransactions() {
 				description="Every credit and debit across the bank accounts, with buyer, flat and installment details."
 				actions={
 					<div className="flex flex-wrap gap-2">
+						{canExport && (
+						<>
 						<Button variant="outline" onClick={() => exportAs("excel")} disabled={!!exporting}>
 							<FileSpreadsheet className="h-4 w-4 mr-2" /> {exporting === "excel" ? "Preparing..." : "Export to Excel"}
 						</Button>
 						<Button variant="outline" onClick={() => exportAs("pdf")} disabled={!!exporting}>
 							<FileText className="h-4 w-4 mr-2" /> {exporting === "pdf" ? "Preparing..." : "Export to PDF"}
 						</Button>
+						</>
+						)}
 					</div>
 				}
 			/>

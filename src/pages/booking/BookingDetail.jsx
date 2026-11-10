@@ -10,6 +10,10 @@ import { useBooking } from "@/hooks/useBooking";
 import { useAuthStore } from "@/store/authStore";
 import { canMutate } from "@/data/permissions";
 import { BookingStatusBadge } from "@/components/booking/BookingStatusBadge";
+import { NotificationHistoryPanel } from "@/components/booking/NotificationHistoryPanel";
+import { notificationApi } from "@/api/notificationApi";
+import { cancelNoticeText, whatsappCancellationStatus } from "@/lib/bookingNotifications";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { InstallmentTable } from "@/components/booking/InstallmentTable";
 import { PayInstallmentDialog } from "@/components/booking/PayInstallmentDialog";
 import { formatDate } from "@/lib/helpers";
@@ -38,6 +42,8 @@ export default function BookingDetail() {
 	const [selectedInstallment, setSelectedInstallment] = useState(null);
 	const [payDialogOpen, setPayDialogOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
+	const [cancelResult, setCancelResult] = useState(null); // { pdfUrl } after a successful cancel
+	const [historyKey, setHistoryKey] = useState(0); // bump to reload the notification history
 
 	useEffect(() => {
 		if (id) {
@@ -75,7 +81,8 @@ export default function BookingDetail() {
 			setUploading(false);
 			if (url) {
 				await fetchBookingById(id);
-				toast.success("Agreement uploaded");
+				setHistoryKey((k) => k + 1);
+				toast.success("Agreement uploaded. Buyer has been notified via WhatsApp.");
 			}
 		};
 		fileInput.click();
@@ -89,11 +96,20 @@ export default function BookingDetail() {
 	const handleCancel = async () => {
 		const reason = prompt("Enter cancellation reason:");
 		if (reason) {
-			await cancelBooking(id, {
+			const result = await cancelBooking(id, {
 				reason,
 				refundAdvance: window.confirm("Refund advance amount?"),
 			});
 			await fetchBookingById(id);
+			setHistoryKey((k) => k + 1);
+			if (result) {
+				// Read the WhatsApp result from the history, so the dialog says what really happened
+				const logs = await notificationApi
+					.history(id)
+					.then((res) => res.data?.data?.logs || [])
+					.catch(() => []);
+				setCancelResult({ pdfUrl: result.cancellationPdfUrl, whatsapp: whatsappCancellationStatus(logs) });
+			}
 		}
 	};
 
@@ -615,6 +631,33 @@ export default function BookingDetail() {
 					canPay={canPay}
 				/>
 			</div>
+
+			{/* --- Notification history (PDF v2.9) --- */}
+			<div>
+				<NotificationHistoryPanel bookingId={id} refreshKey={historyKey} />
+			</div>
+
+			<Dialog open={!!cancelResult} onOpenChange={(o) => !o && setCancelResult(null)}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>
+							{cancelResult?.whatsapp?.status === "failed"
+								? "Booking cancelled, but the WhatsApp notice failed"
+								: "Booking cancelled"}
+						</DialogTitle>
+						<DialogDescription>{cancelNoticeText(cancelResult?.whatsapp)}</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setCancelResult(null)}>Close</Button>
+						<Button
+							disabled={!cancelResult?.pdfUrl}
+							onClick={() => cancelResult?.pdfUrl && window.open(cancelResult.pdfUrl, "_blank", "noopener,noreferrer")}
+						>
+							<Download className="h-4 w-4 mr-1" /> Download Cancellation Letter
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			<PayInstallmentDialog
 				open={payDialogOpen}

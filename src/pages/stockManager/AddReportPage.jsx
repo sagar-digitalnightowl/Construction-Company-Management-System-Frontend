@@ -1,7 +1,7 @@
 // src/pages/stockManager/AddReportPage.jsx
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +27,9 @@ const NUMERIC_FIELDS = ["qty", "ratePerUnit", "totalAmount", "estimatedValue"];
 
 export default function AddReportPage() {
 	const navigate = useNavigate();
+	// Site engineers use the same forms; after saving or cancelling they return to their own stock page
+	const { pathname } = useLocation();
+	const inSiteEngineer = pathname.startsWith("/site-engineer");
 	const { createReport } = useSiteStock();
 
 	const [loading, setLoading] = useState(false);
@@ -230,7 +233,7 @@ export default function AddReportPage() {
 			saveItemNameToHistory(formData.itemName);
 			
 			toast.success("Stock report created successfully");
-			navigate("/site-manager/list");
+			navigate(inSiteEngineer ? "/site-engineer/stock" : "/site-manager/list");
 		} catch (error) {
 			console.error("Error creating report:", error);
 			// Toast already shown in hook
@@ -245,7 +248,7 @@ export default function AddReportPage() {
 				title="Add Stock"
 				description="Create a new material stock report for the site"
 				actions={
-					<Button variant="outline" onClick={() => navigate("/site-manager/list")}>
+					<Button variant="outline" onClick={() => navigate(inSiteEngineer ? "/site-engineer/stock" : "/site-manager/list")}>
 						<ArrowLeft className="h-4 w-4 mr-2" />
 						Back
 					</Button>
@@ -570,7 +573,7 @@ export default function AddReportPage() {
 							<Button
 								type="button"
 								variant="outline"
-								onClick={() => navigate("/site-manager/list")}
+								onClick={() => navigate(inSiteEngineer ? "/site-engineer/stock" : "/site-manager/list")}
 								disabled={loading}
 							>
 								Cancel

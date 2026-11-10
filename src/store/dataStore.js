@@ -11,7 +11,7 @@ import {
     seedLeads,
     seedDocuments,
     seedPayroll,
-    seedSales,
+    seedSales, 
     seedProcurement,
     seedBookings,
 } from "./seed";

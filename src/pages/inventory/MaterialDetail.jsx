@@ -457,8 +457,8 @@ export default function MaterialDetail() {
                     setIssueForm({ ...issueForm, warehouseName: v })
                   }
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {warehouses.map((w) => (

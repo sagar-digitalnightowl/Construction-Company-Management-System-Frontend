@@ -72,6 +72,19 @@ export function TeamCard({ project, canEdit, onAssignTeam, onUpdateTeamRole, onR
               </p>
             </div>
           </div>
+          <div className="flex items-start gap-2">
+            <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-muted-foreground text-xs">Site Manager</p>
+              {project?.siteManager?.name ? (
+                <p className="font-medium">{project.siteManager.name}{project.siteManager.phone ? ` · ${project.siteManager.phone}` : ""}</p>
+              ) : (
+                <p className="font-medium text-destructive">
+                  Not assigned. Work reports will be unrouted.
+                </p>
+              )}
+            </div>
+          </div>
           <Separator />
           <div>
             <div className="flex justify-between items-center mb-2">
