@@ -48,6 +48,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export default function MaterialDetail() {
   const { id } = useParams();
@@ -712,6 +713,7 @@ export default function MaterialDetail() {
 
         {/* Stock Tab */}
         <TabsContent value="stock" className="mt-4">
+        	<ExportButtons url="/inventory/stock" params={{ materialId: id }} name="material-stock" />
           {stock.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center text-muted-foreground">

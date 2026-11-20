@@ -31,6 +31,7 @@ import { useLead } from "@/hooks/useLead";
 import { useHR } from "@/hooks/useHR";
 import { toast } from "sonner";
 import { leadApi } from "@/api/leadApi";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import {
   Phone,
   PhoneCall,
@@ -275,6 +276,7 @@ const CallingRecordsPage = () => {
 
   return (
     <div className="space-y-4">
+      <ExportButtons url="/lead/calling-records" name="calling-records" />
       {/* ─── Statistics Cards ─── */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatsCard icon={Phone} label="Total" value={stats.total} />

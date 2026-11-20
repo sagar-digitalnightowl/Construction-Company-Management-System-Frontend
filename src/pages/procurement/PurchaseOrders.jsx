@@ -1,6 +1,7 @@
 // src/pages/procurement/PurchaseOrders.jsx
 import React, { useState, useEffect } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Plus, ShoppingCart } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -54,13 +55,13 @@ export default function PurchaseOrders() {
         eyebrow="Procurement"
         title="Purchase Orders"
         description="Create and manage purchase orders from accepted quotations."
-        actions={
+        actions={<div className="flex flex-wrap gap-2"><ExportButtons url="/procurement/purchase-orders" name="purchase-orders" />{
           canEdit && (
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" /> Create PO
             </Button>
           )
-        }
+        }</div>}
       />
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
         <Tabs value={statusFilter} onValueChange={setStatusFilter}>

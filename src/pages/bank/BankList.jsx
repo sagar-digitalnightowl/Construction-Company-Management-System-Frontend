@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, Pencil, Plus, Trash2, ArrowRightLeft } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,7 +118,8 @@ export default function BankList() {
 				title="Banks"
 				description="Bank accounts where buyer payments are deposited, with their running balances."
 				actions={
-					<div className="flex gap-2">
+					<div className="flex flex-wrap gap-2">
+						<ExportButtons url="/bank" params={{ includeInactive: includeInactive && canSeeInactive ? true : undefined }} name="banks" />
 						<Button variant="outline" asChild>
 							<Link to="/banks/transactions">
 								<ArrowRightLeft className="h-4 w-4 mr-2" /> Transactions

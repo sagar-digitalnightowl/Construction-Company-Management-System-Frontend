@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { PageHeader, EmptyState, StatCard } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, X, ChevronRight } from "lucide-react";
@@ -73,6 +74,7 @@ export default function ManagersList() {
 				eyebrow="Booking"
 				title="Managers"
 				description="Every PM/BM/TM with their booking counts and collections."
+			actions={<ExportButtons url="/booking/managers-list" params={{ role: role, search: search, projectId: projectId, includeZero: includeZero || undefined }} name="managers" />}
 			/>
 
 			{managersListSummary && (

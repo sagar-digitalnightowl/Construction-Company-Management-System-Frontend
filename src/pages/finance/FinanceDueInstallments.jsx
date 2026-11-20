@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import Swal from "sweetalert2";
 import { DueInstallmentsTable } from "./FinanceDueInstallments/DueInstallmentsTable";
 import { BulkWhatsAppDialog } from "./FinanceDueInstallments/BulkWhatsAppDialog";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function FinanceDueInstallments() {
 	const {
@@ -132,6 +133,7 @@ export function FinanceDueInstallments() {
 
 	return (
 		<div className="space-y-4">
+			<ExportButtons url="/finance/installments/due" params={{ dueDate: dueDateFilter, overdue: overdueOnly || undefined, search: debouncedSearch }} name="due-installments" />
 			<div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm lg:flex-row lg:items-end lg:justify-between">
 				<div className="flex flex-col flex-wrap gap-4 sm:flex-row sm:items-end">
 					<div className="space-y-1.5">

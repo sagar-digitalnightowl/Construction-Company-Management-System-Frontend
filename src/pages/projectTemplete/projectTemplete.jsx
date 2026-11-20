@@ -3,6 +3,7 @@ import { Plus, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -136,14 +137,14 @@ export default function ProjectTemplate() {
         eyebrow="Operations"
         title="Project Templates"
         description="Create reusable templates for faster project setup."
-        actions={
+        actions={<div className="flex flex-wrap gap-2"><ExportButtons url="/project/templates" name="project-templates" />{
           canEdit && (
             <Button onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4 mr-1" />
               New Template
             </Button>
           )
-        }
+        }</div>}
       />
 
       {/* LIST */}

@@ -16,6 +16,7 @@ import { useHR } from "@/hooks/useHR";
 import { useAuthStore } from "@/store/authStore";
 import { formatDate } from "@/lib/helpers";
 import { StatCard } from "@/components/common/PageHeader"; // Ensure this path matches your project structure
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 // Helper to calculate days between two dates
 const calculateDays = (start, end) => {
@@ -89,6 +90,7 @@ export const EmployeeLeaves = () => {
 	return (
 		<div className="space-y-4">
 			<div className="flex justify-between items-center">
+				<ExportButtons url="/hr/leaves/my" name="my-leaves" />
 				<h3 className="text-lg font-semibold">Leave Balance</h3>
 				<Button onClick={() => setDialogOpen(true)}>
 					<Plus className="h-4 w-4 mr-1" /> Apply Leave

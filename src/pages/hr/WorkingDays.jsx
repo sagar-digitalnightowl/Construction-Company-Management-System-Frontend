@@ -31,6 +31,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Lock, Unlock, Trash2, Save, Calendar } from "lucide-react";
 import { useHR } from "@/hooks/useHR";
 import { toast } from "sonner";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export const WorkingDays = () => {
 	const {
@@ -289,6 +290,7 @@ export const WorkingDays = () => {
 			{/* Filters */}
 			<Card>
 				<CardHeader>
+					<ExportButtons url="/hr/salary/working-days" params={{ month: selectedMonth, includeMissing: includeMissing || undefined, officeId: selectedOffice, departmentId: selectedDepartment, search: searchQuery }} name="working-days" />
 					<CardTitle className="text-base flex items-center gap-2">
 						<Calendar className="h-4 w-4" />
 						Filters

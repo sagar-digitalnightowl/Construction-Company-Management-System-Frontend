@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHR } from "@/hooks/useHR";
 import { formatDate } from "@/lib/helpers";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export const EmployeeAnnouncements = () => {
 	const { announcements, fetchAnnouncements } = useHR();
@@ -25,6 +26,7 @@ export const EmployeeAnnouncements = () => {
 				<CardTitle>Company Announcements</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-4">
+				<ExportButtons url="/hr/announcements" name="announcements" />
 				{announcements?.length === 0 ? (
 					<p className="text-center text-muted-foreground">No announcements</p>
 				) : (

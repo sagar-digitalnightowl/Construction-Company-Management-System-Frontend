@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Package } from "lucide-react";
 import { PageHeader, StatCard } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +43,7 @@ export default function SeStock() {
 			<PageHeader
 				title="Site stock"
 				description="Stock delivered to your sites, what has been used, and what is left."
-				actions={
+				actions={<div className="flex flex-wrap gap-2"><ExportButtons url="/site-stock/my" name="my-site-stock" />{
 					<>
 						<Button asChild variant="outline">
 							<Link to="/site-engineer/stock/add">
@@ -55,7 +56,7 @@ export default function SeStock() {
 							</Link>
 						</Button>
 					</>
-				}
+				}</div>}
 			/>
 
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

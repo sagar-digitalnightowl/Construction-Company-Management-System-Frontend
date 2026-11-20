@@ -1,6 +1,7 @@
 // src/pages/procurement/Quotations.jsx
 import React, { useState, useEffect } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { QuotationCard } from "@/components/procurement/QuotationCard";
@@ -74,7 +75,8 @@ export default function Quotations() {
         eyebrow="Procurement"
         title="Vendor Quotations"
         description="Review, accept, or reject quotations from vendors."
-      />
+      actions={<ExportButtons url="/procurement/quotations" name="quotations" />}
+			/>
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
         <Tabs value={statusFilter} onValueChange={setStatusFilter}>
           <TabsList>

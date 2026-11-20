@@ -12,6 +12,7 @@ import { siteStockApi, projectApi } from "@/api";
 import { useProjectTowers } from "@/hooks/useProjectTowers";
 import { CONSUMPTION_WORK_TYPES, displayFloor, displayTower, workTypeLabel } from "@/data/stockConstants";
 import { formatMoney, formatQty } from "./stockHelpers";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 const ALL = "all";
 
@@ -240,7 +241,11 @@ export default function ConsumptionReportPage() {
 
 	return (
 		<div className="space-y-5 sm:space-y-6">
-			<PageHeader title="Consumption Report" description="Material used by tower, floor and work type, with item-wise and work-type-wise totals." />
+			<PageHeader
+				title="Consumption Report"
+				description="Material used by tower, floor and work type, with item-wise and work-type-wise totals."
+				actions={projectId ? <ExportButtons url="/site-stock/consumption/report" params={{ projectId, towerName, floor, workType, dateFrom, dateTo }} name="consumption-report" /> : null}
+			/>
 
 			<Card>
 				<CardContent className="pt-6">

@@ -1,7 +1,7 @@
 // src/pages/stockManager/tabs/MyReportsTab.jsx
 
 import React, { useState } from "react";
-import { Eye, Edit, Trash2, Calendar, Package, MapPin, Download } from "lucide-react";
+import { Eye, Edit, Trash2, Calendar, Package, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,6 +38,7 @@ import { currentUserId, canEditStock, canDeleteStock } from "../stockPermissions
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function MyReportsTab({ reports = [], pagination, loading, onRefresh, onDelete }) {
 	const { fetchReportById, updateReport } = useSiteStock();
@@ -164,42 +165,7 @@ export function MyReportsTab({ reports = [], pagination, loading, onRefresh, onD
 		return VERIFICATION_STATUS_COLORS[status] || "default";
 	};
 
-	const handleExportCSV = () => {
-		const headers = ["Date", "Project", "Item Name", "Category", "Quantity", "Unit", "Rate Per Unit", "Total Amount", "Supplier", "Vehicle Number", "Status", "Verified By", "Rejection Reason"];
-		
-		const rows = filteredReports.map(report => [
-			formatDate(report.materialArrivedDate),
-			report.projectName,
-			report.itemName,
-			report.itemCategory,
-			report.qty,
-			report.unit,
-			report.ratePerUnit,
-			report.totalAmount,
-			report.supplierName || "-",
-			report.vehicleNumber || "-",
-			report.verificationStatus,
-			report.verifiedBy?.name || "-",
-			report.rejectionReason || "-"
-		]);
-
-		const csvContent = [
-			headers.join(","),
-			...rows.map(row => row.map(cell => `"${cell}"`).join(","))
-		].join("\n");
-
-		const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-		const link = document.createElement("a");
-		const url = URL.createObjectURL(blob);
-		link.setAttribute("href", url);
-		link.setAttribute("download", `my_stock_reports_${new Date().toISOString().split('T')[0]}.csv`);
-		link.style.visibility = "hidden";
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-	};
-
-	return (
+		return (
 		<div className="space-y-4">
 			{/* Filters */}
 			<Card className="p-4">
@@ -243,10 +209,7 @@ export function MyReportsTab({ reports = [], pagination, loading, onRefresh, onD
 					</Select>
 
 					<div className="flex gap-2">
-						<Button onClick={handleExportCSV} variant="outline" size="sm">
-							<Download className="h-4 w-4 mr-2" />
-							Export CSV
-						</Button>
+						<ExportButtons url="/site-stock/my" name="my-stock-reports" />
 						<Button onClick={() => onRefresh()} variant="outline">
 							Refresh
 						</Button>

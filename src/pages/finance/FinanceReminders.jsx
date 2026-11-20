@@ -9,6 +9,7 @@ import { projectApi } from "@/api";
 import { toast } from "sonner";
 import RemindersTable from "./FinanceReminders/RemindersTable";
 import ReminderDetailsDialog from "./FinanceReminders/ReminderDetailsDialog";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function FinanceReminders() {
 	const { reminders, fetchReminderLogs, loading, pagination } = useFinance();
@@ -75,6 +76,7 @@ export function FinanceReminders() {
 
 	return (
 		<div className="space-y-6">
+			<ExportButtons url="/finance/reminders" params={{ projectId: projectFilter }} name="reminder-logs" />
 			{/* Modern Top Filter Bar */}
 			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-card p-4 rounded-xl border shadow-sm gap-4">
 				<div className="flex items-center gap-3 w-full sm:w-auto">

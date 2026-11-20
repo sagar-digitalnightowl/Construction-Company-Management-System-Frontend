@@ -25,6 +25,7 @@ import { useHR } from "@/hooks/useHR";
 import { projectApi } from "@/api/projectApi";
 import { toast } from "sonner";
 import { formatINR } from "@/lib/helpers";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 const STATUS_OPTIONS = [
 	{ value: "all", label: "All Status" },
@@ -488,6 +489,7 @@ export default function MyExpenses() {
 
 	return (
 		<div className="space-y-6 max-w-7xl mx-auto">
+			<ExportButtons url="/hr/expenses/my" name="my-expenses" />
 			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 				<div>
 					<h1 className="text-2xl font-display font-semibold tracking-tight text-foreground flex items-center gap-2">
@@ -591,6 +593,7 @@ export default function MyExpenses() {
 							<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 								<div>
 									<CardTitle>Wallet Transactions</CardTitle>
+										<ExportButtons url="/hr/wallet/transactions" name="my-wallet-transactions" />
 									<CardDescription>History of all credits and debits to your wallet.</CardDescription>
 								</div>
 							</div>

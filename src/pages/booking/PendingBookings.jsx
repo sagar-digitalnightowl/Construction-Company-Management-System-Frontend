@@ -2,6 +2,7 @@
 // src/pages/PendingBookings.jsx
 import React, { useState, useEffect } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -71,7 +72,8 @@ export default function PendingBookings() {
         eyebrow="Approvals"
         title="Booking Approvals"
         description="Review and manage pending or rejected buyer booking requests."
-      />
+      actions={<ExportButtons url="/booking/pending-requests" params={{ approvalStatus: statusFilter }} name="booking-approvals" />}
+			/>
       
       <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full">
         <TabsList>

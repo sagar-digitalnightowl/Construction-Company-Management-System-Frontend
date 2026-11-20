@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLead } from "@/hooks/useLead";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import CampaignFormModal from "@/components/lead/CampaignFormModal";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 const CampaignsPage = () => {
   const { campaigns, fetchCampaigns, deleteCampaign } = useLead();
@@ -34,6 +35,7 @@ const CampaignsPage = () => {
 
   return (
     <div className="space-y-4">
+      <ExportButtons url="/lead/campaigns" name="campaigns" />
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Calling Campaigns</h2>
         <Button

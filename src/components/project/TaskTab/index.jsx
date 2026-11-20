@@ -12,6 +12,7 @@ import { CreateTaskDialog } from "@/components/project/TaskTab/CreateTaskDialog"
 import { taskApi } from "@/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 const priorityColors = { low: "muted", medium: "warning", high: "destructive" };
 const statusColors = {
@@ -129,6 +130,7 @@ export function TasksTab({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
+      	<ExportButtons url={`/task/project/${projectId}`} name="project-tasks" />
         <div className="flex gap-2">
           <Tabs value={filter} onValueChange={setFilter}>
             <TabsList>

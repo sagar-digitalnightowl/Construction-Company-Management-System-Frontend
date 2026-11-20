@@ -31,6 +31,7 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { useAuthStore } from "@/store/authStore";
 import { canMutate } from "@/data/permissions";
 import { formatINR, formatDate } from "@/lib/helpers";
+import { exportList } from "@/lib/exportFile";
 import { ProjectForm } from "@/components/project/ProjectForm";
 import { projectApi, hrApi } from "@/api";
 import {
@@ -876,41 +877,15 @@ export default function Projects() {
   };
 
   // ---------- Export (on current accumulated list) ----------
-  const exportToCSV = (data) => {
-    const headers = Object.keys(data[0]);
-    const csvRows = [
-      headers.join(","),
-      ...data.map((row) =>
-        headers.map((field) => `"${row[field] ?? ""}"`).join(",")
-      ),
-    ];
-    const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "projects.csv";
-    a.click();
-  };
-
-  const exportToPDF = (data) => {
-    // Simplified version – keep your existing PDF logic here
-    toast.info("PDF export not fully implemented in this snippet.");
-  };
-
-  const handleExport = async (format = "excel") => {
+  // Excel and PDF come from the server (universal export): the same filters, all matching rows
+  const handleServerExport = async (format) => {
+    const filters = buildQueryParams(1);
+    delete filters.page;
+    delete filters.limit;
     try {
-      if (!projects.length) {
-        toast.error("No data to export");
-        return;
-      }
-      if (format === "excel" || format === "csv") {
-        exportToCSV(projects);
-      } else if (format === "pdf") {
-        exportToPDF(projects);
-      }
-      toast.success("Export completed");
-    } catch (err) {
-      toast.error("Export failed");
+      await exportList("/project", filters, format, "projects");
+    } catch {
+      toast.error("Export failed. Please try again.");
     }
   };
 
@@ -943,14 +918,11 @@ export default function Projects() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleExport("excel")}>
+                <DropdownMenuItem onClick={() => handleServerExport("xlsx")}>
                   Export as Excel
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport("pdf")}>
+                <DropdownMenuItem onClick={() => handleServerExport("pdf")}>
                   Export as PDF
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport("csv")}>
-                  Export as CSV
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

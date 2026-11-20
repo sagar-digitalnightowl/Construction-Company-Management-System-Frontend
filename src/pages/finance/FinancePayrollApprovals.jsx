@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFinance } from "@/hooks/useFinance";
 import { Loader2, CheckCircle, XCircle, Send, Banknote, Download, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function FinancePayrollApprovals() {
 	const {
@@ -314,6 +315,7 @@ export function FinancePayrollApprovals() {
 
 	return (
 		<div className="space-y-6">
+			<ExportButtons url={activeTab === "pending" ? "/finance/payroll/pending" : "/finance/payroll"} name="payroll" />
 			<Tabs value={activeTab} onValueChange={handleTabChange}>
 				<TabsList>
 					<TabsTrigger value="pending">Pending Approvals</TabsTrigger>

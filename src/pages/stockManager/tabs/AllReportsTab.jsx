@@ -1,7 +1,7 @@
 // src/pages/stockManager/tabs/AllReportsTab.jsx
 
 import React, { useState } from "react";
-import { Eye, CheckCircle, XCircle, Calendar, Package, MapPin, User, Download } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Calendar, Package, MapPin, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,6 +26,7 @@ import { formatDate } from "@/lib/helpers";
 import { ReportDetailDialog } from "../components/ReportDetailDialog";
 import { VerifyReportDialog } from "../components/VerifyReportDialog";
 import { useSiteStock } from "@/hooks/useSiteStock";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function AllReportsTab({ reports = [], pagination, loading, onRefresh, onVerify, canVerify }) {
 	const [selectedReport, setSelectedReport] = useState(null);
@@ -89,43 +90,7 @@ export function AllReportsTab({ reports = [], pagination, loading, onRefresh, on
 		return VERIFICATION_STATUS_COLORS[status] || "default";
 	};
 
-	const handleExportCSV = () => {
-		const headers = ["Date", "Project", "Item Name", "Category", "Quantity", "Unit", "Rate Per Unit", "Total Amount", "Supplier", "Vehicle Number", "Reported By", "Status", "Verified By", "Rejection Reason"];
-		
-		const rows = filteredReports.map(report => [
-			formatDate(report.materialArrivedDate),
-			report.projectName,
-			report.itemName,
-			report.itemCategory,
-			report.qty,
-			report.unit,
-			report.ratePerUnit,
-			report.totalAmount,
-			report.supplierName || "-",
-			report.vehicleNumber || "-",
-			report.reportedBy?.name || "-",
-			report.verificationStatus,
-			report.verifiedBy?.name || "-",
-			report.rejectionReason || "-"
-		]);
-
-		const csvContent = [
-			headers.join(","),
-			...rows.map(row => row.map(cell => `"${cell}"`).join(","))
-		].join("\n");
-
-		const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-		const link = document.createElement("a");
-		const url = URL.createObjectURL(blob);
-		link.setAttribute("href", url);
-		link.setAttribute("download", `all_stock_reports_${new Date().toISOString().split('T')[0]}.csv`);
-		link.style.visibility = "hidden";
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-	};
-
-	if (loading) {
+		if (loading) {
 		return (
 			<Card className="p-6">
 				<div className="text-center text-muted-foreground">Loading reports...</div>
@@ -187,10 +152,7 @@ export function AllReportsTab({ reports = [], pagination, loading, onRefresh, on
 					</Select>
 
 					<div className="flex gap-2">
-						<Button onClick={handleExportCSV} variant="outline" size="sm">
-							<Download className="h-4 w-4 mr-2" />
-							Export CSV
-						</Button>
+						<ExportButtons url="/site-stock" name="all-stock-reports" />
 						<Button onClick={onRefresh} variant="outline">
 							Refresh
 						</Button>

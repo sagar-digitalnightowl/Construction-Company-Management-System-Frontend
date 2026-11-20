@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { projectApi } from "@/api";
 import { FinanceBookingsTable } from "./FinanceBookingReminder/FinanceBookingsTable";
 import { ReminderDialog } from "./FinanceBookingReminder/ReminderDialog";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function FinanceBookingsReminder() {
 	const {
@@ -286,6 +287,7 @@ export function FinanceBookingsReminder() {
 
 	return (
 		<div className="space-y-4">
+			<ExportButtons url="/finance/bookings" params={{ projectId: projectFilter, search: searchQuery }} name="bookings-reminder" />
 			<div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center bg-card p-4 rounded-xl border shadow-sm">
 				<div className="flex items-center gap-3 w-full xl:w-auto">
 					<span className="text-sm font-semibold text-muted-foreground whitespace-nowrap hidden sm:inline-block">

@@ -1321,6 +1321,7 @@ import { projectApi } from "@/api/projectApi";
 import { useHR } from "@/hooks/useHR";
 import { toast } from "sonner";
 import { formatINR } from "@/lib/helpers";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function FinanceExpenses() {
     const topRef = useRef(null);
@@ -1773,6 +1774,7 @@ export function FinanceExpenses() {
 
                 {/* ==================== 2. WALLETS TAB CONTENT ==================== */}
                 <TabsContent value="wallets" className="space-y-4 m-0">
+                    <ExportButtons url="/hr/wallet/pending-payments" name="pending-wallet-payments" />
                     {!selectedEmpId ? (
                         <div className="space-y-4">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30 p-4 rounded-lg border">

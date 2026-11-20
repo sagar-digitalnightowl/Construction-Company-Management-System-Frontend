@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FileText, Loader2 } from "lucide-react";
 import { useHR } from "@/hooks/useHR";
 import { SalaryCard } from "./SalaryCard";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export const EmployeeSalary = () => {
 	const { salarySlips, fetchMySalarySlips } = useHR();
@@ -29,6 +30,7 @@ export const EmployeeSalary = () => {
 
 	return (
 		<div className="space-y-4">
+			<ExportButtons url="/hr/salary/my-slips" name="my-salary-slips" />
 			{safeSlips.length === 0 ? (
 				<div className="text-center py-16 rounded-2xl border-2 border-dashed border-border flex flex-col items-center gap-3">
 					<FileText size={48} strokeWidth={1.5} className="text-muted-foreground/50" />

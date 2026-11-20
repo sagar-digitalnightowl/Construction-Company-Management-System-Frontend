@@ -18,6 +18,7 @@ import { canMutate } from "@/data/permissions";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import LeadFormModal from "@/components/lead/LeadFormModal";
 import LeadDetailsModal from "@/components/lead/LeadDetailsModal";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 const STAGES = [
   { id: "new", label: "New", tint: "var(--color-chart-4)" },
@@ -98,6 +99,7 @@ const LeadKanbanPage = () => {
 
   return (
     <div className="space-y-4">
+      <ExportButtons url={["employee", "site_engineer", "project_manager"].includes(current.role) ? "/lead/my-leads" : "/lead"} name="leads" />
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Eye, Plus } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -131,9 +132,12 @@ export default function SeMaterialRequests() {
 				title="Material Requests"
 				description="Ask for the materials your site needs. Your site manager reviews each request."
 				actions={
-					<Button onClick={openCreate} disabled={projects.length === 0}>
-						<Plus className="h-4 w-4 mr-2" /> New request
-					</Button>
+					<div className="flex flex-wrap gap-2">
+						<ExportButtons url="/site/material-request" params={filters} name="material-requests" />
+						<Button onClick={openCreate} disabled={projects.length === 0}>
+							<Plus className="h-4 w-4 mr-2" /> New request
+						</Button>
+					</div>
 				}
 			/>
 

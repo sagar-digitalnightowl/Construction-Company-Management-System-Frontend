@@ -39,6 +39,7 @@ import { OfficesTab } from "./tabs/OfficesTab";
 import { AdvanceSalaryTab } from "./tabs/AdvanceSalaryTab";
 import { IncentiveBonusTab } from "./tabs/IncentiveBonusTab";
 import { PayrollPreviewDialog } from "./tabs/PayrollPreviewDialog";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 // 👇 NEW: Mapping for dynamic page headers
 const TAB_HEADERS = {
@@ -56,6 +57,21 @@ const TAB_HEADERS = {
 	"labor-wages": { title: "Labor Wages", desc: "Manage labor wages and payments." },
 	labors: { title: "Labors", desc: "Manage daily labors and attendance." },
 	announcements: { title: "Announcements", desc: "Manage company-wide announcements." },
+};
+
+// Export for each HR tab: the list endpoint behind the tab (universal export)
+const HR_EXPORTS = {
+	employees: { url: "/hr/employees", name: "employees" },
+	offices: { url: "/hr/offices", name: "offices" },
+	departments: { url: "/hr/departments", name: "departments" },
+	salary: { url: "/hr/salary/all", name: "salary-slips" },
+	"advance-salary": { url: "/hr/advances", name: "advance-salary" },
+	"incentives-bonus": { url: "/incentives", name: "incentives" },
+	"expense-approvals": { url: "/hr/expenses", name: "expenses" },
+	shifts: { url: "/hr/shifts", name: "shifts" },
+	"labor-wages": { url: "/hr/labor-wages", name: "labor-wages" },
+	labors: { url: "/hr/labors", name: "labors" },
+	announcements: { url: "/hr/announcements", name: "announcements" },
 };
 
 export default function HR() {
@@ -213,6 +229,7 @@ export default function HR() {
 				<PageHeader
 					title={headerInfo.title}
 					description={headerInfo.desc}
+					actions={HR_EXPORTS[currentTab] && <ExportButtons url={HR_EXPORTS[currentTab].url} params={HR_EXPORTS[currentTab].params} name={HR_EXPORTS[currentTab].name} />}
 				/>
 			)}
 

@@ -9,6 +9,7 @@ import MyCallingListPage from "./MyCallingListPage";
 import LeadStatsPage from "./LeadStatsPage";
 import MyCallLogsPage from "./MyCallLogsPage";
 import EmployeeLeadsPage from "./EmployeeLeadsPage";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 const LeadManagement = () => {
   const { current } = useAuthStore();
@@ -68,24 +69,28 @@ const LeadManagement = () => {
 
         {isEmployee && (
           <TabsContent value="my-calling-list">
+          	<ExportButtons url="/lead/my-calling-list" name="my-calling-list" />
             <MyCallingListPage />
           </TabsContent>
         )}
 
         {isEmployee && (
           <TabsContent value="my-call-logs">
+          	<ExportButtons url="/lead/my-call-logs" name="my-call-logs" />
             <MyCallLogsPage />
           </TabsContent>
         )}
 
         {(isAdminOrDirector || isHR) && (
           <TabsContent value="stats">
+          	<ExportButtons url="/lead/agent-performance" name="agent-performance" />
             <LeadStatsPage />
           </TabsContent>
         )}
 
         {(isAdminOrDirector || isHR) && (
           <TabsContent value="employees">
+          	<ExportButtons url="/lead/employees" name="lead-employees" />
             <EmployeeLeadsPage />
           </TabsContent>
         )}

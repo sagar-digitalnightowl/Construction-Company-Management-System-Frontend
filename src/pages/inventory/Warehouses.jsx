@@ -1,6 +1,7 @@
 // src/pages/inventory/Warehouses.jsx
 import React, { useState } from 'react';
 import { PageHeader, EmptyState } from '@/components/common/PageHeader';
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from '@/components/ui/button';
 import { Plus, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,7 +21,7 @@ export default function Warehouses() {
                 eyebrow="Facilities"
                 title="Warehouses"
                 description="Manage storage locations for construction materials."
-                actions={<Button onClick={() => setDialogOpen(true)}><Plus className="h-4 w-4 mr-2" /> New Warehouse</Button>}
+                actions={<div className="flex flex-wrap gap-2"><ExportButtons url="/inventory/warehouses" name="warehouses" />{<Button onClick={() => setDialogOpen(true)}><Plus className="h-4 w-4 mr-2" /> New Warehouse</Button>}</div>}
             />
             {warehouses.length === 0 ? (
                 <EmptyState title="No warehouses" description="Create warehouses to organize inventory." />
