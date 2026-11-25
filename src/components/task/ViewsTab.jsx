@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { taskApi } from "@/api";
 import { toast } from "sonner";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 /* ─── shared helpers ─────────────────────────────────────── */
 
@@ -1245,6 +1246,7 @@ export function ViewsTab({ projectId }) {
       )}
 
       {/* views */}
+      {view === "calendar" && <ExportButtons url="/task/calendar" name="task-calendar" />}
       {!loading && view === "kanban" && kanbanData && (
         <KanbanView data={kanbanData} />
       )}

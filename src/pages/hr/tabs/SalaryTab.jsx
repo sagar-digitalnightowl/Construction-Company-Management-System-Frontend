@@ -24,6 +24,7 @@ import { useHR } from "@/hooks/useHR";
 import { formatDate } from "@/lib/helpers";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function SalaryTab() {
 	const navigate = useNavigate();
@@ -448,6 +449,7 @@ export function SalaryTab() {
 					<Card>
 						<CardHeader>
 							<CardTitle>My Payroll Submissions</CardTitle>
+								<ExportButtons url="/hr/salary/report/my-batches" name="my-payroll-batches" />
 							<CardDescription>Track the status of payroll batches submitted to finance.</CardDescription>
 						</CardHeader>
 						<CardContent>

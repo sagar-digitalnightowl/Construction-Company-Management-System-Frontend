@@ -36,6 +36,7 @@ import { useIncentive } from "@/hooks/useIncentive";
 import { useAuthStore } from "@/store/authStore";
 import { canMutate } from "@/data/permissions";
 import { formatDate, formatINR } from "@/lib/helpers";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 const STATUS_OPTIONS = ["approved", "paid"];
 const CLEARED_OPTIONS = ["pending", "cleared", "uncleared"];
@@ -301,6 +302,7 @@ export function FinanceIncentives() {
 
 	return (
 		<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+			<ExportButtons url="/incentives" params={{ payoutStatus: filters.payoutStatus, payoutMonth: filters.payoutMonth }} name="incentives" />
 			<TabsList>
 				<TabsTrigger value="incentives">Incentives</TabsTrigger>
 				<TabsTrigger value="bonus" disabled>

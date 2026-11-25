@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight, Pencil, Plus, RotateCcw, Search } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -267,12 +268,12 @@ export default function GstDeferredBookings() {
 				eyebrow="Real Estate"
 				title="GST Deferred Bookings"
 				description="Bookings registered at the lower amount, with the GST added later."
-				actions={
+				actions={<div className="flex flex-wrap gap-2"><ExportButtons url="/booking/gst-deferred" params={{ projectId: projectId, towerName: towerName, status: status, businessManagerId: businessManagerId, projectManagerId: projectManagerId, teamManagerId: teamManagerId, label: label }} name="gst-deferred-bookings" />{
 					<Button variant="outline" onClick={() => navigate("/bookings")}>
 						<ArrowLeft className="h-4 w-4 mr-2" />
 						Back to Bookings
 					</Button>
-				}
+				}</div>}
 			/>
 
 			<div className="grid grid-cols-2 lg:grid-cols-3 gap-3">

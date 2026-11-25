@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { workReportApi } from "@/api/workReportApi";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { formatDate, formatDateTime } from "@/lib/helpers";
 
 export const STATUS_LABEL = {
@@ -151,7 +152,11 @@ export function WorkReportQueue({ title, description, allowed, defaultStatus = "
 
 	return (
 		<div className="space-y-5 sm:space-y-6">
-			<PageHeader title={title} description={description} />
+			<PageHeader
+				title={title}
+				description={description}
+				actions={<ExportButtons url="/site/work-reports" params={{ status }} name="work-reports" />}
+			/>
 
 			<Card>
 				<CardHeader>

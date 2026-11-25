@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LayoutDashboard, ClipboardList, Minus, Bell, BarChart3 } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { useSiteStock } from "@/hooks/useSiteStock";
 import { useAuthStore } from "@/store/authStore";
 import SiteManagerDashboard from "./SiteManagerDashboard";
@@ -50,6 +51,7 @@ export default function StockManager() {
 				description={header.desc}
 				actions={
 					<div className="flex flex-wrap gap-2">
+						{(currentTab === "reports" || currentTab === "consumption") && <ExportButtons url={currentTab === "consumption" ? "/site-stock/consumption" : "/site-stock"} name="site-stock" />}
 						{perms.canAddConsumption && (
 							<button
 								type="button"

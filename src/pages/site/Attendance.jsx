@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { projectApi } from "@/api";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export function Attendance({ canEdit, canOperationsEdit }) {
   const { current } = useAuthStore();
@@ -83,6 +84,7 @@ export function Attendance({ canEdit, canOperationsEdit }) {
       <div className="flex justify-between items-center flex-wrap gap-3">
         <p className="text-sm text-muted-foreground">{list.length} record(s)</p>
         <div className="flex gap-2">
+          <ExportButtons url="/site/attendance" name="site-attendance" />
           {!isSiteEngineer && (
             <Select
               value={selectedProjectId}

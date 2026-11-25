@@ -1,6 +1,7 @@
 // src/pages/tasks/TaskRequests.jsx
 import React, { useState, useEffect } from 'react';
 import { PageHeader, EmptyState } from '@/components/common/PageHeader';
+import { ExportButtons } from '@/components/common/ExportButtons';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +20,7 @@ export default function TaskRequests() {
     const fetchRequests = async () => {
         setLoading(true);
         try {
-            const res = await taskApi.getRequests(statusFilter);
+            const res = await taskApi.getTaskRequests(statusFilter);
             setRequests(res.data?.data || []);
         } catch (err) {
             console.log("Error in fetch task request : ", err)
@@ -65,6 +66,7 @@ export default function TaskRequests() {
                 eyebrow="Administration"
                 title="Task Requests"
                 description="Approve or reject due date changes and reassignment requests."
+                actions={<ExportButtons url="/task/requests" params={{ status: statusFilter }} name="task-requests" />}
             />
             <Tabs value={statusFilter} onValueChange={setStatusFilter}>
                 <TabsList>

@@ -3,6 +3,7 @@
 
 import React, { useEffect } from 'react';
 import { PageHeader, EmptyState } from '@/components/common/PageHeader';
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +29,8 @@ export default function LowStockAlerts() {
                 eyebrow="Monitoring"
                 title="Low Stock Alerts"
                 description="Materials that have fallen below minimum stock levels."
-            />
+            actions={<ExportButtons url="/inventory/stock/low-stock" name="low-stock-alerts" />}
+			/>
 
             {lowStockAlerts.length === 0 ? (
                 <EmptyState

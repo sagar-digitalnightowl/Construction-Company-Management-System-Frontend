@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { OverallExpenseView } from "./ExpenseReports/OverallExpenseView";
 import { ProjectExpenseView } from "./ExpenseReports/ProjectExpenseView";
 import { EmployeeExpenseView } from "./ExpenseReports/EmployeeExpenseView";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export default function ExpenseReports() {
 	const topRef = useRef(null);
@@ -117,6 +118,7 @@ export default function ExpenseReports() {
 				/>
 			)}
 
+			{currentView === "project" && selectedProject && <ExportButtons url={`/finance/expenses/project/${selectedProject}`} name="project-expenses" />}
 			{/* ======================= PROJECT-WISE VIEW ======================= */}
 			{currentView === "project" && (
 				<ProjectExpenseView
@@ -134,6 +136,7 @@ export default function ExpenseReports() {
 				/>
 			)}
 
+			{currentView === "employee" && selectedEmployee && <ExportButtons url={`/finance/expenses/employee/${selectedEmployee}`} name="employee-expenses" />}
 			{/* ======================= EMPLOYEE-WISE VIEW ======================= */}
 			{currentView === "employee" && (
 				<EmployeeExpenseView

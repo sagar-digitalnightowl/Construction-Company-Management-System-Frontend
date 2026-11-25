@@ -1,6 +1,7 @@
 // src/pages/inventory/StockTransactions.jsx
 import React, { useEffect, useState } from 'react';
 import { PageHeader, EmptyState } from '@/components/common/PageHeader';
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Input } from '@/components/ui/input';
 import { Search, Calendar } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -29,7 +30,8 @@ export default function StockTransactions() {
 
     return (
         <div className="space-y-6">
-            <PageHeader eyebrow="Audit" title="Stock Transactions" description="Complete history of all inventory movements." />
+            <PageHeader eyebrow="Audit" title="Stock Transactions" description="Complete history of all inventory movements." actions={<ExportButtons url="/inventory/transactions" name="stock-transactions" />}
+			/>
             <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input className="pl-9" placeholder="Search by material..." value={search} onChange={(e) => setSearch(e.target.value)} />

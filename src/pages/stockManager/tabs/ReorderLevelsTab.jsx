@@ -16,6 +16,7 @@ import { useAuthStore } from "@/store/authStore";
 import { STOCK_ITEM_CATEGORIES, STOCK_UNITS } from "@/data/stockConstants";
 import { categoryLabel, formatQty, sanitizeNumeric } from "../stockHelpers";
 import { rolePerms } from "../stockPermissions";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 const EMPTY_FORM = {
 	projectId: "",
@@ -124,6 +125,7 @@ export function ReorderLevelsTab() {
 
 	return (
 		<div className="space-y-4">
+			<ExportButtons url="/site-stock/reorder-level" name="reorder-levels" />
 			{perms.canSetReorder && (
 				<div className="flex justify-end">
 					<Button onClick={openNew}>

@@ -84,7 +84,7 @@ export const useAIChat = () => {
                         try {
                                 const res = await aiChatApi.ask({
                                         message: trimmed,
-                                        conversationId: conversationIdRef.current || undefined,
+                                        conversationId: conversationIdRef.current || null, // null starts a new conversation
                                 });
                                 const data = res.data || {};
                                 if (data.conversationId) {
@@ -101,6 +101,8 @@ export const useAIChat = () => {
                                                 stats: data.stats,
                                                 provider: data.provider,
                                                 model: data.model,
+                                                aiFallback: data.aiFallback,
+                                                suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
                                                 createdAt: new Date().toISOString(),
                                         },
                                 ]);
@@ -109,9 +111,18 @@ export const useAIChat = () => {
                         } catch (err) {
                                 const msg = err?.response?.data?.message || "Message send nahi hua. Thodi der baad try karein.";
                                 toast.error(msg);
+                                // error bubble keeps the failed text and the failed user message id, so Retry can resend it
                                 setMessages((prev) => [
                                         ...prev,
-                                        { id: `e_${Date.now()}`, role: "assistant", content: msg, source: "error", createdAt: new Date().toISOString() },
+                                        {
+                                                id: `e_${Date.now()}`,
+                                                role: "assistant",
+                                                content: msg,
+                                                source: "error",
+                                                retryText: trimmed,
+                                                failedId: tempId,
+                                                createdAt: new Date().toISOString(),
+                                        },
                                 ]);
                         } finally {
                                 setSending(false);
@@ -119,6 +130,16 @@ export const useAIChat = () => {
                 },
                 // eslint-disable-next-line react-hooks/exhaustive-deps
                 [sending],
+        );
+
+        // Retry: removes the failed attempt (user message + error bubble) and sends the same text again
+        const retry = useCallback(
+                (errorMessage) => {
+                        setMessages((prev) => prev.filter((m) => m.id !== errorMessage.id && m.id !== errorMessage.failedId));
+                        send(errorMessage.retryText);
+                },
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+                [send],
         );
 
         // ---------- conversations ----------
@@ -228,6 +249,7 @@ export const useAIChat = () => {
                 messages,
                 sending,
                 send,
+                retry,
                 suggestions,
                 // conversations
                 conversations,

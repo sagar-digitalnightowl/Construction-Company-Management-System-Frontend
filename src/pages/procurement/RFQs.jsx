@@ -1,6 +1,7 @@
 // src/pages/procurement/RFQs.jsx
 import React, { useState, useEffect } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Plus, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -52,13 +53,13 @@ export default function RFQs() {
         eyebrow="Procurement"
         title="Request for Quotations (RFQs)"
         description="Create RFQs, invite vendors, and compare quotations."
-        actions={
+        actions={<div className="flex flex-wrap gap-2"><ExportButtons url="/procurement/rfq" name="rfqs" />{
           canEdit && (
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" /> Create RFQ
             </Button>
           )
-        }
+        }</div>}
       />
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
         <Tabs value={statusFilter} onValueChange={setStatusFilter}>

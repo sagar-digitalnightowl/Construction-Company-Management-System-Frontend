@@ -1,6 +1,7 @@
 // src/pages/inventory/Materials.jsx
 import React, { useState } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Plus, AlertTriangle } from "lucide-react";
 import { MaterialTable } from "@/components/inventory/MaterialTable";
@@ -74,7 +75,7 @@ export default function Materials() {
         eyebrow="Master Data"
         title="Materials"
         description="Manage all construction materials and their specifications."
-        actions={
+        actions={<div className="flex flex-wrap gap-2"><ExportButtons url="/inventory/materials" name="materials" />{
           <div className="flex gap-2">
             {lowStockCount > 0 && (
               <TooltipProvider>
@@ -102,7 +103,7 @@ export default function Materials() {
               </Button>
             )}
           </div>
-        }
+        }</div>}
       />
 
       {loading ? (

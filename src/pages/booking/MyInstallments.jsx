@@ -1,6 +1,7 @@
 // src/pages/booking/MyInstallments.jsx
 import React, { useEffect, useState } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InstallmentTable } from "@/components/booking/InstallmentTable";
@@ -51,7 +52,8 @@ export default function MyInstallments() {
         eyebrow="Payments"
         title="My Installments"
         description="Track and pay your installment schedule."
-      />
+      actions={<ExportButtons url="/booking/installments/my" params={{ status: statusFilter }} name="my-installments" />}
+			/>
       <Tabs value={statusFilter} onValueChange={setStatusFilter}>
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Search, ShieldCheck, ChevronLeft, ChevronRight, Upload, X, Eye, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -553,8 +554,13 @@ export default function Users() {
             <PageHeader
                 eyebrow="Administration" title="User & Role Management"
                 description="Create accounts for any role; users can sign in with the credentials you set here."
-                actions={canEdit && (
-                    <Button data-testid="users-create-btn" onClick={startCreate}><Plus className="h-4 w-4 mr-1" /> New user</Button>
+                actions={(
+                    <div className="flex flex-wrap gap-2">
+                        <ExportButtons url="/auth/users" params={{ search: debouncedSearch, role: roleFilter }} name="users" />
+                        {canEdit && (
+                            <Button data-testid="users-create-btn" onClick={startCreate}><Plus className="h-4 w-4 mr-1" /> New user</Button>
+                        )}
+                    </div>
                 )}
             />
 
@@ -598,7 +604,7 @@ export default function Users() {
                                 <TableHead>Role</TableHead>
                                 <TableHead>Phone</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="w-[150px] text-right">Actions</TableHead>
+                                <TableHead className="ew-[150px] text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -642,7 +648,7 @@ export default function Users() {
                                                 )}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right">z
                                             {canEdit && (
                                                 <div className="flex justify-end gap-1">
                                                     <Button size="icon" variant="ghost" onClick={() => viewUser(u)} title="View Details">

@@ -1,6 +1,7 @@
 // src/pages/tasks/MyTasks.jsx
 import React, { useState, useEffect } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, ListTodo } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,6 +58,7 @@ export default function MyTasks() {
         eyebrow="Tasks"
         title="My Tasks"
         description="View and manage tasks assigned to you."
+        actions={<ExportButtons url="/task/my-tasks" name="my-tasks" />}
       />
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
         <Tabs value={filter} onValueChange={setFilter}>

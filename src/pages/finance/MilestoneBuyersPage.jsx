@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, ArrowRight, Download } from "lucide-react";
 import { formatINR } from "@/lib/helpers";
 import { StatCard } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Badge } from "@/components/ui/badge";
 
 export function MilestoneBuyersPage() {
@@ -118,6 +119,7 @@ export function MilestoneBuyersPage() {
 
 	return (
 		<div className="space-y-4 p-4">
+			<ExportButtons url="/finance/milestone-buyers" params={{ projectId: projectId, milestone: milestone, status: status, search: search }} name="milestone-buyers" />
 			<div className="flex items-center justify-between">
 				<Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
 					<ArrowLeft className="mr-1.5 h-4 w-4" />

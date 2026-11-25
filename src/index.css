@@ -367,6 +367,121 @@ body::before {
 	animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
+/* ---------- Chat animations (smooth, GPU-friendly: opacity + transform only) ---------- */
+@keyframes chat-popup-in {
+	from {
+		opacity: 0;
+		transform: translateY(14px) scale(0.97);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes chat-popup-out {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateY(10px) scale(0.98);
+	}
+}
+
+@keyframes chat-fade-up {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes chat-fade {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes chat-dot {
+	0%,
+	80%,
+	100% {
+		opacity: 0.35;
+		transform: translateY(0);
+	}
+
+	40% {
+		opacity: 1;
+		transform: translateY(-3px);
+	}
+}
+
+.chat-popup-in {
+	animation: chat-popup-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+	transform-origin: bottom right;
+}
+
+.chat-popup-out {
+	animation: chat-popup-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+	transform-origin: bottom right;
+	pointer-events: none;
+}
+
+.chat-message-in {
+	animation: chat-fade-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chat-fade-in {
+	animation: chat-fade 180ms ease-out both;
+}
+
+.chat-dot {
+	animation: chat-dot 1.2s ease-in-out infinite;
+	will-change: transform, opacity;
+}
+
+/* chat hover/press feedback: same timing everywhere */
+.chat-interactive {
+	transition:
+		background-color 180ms ease-out,
+		border-color 180ms ease-out,
+		color 180ms ease-out,
+		opacity 180ms ease-out,
+		transform 180ms ease-out;
+}
+
+.chat-interactive:active {
+	transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.chat-popup-in,
+	.chat-popup-out,
+	.chat-message-in,
+	.chat-fade-in,
+	.chat-dot {
+		animation: none !important;
+	}
+
+	.chat-interactive,
+	.chat-interactive:active {
+		transition: none !important;
+		transform: none !important;
+	}
+}
+
 /* ============================================================
    Branded Loader — used by AppLoader.jsx (matches index.html)
    ============================================================ */

@@ -1,6 +1,7 @@
 // src/pages/booking/MyBookings.jsx
 import React, { useEffect, useState } from "react";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingCard } from "@/components/booking/BookingCard";
 import { useBooking } from "@/hooks/useBooking";
@@ -25,11 +26,11 @@ export default function MyBookings() {
         eyebrow="My Portfolio"
         title="My Bookings"
         description="View all your booked units and payment progress."
-        actions={
+        actions={<div className="flex flex-wrap gap-2"><ExportButtons url="/booking/my-bookings" name="my-bookings" />{
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4 mr-2" /> New Booking
           </Button>
-        }
+        }</div>}
       />
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

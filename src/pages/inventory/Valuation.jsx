@@ -1,6 +1,7 @@
 // src/pages/inventory/Valuation.jsx
 import React, { useEffect } from 'react';
 import { PageHeader, EmptyState } from '@/components/common/PageHeader';
+import { ExportButtons } from "@/components/common/ExportButtons";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useInventory } from '@/hooks/useInventory';
@@ -20,7 +21,8 @@ export default function Valuation() {
 
     return (
         <div className="space-y-6">
-            <PageHeader eyebrow="Finance" title="Inventory Valuation" description="Current value of all stock across warehouses." />
+            <PageHeader eyebrow="Finance" title="Inventory Valuation" description="Current value of all stock across warehouses." actions={<ExportButtons url="/inventory/valuation" name="inventory-valuation" />}
+			/>
             <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                     <CardHeader><CardTitle>Total Inventory Value</CardTitle></CardHeader>

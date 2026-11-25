@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { notificationApi } from "@/api/notificationApi";
 import { formatDateTime } from "@/lib/helpers";
+import { ExportButtons } from "@/components/common/ExportButtons";
 
 export const NOTIFICATION_TYPE_LABEL = {
 	booking_confirmation: "Booking Confirmation",
@@ -50,6 +51,7 @@ export function NotificationHistoryPanel({ bookingId, refreshKey = 0 }) {
 	return (
 		<Card>
 			<CardHeader>
+				<ExportButtons url={`/notification/history/${bookingId}`} name="notifications" />
 				<CardTitle className="text-base">Notification History</CardTitle>
 			</CardHeader>
 			<CardContent>
