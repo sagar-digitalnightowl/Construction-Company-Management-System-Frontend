@@ -10,13 +10,15 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { Bot, MessageSquarePlus, Send, Settings2, Sparkles, X } from "lucide-react";
+import { Bot, History, MessageSquarePlus, Send, Settings2, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { cn } from "@/lib/helpers";
 import { ChatMessage, TypingBubble } from "@/components/chat/ChatMessage";
+import { ConversationHistory } from "@/components/chat/ConversationHistory";
 import { AISettingsDialog } from "@/components/chat/AISettingsDialog";
 import { useAIChat } from "@/hooks/useAIChat";
 import { useAuthStore } from "@/store/authStore";
@@ -26,8 +28,15 @@ export function ChatWidget() {
                 messages,
                 sending,
                 send,
+                retry,
                 suggestions,
                 startNewChat,
+                conversations,
+                conversationsLoading,
+                conversationId,
+                fetchConversations,
+                openConversation,
+                deleteConversation,
                 status,
                 statusLoading,
                 fetchStatus,
@@ -42,6 +51,33 @@ export function ChatWidget() {
         const [open, setOpen] = useState(false);
         const [input, setInput] = useState("");
         const [settingsOpen, setSettingsOpen] = useState(false);
+        const [view, setView] = useState("chat"); // "chat" | "history"
+        const [closing, setClosing] = useState(false); // plays the close animation before unmounting
+
+        const closePopup = () => {
+                if (closing) return;
+                setClosing(true);
+                window.setTimeout(() => {
+                        setOpen(false);
+                        setClosing(false);
+                }, 180);
+        };
+
+        const toggleBubble = () => {
+                if (closing) return;
+                if (open) closePopup();
+                else setOpen(true);
+        };
+        const [deleteTarget, setDeleteTarget] = useState(null);
+
+        const toggleHistory = () => {
+                if (view === "history") {
+                        setView("chat");
+                        return;
+                }
+                fetchConversations();
+                setView("history");
+        };
 
         const scrollRef = useRef(null);
         const inputRef = useRef(null);
@@ -49,7 +85,7 @@ export function ChatWidget() {
         // auto-scroll to bottom on new messages / typing
         useEffect(() => {
                 const el = scrollRef.current?.querySelector("[data-radix-scroll-area-viewport]");
-                if (el) el.scrollTop = el.scrollHeight;
+                if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
         }, [messages, sending, open]);
 
         // keep textarea auto-height
@@ -57,7 +93,7 @@ export function ChatWidget() {
                 const el = inputRef.current;
                 if (!el) return;
                 el.style.height = "auto";
-                el.style.height = `${Math.min(el.scrollHeight, 110)}px`;
+                el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
         }, [input]);
 
         const handleSend = () => {
@@ -84,7 +120,8 @@ export function ChatWidget() {
                                                 "fixed z-[45] bottom-[4.75rem] right-3 sm:right-6 flex flex-col overflow-hidden",
                                                 "w-[calc(100vw-1.5rem)] sm:w-[400px]",
                                                 "h-[min(560px,calc(100dvh-7.5rem))]",
-                                                "rounded-2xl border border-border/70 bg-card shadow-2xl animate-rise",
+                                                "rounded-2xl border border-border/70 bg-card shadow-2xl",
+                                                closing ? "chat-popup-out" : "chat-popup-in",
                                         )}
                                         role="dialog"
                                         aria-label="Nirman AI chat"
@@ -115,8 +152,21 @@ export function ChatWidget() {
                                                         <Button
                                                                 variant="ghost"
                                                                 size="icon"
+                                                                className={cn("h-8 w-8", view === "history" && "bg-muted")}
+                                                                onClick={toggleHistory}
+                                                                title="Conversations"
+                                                                aria-label="Conversations"
+                                                        >
+                                                                <History className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                                variant="ghost"
+                                                                size="icon"
                                                                 className="h-8 w-8"
-                                                                onClick={startNewChat}
+                                                                onClick={() => {
+                                                                        startNewChat();
+                                                                        setView("chat");
+                                                                }}
                                                                 title="New chat"
                                                         >
                                                                 <MessageSquarePlus className="h-4 w-4" />
@@ -136,13 +186,29 @@ export function ChatWidget() {
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8"
-                                                                onClick={() => setOpen(false)}
+                                                                onClick={closePopup}
                                                                 title="Close"
                                                         >
                                                                 <X className="h-4 w-4" />
                                                         </Button>
                                                 </div>
                                         </div>
+
+                                        {/* conversation history (covers the chat while open) */}
+                                        {view === "history" && (
+                                                <div className="chat-fade-in absolute inset-x-0 bottom-0 top-[57px] z-10 overflow-y-auto bg-card" data-testid="history-panel">
+                                                        <ConversationHistory
+                                                                conversations={conversations}
+                                                                loading={conversationsLoading}
+                                                                activeId={conversationId}
+                                                                onOpen={(id) => {
+                                                                        openConversation(id);
+                                                                        setView("chat");
+                                                                }}
+                                                                onDelete={setDeleteTarget}
+                                                        />
+                                                </div>
+                                        )}
 
                                         {/* messages */}
                                         <ScrollArea className="flex-1" ref={scrollRef}>
@@ -162,7 +228,7 @@ export function ChatWidget() {
                                                                                                 <button
                                                                                                         key={s}
                                                                                                         onClick={() => send(s)}
-                                                                                                        className="rounded-full border border-border/80 bg-card px-2.5 py-1 text-[11px] transition-colors hover:bg-primary/10 hover:border-primary/40 hover:text-primary"
+                                                                                                        className="rounded-full border border-border/80 bg-card px-2.5 py-1 text-[11px] chat-interactive hover:bg-primary/10 hover:border-primary/40 hover:text-primary"
                                                                                                 >
                                                                                                         {s}
                                                                                                 </button>
@@ -173,7 +239,7 @@ export function ChatWidget() {
                                                         )}
 
                                                         {messages.map((m) => (
-                                                                <ChatMessage key={m.id} message={m} />
+                                                                <ChatMessage key={m.id} message={m} onSuggest={send} onRetry={retry} />
                                                         ))}
                                                         {sending && <TypingBubble />}
                                                 </div>
@@ -186,7 +252,7 @@ export function ChatWidget() {
                                                                 <button
                                                                         key={s}
                                                                         onClick={() => send(s)}
-                                                                        className="shrink-0 rounded-full border border-border/80 px-2.5 py-1 text-[10px] text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary hover:border-primary/40"
+                                                                        className="shrink-0 rounded-full border border-border/80 px-2.5 py-1 text-[10px] text-muted-foreground chat-interactive hover:bg-primary/10 hover:text-primary hover:border-primary/40"
                                                                 >
                                                                         {s}
                                                                 </button>
@@ -200,20 +266,18 @@ export function ChatWidget() {
                                                         <Textarea
                                                                 ref={inputRef}
                                                                 rows={1}
-                                                                placeholder="Poocho… e.g. How many 2 bhk north facing is available?"
+                                                                placeholder="Ask anything... (Shift+Enter for new line)"
                                                                 value={input}
                                                                 onChange={(e) => setInput(e.target.value)}
                                                                 onKeyDown={handleKeyDown}
-                                                                className="min-h-[40px] max-h-[110px] resize-none text-sm"
-                                                                disabled={sending}
+                                                                className="min-h-[40px] max-h-[120px] resize-none text-sm"
                                                         />
                                                         <Button
-                                                                size="icon"
-                                                                className="h-10 w-10 shrink-0"
+                                                                className="h-10 shrink-0 px-3"
                                                                 onClick={handleSend}
                                                                 disabled={sending || !input.trim()}
                                                         >
-                                                                <Send className="h-4 w-4" />
+                                                                {sending ? "..." : "Send"}
                                                         </Button>
                                                 </div>
                                                 <div className="mt-1 text-[9.5px] text-muted-foreground">
@@ -225,10 +289,10 @@ export function ChatWidget() {
 
                         {/* ================= FLOATING BUBBLE ================= */}
                         <button
-                                onClick={() => setOpen((o) => !o)}
+                                onClick={toggleBubble}
                                 className={cn(
                                         "fixed z-[45] bottom-4 right-3 sm:right-6 grid h-14 w-14 place-items-center rounded-full",
-                                        "bg-primary text-primary-foreground shadow-xl transition-all duration-200",
+                                        "bg-primary text-primary-foreground shadow-xl chat-interactive",
                                         "hover:scale-105 hover:shadow-2xl active:scale-95",
                                         open && "bg-muted text-foreground hover:bg-muted",
                                 )}
@@ -246,6 +310,19 @@ export function ChatWidget() {
                                         />
                                 )}
                         </button>
+
+                        {/* delete conversation confirm */}
+                        <ConfirmDialog
+                                open={Boolean(deleteTarget)}
+                                onOpenChange={(open) => !open && setDeleteTarget(null)}
+                                title="Delete conversation?"
+                                description={`"${deleteTarget?.title || ""}" hamesha ke liye delete ho jayegi.`}
+                                confirmLabel="Delete"
+                                onConfirm={() => {
+                                        if (deleteTarget) deleteConversation(deleteTarget.id);
+                                        setDeleteTarget(null);
+                                }}
+                        />
 
                         {/* admin AI settings dialog (API key) */}
                         <AISettingsDialog
